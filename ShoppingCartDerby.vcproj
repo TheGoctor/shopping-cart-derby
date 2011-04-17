@@ -1,0 +1,789 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9.00"
+	Name="ShoppingCartDerby"
+	ProjectGUID="{268B119C-8AE4-4113-AF72-E3CA899289FB}"
+	RootNamespace="ShoppingCartDerby"
+	Keyword="Win32Proj"
+	TargetFrameworkVersion="196613"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="Lua5.1.4\src;&quot;C:\Program Files\Audiokinetic\Wwise\SDK\include&quot;;&quot;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\include&quot;;&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;;&quot;C:\Program Files (x86)\Visual Leak Detector\include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="AkSoundEngine.lib AkMusicEngine.lib AkMemoryMgr.lib AkStreamMgr.lib AkVorbisDecoder.lib AkAudioInputSource.lib AkDelayFX.lib AkPeakLimiterFX.lib AkSoundSeedImpactFX.lib dxguid.lib ws2_32.lib CommunicationCentral.lib AkMotionGenerator.lib AkRumble.lib AkRoomVerbFX.lib akparametriceqfx.lib dbghelp.lib Winmm.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Audiokinetic\Wwise\SDK\Win32_vc90\Debug\lib&quot;;&quot;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\Win32_vc90\Debug\lib&quot;;&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86&quot;;&quot;C:\Program Files\Microsoft DirectX SDK (June 2010)\Lib\x86&quot;;&quot;C:\Program Files (x86)\Visual Leak Detector\lib\Win32&quot;"
+				IgnoreDefaultLibraryNames="LIBCMTD"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="AkSoundEngine.lib AkMusicEngine.lib AkMemoryMgr.lib AkStreamMgr.lib AkVorbisDecoder.lib dxguid.lib ws2_32.lib AkAudioInputSource.lib AkDelayFX.lib AkPeakLimiterFX.lib AkSoundSeedImpactFX.lib AkMotionGenerator.lib AkRumble.lib AkRoomVerbFX.lib akparametriceqfx.lib"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Audiokinetic\Wwise\SDK\Win32_vc90\Release(StaticCRT)\lib&quot;"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames="LIBCMT"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath=".\Source\CGame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\WinMain.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\Source\CFrame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\CGame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\CObject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\IComponent.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<Filter
+				Name="Sound"
+				>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="GlobalManagers"
+			>
+			<Filter
+				Name="MemoryManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CAllocator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CEventAllocator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CHeap.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CHeap.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CMemoryManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CMemoryManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="EventManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Event Manager\CEventManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Event Manager\CEventManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Event Manager\CIDGen.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Event Manager\CIDGen.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Event Manager\IEvent.h"
+					>
+				</File>
+				<Filter
+					Name="Events"
+					>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CGoalItemCollected.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CGoalItemEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CHeadingEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CInputEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CMoveCameraEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CObjectEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CRamEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CRenderEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CStateEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CUpdateStateEvent.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Event Manager\CWeightClassEvent.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="InputManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Input Manager\CInputManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Input Manager\CInputManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="StateManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\State Manager\CStateManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\State Manager\CStateManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="ObjectManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Object Manager\CObjectManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Object Manager\CObjectManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Rendering Manager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Camera.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Camera.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CCameraManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CCameraManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Direct3DManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Direct3DManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXMesh.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXMesh.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXRenderContext.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXRenderContext.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXRenderContextManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXRenderContextManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXRenderShape.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXRenderShape.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\DXRenderStatic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\dxrenderstatic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\dxutil.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\ModelManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\ModelManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Renderer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Renderer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\RenderNode.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\RenderSet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\RenderSet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\VertexStructs.h"
+					>
+				</File>
+				<Filter
+					Name="Texture Managers"
+					>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CBitmapFont.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CBitmapFont.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="SoundManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Sound Manager\CWwiseSoundManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="Components"
+			>
+			<Filter
+				Name="AI"
+				>
+				<File
+					RelativePath=".\Source\Components\AI\CAIComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\AI\CAIComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Level"
+				>
+				<File
+					RelativePath=".\Source\Components\Level\CGoalItemComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Level\CGoalItemComponent.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Level\CHeldItemComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Level\CHeldItemComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Movement"
+				>
+				<File
+					RelativePath=".\Source\Components\Movement\CMovement.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Movement\CMovement.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="HasWon"
+				>
+				<File
+					RelativePath=".\Source\Components\HasWon\CHasWonComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\HasWon\CHasWonComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Rendering"
+				>
+				<File
+					RelativePath=".\Source\Components\Rendering\CRenderComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CRenderComponent.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CSpriteComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CSpriteComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Collision"
+				>
+				<File
+					RelativePath=".\Source\Components\Collision\CCollideable.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Collision\CCollideable.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Sound"
+				>
+				<File
+					RelativePath=".\Source\Components\Sound\CSoundComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Sound\CSoundComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="StartOfRace"
+				>
+				<File
+					RelativePath=".\Source\Components\StartOfRace\CStartOfRaceComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\StartOfRace\CStartOfRaceComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Button"
+				>
+				<File
+					RelativePath=".\Source\Components\Button\CButtonComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Button\CButtonComponent.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="ComponentManagers"
+			>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CAIManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CAIManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CCollisionManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CCollisionManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CLevelManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CLevelManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CMovementManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CMovementManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CSoundManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CSoundManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CStartOfRaceManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CStartOfRaceManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CSteeringManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CSteeringManager.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Scripts"
+			>
+			<File
+				RelativePath=".\Source\Scripts\luatest.lua"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Sound Includes"
+			>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkCommunication.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkDefaultIOHookBlocking.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\akdefaultiohookblocking.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkDefaultIOHookDeferred.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkDefaultIOHookDeferred.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkDefaultLowLevelIODispatcher.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkDefaultLowLevelIODispatcher.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFileHelpers.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFileLocationBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFileLocationBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFilePackage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFilePackage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFilePackageLowLevelIO.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\akfilepackagelowlevelioblocking.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFilePackageLowLevelIODeferred.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFilePackageLUT.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkFilePackageLUT.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AkSoundEngineDLL.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AlignedPtr.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Wwise\includes\AlignedPtr.h"
+				>
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

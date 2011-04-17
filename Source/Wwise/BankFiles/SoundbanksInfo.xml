@@ -1,0 +1,558 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SoundBanksInfo Platform="Windows" SchemaVersion="6">
+	<RootPaths>
+		<SourceFilesRoot>D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\</SourceFilesRoot>
+		<SoundBanksRoot>D:\_Wwise Projects\Wwise_2010_3\GeneratedSoundBanks\Windows\</SoundBanksRoot>
+	</RootPaths>
+	<Arguments />
+	<DialogueEvents />
+	<StreamedFiles />
+	<SoundBanks>
+		<SoundBank Id="1355168291" Language="SFX">
+			<ShortName>Init</ShortName>
+			<Path>Init.bnk</Path>
+			<IncludedEvents />
+			<IncludedDialogueEvents />
+			<ReferencedStreamedFiles />
+			<IncludedFullFiles />
+			<IncludedPrefetchFiles />
+			<ExternalSources />
+		</SoundBank>
+		<SoundBank Id="1661994096" Language="SFX">
+			<ShortName>SoundBank</ShortName>
+			<Path>SoundBank.bnk</Path>
+			<IncludedEvents>
+				<Event Id="3864097025" Name="Pause_All" />
+				<Event Id="3412940309" Name="Play_DX_2D_Breathing_Loop" />
+				<Event Id="2068802240" Name="Play_DX_2D_Death" />
+				<Event Id="1203171421" Name="Play_DX_2D_Hurt" />
+				<Event Id="1763800590" Name="Play_DX_2D_Jump" />
+				<Event Id="4126538873" Name="Play_DX_2D_Land" />
+				<Event Id="430329040" Name="Play_DX_2D_UnderAttack" />
+				<Event Id="2337306830" Name="Play_DX_2D_UnitCommands" />
+				<Event Id="3761829895" Name="Play_DX_3D_Aggro" />
+				<Event Id="969992391" Name="Play_DX_3D_Attack" />
+				<Event Id="3432959431" Name="Play_DX_3D_Death" />
+				<Event Id="3836275424" Name="Play_DX_3D_Hurt" />
+				<Event Id="3110195632" Name="Play_FX_2D_Alarm_Loop" />
+				<Event Id="1107108682" Name="Play_FX_2D_AmmoPickup" />
+				<Event Id="425165382" Name="Play_FX_2D_AssaultRifle_Loop" />
+				<Event Id="2882299664" Name="Play_FX_2D_Beep" />
+				<Event Id="4042539875" Name="Play_FX_2D_Bodyfall" />
+				<Event Id="905521127" Name="Play_FX_2D_Car_Loop" />
+				<Event Id="1456069603" Name="Play_FX_2D_CoinPickup" />
+				<Event Id="2067887017" Name="Play_FX_2D_Footsteps" />
+				<Event Id="726857588" Name="Play_FX_2D_Forest_Loop" />
+				<Event Id="1728663298" Name="Play_FX_2D_HealthPickup" />
+				<Event Id="987385568" Name="Play_FX_2D_Jump" />
+				<Event Id="4123835918" Name="Play_FX_2D_Klaxon_Loop" />
+				<Event Id="2415006107" Name="Play_FX_2D_Land" />
+				<Event Id="696917685" Name="Play_FX_2D_MagicPickup" />
+				<Event Id="1526375285" Name="Play_FX_2D_MenuAccept" />
+				<Event Id="4292106387" Name="Play_FX_2D_MenuBackup" />
+				<Event Id="2078529791" Name="Play_FX_2D_MenuCancel" />
+				<Event Id="3621386429" Name="Play_FX_2D_MenuMove_Hover" />
+				<Event Id="4195054897" Name="Play_FX_2D_MenuPause" />
+				<Event Id="3637374546" Name="Play_FX_2D_MenuUnPause" />
+				<Event Id="3618765313" Name="Play_FX_2D_PistolShot" />
+				<Event Id="2632226688" Name="Play_FX_2D_Punches" />
+				<Event Id="2666978119" Name="Play_FX_2D_Rain_Loop" />
+				<Event Id="3973443319" Name="Play_FX_2D_SheildPickup" />
+				<Event Id="2622520724" Name="Play_FX_2D_Underwater_Loop" />
+				<Event Id="3135678882" Name="Play_FX_2D_WeaponWhoosh" />
+				<Event Id="3407866903" Name="Play_FX_2D_Wind_Loop" />
+				<Event Id="3295936277" Name="Play_FX_3D_AssaultRifle_Loop" />
+				<Event Id="891453498" Name="Play_FX_3D_Bodyfall" />
+				<Event Id="3814004282" Name="Play_FX_3D_Car_Loop" />
+				<Event Id="2046371004" Name="Play_FX_3D_Door_Close" />
+				<Event Id="1585471016" Name="Play_FX_3D_Door_Open" />
+				<Event Id="73471290" Name="Play_FX_3D_Explosion" />
+				<Event Id="21750526" Name="Play_FX_3D_Footsteps" />
+				<Event Id="4050058769" Name="Play_FX_3D_Jump" />
+				<Event Id="4112129774" Name="Play_FX_3D_Land" />
+				<Event Id="3553836542" Name="Play_FX_3D_Lever_Switch" />
+				<Event Id="163704345" Name="Play_FX_3D_Missle_Loop" />
+				<Event Id="3359821848" Name="Play_FX_3D_PistolShot" />
+				<Event Id="1070288727" Name="Play_FX_3D_Punches" />
+				<Event Id="1902835760" Name="Play_FX_3D_SmashCrate" />
+				<Event Id="1491931047" Name="Play_FX_3D_WaterSplash" />
+				<Event Id="4023349039" Name="Play_FX_3D_WeaponWhoosh" />
+				<Event Id="2230580979" Name="Play_MX_MusicLoop_01" />
+				<Event Id="2230580976" Name="Play_MX_MusicLoop_02" />
+				<Event Id="2230580977" Name="Play_MX_MusicLoop_03" />
+				<Event Id="2230580982" Name="Play_MX_MusicLoop_04" />
+				<Event Id="2230580983" Name="Play_MX_MusicLoop_05" />
+				<Event Id="2230580980" Name="Play_MX_MusicLoop_06" />
+				<Event Id="3679762312" Name="Resume_All" />
+				<Event Id="452547817" Name="Stop_All" />
+				<Event Id="943723731" Name="Stop_DX_2D_Breathing_Loop" />
+				<Event Id="1262658854" Name="Stop_FX_2D_Alarm_Loop" />
+				<Event Id="3877919460" Name="Stop_FX_2D_AssaultRifle_Loop" />
+				<Event Id="4240821802" Name="Stop_FX_2D_Forest_Loop" />
+				<Event Id="4219667864" Name="Stop_FX_2D_Klaxon_Loop" />
+				<Event Id="3290877581" Name="Stop_FX_2D_Rain_Loop" />
+				<Event Id="3178288442" Name="Stop_FX_2D_Underwater_Loop" />
+				<Event Id="4017587645" Name="Stop_FX_2D_Wind_Loop" />
+				<Event Id="1042256331" Name="Stop_FX_3D_AssaultRifle_Loop" />
+				<Event Id="3939718988" Name="Stop_FX_3D_Car_Loop" />
+				<Event Id="3286584031" Name="Stop_FX_3D_Missle_Loop" />
+				<Event Id="3567964133" Name="Stop_MX_MusicLoop_01" />
+				<Event Id="3567964134" Name="Stop_MX_MusicLoop_02" />
+				<Event Id="3567964135" Name="Stop_MX_MusicLoop_03" />
+				<Event Id="3567964128" Name="Stop_MX_MusicLoop_04" />
+				<Event Id="3567964129" Name="Stop_MX_MusicLoop_05" />
+				<Event Id="3567964130" Name="Stop_MX_MusicLoop_06" />
+			</IncludedEvents>
+			<IncludedDialogueEvents />
+			<ReferencedStreamedFiles />
+			<IncludedFullFiles>
+				<File Id="12951625" Language="SFX">
+					<ShortName>Rocket_Missile_Loop01.wav</ShortName>
+					<Path>SFX\Rocket_Missile_Loop01_444760E0.ogg</Path>
+				</File>
+				<File Id="33543037" Language="SFX">
+					<ShortName>Bodyfall_Concrete01.wav</ShortName>
+					<Path>SFX\Bodyfall_Concrete01_444760E1.ogg</Path>
+				</File>
+				<File Id="38425329" Language="SFX">
+					<ShortName>Punch_Boxing_FaceHit4.wav</ShortName>
+					<Path>SFX\Punch_Boxing_FaceHit4_444760E1.ogg</Path>
+				</File>
+				<File Id="46157926" Language="SFX">
+					<ShortName>Whoosh_Deep01.wav</ShortName>
+					<Path>SFX\Whoosh_Deep01_444760E1.ogg</Path>
+				</File>
+				<File Id="53641100" Language="SFX">
+					<ShortName>Henchmen_01_Hurt_01.wav</ShortName>
+					<Path>SFX\Henchmen_01_Hurt_01_444760E1.ogg</Path>
+				</File>
+				<File Id="58847391" Language="SFX">
+					<ShortName>Foot_Dirt1_BootJump7.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootJump7_444760E1.ogg</Path>
+				</File>
+				<File Id="66645390" Language="SFX">
+					<ShortName>DX_Sidekick_UnderAttack_01.wav</ShortName>
+					<Path>SFX\DX_Sidekick_UnderAttack_01_444760E1.ogg</Path>
+				</File>
+				<File Id="83368234" Language="SFX">
+					<ShortName>Underwater_AmbLoop1.wav</ShortName>
+					<Path>SFX\Underwater_AmbLoop1_444760E0.ogg</Path>
+				</File>
+				<File Id="83535862" Language="SFX">
+					<ShortName>Agent_Land_05.wav</ShortName>
+					<Path>SFX\Agent_Land_05_444760E1.ogg</Path>
+				</File>
+				<File Id="86849089" Language="SFX">
+					<ShortName>DX_Sidekick_Death_02.wav</ShortName>
+					<Path>SFX\DX_Sidekick_Death_02_444760E1.ogg</Path>
+				</File>
+				<File Id="103608097" Language="SFX">
+					<ShortName>Henchmen_01_Attack_03.wav</ShortName>
+					<Path>SFX\Henchmen_01_Attack_03_444760E1.ogg</Path>
+				</File>
+				<File Id="113163960" Language="SFX">
+					<ShortName>Foot_Dirt1_BootJump1.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootJump1_444760E1.ogg</Path>
+				</File>
+				<File Id="114468270" Language="SFX">
+					<ShortName>Game_play_music_03_Loop.wav</ShortName>
+					<Path>SFX\Game_play_music_03_Loop_037AA0CE.ogg</Path>
+				</File>
+				<File Id="118137773" Language="SFX">
+					<ShortName>Foot_Dirt1_BootLand5.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootLand5_444760E1.ogg</Path>
+				</File>
+				<File Id="119082756" Language="SFX">
+					<ShortName>Wind_BlowingLoop1.wav</ShortName>
+					<Path>SFX\Wind_BlowingLoop1_444760E0.ogg</Path>
+				</File>
+				<File Id="123122664" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk08.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk08_444760E1.ogg</Path>
+				</File>
+				<File Id="125508612" Language="SFX">
+					<ShortName>Foot_Dirt1_BootJump3.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootJump3_444760E1.ogg</Path>
+				</File>
+				<File Id="130332201" Language="SFX">
+					<ShortName>Door_LargeWood_Open01.wav</ShortName>
+					<Path>SFX\Door_LargeWood_Open01_444760E1.ogg</Path>
+				</File>
+				<File Id="135057958" Language="SFX">
+					<ShortName>Agent_Hit_beanbag_03.wav</ShortName>
+					<Path>SFX\Agent_Hit_beanbag_03_444760E1.ogg</Path>
+				</File>
+				<File Id="157765827" Language="SFX">
+					<ShortName>Foot_Dirt1_BootJump5.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootJump5_444760E1.ogg</Path>
+				</File>
+				<File Id="164332036" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk04.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk04_444760E1.ogg</Path>
+				</File>
+				<File Id="177860526" Language="SFX">
+					<ShortName>Explo_Small_04.wav</ShortName>
+					<Path>SFX\Explo_Small_04_444760E1.ogg</Path>
+				</File>
+				<File Id="186574772" Language="SFX">
+					<ShortName>Henchmen_01_Attack_04.wav</ShortName>
+					<Path>SFX\Henchmen_01_Attack_04_444760E1.ogg</Path>
+				</File>
+				<File Id="188813553" Language="SFX">
+					<ShortName>Foot_Dirt1_BootLand2.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootLand2_444760E1.ogg</Path>
+				</File>
+				<File Id="190873091" Language="SFX">
+					<ShortName>Agent_Hit_beanbag_04.wav</ShortName>
+					<Path>SFX\Agent_Hit_beanbag_04_444760E1.ogg</Path>
+				</File>
+				<File Id="192860657" Language="SFX">
+					<ShortName>Agent_Land_03.wav</ShortName>
+					<Path>SFX\Agent_Land_03_444760E1.ogg</Path>
+				</File>
+				<File Id="194954479" Language="SFX">
+					<ShortName>Pickup_Coins01.wav</ShortName>
+					<Path>SFX\Pickup_Coins01_444760E1.ogg</Path>
+				</File>
+				<File Id="196342131" Language="SFX">
+					<ShortName>Agent_Hit_Bullet_02.wav</ShortName>
+					<Path>SFX\Agent_Hit_Bullet_02_444760E1.ogg</Path>
+				</File>
+				<File Id="209263346" Language="SFX">
+					<ShortName>DX_Sidekick_Death_05.wav</ShortName>
+					<Path>SFX\DX_Sidekick_Death_05_444760E1.ogg</Path>
+				</File>
+				<File Id="209547262" Language="SFX">
+					<ShortName>Punch_Boxing_FaceHit3.wav</ShortName>
+					<Path>SFX\Punch_Boxing_FaceHit3_444760E1.ogg</Path>
+				</File>
+				<File Id="224907793" Language="SFX">
+					<ShortName>Foot_Dirt1_BootLand3.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootLand3_444760E1.ogg</Path>
+				</File>
+				<File Id="233236693" Language="SFX">
+					<ShortName>Explo_Small_05.wav</ShortName>
+					<Path>SFX\Explo_Small_05_444760E1.ogg</Path>
+				</File>
+				<File Id="248895595" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk03.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk03_444760E1.ogg</Path>
+				</File>
+				<File Id="256680551" Language="SFX">
+					<ShortName>Explo_Small_01.wav</ShortName>
+					<Path>SFX\Explo_Small_01_444760E1.ogg</Path>
+				</File>
+				<File Id="259371108" Language="SFX">
+					<ShortName>Henchmen_01_Attack_01.wav</ShortName>
+					<Path>SFX\Henchmen_01_Attack_01_444760E1.ogg</Path>
+				</File>
+				<File Id="280381218" Language="SFX">
+					<ShortName>Pickup_GemBells01.wav</ShortName>
+					<Path>SFX\Pickup_GemBells01_444760E1.ogg</Path>
+				</File>
+				<File Id="286254975" Language="SFX">
+					<ShortName>Explo_Small_06.wav</ShortName>
+					<Path>SFX\Explo_Small_06_444760E1.ogg</Path>
+				</File>
+				<File Id="291235004" Language="SFX">
+					<ShortName>65Corvette_Loop1.wav</ShortName>
+					<Path>SFX\65Corvette_Loop1_444760E0.ogg</Path>
+				</File>
+				<File Id="296394858" Language="SFX">
+					<ShortName>Henchmen_01_Hurt_03.wav</ShortName>
+					<Path>SFX\Henchmen_01_Hurt_03_444760E1.ogg</Path>
+				</File>
+				<File Id="339509342" Language="SFX">
+					<ShortName>Foot_Dirt1_BootJump2.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootJump2_444760E1.ogg</Path>
+				</File>
+				<File Id="377377763" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk07.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk07_444760E1.ogg</Path>
+				</File>
+				<File Id="377459119" Language="SFX">
+					<ShortName>Menu_Cancel01.wav</ShortName>
+					<Path>SFX\Menu_Cancel01_444760E1.ogg</Path>
+				</File>
+				<File Id="379069451" Language="SFX">
+					<ShortName>Foot_Dirt1_BootLand4.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootLand4_444760E1.ogg</Path>
+				</File>
+				<File Id="387863399" Language="SFX">
+					<ShortName>Henchmen_01_Death_02.wav</ShortName>
+					<Path>SFX\Henchmen_01_Death_02_444760E1.ogg</Path>
+				</File>
+				<File Id="389904861" Language="SFX">
+					<ShortName>Door_LargeWood_Close.wav</ShortName>
+					<Path>SFX\Door_LargeWood_Close_444760E1.ogg</Path>
+				</File>
+				<File Id="419285226" Language="SFX">
+					<ShortName>Punch_Boxing_FaceHit1.wav</ShortName>
+					<Path>SFX\Punch_Boxing_FaceHit1_444760E1.ogg</Path>
+				</File>
+				<File Id="433711047" Language="SFX">
+					<ShortName>Agent_Land_01.wav</ShortName>
+					<Path>SFX\Agent_Land_01_444760E1.ogg</Path>
+				</File>
+				<File Id="439318752" Language="SFX">
+					<ShortName>Foot_Dirt1_BootJump6.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootJump6_444760E1.ogg</Path>
+				</File>
+				<File Id="460369817" Language="SFX">
+					<ShortName>Agent_Hit_beanbag_01.wav</ShortName>
+					<Path>SFX\Agent_Hit_beanbag_01_444760E1.ogg</Path>
+				</File>
+				<File Id="460912589" Language="SFX">
+					<ShortName>Punch_Boxing_FaceHit2.wav</ShortName>
+					<Path>SFX\Punch_Boxing_FaceHit2_444760E1.ogg</Path>
+				</File>
+				<File Id="469467618" Language="SFX">
+					<ShortName>Agent_Jump_05.wav</ShortName>
+					<Path>SFX\Agent_Jump_05_444760E1.ogg</Path>
+				</File>
+				<File Id="477136874" Language="SFX">
+					<ShortName>Breathing_Speed_01.wav</ShortName>
+					<Path>SFX\Breathing_Speed_01_444760E0.ogg</Path>
+				</File>
+				<File Id="477829810" Language="SFX">
+					<ShortName>Health_Powerup.wav</ShortName>
+					<Path>SFX\Health_Powerup_444760E1.ogg</Path>
+				</File>
+				<File Id="480144977" Language="SFX">
+					<ShortName>Agent_Jump_06.wav</ShortName>
+					<Path>SFX\Agent_Jump_06_444760E1.ogg</Path>
+				</File>
+				<File Id="500927666" Language="SFX">
+					<ShortName>Agent_Jump_04.wav</ShortName>
+					<Path>SFX\Agent_Jump_04_444760E1.ogg</Path>
+				</File>
+				<File Id="505391842" Language="SFX">
+					<ShortName>Alarm_Loop01.wav</ShortName>
+					<Path>SFX\Alarm_Loop01_444760E0.ogg</Path>
+				</File>
+				<File Id="517083021" Language="SFX">
+					<ShortName>Agent_Land_04.wav</ShortName>
+					<Path>SFX\Agent_Land_04_444760E1.ogg</Path>
+				</File>
+				<File Id="522926251" Language="SFX">
+					<ShortName>Henchmen_01_Hurt_02.wav</ShortName>
+					<Path>SFX\Henchmen_01_Hurt_02_444760E1.ogg</Path>
+				</File>
+				<File Id="532148361" Language="SFX">
+					<ShortName>Menu_Backup01.wav</ShortName>
+					<Path>SFX\Menu_Backup01_444760E1.ogg</Path>
+				</File>
+				<File Id="532656836" Language="SFX">
+					<ShortName>Foot_Dirt1_BootLand1.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootLand1_444760E1.ogg</Path>
+				</File>
+				<File Id="540810594" Language="SFX">
+					<ShortName>Breathing_Speed_05.wav</ShortName>
+					<Path>SFX\Breathing_Speed_05_444760E0.ogg</Path>
+				</File>
+				<File Id="542353733" Language="SFX">
+					<ShortName>Gun_Weapon_Pickup01.wav</ShortName>
+					<Path>SFX\Gun_Weapon_Pickup01_444760E1.ogg</Path>
+				</File>
+				<File Id="543910436" Language="SFX">
+					<ShortName>Foot_Dirt1_BootJump4.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootJump4_444760E1.ogg</Path>
+				</File>
+				<File Id="546628902" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk06.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk06_444760E1.ogg</Path>
+				</File>
+				<File Id="571111605" Language="SFX">
+					<ShortName>DX_Sidekick_GoCommand_02.wav</ShortName>
+					<Path>SFX\DX_Sidekick_GoCommand_02_444760E1.ogg</Path>
+				</File>
+				<File Id="575657324" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk01.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk01_444760E1.ogg</Path>
+				</File>
+				<File Id="596088622" Language="SFX">
+					<ShortName>Punch_Boxing_FaceHit5.wav</ShortName>
+					<Path>SFX\Punch_Boxing_FaceHit5_444760E1.ogg</Path>
+				</File>
+				<File Id="601611294" Language="SFX">
+					<ShortName>Amb_TropicalForestLoop1.wav</ShortName>
+					<Path>SFX\Amb_TropicalForestLoop1_444760E0.ogg</Path>
+				</File>
+				<File Id="608902326" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk05.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk05_444760E1.ogg</Path>
+				</File>
+				<File Id="613103447" Language="SFX">
+					<ShortName>Foot_Dirt1_BootLand6.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootLand6_444760E1.ogg</Path>
+				</File>
+				<File Id="618613825" Language="SFX">
+					<ShortName>Henchmen_01_Attack_02.wav</ShortName>
+					<Path>SFX\Henchmen_01_Attack_02_444760E1.ogg</Path>
+				</File>
+				<File Id="636626847" Language="SFX">
+					<ShortName>MenuPause.wav</ShortName>
+					<Path>SFX\MenuPause_444760E1.ogg</Path>
+				</File>
+				<File Id="646915019" Language="SFX">
+					<ShortName>Pickup_ArmourShield01.wav</ShortName>
+					<Path>SFX\Pickup_ArmourShield01_444760E1.ogg</Path>
+				</File>
+				<File Id="647860590" Language="SFX">
+					<ShortName>Gun_Pistol_Shot01.wav</ShortName>
+					<Path>SFX\Gun_Pistol_Shot01_444760E1.ogg</Path>
+				</File>
+				<File Id="654905969" Language="SFX">
+					<ShortName>AssaultRifle_ShotLoop01.wav</ShortName>
+					<Path>SFX\AssaultRifle_ShotLoop01_444760E0.ogg</Path>
+				</File>
+				<File Id="661410750" Language="SFX">
+					<ShortName>Agent_Jump_03.wav</ShortName>
+					<Path>SFX\Agent_Jump_03_444760E1.ogg</Path>
+				</File>
+				<File Id="675283150" Language="SFX">
+					<ShortName>DX_Sidekick_GoCommand.wav</ShortName>
+					<Path>SFX\DX_Sidekick_GoCommand_444760E1.ogg</Path>
+				</File>
+				<File Id="680242150" Language="SFX">
+					<ShortName>Bodyfall_Deepwater1.wav</ShortName>
+					<Path>SFX\Bodyfall_Deepwater1_444760E1.ogg</Path>
+				</File>
+				<File Id="698491332" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk02.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk02_444760E1.ogg</Path>
+				</File>
+				<File Id="701304591" Language="SFX">
+					<ShortName>Alarm_Klaxon_Loop1.wav</ShortName>
+					<Path>SFX\Alarm_Klaxon_Loop1_444760E0.ogg</Path>
+				</File>
+				<File Id="709711836" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk10.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk10_444760E1.ogg</Path>
+				</File>
+				<File Id="715974961" Language="SFX">
+					<ShortName>DX_Sidekick_Death_01.wav</ShortName>
+					<Path>SFX\DX_Sidekick_Death_01_444760E1.ogg</Path>
+				</File>
+				<File Id="724412770" Language="SFX">
+					<ShortName>65Corvette_IdleLoop1.wav</ShortName>
+					<Path>SFX\65Corvette_IdleLoop1_444760E0.ogg</Path>
+				</File>
+				<File Id="726946176" Language="SFX">
+					<ShortName>Agent_Hit_beanbag_02.wav</ShortName>
+					<Path>SFX\Agent_Hit_beanbag_02_444760E1.ogg</Path>
+				</File>
+				<File Id="749557529" Language="SFX">
+					<ShortName>Beep_GrenadeBombTimer1.wav</ShortName>
+					<Path>SFX\Beep_GrenadeBombTimer1_444760E1.ogg</Path>
+				</File>
+				<File Id="757819000" Language="SFX">
+					<ShortName>Agent_Hit_Bullet_04.wav</ShortName>
+					<Path>SFX\Agent_Hit_Bullet_04_444760E1.ogg</Path>
+				</File>
+				<File Id="793147095" Language="SFX">
+					<ShortName>Henchmen_02_Orders_01.wav</ShortName>
+					<Path>SFX\Henchmen_02_Orders_01_444760E1.ogg</Path>
+				</File>
+				<File Id="799561220" Language="SFX">
+					<ShortName>Foot_Dirt1_BootLand7.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootLand7_444760E1.ogg</Path>
+				</File>
+				<File Id="807494317" Language="SFX">
+					<ShortName>Henchmen_02_Orders_02.wav</ShortName>
+					<Path>SFX\Henchmen_02_Orders_02_444760E1.ogg</Path>
+				</File>
+				<File Id="809914271" Language="SFX">
+					<ShortName>Agent_Jump_01.wav</ShortName>
+					<Path>SFX\Agent_Jump_01_444760E1.ogg</Path>
+				</File>
+				<File Id="813779090" Language="SFX">
+					<ShortName>Game_play_music_02_Loop.wav</ShortName>
+					<Path>SFX\Game_play_music_02_Loop_037AA0CE.ogg</Path>
+				</File>
+				<File Id="838141253" Language="SFX">
+					<ShortName>Agent_Land_02.wav</ShortName>
+					<Path>SFX\Agent_Land_02_444760E1.ogg</Path>
+				</File>
+				<File Id="845196286" Language="SFX">
+					<ShortName>Lever_LargeMetal_Switch01.wav</ShortName>
+					<Path>SFX\Lever_LargeMetal_Switch01_444760E1.ogg</Path>
+				</File>
+				<File Id="856642211" Language="SFX">
+					<ShortName>Agent_Hit_Bullet_03.wav</ShortName>
+					<Path>SFX\Agent_Hit_Bullet_03_444760E1.ogg</Path>
+				</File>
+				<File Id="869294581" Language="SFX">
+					<ShortName>Smash_WoodBreak01.wav</ShortName>
+					<Path>SFX\Smash_WoodBreak01_444760E1.ogg</Path>
+				</File>
+				<File Id="870510227" Language="SFX">
+					<ShortName>Button_VendingMachine1.wav</ShortName>
+					<Path>SFX\Button_VendingMachine1_444760E1.ogg</Path>
+				</File>
+				<File Id="880182030" Language="SFX">
+					<ShortName>Gameplay_05.wav</ShortName>
+					<Path>SFX\Gameplay_05_037AA0CE.ogg</Path>
+				</File>
+				<File Id="907429488" Language="SFX">
+					<ShortName>Foot_Dirt1_BootWalk09.wav</ShortName>
+					<Path>SFX\Foot_Dirt1_BootWalk09_444760E1.ogg</Path>
+				</File>
+				<File Id="955280945" Language="SFX">
+					<ShortName>Agent_Jump_02.wav</ShortName>
+					<Path>SFX\Agent_Jump_02_444760E1.ogg</Path>
+				</File>
+				<File Id="959721945" Language="SFX">
+					<ShortName>Agent_Hit_Bullet_01.wav</ShortName>
+					<Path>SFX\Agent_Hit_Bullet_01_444760E1.ogg</Path>
+				</File>
+				<File Id="971806798" Language="SFX">
+					<ShortName>Gameplay_04.wav</ShortName>
+					<Path>SFX\Gameplay_04_037AA0CE.ogg</Path>
+				</File>
+				<File Id="981389914" Language="SFX">
+					<ShortName>DX_Sidekick_Death_04.wav</ShortName>
+					<Path>SFX\DX_Sidekick_Death_04_444760E1.ogg</Path>
+				</File>
+				<File Id="991622778" Language="SFX">
+					<ShortName>Explo_Small_02.wav</ShortName>
+					<Path>SFX\Explo_Small_02_444760E1.ogg</Path>
+				</File>
+				<File Id="996787749" Language="SFX">
+					<ShortName>Menu_Backup09.wav</ShortName>
+					<Path>SFX\Menu_Backup09_444760E1.ogg</Path>
+				</File>
+				<File Id="1011476984" Language="SFX">
+					<ShortName>Henchmen_01_Death_01.wav</ShortName>
+					<Path>SFX\Henchmen_01_Death_01_444760E1.ogg</Path>
+				</File>
+				<File Id="1014982202" Language="SFX">
+					<ShortName>Menu_Accept.wav</ShortName>
+					<Path>SFX\Menu_Accept_444760E1.ogg</Path>
+				</File>
+				<File Id="1017029353" Language="SFX">
+					<ShortName>Game_play_music_01_Loop.wav</ShortName>
+					<Path>SFX\Game_play_music_01_Loop_037AA0CE.ogg</Path>
+				</File>
+				<File Id="1023247839" Language="SFX">
+					<ShortName>Rain_Loop01.wav</ShortName>
+					<Path>SFX\Rain_Loop01_444760E0.ogg</Path>
+				</File>
+				<File Id="1046394917" Language="SFX">
+					<ShortName>Explo_Small_03.wav</ShortName>
+					<Path>SFX\Explo_Small_03_444760E1.ogg</Path>
+				</File>
+				<File Id="1046506901" Language="SFX">
+					<ShortName>DX_Sidekick_Death_03.wav</ShortName>
+					<Path>SFX\DX_Sidekick_Death_03_444760E1.ogg</Path>
+				</File>
+				<File Id="1048482320" Language="SFX">
+					<ShortName>StatScreen.wav</ShortName>
+					<Path>SFX\StatScreen_037AA0CE.ogg</Path>
+				</File>
+			</IncludedFullFiles>
+			<IncludedPrefetchFiles />
+			<ExternalSources />
+		</SoundBank>
+	</SoundBanks>
+</SoundBanksInfo>
