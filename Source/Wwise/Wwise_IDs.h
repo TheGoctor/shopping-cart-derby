@@ -14,6 +14,7 @@ namespace AK
     namespace EVENTS
     {
         static const AkUniqueID PAUSE_ALL = 3864097025U;
+        static const AkUniqueID PAUSE_MX_GAMEPLAY = 1171415762U;
         static const AkUniqueID PLAY_DX_2D_BREATHING_LOOP = 3412940309U;
         static const AkUniqueID PLAY_DX_2D_DEATH = 2068802240U;
         static const AkUniqueID PLAY_DX_2D_HURT = 1203171421U;
@@ -21,10 +22,7 @@ namespace AK
         static const AkUniqueID PLAY_DX_2D_LAND = 4126538873U;
         static const AkUniqueID PLAY_DX_2D_UNDERATTACK = 430329040U;
         static const AkUniqueID PLAY_DX_2D_UNITCOMMANDS = 2337306830U;
-        static const AkUniqueID PLAY_DX_3D_AGGRO = 3761829895U;
-        static const AkUniqueID PLAY_DX_3D_ATTACK = 969992391U;
-        static const AkUniqueID PLAY_DX_3D_DEATH = 3432959431U;
-        static const AkUniqueID PLAY_DX_3D_HURT = 3836275424U;
+        static const AkUniqueID PLAY_DX_GAMEPLAY_STARTRACECOUNTDOWN = 214446584U;
         static const AkUniqueID PLAY_FX_2D_ALARM_LOOP = 3110195632U;
         static const AkUniqueID PLAY_FX_2D_AMMOPICKUP = 1107108682U;
         static const AkUniqueID PLAY_FX_2D_ASSAULTRIFLE_LOOP = 425165382U;
@@ -68,13 +66,34 @@ namespace AK
         static const AkUniqueID PLAY_FX_3D_SMASHCRATE = 1902835760U;
         static const AkUniqueID PLAY_FX_3D_WATERSPLASH = 1491931047U;
         static const AkUniqueID PLAY_FX_3D_WEAPONWHOOSH = 4023349039U;
-        static const AkUniqueID PLAY_MX_MUSICLOOP_01 = 2230580979U;
-        static const AkUniqueID PLAY_MX_MUSICLOOP_02 = 2230580976U;
-        static const AkUniqueID PLAY_MX_MUSICLOOP_03 = 2230580977U;
-        static const AkUniqueID PLAY_MX_MUSICLOOP_04 = 2230580982U;
-        static const AkUniqueID PLAY_MX_MUSICLOOP_05 = 2230580983U;
-        static const AkUniqueID PLAY_MX_MUSICLOOP_06 = 2230580980U;
+        static const AkUniqueID PLAY_MX_GAMEPLAY = 368551784U;
+        static const AkUniqueID PLAY_MX_MENU = 1022453873U;
+        static const AkUniqueID PLAY_SFX_CART_BIKE_SLIP = 2127105977U;
+        static const AkUniqueID PLAY_SFX_CART_BIKE_START = 489997781U;
+        static const AkUniqueID PLAY_SFX_CART_BIKE_START_FAIL = 3312685852U;
+        static const AkUniqueID PLAY_SFX_CART_COLLECTION = 1031492171U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_CART_BOOST = 1424774823U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_CART_BRAKE = 1272336075U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_COLLECTION = 2522700081U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_HURT = 2214460854U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_ITEMUSE = 3676295357U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_SHOVE = 3121019700U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_SPEED = 4056774930U;
+        static const AkUniqueID PLAY_SFX_CHARACTERS_BULLDOGMA_VICTORY = 3266394469U;
+        static const AkUniqueID PLAY_SFX_GAMEPLAY_ITEMCOLLISON = 1055251637U;
+        static const AkUniqueID PLAY_SFX_GAMEPLAY_LOSE = 4262755758U;
+        static const AkUniqueID PLAY_SFX_GAMEPLAY_WIN = 4036155509U;
+        static const AkUniqueID PLAY_SFX_IMPACT_CART_ENEMY = 4175615188U;
+        static const AkUniqueID PLAY_SFX_IMPACT_CART_WALL = 674762364U;
+        static const AkUniqueID PLAY_SFX_ITEM_TURKEY_IMPACT = 3519348969U;
+        static const AkUniqueID PLAY_SFX_ITEM_TURKEY_TRAVEL = 837004335U;
+        static const AkUniqueID PLAY_SFX_ITEM_TURKEY_USE = 1222678624U;
+        static const AkUniqueID PLAY_SFX_MAIN_MENU_SCISSOR = 3908685218U;
+        static const AkUniqueID PLAY_SFX_MENU_CANCEL = 3750105340U;
+        static const AkUniqueID PLAY_SFX_MENU_SCROLL = 2151728965U;
+        static const AkUniqueID PLAY_SFX_MENU_SELECT = 3759090466U;
         static const AkUniqueID RESUME_ALL = 3679762312U;
+        static const AkUniqueID RESUME_MX_GAMEPLAY = 1646171595U;
         static const AkUniqueID STOP_ALL = 452547817U;
         static const AkUniqueID STOP_DX_2D_BREATHING_LOOP = 943723731U;
         static const AkUniqueID STOP_FX_2D_ALARM_LOOP = 1262658854U;
@@ -87,12 +106,10 @@ namespace AK
         static const AkUniqueID STOP_FX_3D_ASSAULTRIFLE_LOOP = 1042256331U;
         static const AkUniqueID STOP_FX_3D_CAR_LOOP = 3939718988U;
         static const AkUniqueID STOP_FX_3D_MISSLE_LOOP = 3286584031U;
-        static const AkUniqueID STOP_MX_MUSICLOOP_01 = 3567964133U;
-        static const AkUniqueID STOP_MX_MUSICLOOP_02 = 3567964134U;
-        static const AkUniqueID STOP_MX_MUSICLOOP_03 = 3567964135U;
-        static const AkUniqueID STOP_MX_MUSICLOOP_04 = 3567964128U;
-        static const AkUniqueID STOP_MX_MUSICLOOP_05 = 3567964129U;
-        static const AkUniqueID STOP_MX_MUSICLOOP_06 = 3567964130U;
+        static const AkUniqueID STOP_MX_GAMEPLAY = 3165009754U;
+        static const AkUniqueID STOP_MX_MENU = 2638592923U;
+        static const AkUniqueID STOP_SFX_CHARACTERS_BULLDOGMA_SPEED = 1808949856U;
+        static const AkUniqueID STOP_SFX_ITEM_TURKEY_TRAVEL = 1667376673U;
     } // namespace EVENTS
 
     namespace SWITCHES
@@ -112,6 +129,7 @@ namespace AK
 
     namespace GAME_PARAMETERS
     {
+        static const AkUniqueID BULLDOG_SPEED = 816331700U;
         static const AkUniqueID DX_VOLUME = 3728565946U;
         static const AkUniqueID FX_VOLUME = 3350225276U;
         static const AkUniqueID MX_VOLUME = 1441253587U;

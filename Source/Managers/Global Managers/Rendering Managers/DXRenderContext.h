@@ -68,7 +68,7 @@ public:
 			((RenderSetSorted *)m_pRenderSet)->SortFunc = SortFunc;
 		}
 		else*/
-			m_pRenderSet = MMNEW(RenderSet) RenderSet();
+			m_pRenderSet = MMNEW(RenderSet);
 	}
 	inline RenderSet &GetRenderSet(void) { return *m_pRenderSet; }
 	inline void AddRenderNode(RenderNode *pNode)

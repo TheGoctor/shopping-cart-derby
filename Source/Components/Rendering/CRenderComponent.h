@@ -6,6 +6,7 @@
 #include"..\\..\\Managers\\Global Managers\\Rendering Managers\\DXRenderContext.h"
 
 class DXRenderShape;
+class DXMesh;
 class CObject;
 
 class CRenderComponent : public IComponent
@@ -16,6 +17,12 @@ class CRenderComponent : public IComponent
 public:
 	CRenderComponent(CObject* pParent, int nModelID, DXRenderContext* pRC,
 		void (*pfRenderFunc)(RenderNode&));
+
+	CRenderComponent(CObject* pParent, DXMesh* pMesh, DXRenderContext* pRC,
+		void (*pfRenderFunc)(RenderNode&));
+
+	void AddToRenderSet(void);
+	static void AddToRenderSetCallback(IEvent* pEvent, IComponent* pComp);
 
 	~CRenderComponent(void);
 

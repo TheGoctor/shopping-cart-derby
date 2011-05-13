@@ -20,16 +20,21 @@ CIDGen::~CIDGen()
 
 CIDGen* CIDGen::GetInstance()
 {
-	static CIDGen m_cInstance;
-	return &m_cInstance;
+	static CIDGen cIDGen;
+	return &cIDGen;
 }
 
 unsigned int CIDGen::GetID(string szName)
 {
-	map<string, unsigned int>::iterator cFoundIter = m_cRegister.find(szName);
+	// See if the name is already defined
+	map<string, unsigned int, less<string>, CAllocator<pair<string, 
+		unsigned int>>>::iterator cFoundIter = m_cRegister.find(szName);
+
+	// Return ID if defined
 	if(cFoundIter != m_cRegister.end())
 		return (*cFoundIter).second;
 
+	// Add string to register if not defined
 	std::pair<string, unsigned int> pNewPair(szName, 0);
 	m_cRegister.insert(pNewPair);
 	int nID = (unsigned int)(*m_cRegister.find(szName)).first.c_str();

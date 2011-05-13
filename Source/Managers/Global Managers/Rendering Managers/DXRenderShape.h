@@ -9,8 +9,6 @@ class DXRenderContext;
 
 typedef void(*pfRenderFunc)(RenderNode&);
 
-enum ERenderFunc { RF_MIN = -1, RF_VERT, RF_INDEXED_VERT, RF_MAX };
-
 class DXRenderShape : public DXRenderStatic
 {
 private:
@@ -55,7 +53,7 @@ public:
 	// Accessor
 	static pfRenderFunc GetRenderFunc(ERenderFunc eRenderFunc)
 	{
-		static void (*m_pfRenderFuncs[RF_MAX])(RenderNode&) = { VertsRenderFunc, IndexedVertsRenderFunc };
+		static void (*m_pfRenderFuncs[RF_MAX])(RenderNode&) = { VertsRenderFunc, IndexedVertsRenderFunc, IndexedVertsTextureRenderFunc };
 		return m_pfRenderFuncs[eRenderFunc]; 
 	}
 };

@@ -21,10 +21,9 @@ class CSpriteComponent;
 
 class CStartOfRaceManager
 {
-	std::list<CStartOfRaceComponent*, CAllocator<CStartOfRaceComponent*>> m_lStartOfRaceComponents;
-
 	float		m_fTotalDuration;
 	float		m_fCurrentTimerValue;
+	bool		m_bEnableInput;
 
 	CObject*			m_pDisplay0;
 	CObject*			m_pDisplay1;
@@ -34,21 +33,20 @@ class CStartOfRaceManager
 	CSpriteComponent*	m_pDisplayComponent1;
 	CSpriteComponent*	m_pDisplayComponent2;
 	CSpriteComponent*	m_pDisplayComponent3;
+
 public:
 	CStartOfRaceManager();
 
 	static CStartOfRaceManager* GetInstance()
 	{
-		static CStartOfRaceManager me;
-		return &me;
+		static CStartOfRaceManager cStartOfRaceManager;
+		return &cStartOfRaceManager;
 	}
 
-	static int CreateStartOfRaceComponent(lua_State* pLua);
-	static CStartOfRaceComponent* CreateStartOfRaceComponent(CObject* pObj);
-
-	static void HandleUpdate(IEvent* cEvent, IComponent* cCenter);	
-	
-	
+	static void HandleUpdate(IEvent* cEvent, IComponent* cCenter);
+	static void HandleStateEnter(IEvent* cEvent, IComponent* cCenter);
+	static void HandleStateExit(IEvent* cEvent, IComponent* cCenter);
+	static void HandleStateInit(IEvent* cEvent, IComponent* cCenter);
 };
 
 

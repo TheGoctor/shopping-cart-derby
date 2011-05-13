@@ -14,18 +14,30 @@
 #include <string>
 #include <map>
 #include <set>
+#include <list>
 using namespace std;
 
 #include "../Memory Manager/CEventAllocator.h"
+#include "IEvent.h"
+#include "..\..\..\Enums.h"
 
-class IEvent;
+//class IEvent;
 class IComponent;
 typedef unsigned int EventID;
 
-enum EEventPriority{PRIORITY_IMMEDIATE, PRIORITY_NORMAL, PRIORITY_INPUT, PRIORITY_UPDATE, PRIORITY_RENDER, PRIORITY_SHUTDOWN};
-
 class CEventManager
 {
+	struct cmp
+	{
+		bool operator()(const IEvent* lhs, const IEvent* rhs)
+		{
+			if(lhs->m_nPriority == rhs->m_nPriority)
+			{
+				return lhs < rhs;
+			}
+			return lhs->m_nPriority < rhs->m_nPriority;
+		}
+	};
 	struct TListener
 	{
 		IComponent* m_pcListener;
@@ -40,7 +52,7 @@ CEventAllocator<pair<EventID, TListener*>>>::iterator EventIter;
 
 	EventMap	m_cListeners;
 
-	set<IEvent*, less<IEvent*>, CEventAllocator<IEvent*> > m_cEventList;
+	set<IEvent*, cmp, CEventAllocator<IEvent*> > m_cEventList;
 
 	/////////////////
 	// Constructor //
@@ -53,6 +65,22 @@ CEventAllocator<pair<EventID, TListener*>>>::iterator EventIter;
 	~CEventManager();
 	CEventManager(const CEventManager&);
 	CEventManager& operator=(const CEventManager&);
+
+	// Things needed to properly unregister events
+	struct TUnregister
+	{
+		EventID nEventID;
+		IComponent* pListener;
+	};
+	// Container for events that need to be unregistered
+	list<TUnregister, CEventAllocator<TUnregister>> m_cUnregisterList;
+
+	void UnregisterEvents();
+
+	void ActuallyUnregisterEvent(EventID nEventID, IComponent* pcListener);
+
+	void ActuallyUnregisterEventAll(IComponent* pcListener);
+
 
 public:
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +97,8 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 //
 ////////////////////////////////////////////////////////////////////////////////
-	void RegisterEvent(EventID nEventID);
+	void RegisterEvent(EventID nEventID, IComponent* pcListener, 
+		void(*pfCallback)(IEvent*, IComponent*));
 
 ////////////////////////////////////////////////////////////////////////////////
 //

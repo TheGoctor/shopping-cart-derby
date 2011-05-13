@@ -12,23 +12,18 @@
 
 #include <stack>
 #include "../Memory Manager/CAllocator.h"
+#include "../../../Enums.h"
 
 class IEvent;
 class IComponent;
 class CEventManager;
 
-// Game States
-enum EGameState {MIN_STATE = -1,
-				 INTRO_STATE,
-				 MAIN_MENU_STATE,
-				 GAMEPLAY_STATE,
-				 PAUSE_STATE,
-				 MAX_STATE};
-
 class CStateManager
 {
 	std::stack<EGameState, deque<EGameState, CAllocator<EGameState>>> m_cStateStack; // The stack which contains the active states
 	CEventManager* m_pEM;
+
+	bool		m_bChangingState;
 
 	// Constructors, Destructors
 	CStateManager(void);
@@ -116,6 +111,9 @@ class CStateManager
 	// Helper Funcs
 	void PostEnableObjectsEvent(EGameState eGameState);
 	void PostDisableObjectsEvent(EGameState eGameState);
+	void PostInitObjectsEvent(EGameState eGameState);
+	void PostLoadObjectsEvent(EGameState eGameState);
+	void PostUnloadObjectsEvent(EGameState eGameState);
 	void PostInputChangeEvent(EGameState eGameState);
 
 public:
@@ -130,8 +128,8 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	static CStateManager* GetInstance(void) 
 	{ 
-		static CStateManager instance;
-		return &instance; 
+		static CStateManager cStateManager;
+		return &cStateManager; 
 	} 
 	
 	////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +148,7 @@ public:
 	static void PopState(IEvent* pcEvent, IComponent* pcSender);
 	static void ChangeState(IEvent* pcEvent, IComponent* pcSender);
 	static void ChangeStateGameplay(IEvent* pcEvent, IComponent* pcSender);
+	static void PushPausedState(IEvent* pcEvent, IComponent* pcSender);
 
 };
 

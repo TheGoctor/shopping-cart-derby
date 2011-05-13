@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Filename:  		CAIManager.h
  * Date:      		04/04/2011
- * Mod. Date: 		04/14/2011
+ * Mod. Date: 		05/12/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This is the manager for the
@@ -31,41 +31,44 @@ class CEventManager;
 class CObject;
 class IEvent;
 class IComponent;
-struct TNode;
-struct TVertex;
-struct TEdge;
+class CVertex;
+class CEdge;
+
+// Pathfinding classes
+class CVertex
+{
+	friend class CAIManager;
+	friend class CAIComponent;
+
+protected:
+
+	CObject* m_pcObject;
+	CVertex* m_pcParent;
+	D3DXVECTOR3 m_cLocation;
+	double m_dGivenCost;
+	std::list<CEdge*, CAllocator<CEdge*>> m_pcConnections;
+
+	CVertex(CObject* pObj) : m_pcObject(pObj), m_pcParent(NULL), m_dGivenCost(0)
+	{}
+};
+class CEdge
+{
+	friend class CAIManager;
+	friend class CAIComponent;
+
+protected:
+
+	double m_dFinalCost;
+	CVertex* m_pcEndpoint;
+
+	CEdge() : m_dFinalCost(0), m_pcEndpoint(NULL)
+	{}
+};
+//
 
 class CAIManager
 {
-private:
-
-	struct TNode
-	{
-		TNode* m_pcParent;
-		TVertex* m_pcVertex;
-	};
-	struct TVertex
-	{
-		D3DXVECTOR3 m_cLocation;
-		std::list<TEdge*> m_pcConnections;
-	};
-	struct TEdge
-	{
-		double m_Cost;
-		TVertex* m_pcEndpoint;
-	};
-
-	//struct TNode
-	//{
-	//	std::list<TNode*> m_tNeighbors;
-	//	D3DXVECTOR3 m_cLocation;
-	//	double m_Cost;
-	//	double m_Heuristic;
-	//	double m_FinalCost;
-	//	TNode* m_tParent;
-	//};
-
-	D3DXVECTOR3 cDepartmentPos[9];
+	friend class CAIComponent;
 
 	/////////////////
 	// Constructor //
@@ -79,7 +82,20 @@ private:
 	CAIManager(const CAIManager&) {}
 	CAIManager& operator=(const CAIManager&) {}
 
-public:
+	struct TNode
+	{
+		char szName[40];
+		D3DXMATRIX tLocalMatrix;
+		D3DXMATRIX tWorldMatrix;
+	};
+
+	void LoadAIWaypoints();
+	void ConnectWaypoints();
+
+protected:
+	D3DXVECTOR3 cDepartmentPos[9];
+
+	std::list<CVertex*, CAllocator<CVertex*>> m_cWaypointNodes;
 
 	// Will call allocate to create
 	// the amount of AI agents needed
@@ -88,24 +104,19 @@ public:
 
 	std::list<CObject*,	CAllocator<CObject*>> m_cPlayers;
 
-	enum EDepartments { };
-
-	static CAIManager* GetInstance()
-	{
-		static CAIManager AIManager;
-
-		return &AIManager;
-	}
-
+public:
 	void Init();
 
 	static int CreateAIComponent(lua_State* pLua);
 
 	static CAIComponent* CreateAIComponent(CObject* pObj);
 
+	
+
 	/***************
 	*  Accessors
 	***************/
+	static CAIManager* GetInstance();
 
 	/***************
 	* Mutators
@@ -114,9 +125,9 @@ public:
 	/*****************************************************************
 	***************************** Events *****************************
 	*****************************************************************/
-	static void GoalItemInit(IEvent*, IComponent*);
+	//static void GoalItemInit(IEvent*, IComponent*);
 
-	static void PlayerCreated(IEvent*, IComponent*);
+	//static void PlayerCreated(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* GoalItemCollected()	An event that tells the agent that a
@@ -148,7 +159,7 @@ public:
 	* Mod. Date:		      04/08/2011
 	* Mod. Initials:	      JS
 	*****************************************************************/
-	static void PlayerAttacked(IEvent*, IComponent*);
+	//static void PlayerAttacked(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* GoalItemSpawned()	An event that tells the agent that a

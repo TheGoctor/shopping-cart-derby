@@ -7,11 +7,13 @@
 #include "..\Memory Manager\CMemoryManager.h"
 #include "../../../Components/Rendering/CRenderComponent.h"
 #include "../../../IComponent.h"
+#include "../../../CGame.h"
 #include "../../../Managers/Global Managers/Event Manager/CEventManager.h"
-#include "../../../Managers/Global Managers/Event Manager/CRenderEvent.h"
-#include "../../../Managers/Global Managers/Event Manager/CMoveCameraEvent.h"
-#include "CCameraManager.h"
-#include "Camera.h"
+#include "../../../Managers/Global Managers/Event Manager/EventStructs.h"
+using namespace EventStructs;
+#include "../Console Manager/CConsoleManager.h"
+#include "../Camera Manager/CCameraManager.h"
+#include "../Camera Manager/Camera.h"
 #include "../../../CObject.h"
 #include "DXRenderShape.h"
 #include "DXRenderShape.h"
@@ -21,6 +23,13 @@
 
 #define   FONT_RECT   {0,0,1000,200}
 #define   FONT_COLOR   D3DCOLOR_XRGB(255,255,255)
+
+//Viewport hack
+//D3DVIEWPORT9 view1;
+//D3DVIEWPORT9 view2;
+//D3DVIEWPORT9 view3;
+//D3DVIEWPORT9 view4;
+//D3DVIEWPORT9  vps[4];
 
 Renderer::Renderer(void)
 {
@@ -42,7 +51,42 @@ void Renderer::Init(HWND hWnd, int nScreenWidth,
 
 	m_pRCM = DXRenderContextManager::GetInstance();
 	m_pRCM->Initialize();
+	
+	/*
+	//////// Viewport Hack
+	view1.Height	= nScreenHeight/2;
+	view1.Width		= nScreenWidth/2 ;
+	view1.X			= 0;
+	view1.Y			= 0;
+	view1.MinZ		= 0.0f;
+	view1.MaxZ		= 1.0f;
 
+	view2.Height	= nScreenHeight/2;
+	view2.Width		= nScreenWidth/2 ;
+	view2.X			= nScreenWidth/2;
+	view2.Y			= 0;
+	view2.MinZ		= 0.0f;
+	view2.MaxZ		= 1.0f;
+
+	view2.Height	= nScreenHeight/2;
+	view2.Width		= nScreenWidth/2 ;
+	view2.X			= 0;
+	view2.Y			= nScreenHeight/2;
+	view2.MinZ		= 0.0f;
+	view2.MaxZ		= 1.0f;
+
+	view2.Height	= nScreenHeight/2;
+	view2.Width		= nScreenWidth/2 ;
+	view2.X			= nScreenWidth/2;
+	view2.Y			= nScreenHeight/2;
+	view2.MinZ		= 0.0f;
+	view2.MaxZ		= 1.0f;
+
+	vps[0] = view1;
+	vps[1] = view2;
+	vps[2] = view3;
+	vps[3] = view4;	
+*/
 	// Sprites
 	//CTextureManager::GetInstance()->InitTextureManager(m_pD3D->GetDirect3DDevice(), 
 
@@ -75,16 +119,67 @@ void Renderer::Init(HWND hWnd, int nScreenWidth,
 	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_TallShelf_FINShape.mesh");
 	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Wall_FINShape.mesh");
 
+	// Circle
+	ModelManager::GetInstance()->LoadModel("Resource/pSphereShape1.mesh");
+
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_EmployeeDoor_FIN_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_Endcap_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FreeDisplaySquareL_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FreeDisplaySquareM_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FreeDisplaySquareS_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FrontDoor_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_GlassCounter_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_GlassFreezer_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_HalfWall_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_LobsterTank_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_OpenFreezerLeft_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_OpenFreezerRight_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_ProduceLeft_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_ProduceRight_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_Register_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_ShortShelf_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_TallShelf_FINShape_Collision.mesh");
+
+
+	// draw collision volumes
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_EmployeeDoor_FIN_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Endcap_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareL_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareM_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareS_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FrontDoor_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_GlassCounter_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_GlassFreezer_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_HalfWall_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_LobsterTank_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_OpenFreezerLeft_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_OpenFreezerRight_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ProduceLeft_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ProduceRight_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Register_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ShortShelf_FINShape_Collision.mesh");
+	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_TallShelf_FINShape_Collision.mesh");
+
 	// Register For Events
 	CEventManager* pEM = CEventManager::GetInstance();
 	pEM->RegisterEvent("Render",
-		NULL, RenderCallback);
+		(IComponent*)GetInstance(), RenderCallback);
 
 	pEM->RegisterEvent("AddToSet",
-		NULL, AddToRenderSet);
+		(IComponent*)GetInstance(), AddToRenderSet);
 
 	pEM->RegisterEvent("Shutdown",
-		NULL, ShutdownCallback);
+		(IComponent*)GetInstance(), ShutdownCallback);
+
+	pEM->RegisterEvent("DestroyObject", (IComponent*)GetInstance(), DestroyComponent);
+}
+
+void Renderer::DestroyObject(IEvent* pcEvent, IComponent*)
+{
+	TObjectEvent* pcObj = (TObjectEvent*)pcEvent->GetData();
+
+	GetInstance()->m_cRenderComps.erase(GetInstance()->m_cRenderComps.find(
+		pcObj->m_pcObj->GetID()));
 }
 
 void Renderer::Render(RenderSet &set)
@@ -111,26 +206,32 @@ void Renderer::RenderScene(void)
 	m_pD3D->DeviceBegin();
 
 	//
-
+	///Viewport Hack
+	//for (unsigned int i = 0; i < 4; ++i)
+	//{
+	
+		//m_pD3D->GetDirect3DDevice()->SetViewport(&vps[i]);
+		//m_pD3D->GetDirect3DDevice()->Clear(0L, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xffcccccc, 1.0f, 0L);
 		// Contexts
 		m_pRCM->RenderContexts();
 
 		// Sprites
-		IEvent* pRenderEvent = MMNEWEVENT(IEvent) IEvent(CIDGen::GetInstance()->
-			GetID("RenderSprites"), NULL);
-		m_pEM->PostEvent(pRenderEvent, PRIORITY_IMMEDIATE);
+		SendIEvent("RenderSprites", NULL, NULL, PRIORITY_IMMEDIATE);
 
 		// Cam Pos
 		char text[64];
-		sprintf_s(text, 64, "Camera Pos: X = %f Y = %f Z = %f",
+		sprintf_s(text, 64, "Camera Pos: X:%f Y:%f Z:%f\nFPS:%d",
 			m_pCM->GetCam()->GetViewPosition().x, 
 			m_pCM->GetCam()->GetViewPosition().y,
-			m_pCM->GetCam()->GetViewPosition().z);
+			m_pCM->GetCam()->GetViewPosition().z,
+			CGame::GetInstance()->GetFPS());
 		RECT fontRec = FONT_RECT;
 		m_pD3D->GetFont()->DrawText(0, text, -1, &fontRec, 0, FONT_COLOR);
+		
+		CConsoleManager::GetInstance()->DrawConsole();
 
 	//
-
+	//}
 	// stop the scene
 	m_pD3D->DeviceEnd();
 	
@@ -140,35 +241,39 @@ void Renderer::RenderScene(void)
 void Renderer::AddToRenderSet(IEvent* pcEvent, IComponent* pcSender)
 {
 	// do some lookup to find the right component in the list
-	CRenderEvent* pcRendEvent = (CRenderEvent*)pcEvent;
-	CObject* pParent = pcRendEvent->GetParent();
+	TRenderEvent* pcRendEvent = (TRenderEvent*)pcEvent->GetData();
+	CObject* pParent = pcRendEvent->m_pParent;
 
 	map<unsigned int, CRenderComponent*, less<unsigned int>,
 		CAllocator<pair<unsigned int, CRenderComponent*>>>::iterator cIter = 
 		Renderer::GetInstance()->m_cRenderComps.find(pParent->GetID());
+
 	CRenderComponent* pcRComp = (*cIter).second;
 	
 	pcRComp->GetRenderShape()->GetRenderContext()->
 		AddRenderNode(pcRComp->GetRenderShape());
 
-	//std::map<CRenderComponent*>::iterator cIter;
-	//cIter = Renderer::GetInstance()->m_cRenderComps.begin();
-	//for(; cIter != Renderer::GetInstance()->m_cRenderComps.end(); cIter++)
-	//{
-	//	if((*cIter)->GetParent() == pParent)
-	//	{
-	//		(*cIter)->GetRenderShape().GetRenderContext()->
-	//			AddRenderNode(&(*cIter)->GetRenderShape());
-	//	}
-	//}
+	/*map<unsigned int, CRenderComponent*, less<unsigned int>,
+		CAllocator<pair<unsigned int, CRenderComponent*>>>::iterator cIter;
+	cIter = Renderer::GetInstance()->m_cRenderComps.begin();
+	for(; cIter != Renderer::GetInstance()->m_cRenderComps.end(); cIter++)
+	{
+		CRenderComponent* pRC = (*cIter).second;
+
+		if(pRC->GetParent() == pParent)
+		{
+			pRC->GetRenderShape()->GetRenderContext()->
+				AddRenderNode(pRC->GetRenderShape());
+		}
+	}*/
 }
 
 int Renderer::CreateRenderComp(lua_State* pLua)
 {
-	CObject* pObj = (CObject*)lua_topointer(pLua, 1);
-	int nModelID = (int)lua_tonumber(pLua, 2);
-	int nRC = (int)lua_tonumber(pLua, 3);
-	int nRendFunc = (int)lua_tonumber(pLua, 4);
+	CObject* pObj = (CObject*)lua_topointer(pLua, -4);
+	int nModelID = (int)lua_tonumber(pLua, -3);
+	int nRC = (int)lua_tonumber(pLua, -2);
+	int nRendFunc = (int)lua_tonumber(pLua, -1);
 
 	CRenderComponent* pRend = CreateRenderComp(pObj, nModelID, 
 		nRC, nRendFunc);
@@ -182,8 +287,24 @@ CRenderComponent* Renderer::CreateRenderComp(CObject* pParent, int nModelID,
 {
 	DXRenderContext* pRC = GetInstance()->m_pRCM->GetContext((ERenderContext)nRenderContextIdx);
 	
-	CRenderComponent* comp = MMNEW(CRenderComponent) CRenderComponent(pParent,
-		nModelID, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx));	
+	CRenderComponent* comp = MMNEW(CRenderComponent(pParent,
+		nModelID, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx)));	
+	
+	comp->Init();
+	pParent->AddComponent(comp);
+
+	Renderer::GetInstance()->m_cRenderComps.insert(make_pair((unsigned int)pParent->GetID(), comp));
+
+	return comp;
+}
+
+CRenderComponent* Renderer::CreateRenderComp(CObject* pParent, DXMesh* pMesh,
+								   int nRenderContextIdx, int nRenderFuncIdx)
+{
+	DXRenderContext* pRC = GetInstance()->m_pRCM->GetContext((ERenderContext)nRenderContextIdx);
+	
+	CRenderComponent* comp = MMNEW(CRenderComponent(pParent,
+		(DXMesh*)pMesh, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx)));	
 	
 	comp->Init();
 	pParent->AddComponent(comp);
@@ -214,9 +335,22 @@ void Renderer::Shutdown(void)
 	{
 		if(cIter->second)
 		{
-			MMDEL(CRenderComponent, cIter->second);
+			MMDEL(cIter->second);
 		}
 
 		cIter++;
+	}
+}
+
+void Renderer::DestroyComponent(IEvent* pEvent, IComponent* pComp)
+{
+	TObjectEvent* pObjEvent = (TObjectEvent*)pEvent->GetData();
+	int nID = pObjEvent->m_pcObj->GetID();
+	CRenderComponent* pRendComp = (CRenderComponent*)pEvent->GetSender();
+
+	if((*GetInstance()->m_cRenderComps.find(nID)).second == pRendComp)
+	{
+		MMDEL(pRendComp);
+		GetInstance()->m_cRenderComps.erase(nID);
 	}
 }

@@ -17,6 +17,8 @@
 
 #include "Managers/Global Managers/Memory Manager/CAllocator.h"
 #include "Managers/Global Managers/Event Manager/CIDGen.h"
+
+
 #include "CFrame.h"
 
 class IComponent;
@@ -32,9 +34,16 @@ public:
 	{
 		m_nID = CIDGen::GetInstance()->GetID(szName);
 	}
-	//~CObject()
-	//{
-	//} 
+	~CObject()
+	{
+		// This assumes each of the managers have already released their 
+		// handles to the components
+		//while(m_cComponents.empty() == false)
+		//{
+		//	// Delete here
+		//}
+		m_cComponents.clear();
+	} 
 	//CObject(const CObject& cObj)
 	//{
 	//	//m_nID = cObj.m_nID;
@@ -81,10 +90,12 @@ public:
 		m_cComponents.push_back(pcComponent);
 	}
 
-	inline void RemoveComponent(IComponent* pcComponent)
+	void RemoveComponent(IComponent* pcComponent)
 	{
+		// This only removes the component from the manager
+		// Also remove the comonent from the appropriate manager
+		// and that manager is responsible for deleting the component
 		m_cComponents.remove(pcComponent);
-		// Maybe delete here
 	}
 };
 

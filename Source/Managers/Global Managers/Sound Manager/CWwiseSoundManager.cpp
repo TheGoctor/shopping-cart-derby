@@ -7,7 +7,9 @@
 //
 //  Date Created	:	3/27/2011
 //
-//	Last Changed	:	4/13/2001
+//	Last Changed	:	5/04/2001
+//
+//	Changed By		:	HN
 //
 //  Purpose			:	Wrapper class for Wwise API
 //
@@ -15,17 +17,13 @@
 #include"CWwiseSoundManager.h"
 //includes
 /////////////////////////////////////////
-#ifdef _DEBUG
-#include "../../../Wwise/includes/AkCommunication.h"
-#endif
-
 #include <AK/SoundEngine/Common/AkMemoryMgr.h>
 #include <AK/SoundEngine/Common/AkModule.h>
 #include <AK/SoundEngine/Common/AkStreamMgrModule.h>
 #include <AK/SoundEngine/Common/IAkStreamMgr.h>
 #include <AK/Tools/Common/AkPlatformFuncs.h>
-#include<AK/MusicEngine/Common/AkMusicEngine.h>
-#include<AK/SoundEngine/Common/AkSoundEngine.h>
+#include <AK/MusicEngine/Common/AkMusicEngine.h>
+#include <AK/SoundEngine/Common/AkSoundEngine.h>
 #include <AK/Tools/Common/AkMonitorError.h>
 #include <AK/Plugin/AkVorbisFactory.h>
 #ifdef _DEBUG
@@ -43,11 +41,17 @@
 #include "../../../Wwise/Plugin/AkDelayFXFactory.h"
 #include "../../../Wwise/Plugin/AkPeakLimiterFXFactory.h"
 
-#define SOUND_VOLUME_DEFAULT 50.0f
-#define MUSIC_VOLUME_DEFAULT 15.0f
+#include "../Event Manager/EventStructs.h"
+#include "../Event Manager/CEventManager.h"
+using namespace EventStructs;
 
+#define SOUND_VOLUME_DEFAULT 50.0f
+#define MUSIC_VOLUME_DEFAULT 25.0f
+#define DX_VOLUME_DEFAULT 100.0f
+////////////////////////////////////////////////////////////////////////////////
 // Custom alloc/free functions. These are declared as "extern" in AkMemoryMgr.h
 // and MUST be defined by the game developer.
+////////////////////////////////////////////////////////////////////////////////
 namespace AK
 {
 #ifdef WIN32
@@ -83,46 +87,53 @@ namespace AK
 #endif
 }
 
-
-
+//Constructor
 CWwiseSoundManager::CWwiseSoundManager()
 {
 }
-
+//Deconstuctor
 CWwiseSoundManager::~CWwiseSoundManager()
 {
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Returns a single instance of the manager
+//////////////////////////////////////////////////////////////////////////////////
 CWwiseSoundManager* CWwiseSoundManager::GetInstance()
 {
-	static CWwiseSoundManager instance;
-	return &instance;
+	static CWwiseSoundManager cWwiseSoundManager;
+	return &cWwiseSoundManager;
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Properly initializes the manager and loads in the BNK files need to play sound
+//sets the default volumes for sound and music
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::InitSoundManager()
 {
-	mTotalID = 2;
-	m_pGlobalID = 1;
-	
 	InitWise();
-	InitSounds();
 	InitBanks();
-	
 	LoadBank(INIT);
-	 LoadBank(SOUNDBANK);
+	LoadBank(SOUNDBANK);
+	RegisterForEvents();
 	
-	 m_fDefSound = SOUND_VOLUME_DEFAULT;
-	 m_fDefMusic = MUSIC_VOLUME_DEFAULT;
+	m_fDefSound = SOUND_VOLUME_DEFAULT;
+	m_fDefMusic = MUSIC_VOLUME_DEFAULT;
+	m_fDefDXSound = DX_VOLUME_DEFAULT;
 
-	 SetSoundVolume(m_fDefSound);
-	 SetMusicVolume(m_fDefMusic);
+	SetSoundVolume(m_fDefSound);
+	SetMusicVolume(m_fDefMusic);
+	SetDXVolume(m_fDefDXSound);
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Calls RenderAudio to go through the sound events that needed to be played,
+//must be called in update every frame
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::Update()
 {
 	AK::SoundEngine::RenderAudio();
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Calls functions to shutdown the manager correctly
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::ShutdownManager()
 {
 	StopAll();
@@ -131,147 +142,283 @@ void CWwiseSoundManager::ShutdownManager()
 
 	ShutdownWise();
 }
-
-void CWwiseSoundManager::PlaySound(SoundID soundid, AkGameObjectID object)
+////////////////////////////////////////////////////////////////////////////////
+//Plays the sound associated with the object
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::PlayTheSound(SoundID soundid, EObjectID object)
 {
-	AK::SoundEngine::PostEvent(mSounds[soundid],object);
+	AkGameObjectID obj = object;
+	AkUniqueID eventID = soundid;
+	AK::SoundEngine::PostEvent(eventID, obj);
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Plays the music
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::PlayMusic(SoundID soundid)
 {
-	AK::SoundEngine::PostEvent(mSounds[soundid],m_pGlobalID);
+	AkGameObjectID obj = GLOBAL_ID;
+	AkUniqueID eventID = soundid;
+	AK::SoundEngine::PostEvent(eventID, obj);
 }
-
-void CWwiseSoundManager::Pause(AkGameObjectID object)
+////////////////////////////////////////////////////////////////////////////////
+//Pauses the sound
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::Pause(EObjectID object)
 {
-	AK::SoundEngine::PostEvent(AK::EVENTS::PAUSE_ALL,object);
+	AkGameObjectID obj = object;
+	AK::SoundEngine::PostEvent(AK::EVENTS::PAUSE_ALL, obj);
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Pauses all the sounds
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::PauseAll()
 {
-	AK::SoundEngine::PostEvent(AK::EVENTS::PAUSE_ALL, m_pGlobalID);
+	m_pObjectID = GLOBAL_ID;
+	AK::SoundEngine::PostEvent(AK::EVENTS::PAUSE_ALL, m_pObjectID);
 }
-
-void CWwiseSoundManager::Resume(AkGameObjectID object)
+////////////////////////////////////////////////////////////////////////////////
+//Reumses the sound
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::Resume(EObjectID object)
 {
-	AK::SoundEngine::PostEvent(AK::EVENTS::RESUME_ALL,object);
+	AkGameObjectID obj = object;
+	AK::SoundEngine::PostEvent(AK::EVENTS::RESUME_ALL, obj);
 }
-
-void CWwiseSoundManager::Stop(AkGameObjectID object)
+////////////////////////////////////////////////////////////////////////////////
+//Stops sound
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::Stop(EObjectID object )
 {
-	AK::SoundEngine::PostEvent(AK::EVENTS::STOP_ALL, object);
+	AkGameObjectID obj = object;
+	AK::SoundEngine::PostEvent(AK::EVENTS::STOP_ALL, obj);
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Stops all the sounds in the game
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::StopAll()
 {
-	AK::SoundEngine::PostEvent(AK::EVENTS::STOP_ALL, m_pGlobalID);
+	m_pObjectID = GLOBAL_ID;
+	AK::SoundEngine::PostEvent(AK::EVENTS::STOP_ALL, m_pObjectID);
 }
 
-void CWwiseSoundManager::SetScale(AkGameObjectID object, float scale)
+////////////////////////////////////////////////////////////////////////////////
+//Sets the SFX volume
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::SetScale(EObjectID object, float scale)
 {
-	AK::SoundEngine::SetAttenuationScalingFactor(object, scale);
+	AkGameObjectID obj = object;
+	AK::SoundEngine::SetAttenuationScalingFactor(obj, scale);
 }
-
-
+////////////////////////////////////////////////////////////////////////////////
+//Sets the Music volume
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::SetMusicVolume(float volume)
 {
 	m_fMusicVolume = volume;
+	if (m_fMusicVolume > 100.0f)
+	{
+		m_fMusicVolume = 100.0f;
+	}
+	else if (m_fMusicVolume < 0.0f)
+	{
+		m_fMusicVolume = 0.0f;
+	}
 	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::MX_VOLUME,m_fMusicVolume);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//Sets the SFX volume
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::SetSoundVolume(float volume)
 {
 	m_fSoundVolume = volume;
-	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::FX_VOLUME,m_fSoundVolume);
-	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::DX_VOLUME,m_fSoundVolume);
+
+	if (m_fSoundVolume > 100.0f)
+	{
+		m_fSoundVolume = 100.0f;
+	}
+	else if (m_fSoundVolume < 0.0f)
+	{
+		m_fSoundVolume = 0.0f;
+	}
+	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::FX_VOLUME ,m_fSoundVolume);
+
+}
+////////////////////////////////////////////////////////////////////////////////
+// Sets the DX Volume
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::SetDXVolume(float volume)
+{
+	m_fDXvolume = volume;
+
+	if (m_fDXvolume > 100.0f)
+	{
+		m_fDXvolume = 100.0f;
+	}
+	else if (m_fDXvolume < 0.0f)
+	{
+		m_fDXvolume = 0.0f;
+	}
+
+	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::DX_VOLUME, m_fDXvolume);
+}
+////////////////////////////////////////////////////////////////////////////////
+//Sets the RPM value
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::SetRPMValue(float rpm , EObjectID object)
+{
+	m_fRPM = rpm;
+	if(m_fRPM > 1000.0f)
+	{
+		m_fRPM = 1000.0f;
+	}
+	else if(m_fRPM < 100.0f)
+	{
+		m_fRPM = 100.0f;
+	}
+	AkGameObjectID obj = object;
+	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::RPM, m_fRPM, obj);
 }
 
-void CWwiseSoundManager::SetListener(D3DXVECTOR3 position, float scale)
+////////////////////////////////////////////////////////////////////////////////
+//Sets the listers position, if the listener moves then call this in the 
+//listeners update
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::SetListener(D3DXVECTOR3 position, float scale, int listener)
 {
 	AkListenerPosition pos;
 	pos.Position.X = position.x;
 	pos.Position.Y = position.y;
 	pos.Position.Z = position.z;
 
-	AK::SoundEngine::SetListenerPosition(pos);
+	pos.OrientationFront.X = 0.0f;
+	pos.OrientationFront.Y = 0.0f;
+	pos.OrientationFront.Z = 1.0f;
+
+	pos.OrientationTop.X = 0.0f;
+	pos.OrientationTop.Y = 1.0f;
+	pos.OrientationTop.Z = 0.0f;
+
+	AK::SoundEngine::SetListenerPosition(pos , listener);
 	AK::SoundEngine::SetListenerScalingFactor(0,scale);
 }
-
-void CWwiseSoundManager::SetObjectPosition(AkGameObjectID object, D3DXVECTOR3 position)
+////////////////////////////////////////////////////////////////////////////////
+//Sets an objects position, needs to be called and objects update
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::SetObjectPosition(EObjectID object, 
+										   D3DXVECTOR3 position, float scale)
 {
 	AkSoundPosition pos;
 	pos.Position.X = position.x;
 	pos.Position.Y = position.y;
 	pos.Position.Z = position.z;
-	AK::SoundEngine::SetPosition(object, pos);
+
+	pos.Orientation.X = -1.0f;
+	pos.Orientation.Y = 0.0f;
+	pos.Orientation.Z = 0.0f;
+
+	AkGameObjectID obj= object;
+	AK::SoundEngine::SetPosition(obj, pos);
+	AK::SoundEngine::SetAttenuationScalingFactor(obj, scale);
 }
 
-void CWwiseSoundManager::RegisterObject(AkGameObjectID object)
+////////////////////////////////////////////////////////////////////////////////
+//Registers a game object and all sounds the object needs to use
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::RegisterObject(EObjectID object)
 {
-	object = mTotalID;
-	AK::SoundEngine::RegisterGameObj(object);
-	++mTotalID;
+	AkGameObjectID obj = object;
+	AK::SoundEngine::RegisterGameObj(obj);
 }
 
-void CWwiseSoundManager::UnregisterObject(AkGameObjectID object)
+////////////////////////////////////////////////////////////////////////////////
+//Unregister an object
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::UnregisterObject(EObjectID object)
 {
-	AK::SoundEngine::UnregisterGameObj(object);
-	//--mTotalID;
+	AkGameObjectID obj = object;
+	AK::SoundEngine::UnregisterGameObj(obj);
 }
+////////////////////////////////////////////////////////////////////////////////
+//Properly start up Wwise
+////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::InitWise()
 {
-	//Memory Manager
+	//////////////////////////////////////////////////////////////////////////
+	//The following code was taken from the Wwise documentation 
+	//////////////////////////////////////////////////////////////////////////
+
+
 	AkMemSettings memSettings;
-	memSettings.uMaxNumPools = 20;
+	memSettings.uMaxNumPools = 50;
+
 	if ( AK::MemoryMgr::Init( &memSettings ) != AK_Success )
 	{
 		assert( ! "Could not create the memory manager." );
 	}
 
-	//Stream manager
+	// Create and initialize an instance of the default streaming manager. Note
+	// that you can override the default streaming manager with your own. Refer
+	// to the SDK documentation for more information.
+
 	AkStreamMgrSettings stmSettings;
-	AK::StreamMgr::GetDefaultSettings(stmSettings);
-	if(!AK::StreamMgr::Create(stmSettings))
+	AK::StreamMgr::GetDefaultSettings( stmSettings );
+
+	// Customize the Stream Manager settings here.
+
+	if ( !AK::StreamMgr::Create( stmSettings ) )
 	{
-		assert( ! "Could not create the Stream manager." );
+		assert( ! "Could not create the Streaming Manager" );
+
 	}
 
-
-	//IO shit
+	//
+	// Create a streaming device with blocking low-level I/O handshaking.
+	// Note that you can override the default low-level I/O module with your own. Refer
+	// to the SDK documentation for more information.        
+	//
 	AkDeviceSettings deviceSettings;
-	AK::StreamMgr::GetDefaultDeviceSettings(deviceSettings);
-	if(g_lowLevelIO.Init(deviceSettings)!=AK_Success)
+	AK::StreamMgr::GetDefaultDeviceSettings( deviceSettings );
+
+	// Customize the streaming device settings here.
+
+	// CAkFilePackageLowLevelIOBlocking::Init() creates a streaming device
+	// in the Stream Manager, and registers itself as the File Location Resolver.
+	if ( g_lowLevelIO.Init( deviceSettings ) != AK_Success )
 	{
-		assert( ! "Could not create the IO manager." );
+		assert( ! "Could not create the streaming device and Low-Level I/O system" );
 	}
 
+	// Create the Sound Engine
+	// Using default initialization parameters
 
-	g_lowLevelIO.SetBankPath(AKTEXT(""));
-	g_lowLevelIO.SetLangSpecificDirName(AKTEXT("English(US)/"));
-
-	//Sound engine
 	AkInitSettings initSettings;
 	AkPlatformInitSettings platformInitSettings;
-	AK::SoundEngine::GetDefaultInitSettings(initSettings);
-	AK::SoundEngine::GetDefaultPlatformInitSettings(platformInitSettings);
-	if(AK::SoundEngine::Init(&initSettings,&platformInitSettings)!=AK_Success)
+	AK::SoundEngine::GetDefaultInitSettings( initSettings );
+	AK::SoundEngine::GetDefaultPlatformInitSettings( platformInitSettings );
+
+	if ( AK::SoundEngine::Init( &initSettings, &platformInitSettings ) != AK_Success )
 	{
-		assert( ! "Could not create the Sound Engine." );
+		assert( ! "Could not initialize the Sound Engine." );
 	}
 
-	//Music engine
+	// Initialize the music engine
+	// Using default initialization parameters
+
 	AkMusicSettings musicInit;
-	AK::MusicEngine::GetDefaultInitSettings(musicInit);
-	if(AK::MusicEngine::Init(&musicInit)!=AK_Success)
+	AK::MusicEngine::GetDefaultInitSettings( musicInit );
+
+	if ( AK::MusicEngine::Init( &musicInit ) != AK_Success )
 	{
-		assert( ! "Could not create the Music Engine." );
+		assert( ! "Could not initialize the Music Engine." );
 	}
+
+	AK::SoundEngine::SetListenerPipeline(0, true, false);
+
+	//////////////////////////////////////////////////////
+	//Connect to the Wwise API for debugging
 #ifdef _DEBUG
 
-	//#ifndef AK_OPTIMIZED
-	//
-	// Initialize communications (not in release build!)
-	//
 	AkCommSettings commSettings;
 	AK::Comm::GetDefaultInitSettings( commSettings );
 	if ( AK::Comm::Init( commSettings ) != AK_Success )
@@ -279,107 +426,9 @@ void CWwiseSoundManager::InitWise()
 		assert( ! "Could not initialize communication." );
 		//return false;
 	}
-	//#endif // AK_OPTIMIZED
-
-
-
-#endif // AK_OPTIMIZED	AkMusicSettings musicSettings;
-
-	RegisterPlugins();
-
-	AK::SoundEngine::RegisterCodec(AKCOMPANYID_AUDIOKINETIC, AKCODECID_VORBIS, CreateVorbisFilePlugin, CreateVorbisBankPlugin);
-
-	//AK::MotionEngine::SetPlayerListener(0,0);
-	AK::SoundEngine::SetListenerPipeline(0, true, false);
-
-}
-void CWwiseSoundManager::ShutdownWise()
-{
-	AK::SoundEngine::UnregisterAllGameObj();
-
-	AK::SoundEngine::RenderAudio();
-
-#ifdef _DEBUG
-	//#ifndef AK_OPTIMIZED
-	//
-	// Terminate Communication Services
-	//
-	AK::Comm::Term();
-	//#endif // AK_OPTIMIZED
 #endif
 
-	// Terminate the music engine
-	//
-	AK::MusicEngine::Term();
-
-
-	// Terminate the sound engine
-	//
-	if(AK::SoundEngine::IsInitialized())
-	{
-		AK::SoundEngine::Term();
-	}
-
-	// Terminate the streaming device and streaming manager
-
-	// CAkFilePackageLowLevelIOBlocking::Term() destroys its associated streaming device 
-	// that lives in the Stream Manager, and unregisters itself as the File Location Resolver.   
-	g_lowLevelIO.Term();
-
-	if ( AK::IAkStreamMgr::Get() )
-		AK::IAkStreamMgr::Get()->Destroy();
-
-	//vorbis
-	// Terminate the Memory Manager
-	AK::MemoryMgr::Term();
-
-}
-void CWwiseSoundManager::InitBanks()
-{
-	mBanks[INIT].mLocation = "Source/Wwise/BankFiles/Init.bnk";
-	mBanks[SOUNDBANK].mLocation = "Source/Wwise/BankFiles/SoundBank.bnk";
-
-}
-
-void CWwiseSoundManager::InitSounds()
-{
-	AK::SoundEngine::RegisterGameObj(m_pGlobalID);
-
-	mSounds[MENU_SELECT] = AK::EVENTS::PLAY_FX_2D_MAGICPICKUP;
-	mSounds[MENU_OPTION_CHANGE] = AK::EVENTS::PLAY_FX_2D_BEEP;
-	mSounds[INVALID_SELECTION] = AK::EVENTS::PLAY_FX_2D_MENUCANCEL;
-	mSounds[CART_MOVEMENT] = AK::EVENTS::PLAY_FX_2D_WEAPONWHOOSH;
-	mSounds[CART_BRAKE] = AK::EVENTS::PLAY_DX_2D_LAND;
-	mSounds[CART_COLLISION] = AK::EVENTS::PLAY_FX_3D_SMASHCRATE;
-	mSounds[ITEM_DROP] = AK::EVENTS::PLAY_FX_2D_AMMOPICKUP;
-	mSounds[ITEM_SPAWN] = AK::EVENTS::PLAY_FX_2D_SHEILDPICKUP;
-	mSounds[PICK_UP] = AK::EVENTS::PLAY_FX_2D_COINPICKUP;
-	mSounds[MUSICLOOP_PLAY] = AK::EVENTS::PLAY_MX_MUSICLOOP_06;
-	mSounds[MUSICLOOP_STOP] = AK::EVENTS::STOP_MX_MUSICLOOP_06;
-}
-
-void CWwiseSoundManager::LoadBank(BankID bankid)
-{
-	AKRESULT result = AK::SoundEngine::LoadBank(mBanks[bankid].mLocation,AK_DEFAULT_POOL_ID,mBanks[bankid].mID);
-	return;
-}
-
-void CWwiseSoundManager::UnloadBank(BankID bankid)
-{
-	AK::SoundEngine::UnloadBank(mBanks[bankid].mID);
-}
-
-void CWwiseSoundManager::UnloadAll()
-{
-	for(int i = 0; i < MAX_BANKS; ++i)
-	{
-		AK::SoundEngine::UnloadBank(mBanks[i].mID);
-	}
-}
-
-void CWwiseSoundManager::RegisterPlugins()
-{
-	// Register RoomVerb FX plugin
+	//Regestering the codecs and plugins
 	AK::SoundEngine::RegisterPlugin( AkPluginTypeEffect,
 		AKCOMPANYID_AUDIOKINETIC,
 		AKEFFECTID_ROOMVERB,
@@ -422,4 +471,329 @@ void CWwiseSoundManager::RegisterPlugins()
 		CreateAudioInputSource,
 		CreateAudioInputSourceParams);
 
+	//////////////////////////////////////////////////////////////////////////
+	//The above code was taken from the Wwise documentation
+	//////////////////////////////////////////////////////////////////////////
+
 }
+////////////////////////////////////////////////////////////////////////////////
+//Properly shutdown Wwise 
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::ShutdownWise()
+{
+	AK::SoundEngine::UnregisterAllGameObj();
+
+
+#ifdef _DEBUG
+
+	// Terminate Communication Services
+
+	AK::Comm::Term();
+#endif
+
+	// Terminate the music engine
+	//
+	AK::MusicEngine::Term();
+
+
+	// Terminate the sound engine
+	//
+	if(AK::SoundEngine::IsInitialized())
+	{
+		AK::SoundEngine::Term();
+	}
+
+	// Terminate the streaming device and streaming manager
+	// CAkFilePackageLowLevelIOBlocking::Term() destroys its associated streaming device 
+	// that lives in the Stream Manager, and unregisters itself as the File Location Resolver.   
+	g_lowLevelIO.Term();
+
+	if ( AK::IAkStreamMgr::Get() )
+		AK::IAkStreamMgr::Get()->Destroy();
+
+	//vorbis
+	// Terminate the Memory Manager
+	AK::MemoryMgr::Term();
+
+}
+////////////////////////////////////////////////////////////////////////////////
+//Sets the path to the bank files
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::InitBanks()
+{
+	mBanks[INIT].mLocation = "Source/Wwise/BankFiles/Init.bnk";
+	mBanks[SOUNDBANK].mLocation = "Source/Wwise/BankFiles/SoundBank.bnk";
+
+}
+////////////////////////////////////////////////////////////////////////////////
+//Initialize and load all sounds 
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// Load in the bank files needed to play sound and music
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::LoadBank(BankID bankid)
+{
+	AK::SoundEngine::LoadBank(mBanks[bankid].mLocation,AK_DEFAULT_POOL_ID, 
+		mBanks[bankid].mID);
+	return;
+}
+////////////////////////////////////////////////////////////////////////////////
+//Unloads a specific bank file
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::UnloadBank(BankID bankid)
+{
+	AK::SoundEngine::UnloadBank(mBanks[bankid].mID);
+}
+////////////////////////////////////////////////////////////////////////////////
+//Unload all the bank files
+////////////////////////////////////////////////////////////////////////////////
+void CWwiseSoundManager::UnloadAll()
+{
+	for(int i = 0; i < MAX_BANKS; ++i)
+	{
+		AK::SoundEngine::UnloadBank(mBanks[i].mID);
+	}
+}
+
+////// Event Callbacks
+
+void CWwiseSoundManager::SetMusicVolumeCallback(IEvent* cEvent, IComponent* cCenter)
+{
+	TFloatEvent* tEvent = (TFloatEvent*)cEvent->GetData();
+	CWwiseSoundManager::GetInstance()->SetMusicVolume(tEvent->m_fValue);
+}
+
+void CWwiseSoundManager::SetSFXVolumeCallback(IEvent* cEvent, IComponent* cCenter)
+{
+	TFloatEvent* tEvent = (TFloatEvent*)cEvent->GetData();
+	CWwiseSoundManager::GetInstance()->SetSoundVolume(tEvent->m_fValue);	
+}
+
+
+void CWwiseSoundManager::RegisterForEvents()
+{
+	CEventManager::GetInstance()->RegisterEvent("SetSoundVolume", (IComponent*)GetInstance(), SetSFXVolumeCallback);
+	CEventManager::GetInstance()->RegisterEvent("SetMusicVolume", (IComponent*)GetInstance(), SetMusicVolumeCallback);
+
+	// BGM Handlers
+
+	// Some of these are commented out so that state changes within the menu
+	//	don't restart the song
+	string szEventNamePlay = "InitObjects";
+	string szEventNamePause = "DisableObjects";
+	string szEventNameResume = "EnableObjects";
+	szEventNamePlay += MAIN_MENU_STATE;
+	szEventNamePause += MAIN_MENU_STATE;
+	szEventNameResume += MAIN_MENU_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+	//	(IComponent*)GetInstance(), PauseMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+	//	(IComponent*)GetInstance(), ResumeMenuMusic);
+
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += GAMEPLAY_STATE;
+	szEventNamePause += GAMEPLAY_STATE;
+	szEventNameResume += GAMEPLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayGameplayMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PauseGameplayMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumeGameplayMusic);
+
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += PAUSE_STATE;
+	szEventNamePause += PAUSE_STATE;
+	szEventNameResume += PAUSE_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayPauseMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PausePauseMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumePauseMusic);
+
+	
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += GAME_MODE_SELECT_STATE;
+	szEventNamePause += GAME_MODE_SELECT_STATE;
+	szEventNameResume += GAME_MODE_SELECT_STATE;
+	//CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+	//	(IComponent*)GetInstance(), PlayMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+	//	(IComponent*)GetInstance(), PauseMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumeMenuMusic);
+	/**/
+	
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += CHARACTER_SELECT_STATE;
+	szEventNamePause += CHARACTER_SELECT_STATE;
+	szEventNameResume += CHARACTER_SELECT_STATE;
+	//CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+	//	(IComponent*)GetInstance(), PlayMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PauseMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+	//	(IComponent*)GetInstance(), ResumeMenuMusic);
+	
+	
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += OPTIONS_STATE;
+	szEventNamePause += OPTIONS_STATE;
+	szEventNameResume += OPTIONS_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+	//	(IComponent*)GetInstance(), PauseMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+	//	(IComponent*)GetInstance(), ResumeMenuMusic);
+	/**/
+
+	/*
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += KEYBIND_STATE;
+	szEventNamePause += KEYBIND_STATE;
+	szEventNameResume += KEYBIND_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PauseMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumeMenuMusic);
+	/**/
+
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += WIN_STATE;
+	szEventNamePause += WIN_STATE;
+	szEventNameResume += WIN_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PauseMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumeMenuMusic);
+
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += LOSE_STATE;
+	szEventNamePause += LOSE_STATE;
+	szEventNameResume += LOSE_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PauseMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumeMenuMusic);
+
+	/*
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += HOW_TO_PLAY_STATE;
+	szEventNamePause += HOW_TO_PLAY_STATE;
+	szEventNameResume += HOW_TO_PLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PauseMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumeMenuMusic);
+	/**/
+
+	/*
+	szEventNamePlay = "InitObjects";
+	szEventNamePause = "DisableObjects";
+	szEventNameResume = "EnableObjects";
+	szEventNamePlay += CREDITS_STATE;
+	szEventNamePause += CREDITS_STATE;
+	szEventNameResume += CREDITS_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
+		(IComponent*)GetInstance(), PlayMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		(IComponent*)GetInstance(), PauseMenuMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+		(IComponent*)GetInstance(), ResumeMenuMusic);
+	/**/
+
+
+	
+}
+
+// Music Callbacks
+void CWwiseSoundManager::PlayMenuMusic(IEvent*, IComponent*)
+{
+	// us pushed on to state stack (InitObjects)
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY);
+}
+
+void CWwiseSoundManager::PauseMenuMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// State pushed on top of us (DisableObjects)
+	GetInstance()->PlayMusic(MENU_MUSIC_STOP); // TODO: Change this to pause
+}
+
+void CWwiseSoundManager::ResumeMenuMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// State on top of us got popped (EnableObjects)
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY); // TODO: Change this to resume
+}
+
+//////
+void CWwiseSoundManager::PlayGameplayMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// us pushed on to state stack (InitObjects)
+	GetInstance()->PlayMusic(MENU_MUSIC_STOP); // To make sure we stop playing the menu music
+	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PLAY);
+}
+
+void CWwiseSoundManager::PauseGameplayMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// State pushed on top of us (DisableObjects)
+	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PAUSE);
+}
+
+void CWwiseSoundManager::ResumeGameplayMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// State on top of us got popped (EnableObjects)
+	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_RESUME);
+}
+
+///////
+void CWwiseSoundManager::PlayPauseMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// us pushed on to state stack (InitObjects)
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY);
+}
+
+
+void CWwiseSoundManager::PausePauseMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// State pushed on top of us (DisableObjects)
+	GetInstance()->PlayMusic(MENU_MUSIC_STOP);
+}
+
+
+void CWwiseSoundManager::ResumePauseMusic(IEvent* cEvent, IComponent* cCenter)
+{
+	// State on top of us got popped (EnableObjects)
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY); // 
+}
+

@@ -2,82 +2,99 @@ Event	ID	Name			Wwise Object Path	Notes
 	21750526	Play_FX_3D_Footsteps			\Default Work Unit\Play_FX_3D_Footsteps	
 	73471290	Play_FX_3D_Explosion			\Default Work Unit\Play_FX_3D_Explosion	
 	163704345	Play_FX_3D_Missle_Loop			\Default Work Unit\Play_FX_3D_Missle_Loop	
+	214446584	Play_DX_GamePlay_StartRaceCountDown			\Default Work Unit\Play_DX_GamePlay_StartRaceCountDown	
+	368551784	Play_MX_Gameplay			\Default Work Unit\Play_MX_Gameplay	
 	425165382	Play_FX_2D_AssaultRifle_Loop			\Default Work Unit\Play_FX_2D_AssaultRifle_Loop	
 	430329040	Play_DX_2D_UnderAttack			\Default Work Unit\Play_DX_2D_UnderAttack	
 	452547817	Stop_All			\Default Work Unit\Stop_All	
+	489997781	Play_SFX_Cart_Bike_Start			\Default Work Unit\Play_SFX_Cart_Bike_Start	
+	674762364	Play_SFX_Impact_Cart_Wall			\Default Work Unit\Play_SFX_Impact_Cart_Wall	
 	696917685	Play_FX_2D_MagicPickup			\Default Work Unit\Play_FX_2D_MagicPickup	
 	726857588	Play_FX_2D_Forest_Loop			\Default Work Unit\Play_FX_2D_Forest_Loop	
+	837004335	Play_SFX_Item_Turkey_Travel			\Default Work Unit\Play_SFX_Item_Turkey_Travel	
 	891453498	Play_FX_3D_Bodyfall			\Default Work Unit\Play_FX_3D_Bodyfall	
 	905521127	Play_FX_2D_Car_Loop			\Default Work Unit\Play_FX_2D_Car_Loop	
 	943723731	Stop_DX_2D_Breathing_Loop			\Default Work Unit\Stop_DX_2D_Breathing_Loop	
-	969992391	Play_DX_3D_Attack			\Default Work Unit\Play_DX_3D_Attack	
 	987385568	Play_FX_2D_Jump			\Default Work Unit\Play_FX_2D_Jump	
+	1022453873	Play_MX_Menu			\Default Work Unit\Play_MX_Menu	
+	1031492171	Play_SFX_Cart_Collection			\Default Work Unit\Play_SFX_Cart_Collection	
 	1042256331	Stop_FX_3D_AssaultRifle_Loop			\Default Work Unit\Stop_FX_3D_AssaultRifle_Loop	
+	1055251637	Play_SFX_GamePlay_ItemCollison			\Default Work Unit\Play_SFX_GamePlay_ItemCollison	
 	1070288727	Play_FX_3D_Punches			\Default Work Unit\Play_FX_3D_Punches	
 	1107108682	Play_FX_2D_AmmoPickup			\Default Work Unit\Play_FX_2D_AmmoPickup	
+	1171415762	Pause_MX_Gameplay			\Default Work Unit\Pause_MX_Gameplay	
 	1203171421	Play_DX_2D_Hurt			\Default Work Unit\Play_DX_2D_Hurt	
+	1222678624	Play_SFX_Item_Turkey_Use			\Default Work Unit\Play_SFX_Item_Turkey_Use	
 	1262658854	Stop_FX_2D_Alarm_Loop			\Default Work Unit\Stop_FX_2D_Alarm_Loop	
+	1272336075	Play_SFX_Characters_BulldogMa_Cart_Brake			\Default Work Unit\Play_SFX_Characters_BulldogMa_Cart_Brake	
+	1424774823	Play_SFX_Characters_BulldogMa_Cart_Boost			\Default Work Unit\Play_SFX_Characters_BulldogMa_Cart_Boost	
 	1456069603	Play_FX_2D_CoinPickup			\Default Work Unit\Play_FX_2D_CoinPickup	
 	1491931047	Play_FX_3D_WaterSplash			\Default Work Unit\Play_FX_3D_WaterSplash	
 	1526375285	Play_FX_2D_MenuAccept			\Default Work Unit\Play_FX_2D_MenuAccept	
 	1585471016	Play_FX_3D_Door_Open			\Default Work Unit\Play_FX_3D_Door_Open	
+	1646171595	Resume_MX_Gameplay			\Default Work Unit\Resume_MX_Gameplay	
+	1667376673	Stop_SFX_Item_Turkey_Travel			\Default Work Unit\Stop_SFX_Item_Turkey_Travel	
 	1728663298	Play_FX_2D_HealthPickup			\Default Work Unit\Play_FX_2D_HealthPickup	
 	1763800590	Play_DX_2D_Jump			\Default Work Unit\Play_DX_2D_Jump	
+	1808949856	Stop_SFX_Characters_BulldogMa_Speed			\Default Work Unit\Stop_SFX_Characters_BulldogMa_Speed	
 	1902835760	Play_FX_3D_SmashCrate			\Default Work Unit\Play_FX_3D_SmashCrate	
 	2046371004	Play_FX_3D_Door_Close			\Default Work Unit\Play_FX_3D_Door_Close	
 	2067887017	Play_FX_2D_Footsteps			\Default Work Unit\Play_FX_2D_Footsteps	
 	2068802240	Play_DX_2D_Death			\Default Work Unit\Play_DX_2D_Death	
 	2078529791	Play_FX_2D_MenuCancel			\Default Work Unit\Play_FX_2D_MenuCancel	
-	2230580976	Play_MX_MusicLoop_02			\Default Work Unit\Play_MX_MusicLoop_02	
-	2230580977	Play_MX_MusicLoop_03			\Default Work Unit\Play_MX_MusicLoop_03	
-	2230580979	Play_MX_MusicLoop_01			\Default Work Unit\Play_MX_MusicLoop_01	
-	2230580980	Play_MX_MusicLoop_06			\Default Work Unit\Play_MX_MusicLoop_06	
-	2230580982	Play_MX_MusicLoop_04			\Default Work Unit\Play_MX_MusicLoop_04	
-	2230580983	Play_MX_MusicLoop_05			\Default Work Unit\Play_MX_MusicLoop_05	
+	2127105977	Play_SFX_Cart_Bike_Slip			\Default Work Unit\Play_SFX_Cart_Bike_Slip	
+	2151728965	Play_SFX_Menu_Scroll			\Default Work Unit\Play_SFX_Menu_Scroll	
+	2214460854	Play_SFX_Characters_BulldogMa_Hurt			\Default Work Unit\Play_SFX_Characters_BulldogMa_Hurt	
 	2337306830	Play_DX_2D_UnitCommands			\Default Work Unit\Play_DX_2D_UnitCommands	
 	2415006107	Play_FX_2D_Land			\Default Work Unit\Play_FX_2D_Land	
+	2522700081	Play_SFX_Characters_BulldogMa_Collection			\Default Work Unit\Play_SFX_Characters_BulldogMa_Collection	
 	2622520724	Play_FX_2D_Underwater_Loop			\Default Work Unit\Play_FX_2D_Underwater_Loop	
 	2632226688	Play_FX_2D_Punches			\Default Work Unit\Play_FX_2D_Punches	
+	2638592923	Stop_MX_Menu			\Default Work Unit\Stop_MX_Menu	
 	2666978119	Play_FX_2D_Rain_Loop			\Default Work Unit\Play_FX_2D_Rain_Loop	
 	2882299664	Play_FX_2D_Beep			\Default Work Unit\Play_FX_2D_Beep	
 	3110195632	Play_FX_2D_Alarm_Loop			\Default Work Unit\Play_FX_2D_Alarm_Loop	
+	3121019700	Play_SFX_Characters_BulldogMa_Shove			\Default Work Unit\Play_SFX_Characters_BulldogMa_Shove	
 	3135678882	Play_FX_2D_WeaponWhoosh			\Default Work Unit\Play_FX_2D_WeaponWhoosh	
+	3165009754	Stop_MX_Gameplay			\Default Work Unit\Stop_MX_Gameplay	
 	3178288442	Stop_FX_2D_Underwater_Loop			\Default Work Unit\Stop_FX_2D_Underwater_Loop	
+	3266394469	Play_SFX_Characters_BulldogMa_Victory			\Default Work Unit\Play_SFX_Characters_BulldogMa_Victory	
 	3286584031	Stop_FX_3D_Missle_Loop			\Default Work Unit\Stop_FX_3D_Missle_Loop	
 	3290877581	Stop_FX_2D_Rain_Loop			\Default Work Unit\Stop_FX_2D_Rain_Loop	
 	3295936277	Play_FX_3D_AssaultRifle_Loop			\Default Work Unit\Play_FX_3D_AssaultRifle_Loop	
+	3312685852	Play_SFX_Cart_Bike_Start_Fail			\Default Work Unit\Play_SFX_Cart_Bike_Start_Fail	
 	3359821848	Play_FX_3D_PistolShot			\Default Work Unit\Play_FX_3D_PistolShot	
 	3407866903	Play_FX_2D_Wind_Loop			\Default Work Unit\Play_FX_2D_Wind_Loop	
 	3412940309	Play_DX_2D_Breathing_Loop			\Default Work Unit\Play_DX_2D_Breathing_Loop	
-	3432959431	Play_DX_3D_Death			\Default Work Unit\Play_DX_3D_Death	
+	3519348969	Play_SFX_Item_Turkey_Impact			\Default Work Unit\Play_SFX_Item_Turkey_Impact	
 	3553836542	Play_FX_3D_Lever_Switch			\Default Work Unit\Play_FX_3D_Lever_Switch	
-	3567964128	Stop_MX_MusicLoop_04			\Default Work Unit\Stop_MX_MusicLoop_04	
-	3567964129	Stop_MX_MusicLoop_05			\Default Work Unit\Stop_MX_MusicLoop_05	
-	3567964130	Stop_MX_MusicLoop_06			\Default Work Unit\Stop_MX_MusicLoop_06	
-	3567964133	Stop_MX_MusicLoop_01			\Default Work Unit\Stop_MX_MusicLoop_01	
-	3567964134	Stop_MX_MusicLoop_02			\Default Work Unit\Stop_MX_MusicLoop_02	
-	3567964135	Stop_MX_MusicLoop_03			\Default Work Unit\Stop_MX_MusicLoop_03	
 	3618765313	Play_FX_2D_PistolShot			\Default Work Unit\Play_FX_2D_PistolShot	
 	3621386429	Play_FX_2D_MenuMove_Hover			\Default Work Unit\Play_FX_2D_MenuMove_Hover	
 	3637374546	Play_FX_2D_MenuUnPause			\Default Work Unit\Play_FX_2D_MenuUnPause	
+	3676295357	Play_SFX_Characters_BulldogMa_ItemUse			\Default Work Unit\Play_SFX_Characters_BulldogMa_ItemUse	
 	3679762312	Resume_All			\Default Work Unit\Resume_All	
-	3761829895	Play_DX_3D_Aggro			\Default Work Unit\Play_DX_3D_Aggro	
+	3750105340	Play_SFX_Menu_Cancel			\Default Work Unit\Play_SFX_Menu_Cancel	
+	3759090466	Play_SFX_Menu_Select			\Default Work Unit\Play_SFX_Menu_Select	
 	3814004282	Play_FX_3D_Car_Loop			\Default Work Unit\Play_FX_3D_Car_Loop	
-	3836275424	Play_DX_3D_Hurt			\Default Work Unit\Play_DX_3D_Hurt	
 	3864097025	Pause_All			\Default Work Unit\Pause_All	
 	3877919460	Stop_FX_2D_AssaultRifle_Loop			\Default Work Unit\Stop_FX_2D_AssaultRifle_Loop	
+	3908685218	Play_SFX_Main_Menu_Scissor			\Default Work Unit\Play_SFX_Main_Menu_Scissor	
 	3939718988	Stop_FX_3D_Car_Loop			\Default Work Unit\Stop_FX_3D_Car_Loop	
 	3973443319	Play_FX_2D_SheildPickup			\Default Work Unit\Play_FX_2D_SheildPickup	
 	4017587645	Stop_FX_2D_Wind_Loop			\Default Work Unit\Stop_FX_2D_Wind_Loop	
 	4023349039	Play_FX_3D_WeaponWhoosh			\Default Work Unit\Play_FX_3D_WeaponWhoosh	
+	4036155509	Play_SFX_GamePlay_Win			\Default Work Unit\Play_SFX_GamePlay_Win	
 	4042539875	Play_FX_2D_Bodyfall			\Default Work Unit\Play_FX_2D_Bodyfall	
 	4050058769	Play_FX_3D_Jump			\Default Work Unit\Play_FX_3D_Jump	
+	4056774930	Play_SFX_Characters_BulldogMa_Speed			\Default Work Unit\Play_SFX_Characters_BulldogMa_Speed	
 	4112129774	Play_FX_3D_Land			\Default Work Unit\Play_FX_3D_Land	
 	4123835918	Play_FX_2D_Klaxon_Loop			\Default Work Unit\Play_FX_2D_Klaxon_Loop	
 	4126538873	Play_DX_2D_Land			\Default Work Unit\Play_DX_2D_Land	
+	4175615188	Play_SFX_Impact_Cart_Enemy			\Default Work Unit\Play_SFX_Impact_Cart_Enemy	
 	4195054897	Play_FX_2D_MenuPause			\Default Work Unit\Play_FX_2D_MenuPause	
 	4219667864	Stop_FX_2D_Klaxon_Loop			\Default Work Unit\Stop_FX_2D_Klaxon_Loop	
 	4240821802	Stop_FX_2D_Forest_Loop			\Default Work Unit\Stop_FX_2D_Forest_Loop	
+	4262755758	Play_SFX_GamePlay_Lose			\Default Work Unit\Play_SFX_GamePlay_Lose	
 	4292106387	Play_FX_2D_MenuBackup			\Default Work Unit\Play_FX_2D_MenuBackup	
 
 Switch Group	ID	Name			Wwise Object Path	Notes
@@ -89,117 +106,159 @@ Switch	ID	Name	Switch Group			Notes
 
 Game Parameter	ID	Name			Wwise Object Path	Notes
 	796049864	RPM			\Default Work Unit\RPM	
+	816331700	Bulldog_Speed			\Default Work Unit\Bulldog_Speed	
 
 In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
-	12951625	FX_3D_Missle_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Rocket_Missile_Loop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\3D\Projectiles\FX_3D_Missle_Loop		15254
-	33543037	FX_3D_Bodyfall	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Bodyfall_Concrete01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Bodyfall		16878
-	38425329	Punch_Boxing_FaceHit4	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Punch_Boxing_FaceHit4_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Impacts\FX_2D_Punches\Punch_Boxing_FaceHit4		7467
-	46157926	FX_3D_WeaponWhoosh	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Whoosh_Deep01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Weapons\Melee\FX_3D_WeaponWhoosh		19306
-	53641100	Henchmen_01_Hurt_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Hurt_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Hurt\Henchmen_01_Hurt_01		6598
-	58847391	Foot_Dirt1_BootJump7	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootJump7_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Jump\Foot_Dirt1_BootJump7		7992
-	66645390	DX_2D_UnderAttack	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_UnderAttack_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_UnderAttack		14548
-	83368234	FX_2D_Underwater_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Underwater_AmbLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Underwater_Loop		14699
-	83535862	Agent_Land_05	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Land_05_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_05		3778
-	86849089	DX_Sidekick_Death_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_Death_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_02		14409
-	103608097	Henchmen_01_Attack_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Attack_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Attack\Henchmen_01_Attack_03		5619
-	113163960	Foot_Dirt1_BootJump1	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootJump1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump1		6117
-	114468270	Game_play_music_03_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Game_play_music_03_Loop_037AA0CE.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_MusicLoop_03\Game_play_music_03_Loop\Game_play_music_03_Loop		1757864
-	118137773	Foot_Dirt1_BootLand5	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootLand5_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Land\Foot_Dirt1_BootLand5		7234
-	119082756	FX_2D_Wind_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Wind_BlowingLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Wind_Loop		80739
-	123122664	Foot_Dirt1_BootWalk08	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk08_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk08		9714
-	125508612	Foot_Dirt1_BootJump3	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootJump3_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump3		9944
-	130332201	FX_3D_Door_Close	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Door_LargeWood_Open01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Doors\FX_3D_Door_Close		40519
-	135057958	Agent_Hit_beanbag_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_beanbag_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_03		3780
-	157765827	Foot_Dirt1_BootJump5	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootJump5_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Jump\Foot_Dirt1_BootJump5		9186
-	164332036	Foot_Dirt1_BootWalk04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk04		11927
-	177860526	Explo_Small_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Explo_Small_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_04		24688
-	186574772	Henchmen_01_Attack_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Attack_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Attack\Henchmen_01_Attack_04		5584
-	188813553	Foot_Dirt1_BootLand2	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootLand2_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand2		10810
-	190873091	Agent_Hit_beanbag_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_beanbag_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_04		3798
-	192860657	Agent_Land_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Land_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_03		4657
-	194954479	FX_2D_CoinPickup	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Pickup_Coins01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_CoinPickup		11067
-	196342131	Agent_Hit_Bullet_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_Bullet_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_02		9244
-	209263346	DX_Sidekick_Death_05	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_Death_05_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_05		16678
-	209547262	Punch_Boxing_FaceHit3	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Punch_Boxing_FaceHit3_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Punches\Punch_Boxing_FaceHit3		5067
-	224907793	Foot_Dirt1_BootLand3	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootLand3_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand3		9751
-	233236693	Explo_Small_05	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Explo_Small_05_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_05		15925
-	248895595	Foot_Dirt1_BootWalk03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk03		8801
-	256680551	Explo_Small_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Explo_Small_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_01		30889
-	259371108	Henchmen_01_Attack_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Attack_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Attack\Henchmen_01_Attack_01		5690
-	280381218	FX_2D_MagicPickup	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Pickup_GemBells01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_MagicPickup		17804
-	286254975	Explo_Small_06	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Explo_Small_06_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_06		17280
-	291235004	65Corvette_Loop1	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\65Corvette_Loop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Vehicle\FX_2D_Car_Loop\65Corvette_Loop1		19546
-	296394858	Henchmen_01_Hurt_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Hurt_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Hurt\Henchmen_01_Hurt_03		4512
-	339509342	Foot_Dirt1_BootJump2	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootJump2_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump2		10383
-	377377763	Foot_Dirt1_BootWalk07	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk07_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk07		11032
-	377459119	FX_2D_MenuCancel	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Menu_Cancel01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuCancel		12737
-	379069451	Foot_Dirt1_BootLand4	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootLand4_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand4		6620
-	387863399	Henchmen_01_Death_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Death_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Death\Henchmen_01_Death_02		19490
-	389904861	FX_3D_Door_Open	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Door_LargeWood_Close_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Doors\FX_3D_Door_Open		13313
-	419285226	Punch_Boxing_FaceHit1	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Punch_Boxing_FaceHit1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Impacts\FX_2D_Punches\Punch_Boxing_FaceHit1		5368
-	433711047	Agent_Land_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Land_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_01		4031
-	439318752	Foot_Dirt1_BootJump6	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootJump6_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump6		7274
-	460369817	Agent_Hit_beanbag_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_beanbag_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_01		3865
-	460912589	Punch_Boxing_FaceHit2	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Punch_Boxing_FaceHit2_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Punches\Punch_Boxing_FaceHit2		6659
-	469467618	Agent_Jump_05	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Jump_05_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_05		4271
-	477136874	Breathing_Speed_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Breathing_Speed_01_444760E0.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Breathing_Loop\Breathing_Speed_01		164311
-	477829810	FX_2D_HealthPickup	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Health_Powerup_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_HealthPickup		18901
-	480144977	Agent_Jump_06	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Jump_06_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_06		6210
-	500927666	Agent_Jump_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Jump_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_04		4760
-	505391842	FX_2D_Alarm_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Alarm_Loop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Alarms-Indicators\FX_2D_Alarm_Loop		7357
-	517083021	Agent_Land_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Land_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_04		6555
-	522926251	Henchmen_01_Hurt_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Hurt_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Hurt\Henchmen_01_Hurt_02		3708
-	532148361	FX_2D_MenuBackup	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Menu_Backup01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuBackup		9213
-	532656836	Foot_Dirt1_BootLand1	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootLand1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand1		6057
-	540810594	Breathing_Speed_05	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Breathing_Speed_05_444760E0.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Breathing_Loop\Breathing_Speed_05		43958
-	542353733	FX_2D_AmmoPickup	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Gun_Weapon_Pickup01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_AmmoPickup		12596
-	543910436	Foot_Dirt1_BootJump4	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootJump4_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Jump\Foot_Dirt1_BootJump4		7094
-	546628902	Foot_Dirt1_BootWalk06	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk06_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk06		9015
-	571111605	DX_Sidekick_GoCommand_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_GoCommand_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_UnitCommands\DX_Sidekick_GoCommand_02		9555
-	575657324	Foot_Dirt1_BootWalk01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk01		9918
-	596088622	Punch_Boxing_FaceHit5	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Punch_Boxing_FaceHit5_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Punches\Punch_Boxing_FaceHit5		4778
-	601611294	FX_2D_Forest_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Amb_TropicalForestLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Forest_Loop		124008
-	608902326	Foot_Dirt1_BootWalk05	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk05_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk05		9848
-	613103447	Foot_Dirt1_BootLand6	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootLand6_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Land\Foot_Dirt1_BootLand6		6990
-	618613825	Henchmen_01_Attack_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Attack_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Attack\Henchmen_01_Attack_02		5538
-	636626847	FX_2D_MenuPause	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\MenuPause_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuPause		9572
-	646915019	FX_2D_SheildPickup	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Pickup_ArmourShield01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_SheildPickup		11235
-	647860590	FX_3D_PistolShot	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Gun_Pistol_Shot01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Weapons\Guns\FX_3D_PistolShot		8986
-	654905969	FX_2D_AssaultRifle_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\AssaultRifle_ShotLoop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Weapons\Guns\FX_2D_AssaultRifle_Loop		21413
-	661410750	Agent_Jump_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Jump_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_03		7069
-	675283150	DX_Sidekick_GoCommand	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_GoCommand_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_UnitCommands\DX_Sidekick_GoCommand		10917
-	680242150	FX_3D_WaterSplash	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Bodyfall_Deepwater1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Liquid\FX_3D_WaterSplash		16943
-	698491332	Foot_Dirt1_BootWalk02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk02		6835
-	701304591	FX_2D_Klaxon_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Alarm_Klaxon_Loop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Alarms-Indicators\FX_2D_Klaxon_Loop		22819
-	709711836	Foot_Dirt1_BootWalk10	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk10_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk10		6897
-	715974961	DX_Sidekick_Death_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_Death_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_01		12922
-	724412770	65Corvette_IdleLoop1	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\65Corvette_IdleLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\3D\Vehicles\FX_3D_Car_Loop\65Corvette_IdleLoop1		45068
-	726946176	Agent_Hit_beanbag_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_beanbag_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_02		3815
-	749557529	FX_2D_Beep	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Beep_GrenadeBombTimer1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Alarms-Indicators\FX_2D_Beep		5954
-	757819000	Agent_Hit_Bullet_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_Bullet_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_04		5262
-	793147095	Henchmen_02_Orders_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_02_Orders_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Aggro\Henchmen_02_Orders_01		20093
-	799561220	Foot_Dirt1_BootLand7	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootLand7_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Land\Foot_Dirt1_BootLand7		8570
-	807494317	Henchmen_02_Orders_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_02_Orders_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Aggro\Henchmen_02_Orders_02		28683
-	809914271	Agent_Jump_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Jump_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_01		6325
-	813779090	Game_play_music_02_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Game_play_music_02_Loop_037AA0CE.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_MusicLoop_02\Game_play_music_02_Loop\Game_play_music_02_Loop		743238
-	838141253	Agent_Land_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Land_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_02		5275
-	845196286	FX_3D_Lever-Switch	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Lever_LargeMetal_Switch01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Switches\FX_3D_Lever-Switch		6626
-	856642211	Agent_Hit_Bullet_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_Bullet_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_03		7972
-	869294581	FX_3D_SmashCrate	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Smash_WoodBreak01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Destructables\FX_3D_SmashCrate		11044
-	870510227	FX_2D_MenuMove-Hover	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Button_VendingMachine1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuMove-Hover		4544
-	880182030	Gameplay_05	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Gameplay_05_037AA0CE.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_MusicLoop_05\MX_MusicLoop_05\Gameplay_05		4922287
-	907429488	Foot_Dirt1_BootWalk09	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Foot_Dirt1_BootWalk09_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk09		8708
-	955280945	Agent_Jump_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Jump_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_02		6604
-	959721945	Agent_Hit_Bullet_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Agent_Hit_Bullet_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_01		6418
-	971806798	Gameplay_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Gameplay_04_037AA0CE.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_MusicLoop_04\MX_MusicLoop_04\Gameplay_04		3164275
-	981389914	DX_Sidekick_Death_04	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_Death_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_04		15722
-	991622778	Explo_Small_02	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Explo_Small_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_02		24191
-	996787749	FX_2D_MenuUnPause	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Menu_Backup09_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuUnPause		9646
-	1011476984	Henchmen_01_Death_01	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Henchmen_01_Death_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\3D\DX_3D_Death\Henchmen_01_Death_01		15626
-	1014982202	FX_2D_MenuAccept	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Menu_Accept_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuAccept		15359
-	1017029353	Game_play_music_01_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Game_play_music_01_Loop_037AA0CE.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_MusicLoop_01\Game_play_music_01_Loop\Game_play_music_01_Loop		920390
-	1023247839	FX_2D_Rain_Loop	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Rain_Loop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Rain_Loop		30011
-	1046394917	Explo_Small_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\Explo_Small_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_03		20773
-	1046506901	DX_Sidekick_Death_03	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\DX_Sidekick_Death_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_03		12039
-	1048482320	StatScreen	D:\_Wwise Projects\Wwise_2010_3\.cache\Windows\SFX\StatScreen_037AA0CE.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_MusicLoop_06\MX_MusicLoop_06\StatScreen		1335930
+	1731146	FFP_GamePlay_Impact_CartLayer_07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_07_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Metal\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_07		7788
+	12951625	FX_3D_Missle_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Rocket_Missile_Loop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\3D\Projectiles\FX_3D_Missle_Loop		15254
+	13770154	FFP_Menu_Elevator_Music	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Menu_Elevator_Music_95287D31.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_Menu\FFP_Menu_Elevator_Music\FFP_Menu_Elevator_Music		668631
+	22097780	FFP_Cart_Bike_Drive	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Drive_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Characters_BulldogMa_Speed\FFP_Cart_Bike_Drive		50250
+	33543037	FX_3D_Bodyfall	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Bodyfall_Concrete01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Bodyfall		16878
+	38425329	Punch_Boxing_FaceHit4	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Punch_Boxing_FaceHit4_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Impacts\FX_2D_Punches\Punch_Boxing_FaceHit4		7467
+	42656699	FFP_GamePlay_Impact_CartLayer_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_04_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_04		10247
+	46157926	FX_3D_WeaponWhoosh	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Whoosh_Deep01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Weapons\Melee\FX_3D_WeaponWhoosh		19306
+	52791380	FFP_GamePlay_Impact_FlavorLayer_07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_07_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_07		9306
+	57361006	FFP_GamePlay_Impact_CartLayer_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_05_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Metal\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_05		8556
+	58847391	Foot_Dirt1_BootJump7	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootJump7_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Jump\Foot_Dirt1_BootJump7		7992
+	63517313	SFX_Cart_Bike_Start_Fail	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Start_Fail_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Cart_Bike_Start_Fail		20619
+	66645390	DX_2D_UnderAttack	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_UnderAttack_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_UnderAttack		14548
+	67004823	FFP_Ch_Ma_Hit	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Ma_Hit_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\FFP_Ch_Ma_Hit		13353
+	70423440	SFX_Item_Turkey_Travel	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Item_Turkey_Collision_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey_Travel		57896
+	75044122	SFX_GamePlay_Lose	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Lose_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_GamePlay_Lose		44457
+	83368234	FX_2D_Underwater_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Underwater_AmbLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Underwater_Loop		14699
+	83535862	Agent_Land_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Land_05_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_05		3778
+	86849089	DX_Sidekick_Death_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_Death_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_02		14409
+	102485651	FFP_Ch_Bulldog_Hit_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Hit_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\FFP_Ch_Bulldog_Hit_01		18021
+	113163960	Foot_Dirt1_BootJump1	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootJump1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump1		6117
+	118137773	Foot_Dirt1_BootLand5	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootLand5_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Land\Foot_Dirt1_BootLand5		7234
+	119082756	FX_2D_Wind_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Wind_BlowingLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Wind_Loop		80739
+	123122664	Foot_Dirt1_BootWalk08	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk08_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk08		9714
+	125508612	Foot_Dirt1_BootJump3	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootJump3_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump3		9944
+	126039646	SFX_Menu_Scroll	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Main_Menu_Scanner_Beep_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_Scroll		1609
+	129531549	SFX_Item_Turkey_Impact	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Item_Turkey_Bounce_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey_Impact		13792
+	130332201	FX_3D_Door_Close	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Door_LargeWood_Open01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Doors\FX_3D_Door_Close		40519
+	135057958	Agent_Hit_beanbag_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_beanbag_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_03		3780
+	153260112	FFP_GamePlay_Impact_CartLayer_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_03		9838
+	155621785	SFX_Menu_Cancel	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Pause_Menu_Exit_Scanner_Beep_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_Cancel		1442
+	157765827	Foot_Dirt1_BootJump5	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootJump5_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Jump\Foot_Dirt1_BootJump5		9186
+	164332036	Foot_Dirt1_BootWalk04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk04		11927
+	167185137	FFP_GamePlay_Impact_CartLayer_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_02		13782
+	177813313	FFP_Ch_Bulldog_Victory_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Victory_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\FFP_Ch_Bulldog_Victory_02		22048
+	177860526	Explo_Small_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_04		24688
+	185184145	FFP_GamePlay_Impact_FlavorLayer_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_06_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_06		6627
+	188813553	Foot_Dirt1_BootLand2	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootLand2_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand2		10810
+	190873091	Agent_Hit_beanbag_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_beanbag_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_04		3798
+	192860657	Agent_Land_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Land_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_03		4657
+	194954479	FX_2D_CoinPickup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Pickup_Coins01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_CoinPickup		11067
+	196342131	Agent_Hit_Bullet_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_Bullet_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_02		9244
+	209263346	DX_Sidekick_Death_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_Death_05_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_05		16678
+	209547262	Punch_Boxing_FaceHit3	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Punch_Boxing_FaceHit3_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Punches\Punch_Boxing_FaceHit3		5067
+	212549853	FFP_GamePlay_Impact_MeatyLayer_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_02		9140
+	224907793	Foot_Dirt1_BootLand3	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootLand3_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand3		9751
+	231796401	FFP_GamePlay_Impact_FlavorLayer_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_02		5592
+	233236693	Explo_Small_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_05_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_05		15925
+	248895595	Foot_Dirt1_BootWalk03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk03		8801
+	250506654	Explo_Small_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Characters_BulldogMa_Cart_Boost\Explo_Small_02		22225
+	256680551	Explo_Small_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_01		30889
+	280381218	FX_2D_MagicPickup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Pickup_GemBells01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_MagicPickup		17804
+	286254975	Explo_Small_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_06_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_06		17280
+	288209416	FFP_Ch_Ma_Collection	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Ma_Collection_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\FFP_Ch_Ma_Collection		13749
+	291235004	65Corvette_Loop1	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\65Corvette_Loop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Vehicle\FX_2D_Car_Loop\65Corvette_Loop1		19546
+	299262557	FFP_GamePlay_Impact_MeatyLayer_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_01		9583
+	302312370	FFP_Ch_Ma_Victory	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Ma_Victory_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\FFP_Ch_Ma_Victory		21930
+	330288857	FFP_GamePlay_Impact_FlavorLayer_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_04_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_04		8306
+	336676011	FFP_GamePlay_Impact_CartLayer_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_06_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_06		8961
+	339509342	Foot_Dirt1_BootJump2	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootJump2_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump2		10383
+	343496394	FFP_Ch_Bulldog_Collection_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Collection_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\FFP_Ch_Bulldog_Collection_02		15338
+	377377763	Foot_Dirt1_BootWalk07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk07_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk07		11032
+	377459119	FX_2D_MenuCancel	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Menu_Cancel01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuCancel		12737
+	379069451	Foot_Dirt1_BootLand4	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootLand4_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand4		6620
+	380813880	FFP_Cart_Bike_Idle	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Idle_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Characters_BulldogMa_Speed\FFP_Cart_Bike_Idle		71190
+	389904861	FX_3D_Door_Open	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Door_LargeWood_Close_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Doors\FX_3D_Door_Open		13313
+	417348575	FFP_Cart_Bike_Brake_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Brake_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Characters_BulldogMa_Cart_Brake\FFP_Cart_Bike_Brake_01		12856
+	419285226	Punch_Boxing_FaceHit1	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Punch_Boxing_FaceHit1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Impacts\FX_2D_Punches\Punch_Boxing_FaceHit1		5368
+	433711047	Agent_Land_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Land_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_01		4031
+	439318752	Foot_Dirt1_BootJump6	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootJump6_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Jump\Foot_Dirt1_BootJump6		7274
+	447599507	SFX_Item_GoalItem_AllCollected	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Item_GoalItem_AllCollected_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Goal\SFX_Item_GoalItem_AllCollected		11672
+	450150487	FFP_GamePlay_Impact_MeatyLayer_10	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_10_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_10		11950
+	460369817	Agent_Hit_beanbag_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_beanbag_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_01		3865
+	460912589	Punch_Boxing_FaceHit2	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Punch_Boxing_FaceHit2_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Punches\Punch_Boxing_FaceHit2		6659
+	468770271	FFP_Ch_Bulldog_Collection_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Collection_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\FFP_Ch_Bulldog_Collection_01		17633
+	469467618	Agent_Jump_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Jump_05_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_05		4271
+	477136874	Breathing_Speed_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Breathing_Speed_01_444760E0.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Breathing_Loop\Breathing_Speed_01		164311
+	477829810	FX_2D_HealthPickup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Health_Powerup_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_HealthPickup		18901
+	480144977	Agent_Jump_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Jump_06_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_06		6210
+	484453347	SFX_Menu_Select	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Strat_Screen_Register_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_Select		8284
+	500927666	Agent_Jump_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Jump_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_04		4760
+	505391842	FX_2D_Alarm_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Alarm_Loop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Alarms-Indicators\FX_2D_Alarm_Loop		7357
+	517083021	Agent_Land_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Land_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_04		6555
+	529610394	SFX_Cart_Bike_Slip	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Slip_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Cart_Bike_Slip		17262
+	532148361	FX_2D_MenuBackup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Menu_Backup01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuBackup		9213
+	532656836	Foot_Dirt1_BootLand1	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootLand1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Land\Foot_Dirt1_BootLand1		6057
+	533718356	FFP_GamePlay_Impact_MeatyLayer_08	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_08_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_08		16895
+	537989910	SFX_Main_Menu_Scissor	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Main_Menu_Scissor_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Main_Menu_Scissor		4847
+	540810594	Breathing_Speed_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Breathing_Speed_05_444760E0.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Breathing_Loop\Breathing_Speed_05		43958
+	542353733	FX_2D_AmmoPickup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Gun_Weapon_Pickup01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_AmmoPickup		12596
+	543910436	Foot_Dirt1_BootJump4	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootJump4_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Jump\Foot_Dirt1_BootJump4		7094
+	546628902	Foot_Dirt1_BootWalk06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk06_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk06		9015
+	550180353	SFX_GamePlay_Win	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Win_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_GamePlay_Win		44389
+	571111605	DX_Sidekick_GoCommand_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_GoCommand_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_UnitCommands\DX_Sidekick_GoCommand_02		9555
+	575657324	Foot_Dirt1_BootWalk01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Movement\FX_3D_Footsteps\Foot_Dirt1_BootWalk01		9918
+	596088622	Punch_Boxing_FaceHit5	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Punch_Boxing_FaceHit5_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Impacts\FX_3D_Punches\Punch_Boxing_FaceHit5		4778
+	601611294	FX_2D_Forest_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Amb_TropicalForestLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Forest_Loop		124008
+	608902326	Foot_Dirt1_BootWalk05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk05_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk05		9848
+	612770648	FFP_GamePlay_Impact_MeatyLayer_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_06_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_06		14410
+	613103447	Foot_Dirt1_BootLand6	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootLand6_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Land\Foot_Dirt1_BootLand6		6990
+	617676720	FFP_Ch_Bulldog_Shove_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Shove_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\FFP_Ch_Bulldog_Shove_02		7954
+	624784791	FFP_Cart_Bike_Brake_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Brake_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Characters_BulldogMa_Cart_Brake\FFP_Cart_Bike_Brake_02		13981
+	636626847	FX_2D_MenuPause	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\MenuPause_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuPause		9572
+	646915019	FX_2D_SheildPickup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Pickup_ArmourShield01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Pickups\FX_2D_SheildPickup		11235
+	647860590	FX_3D_PistolShot	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Gun_Pistol_Shot01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Weapons\Guns\FX_3D_PistolShot		8986
+	654905969	FX_2D_AssaultRifle_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\AssaultRifle_ShotLoop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Weapons\Guns\FX_2D_AssaultRifle_Loop		21413
+	658573653	FFP_GamePlay_Impact_CartLayer_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_01		7620
+	659108098	SFX_Cart_Bike_Start	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Start_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Cart_Bike_Start		140248
+	661410750	Agent_Jump_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Jump_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_03		7069
+	675283150	DX_Sidekick_GoCommand	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_GoCommand_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_UnitCommands\DX_Sidekick_GoCommand		10917
+	678033423	FFP_Ch_Bulldog_Shove	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Shove_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\FFP_Ch_Bulldog_Shove		12468
+	680242150	FX_3D_WaterSplash	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Bodyfall_Deepwater1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Liquid\FX_3D_WaterSplash		16943
+	689985384	FFP_GamePlay_Impact_FlavorLayer_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_01		8480
+	698491332	Foot_Dirt1_BootWalk02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk02		6835
+	701304591	FX_2D_Klaxon_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Alarm_Klaxon_Loop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Alarms-Indicators\FX_2D_Klaxon_Loop		22819
+	709711836	Foot_Dirt1_BootWalk10	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk10_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk10		6897
+	715974961	DX_Sidekick_Death_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_Death_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_01		12922
+	724412770	65Corvette_IdleLoop1	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\65Corvette_IdleLoop1_444760E0.ogg		\Actor-Mixer Hierarchy\FX\3D\Vehicles\FX_3D_Car_Loop\65Corvette_IdleLoop1		45068
+	726946176	Agent_Hit_beanbag_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_beanbag_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_beanbag_02		3815
+	729565081	FFP_GamePlay_Impact_MeatyLayer_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_05_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_05		15817
+	749557529	FX_2D_Beep	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Beep_GrenadeBombTimer1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Alarms-Indicators\FX_2D_Beep		5954
+	757819000	Agent_Hit_Bullet_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_Bullet_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_04		5262
+	763131203	FFP_Cart_Bike_Start_Boost	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Start_Boost_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\BulldogMa\Cart\SFX_Characters_BulldogMa_Cart_Boost\FFP_Cart_Bike_Start_Boost		18838
+	799561220	Foot_Dirt1_BootLand7	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootLand7_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Land\Foot_Dirt1_BootLand7		8570
+	805669449	FFP_Ch_Bulldog_Victory_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Victory_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\FFP_Ch_Bulldog_Victory_01		25790
+	809914271	Agent_Jump_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Jump_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_01		6325
+	838141253	Agent_Land_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Land_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Land\Agent_Land_02		5275
+	845196286	FX_3D_Lever-Switch	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Lever_LargeMetal_Switch01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Switches\FX_3D_Lever-Switch		6626
+	856642211	Agent_Hit_Bullet_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_Bullet_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_03		7972
+	859797848	FFP_GamePlay_Impact_FlavorLayer_09	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_09_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_09		7903
+	869294581	FX_3D_SmashCrate	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Smash_WoodBreak01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Destructables\FX_3D_SmashCrate		11044
+	870510227	FX_2D_MenuMove-Hover	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Button_VendingMachine1_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuMove-Hover		4544
+	877574442	SFX_Cart_Collection	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Collection_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\SFX_Cart_Collection		6874
+	907429488	Foot_Dirt1_BootWalk09	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Foot_Dirt1_BootWalk09_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Movement\FX_2D_Footsteps\Foot_Dirt1_BootWalk09		8708
+	910922157	FFP_GamePlay_Impact_FlavorLayer_08	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_08_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_08		9723
+	955280945	Agent_Jump_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Jump_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Jump\Agent_Jump_02		6604
+	959721945	Agent_Hit_Bullet_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Agent_Hit_Bullet_01_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Hurt\Agent_Hit_Bullet_01		6418
+	978255741	FFP_Ch_Bulldog_Hit_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Bulldog_Hit_02_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\FFP_Ch_Bulldog_Hit_02		26108
+	981389914	DX_Sidekick_Death_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_Death_04_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_04		15722
+	991622778	Explo_Small_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_02		24191
+	996787749	FX_2D_MenuUnPause	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Menu_Backup09_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuUnPause		9646
+	1005673385	FFP_GamePlay_Impact_FlavorLayer_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_05_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_05		6685
+	1007708080	SFX_Item_Turkey_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Item_Turkey_Use_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey_Use		9181
+	1014982202	FX_2D_MenuAccept	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Menu_Accept_444760E1.ogg		\Actor-Mixer Hierarchy\FX\2D\Menu\FX_2D_MenuAccept		15359
+	1016707925	FFP_GamePlay_Impact_FlavorLayer_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_03		5426
+	1023247839	FX_2D_Rain_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Rain_Loop01_444760E0.ogg		\Actor-Mixer Hierarchy\FX\2D\Ambience\FX_2D_Rain_Loop		30011
+	1029506824	FFP_Ch_Ma_Item_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Ch_Ma_Item_Use_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_ItemUse\FFP_Ch_Ma_Item_Use		11945
+	1044477226	DX_GamePlay_StartRaceCountDown	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_StartRaceCountDown_444760E1.ogg		\Actor-Mixer Hierarchy\DX\DX\Announcer\DX_GamePlay_StartRaceCountDown		28644
+	1046394917	Explo_Small_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\3D\Explosions\FX_3D_Explosion\Explo_Small_03		20773
+	1046506901	DX_Sidekick_Death_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sidekick_Death_03_444760E1.ogg		\Actor-Mixer Hierarchy\DX\2D\DX_2D_Death\DX_Sidekick_Death_03		12039
+	1055042976	FFP_Gameplay_Music	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Gameplay_Music_95287D31.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_Gameplay\FFP_Gameplay_Music\FFP_Gameplay_Music		964845
+	1067372270	SFX_GamePlay_ItemCollison	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_ItemCollison_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\SFX_GamePlay_ItemCollison		9691
 

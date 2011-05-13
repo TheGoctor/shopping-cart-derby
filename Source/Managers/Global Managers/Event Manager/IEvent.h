@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//	File			:	CEvent.h
+//	File			:	IEvent.h
 //	Date			:	3/31/11
 //	Mod. Date		:	3/31/11
 //	Mod. Initials	:	MR
@@ -12,6 +12,7 @@
 
 #ifndef _IEVENT_H_
 #define _IEVENT_H_
+#define NULL 0
 
 class IComponent;
 
@@ -21,6 +22,7 @@ private:
 	unsigned int	m_nEventID;	// The ID used to identify this event
 	IComponent*		m_pcSender;
 	unsigned int	m_nPriority;
+	void*			m_pData;
 
 	friend class CEventManager;
 
@@ -32,15 +34,17 @@ protected:
 
 public:
 	// Constructor
-	IEvent(unsigned int nEventID, IComponent* pcSender)
+	IEvent(unsigned int nEventID, IComponent* pcSender, void* pData = NULL)
 	{
 		m_nEventID = nEventID;
 		m_pcSender = pcSender;
+		m_pData = pData;
 	}
 
 	// Destructor
-	virtual ~IEvent()
+	~IEvent()
 	{
+		CMemoryManager::GetInstance()->Deallocate((char*)m_pData, HEAPID_EVENT);
 	}
 
 	// Accessors
@@ -52,6 +56,11 @@ public:
 	IComponent* GetSender()
 	{
 		return m_pcSender;
+	}
+
+	void* GetData()
+	{
+		return m_pData;
 	}
 
 	bool operator<(IEvent& pEvent)

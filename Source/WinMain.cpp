@@ -12,6 +12,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////
 #include <windows.h>	//	Needed for Windows Applications.
+#include <dbghelp.h>
+#pragma comment(lib, "dbghelp.lib")
 
 #define VLD_AGGREGATE_DUPLICATES	//	don't show me the same leak 50 times!!
 #define VLD_MAX_DATA_DUMP 0
@@ -20,7 +22,9 @@
 #include <crtdbg.h>
 #include <io.h>
 #include <iostream>
+#include <fstream>
 #include <fcntl.h>
+using namespace std;
 
 #include "CGame.h"		//	for our game
 #include "Managers/Global Managers/Sound Manager/CWwiseSoundManager.h"
@@ -34,8 +38,28 @@ const int	g_nWINDOW_HEIGHT		= 768;						//	Window Height.
 #ifdef _DEBUG
 	const BOOL	g_bIS_WINDOWED			= TRUE;						
 #else
-	const BOOL	g_bIS_WINDOWED			= FALSE;
+	const BOOL	g_bIS_WINDOWED			= TRUE;
 #endif
+	
+LONG WINAPI errorFunc(_EXCEPTION_POINTERS *pExceptionInfo)
+{
+	HANDLE hFile = ::CreateFile("dumpfile.mdmp", GENERIC_WRITE,
+		FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+	if(hFile != INVALID_HANDLE_VALUE)
+	{
+		_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
+
+		ExInfo.ThreadId = ::GetCurrentThreadId();
+		ExInfo.ExceptionPointers = pExceptionInfo;
+		ExInfo.ClientPointers = NULL;
+		MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
+			hFile, MiniDumpNormal, &ExInfo, NULL, NULL );
+
+		MessageBoxA(NULL, "Dump file saved in same directory as .exe file. Please email the file to mac.reichelt@gmail.com with the subject \"Shopping Cart Derby - Crash\"", "Send Error Report", MB_OK);
+	}
+	return 0;
+}
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -230,29 +254,59 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	////////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-	// Set up the console window.
-	CONSOLE_SCREEN_BUFFER_INFO coninfo;
+	SetUnhandledExceptionFilter(errorFunc);
 
+#ifdef _DEBUG
+
+	short bufferWidth = 80;
+	short bufferHeight = 300;
+	short windowWidth = 80;
+	short windowHeight = 24;
+
+	// Set up the console window.
+	CONSOLE_SCREEN_BUFFER_INFO	coninfo;
+	FILE						*pFile;
+	int							conHandle;
+	HANDLE						stdHandle;
+	SMALL_RECT					window = {0,};
+
+	// Allocate console
 	AllocConsole();
+
+	// reset console properties
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
-	coninfo.dwSize.Y = 500;
+	coninfo.dwSize.Y	= bufferHeight;
+	coninfo.dwSize.X	= bufferWidth;
+	window.Left			= 0;
+	window.Top			= 0;
+	window.Right		= windowWidth - 1;
+	window.Bottom		= windowHeight - 1;
 	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+	SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), true, &window);
 
 	// Redirect standard output to the console window.
-	HANDLE standard_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	int console_handle = _open_osfhandle(reinterpret_cast<intptr_t>(standard_handle), _O_TEXT);
+	stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	conHandle = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+	pFile = _fdopen(conHandle, "w" );
+	*stdout = *pFile;
+	setvbuf(stdout, NULL, _IONBF, 0);	// unbuffered
 
-	*stdout = *_fdopen(console_handle, "w");
-	setvbuf(stdout, 0, _IONBF, 0);
+	// Redirect standard input to console
+	stdHandle = GetStdHandle(STD_INPUT_HANDLE);
+	conHandle = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+	pFile = _fdopen(conHandle, "r");
+	*stdin = *pFile;
+	setvbuf(stdin, NULL, _IONBF, 0);	// unbuffered
 
 	// Redirect standard error to the console window.
-	standard_handle = GetStdHandle(STD_ERROR_HANDLE);
-	console_handle = _open_osfhandle(reinterpret_cast<intptr_t>(standard_handle), _O_TEXT);
-	*stderr = *_fdopen(console_handle, "w");
-	setvbuf(stderr, 0, _IONBF, 0);
+	stdHandle = GetStdHandle(STD_ERROR_HANDLE);
+	conHandle = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+	pFile = _fdopen(conHandle, "w");
+	*stderr = *pFile;
+	setvbuf(stderr, NULL, _IONBF, 0);	// unbuffered
 
 	// Allow C++ code to benefit from console redirection.
+	// route cout, wcout, cin, wcin, wcerr, cerr, wclog & clog as well
 	ios::sync_with_stdio();
 #endif
 
@@ -300,7 +354,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		//	Put Game Logic Here
 		//////////////////////////////////
 		if (pGame->Main() == false)
+		{
 			PostQuitMessage(0);
+			break;
+		}
 		
 		//////////////////////////////////
 	}

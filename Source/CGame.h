@@ -19,7 +19,6 @@
 #include <vector>
 using namespace std;
 
-
 //	Forward Declarations
 class CEventManager;
 class Renderer;
@@ -49,7 +48,7 @@ private:
 	float					m_fDT;				// Time elapsed since last Update
 	DWORD					m_dwPrevTime;		// The previous Update's TickCount
 
-	// TEST
+	// TODO: Delete when collisions can add to set
 	CObject* test;
 
 	//	Constructor
@@ -60,10 +59,9 @@ private:
 	CGame(const CGame&);
 	CGame& operator=(const CGame&);
 
-	
-
 public:
 
+	int GetFPS() { return m_nFPS; }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Function:	“Shutdown”
 	//

@@ -19,24 +19,20 @@ using std::ifstream;
 #include <string>
 using std::string;
 
-CBitmapFont::CBitmapFont(void) : m_pTM(NULL)
+CBitmapFont::CBitmapFont(int nImageID, int nRectWidth, int nCharHeight,
+						 int nNumCols, char chStartChar) : m_pTM(NULL)
 {
 	m_pTM = CTextureManager::GetInstance();
-	SetImageID(-1);
-	SetCharHeight(0);
-	SetRectWidth(0);
-	SetNumColumns(0);
-	SetStartChar(' ');
+	SetImageID(nImageID);
+	SetCharHeight(nCharHeight);
+	SetNumColumns(nNumCols);
+	SetStartChar(chStartChar);
+
+	m_nRectWidth = nRectWidth;
 }
 
 CBitmapFont::~CBitmapFont(void)
 {
-}
-
-CBitmapFont* CBitmapFont::GetInstance()
-{
-	static CBitmapFont instance;
-	return &instance;
 }
 
 void CBitmapFont::DrawString(const char* szString, int nPosX, int nPosY, 
@@ -49,11 +45,12 @@ void CBitmapFont::DrawString(const char* szString, int nPosX, int nPosY,
 	for (int i = 0; i<len; i++)
 	{
 		char ch = szString[i];
-		nCharWidth = GetWidth(ch);
+
+		int nID = ch - m_cStartChar;
 		
 		if (ch == ' ')
 		{
-			nPosX += (int)(nCharWidth * fScale);
+			nPosX += (int)(m_nCharWidth[nID] * fScale);
 			continue;
 		}
 		
@@ -64,10 +61,9 @@ void CBitmapFont::DrawString(const char* szString, int nPosX, int nPosY,
 			continue;
 		}
 
-		int id = ch - m_cStartChar;
-		RECT rLetter = CellAlgorithm(id);
+		RECT rLetter = CellAlgorithm(nID);
 		m_pTM->Draw(GetImageID(), nPosX, nPosY, fScale, fScale, &rLetter, 0.0f, 0.0f, 0.0f, dwColor);
-		nPosX += (int)(nCharWidth * fScale);
+		nPosX += (int)(m_nCharWidth[nID] * fScale);
 	}
 }
 
@@ -76,27 +72,45 @@ void CBitmapFont::LoadFont(const char *szFilename, const char* szFileWidths)
 	// set the image id of this bitmap font
 	SetImageID(m_pTM->LoadTexture(szFilename));
 
+	if(szFileWidths == NULL)
+		return;
+
 	// read in the character widths into the array
-	ifstream fin(szFileWidths);
-	if (fin.is_open())
+	//ifstream fin(szFileWidths);
+	//if (fin.is_open())
+	//{
+	//	unsigned int i = 0;
+	//	char buffer[5];
+	//	while(!fin.eof())
+	//	{
+	//		fin.getline((char*)buffer, 5);
+	//		m_nCharWidth[i] = atoi((const char*)buffer);
+	//		++i;
+	//	}
+	//	fin.close();
+	//	fin.clear();
+	//}
+	ifstream fin(szFileWidths, ios_base::binary | ios_base::in);
+	if(fin.is_open())
 	{
-		unsigned int i = 0;
-		char buffer[5];
-		while(!fin.eof())
-		{
-			fin.getline((char*)buffer, 5);
-			m_nWidths[i] = atoi((const char*)buffer);
-			++i;
-		}
+		fin.read((char*)m_nCharWidth, sizeof(int) * 128);
 		fin.close();
+		fin.clear();
 	}
+
+	//ofstream out("Resource\\BitmapFont_Width.bin", ios_base::binary | ios_base::out);
+	//if(out.is_open())
+	//{
+	//	out.write((char*)m_nCharWidth, sizeof(int)*128);
+	//	out.close();
+	//	out.clear();
+	//}
 }
 
 void CBitmapFont::UnLoadFont()
 {
 	m_pTM->UnloadTexture(GetImageID());
-	for (unsigned int i=0; i<128; ++i)
-		m_nWidths[i] = 0;
+	memset(m_nCharWidth, 0, sizeof(int)*128);
 }
 
 RECT CBitmapFont::CellAlgorithm(int nID)
@@ -104,17 +118,13 @@ RECT CBitmapFont::CellAlgorithm(int nID)
 	RECT rCell;
 	
 	// pick out the proper letter from the image
-	rCell.left = (nID % m_nNumCols) * m_nRectWidth;
+	rCell.left = ((nID % m_nNumCols) * m_nRectWidth) + 
+		((m_nRectWidth - m_nCharWidth[nID])/2);
 	rCell.top = (nID / m_nNumCols) * m_nCharHeight;
-	rCell.right = rCell.left + m_nRectWidth;
+	rCell.right = rCell.left + m_nCharWidth[nID];
 	rCell.bottom = rCell.top + m_nCharHeight;
 
 	return rCell;
-}
-
-int CBitmapFont::GetWidth(char cLetter)
-{
-	return m_nWidths[cLetter - GetStartChar()];
 }
 
 

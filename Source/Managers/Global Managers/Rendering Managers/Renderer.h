@@ -23,6 +23,7 @@ class CCameraManager;
 class ModelManager;
 class DXRenderContextManager;
 class DXRenderContext;
+class DXMesh;
 class CRenderComponent;
 class CHUDManager;
 class IEvent;
@@ -57,11 +58,14 @@ public:
 	static void Render(RenderSet &set);
 
 	static void AddToRenderSet(IEvent*, IComponent*);
+	static void DestroyObject(IEvent*, IComponent*);
 
 	void RenderScene(void);
 	
 	static int CreateRenderComp(lua_State* pLua);
 	static CRenderComponent* CreateRenderComp(CObject* pParent, int nModelID,
+								   int nRenderContextIdx, int nRenderFuncIdx);
+	static CRenderComponent* CreateRenderComp(CObject* pParent, DXMesh* pMesh,
 								   int nRenderContextIdx, int nRenderFuncIdx);
 
 	void Shutdown(void);
@@ -69,6 +73,7 @@ public:
 	// Callbacks
 	static void RenderCallback(IEvent* e, IComponent* comp);
 	static void ShutdownCallback(IEvent* e, IComponent* comp);
+	static void DestroyComponent(IEvent*, IComponent*);
 };
 
 #endif	// _RENDERER_H_

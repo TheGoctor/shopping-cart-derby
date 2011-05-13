@@ -33,7 +33,7 @@ using namespace std;
 
 enum {CMD_ACCEPT = 1, CMD_BACK, CMD_ACCELERATE, CMD_DECELERATE, CMD_SHOVELEFT,
 CMD_SHOVERIGHT, CMD_STEERLEFT, CMD_STEERRIGHT, CMD_UP, CMD_DOWN, CMD_LEFT, 
-CMD_RIGHT, CMD_MENU};
+CMD_RIGHT, CMD_DRIFT, CMD_MENU};
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Frame Structure
@@ -62,6 +62,14 @@ class IEvent;
 class CInputManager
 {
 private:
+
+	struct TPlayer
+	{
+		int m_nID;
+		DWORD m_dwPrevState;
+	};
+
+
 	// DirectInput Devices
 	IDirectInput8*			m_pDin;			// The DirectInput COM object
 	IDirectInputDevice8*	m_pKeyboard;	// The keyboard device
@@ -93,6 +101,7 @@ private:
 	TCommand	m_tSteerRight;	// The key and button used to steer the player's cart right
 	TCommand	m_tShoveLeft;	// The key and button used to shove left
 	TCommand	m_tShoveRight;	// The key and button used to shove right
+	TCommand	m_tDrift;		// The key and button used to enable drift
 	// TODO: Add more controls
 
 	queue<TCommand>	m_cInput;		// Queue of actions registered from input
@@ -130,6 +139,7 @@ public:
 	void GetInputIntro();
 	void GetInputMenu();
 	void GetInputGameplay();
+	void GetInputConsole();
 
 	EGameState GetState()
 	{

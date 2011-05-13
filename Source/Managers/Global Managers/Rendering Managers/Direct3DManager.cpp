@@ -76,10 +76,10 @@ bool Direct3DManager::InitDirect3D(HWND hWnd,
 	m_lpDev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
 	// create font
-	D3DXCreateFont(m_lpDev, 32, 0, FW_NORMAL, NULL, false, 
+	D3DXCreateFont(m_lpDev, 16, 0, FW_NORMAL, NULL, false, 
 	  DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
 	  ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
-	  "Arial", &m_lpFont);
+	  "Consolas", &m_lpFont);
 
 	// Create Sprite Object.
 	D3DXCreateSprite(m_lpDev, &m_lpSprite);
@@ -105,7 +105,7 @@ bool Direct3DManager::InitDirect3D(HWND hWnd,
 	// Texture Manager
 	CTextureManager::GetInstance()->InitTextureManager(m_lpDev, m_lpSprite);
 
-	CEventManager::GetInstance()->RegisterEvent("Shutdown", NULL, Shutdown);
+	CEventManager::GetInstance()->RegisterEvent("Shutdown", (IComponent*)GetInstance(), Shutdown);
 
 	//	Return success.
 	return true;

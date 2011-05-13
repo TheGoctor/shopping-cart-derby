@@ -28,8 +28,6 @@ class IEvent;
 class CEventManager;
 class CObject;
 
-
-
 //defines the depth limit of the BVH
 #define BVHDEPTH_LIMIT 3
 //enum for splitting type(either splitting across x or z axis)
@@ -39,34 +37,30 @@ class CBVHNode
 private:
 	int m_nSplitType;			//set to X/Z-SPLIT to determine how the nodes children were split
 	bool m_bIsLeaf;
-	list<CCollideable*> m_pcObjects;	//objects in the node(only contains data in a leaf node
+	list<CCollideable*, CAllocator<CCollideable*>> m_pcObjects;	//objects in the node(only contains data in a leaf node
 	TAABB m_tBV;			//the bounding volume around this node's area
-//	list<CBVHNode*> m_pChildren; 
+	//	list<CBVHNode*> m_pChildren; 
 	CBVHNode* m_pParent;
 	CBVHNode* m_pRHS;	//right side split
 	CBVHNode* m_pLHS;	//left "
 
 public:
 	// Constructors
-	CBVHNode()
+	CBVHNode() : m_nSplitType(0), m_bIsLeaf(false), m_pParent(NULL), 
+		m_pRHS(NULL), m_pLHS(NULL)
 	{
-		m_nSplitType = 0;
-		m_bIsLeaf = false;
-		m_pParent = NULL;
-		m_pRHS = NULL;
-		m_pLHS = NULL;
 		m_tBV.cBoxMax = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		m_tBV.cBoxMin = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	}
-	CBVHNode(int nsplittype, TAABB tNodeBounds) 
+
+	CBVHNode(int nsplittype, TAABB tNodeBounds) : m_nSplitType(nsplittype),
+		m_tBV(tNodeBounds), m_bIsLeaf(false)
 	{
-		m_nSplitType = nsplittype; m_tBV = tNodeBounds;
-		m_bIsLeaf = false;
 	}
+
 	// Destructor
 	~CBVHNode()
 	{
-
 	}
 
 	// Accessors
@@ -90,6 +84,10 @@ public:
 	{
 		return m_nSplitType;
 	}
+	bool IsLeafNode(void)
+	{	
+		return m_bIsLeaf;
+	}
 	// Mutators
 	void SetParent(CBVHNode* pParent) 
 	{
@@ -98,13 +96,6 @@ public:
 	void SetSplitType(int nsplittype)
 	{
 		m_nSplitType = nsplittype;
-	}
-	void SplitBV(CBVHNode* pParent, CBVHNode* plhs, CBVHNode* prhs);
-
-	bool IsLeafNode(void)
-	{	
-		return m_bIsLeaf;
-//		return m_pChildren.empty();	
 	}
 	void SetIsLeaf(bool bleaf)
 	{
@@ -124,6 +115,7 @@ public:
 		m_tBV.cBoxMin = tbounds.cBoxMin;
 	}
 
+	void SplitBV(CBVHNode* pParent, CBVHNode* plhs, CBVHNode* prhs);
 };
 
 /*******************************************************************************
@@ -132,8 +124,10 @@ public:
 class CCollisionManager
 {
 private:
-	map<unsigned int, CCollideable*> m_cStaticObjects;
-	map<unsigned int, CCollideable*> m_cNonStaticObjects;
+	map<unsigned int, CCollideable*, less<unsigned int>, CAllocator<
+		pair<unsigned int, CCollideable*>>> m_cStaticObjects;
+	map<unsigned int, CCollideable*, less<unsigned int>, CAllocator<
+		pair<unsigned int, CCollideable*>>> m_cNonStaticObjects;
 	CBVHNode*							m_pRoot;				//BVH root node
 
 	CEventManager* m_pEventManager;
@@ -143,13 +137,12 @@ private:
 	CCollisionManager(const CCollisionManager&);
 	CCollisionManager& operator=(const CCollisionManager&);
 
-
-
 public:
 	~CCollisionManager();
 	static CCollisionManager* GetInstance();
 	void Init();
 	static void Shutdown(IEvent* pEvent, IComponent* pComponent);
+	static void DestroyObject(IEvent*, IComponent*);
 	/************************************************************************
 	*	Update :		updates the BVH nodes of all objects that have moved
 	*					since the last update
@@ -168,16 +161,12 @@ public:
 
 	//component functions
 	static int CreateCollideableComponent(lua_State* pLua);
-	static CCollideable* CreateCollideableComponent(CObject* pParent);
-
-
-
-
+	static CCollideable* CreateCollideableComponent(CObject* pParent,
+		bool isStatic, bool isReactor, unsigned int objType);
 
 	//tests for collision between two components(called in update)
 	void SearchForCollision(void);
 	bool TestCollision(CCollideable* obj1, CCollideable* obj2);
-	void CollisionResponse(CCollideable* obj1, CCollideable* obj2);//sends appropriate events for collision
 	void CheckRam(CCollideable* obj1, CCollideable* obj2, D3DXVECTOR3 tvel1, D3DXVECTOR3 tvel2);
 	void InitBVH();
 	/************************************************************************
@@ -224,7 +213,8 @@ public:
 
 	void SetAllNotChecked(void)
 	{
-		std::map<unsigned int, CCollideable*>::iterator insiter; 
+		std::map<unsigned int, CCollideable*, less<unsigned int>, CAllocator
+			<pair<unsigned int, CCollideable*>>>::iterator insiter; 
 		for(insiter = m_cNonStaticObjects.begin(); 
 			insiter != m_cNonStaticObjects.end(); ++insiter)
 		{
@@ -232,232 +222,66 @@ public:
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	//Collision functions
+	// these functions take in the shapes to test collision with
+	// all intersection functions return if there was a collision
+	// all reaction functions handle the collision reaction if there was one
+	//////////////////////////////////////////////////////////////////////////
 
-	/************************************************************************
-	*	PointInCone :		finds if a point is within a specified cone
-	*						projected from a player position
-	*
-	*	Ins:				tPlayerMove	- the movement vector of the object projecting the cone
-	*						tPlayerPos	- position of the object to project the cone from
-	*						tTargetPos	- position of the target to find in the cone
-	*						fCone		- the angle of the projected cone
-	*
-	*	Returns:			bool - true if the point is in the cone, false if not
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
+
+	bool SphereToSphereIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool SphereToSphereReaction(CCollideable* obj1, CCollideable* obj2);
+
+	bool SphereToPlaneIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool SphereToPlaneReaction(CCollideable* obj1, CCollideable* obj2);
+
+	bool SphereToOBBIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool SphereToOBBReaction(CCollideable* obj1, CCollideable* obj2);
+
+	bool SphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool SphereToAABBReaction(CCollideable* obj1, CCollideable* obj2);
+
+	bool OBBToOBBIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool OBBToOBBReaction(CCollideable* obj1, CCollideable* obj2);
+
+	bool OBBToPlaneIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool OBBToPlaneReaction(CCollideable* obj1, CCollideable* obj2);
+
+	bool PlaneToPlaneIntersection(CCollideable* obj1, CCollideable* obj2);
+
+	bool AABBTOAABBIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool AABBToAABBReaction(CCollideable* obj1, CCollideable* obj2);
+
+	//frustum collisions
+	bool SphereToFrustum(CCollideable* obj1, CCollideable* obj2);
+	bool AABBToFrustum(CCollideable* obj1, CCollideable* obj2);
+
+	//////////////////////////////////////////////////////////////////////////
+	//Collision Line Functions
+	// these functions are used mostly by AI entities for pathfinding
+	//////////////////////////////////////////////////////////////////////////
+	bool LineToSphereIntersection(TLine tLine, TSphere tSphere, D3DXVECTOR3& tColPoint);
+	bool LineToPlaneIntersection(TLine tLine, TPlane tPlane, D3DXVECTOR3& tColPoint);
+	bool LineToOBBIntersection(TLine tLine, TOBB tOBB, D3DXVECTOR3& tColPoint);
+	bool LineToAABBIntersection(TLine tLine, TAABB tAABB, D3DXVECTOR3& tColPoint);
+
+	//////////////////////////////////////////////////////////////////////////
+	//returns false and sets tClosestPt to the closest collision point
+	//returns true if the line reaches the waypoint uninterrupted
+	//////////////////////////////////////////////////////////////////////////
+	bool LineToWayPoint(TLine tLine, D3DXVECTOR3 &tClosestPt);
+
+	//////////////////////////////////////////////////////////////////////////
+	//Collision Support Functions
+	// these functions serve to assist the collision check functions
+	// they will be only be called from within the collision manager
+	//////////////////////////////////////////////////////////////////////////
+
 	bool PointInCone(D3DXVECTOR3 tPlayerMove, D3DXVECTOR3 tPlayerPos, 
 		D3DXVECTOR3 tTargetPos, float fCone);
-
-	/************************************************************************
-	*	SphereToSphereIntersection :	checks for collision between two spheres
-	*
-	*	Ins:				tS1Center	- center of the first sphere
-	*						fS1Radius	- radius of the first sphere
-	*						tS2Center	- center of the second sphere
-	*						fS2Radius	- radius of the second sphere
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool SphereToSphereIntersection(TSphere Sphere1, TSphere Sphere2);
-
-	bool PlayerToPlayerIntersection(TSphere tSphere1, TSphere tSphere2, 
-		D3DXVECTOR3 tVel1, D3DXVECTOR3 tVel2, D3DXVECTOR3 &tNew1, D3DXVECTOR3 &tNew2);
-
-	/************************************************************************
-	*	SphereToPlaneIntersection :	checks for collision between a sphere 
-	*								and a plane
-	*
-	*	Ins:				tSCenter	- center of the sphere
-	*						fSRadius	- radius of the sphere
-	*						tPlaneNorm	- normal of the plane
-	*						fPlaneOffset- offset of the plane
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool SphereToPlaneIntersection(TSphere tSphere, TPlane tPlane,
-		D3DXVECTOR3& tNewSCenter);
-
-	/************************************************************************
-	*	SphereToOBBIntersection :	checks for collision between a sphere 
-	*								and an oriented bounding box
-	*
-	*	Ins:				tSCenter	- center of the sphere
-	*						fSRadius	- radius of the sphere
-	*						tBoxMin		- min bounds of the OBB
-	*						fBoxMax		- max bounds of the OBB
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool SphereToOBBIntersection(TSphere tSphere, TOBB tOBB, D3DXVECTOR3& tNewSCenter);
-
-	/************************************************************************
-	*	SphereToAABBIntersection :	checks for intersection between 
-	*								a sphere and an AABB
-	*
-	*	Ins:				tSCenter	- center of the sphere
-	*						fSRadius	- radius of the sphere
-	*						tBoxMin		- min values of the OBB
-	*						tBoxMax		- max values of the OBB
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool SphereToAABBIntersection(TSphere tSphere, TAABB tAABB);
-
-	/************************************************************************
-	*	LineToSphereIntersection :	checks for intersection between 
-	*								a line and a sphere
-	*
-	*	Ins:				tStart		- start point of the line
-	*						tEnd		- end point of the line
-	*						tSCenter	- center of the sphere
-	*						fRadius		- radius of the sphere
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool LineToSphereIntersection(TLine tLine, TSphere tSphere, D3DXVECTOR3& tColPoint);
-
-	/************************************************************************
-	*	LineToPlaneIntersection :	checks for intersection between 
-	*								a line and a plane
-	*
-	*	Ins:				tStart		- start point of the line
-	*						tEnd		- end point of the line
-	*						tPlaneNorm	- normal of the plane
-	*						fPlaneOffset- offset of the plane
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool LineToPlaneIntersection(TLine tLine, TPlane tPlane, D3DXVECTOR3& tColPoint);
-
-	/************************************************************************
-	*	LineToOBBIntersection :	checks for intersection between 
-	*								a line and an OBB
-	*
-	*	Ins:				tStart		- start point of the line
-	*						tEnd		- end point of the line
-	*						tBoxMin		- min values of the OBB
-	*						tBoxMax		- max values of the OBB
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool LineToOBBIntersection(TLine tLine, TOBB tOBB, D3DXVECTOR3& tColPoint);
-
-
-	/************************************************************************
-	*	LineToAABBIntersection :	checks for intersection between 
-	*								a line and an AABB
-	*
-	*	Ins:				tStart		- start point of the line
-	*						tEnd		- end point of the line
-	*						tBoxMin		- min values of the OBB
-	*						tBoxMax		- max values of the OBB
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool LineToAABBIntersection(TLine tLine, TOBB tAABB, D3DXVECTOR3& tColPoint);
-
-
-	/************************************************************************
-	*	OBBToOBBIntersection :	checks for intersection between 
-	*								to OBBs
-	*
-	*	Ins:				tOBB1FTL->tOBB1BBR - the eight points of the first OBB
-	*						tOBB2FTL->tOBB2BBR - the eight points of the second OBB
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool OBBToOBBIntersection(TOBB tOBB1, TOBB tOBB2, D3DXVECTOR3& tColPoint);
-
-	/************************************************************************
-	*	OBBToPlaneIntersection :	checks for intersection between 
-	*								a line and an OBB
-	*
-	*	Ins:				tStart		- start point of the line
-	*						tEnd		- end point of the line
-	*						tBoxMin		- min values of the OBB
-	*						tBoxMax		- max values of the OBB
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool OBBToPlaneIntersection(TOBB tOBB, TPlane tPlane);
-	/************************************************************************
-	*	LineToOBBIntersection :	checks for intersection between 
-	*								a line and an OBB
-	*
-	*	Ins:				tStart		- start point of the line
-	*						tEnd		- end point of the line
-	*						tBoxMin		- min values of the OBB
-	*						tBoxMax		- max values of the OBB
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool PlaneToPlaneIntersection(TPlane tPlane1, TPlane tPlane2);
-	/************************************************************************
-	*	LineToOBBIntersection :	checks for intersection between 
-	*								a line and an OBB
-	*
-	*	Ins:				tStart		- start point of the line
-	*						tEnd		- end point of the line
-	*						tBoxMin		- min values of the OBB
-	*						tBoxMax		- max values of the OBB
-	*
-	*	Outs:				colPoint - point of collision (if any)
-	*
-	*	Returns:			bool - true if there was a collision, else false
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	bool AABBTOAABBIntersection(TAABB tAABB1, TAABB tAABB2);
+	void CheckFrustDist(float fDist, CCollideable* pCheck, bool &collide, bool &behind, bool &intersect);
+	D3DXVECTOR3 GetCloserPt(D3DXVECTOR3 tPt1, D3DXVECTOR3 tPt2, D3DXVECTOR3 tTestpt);
 
 };
 

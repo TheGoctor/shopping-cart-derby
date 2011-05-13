@@ -23,8 +23,8 @@ using namespace std;
 #include "CInputManager.h"
 #include "../Event Manager/CEventManager.h"
 #include "../Event Manager/CIDGen.h"
-#include "../Event Manager/CStateEvent.h"
-#include "../Event Manager/CInputEvent.h"
+#include "../Event Manager/EventStructs.h"
+using namespace EventStructs;
 
 #define CONTROLLER 0
 
@@ -87,6 +87,10 @@ CInputManager::CInputManager()
 	m_tShoveRight.m_nControllerButton = XINPUT_GAMEPAD_RIGHT_SHOULDER;
 	m_tShoveRight.m_chKeyboardKey	= DIK_E;
 
+	m_tDrift.m_nID					= CMD_DRIFT;
+	m_tDrift.m_nControllerButton	= 0; // A?
+	m_tDrift.m_chKeyboardKey		= DIK_GRAVE;
+
 }
 
 //	Destructor
@@ -105,8 +109,8 @@ CInputManager::~CInputManager()
 ////////////////////////////////////////////////////////////////////////////////
 CInputManager* CInputManager::GetInstance()
 {
-	static CInputManager instance;
-	return &instance;
+	static CInputManager cInputManager;
+	return &cInputManager;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,8 +146,8 @@ void CInputManager::Initialize(HWND hWnd, HINSTANCE hInstance)
 
 	m_pfGetInput = &CInputManager::GetInputMenu;
 
-	CEventManager::GetInstance()->RegisterEvent("GetInput", NULL, GetInput);
-	CEventManager::GetInstance()->RegisterEvent("InputStateChange", NULL,
+	CEventManager::GetInstance()->RegisterEvent("GetInput", (IComponent*)GetInstance(), GetInput);
+	CEventManager::GetInstance()->RegisterEvent("InputStateChange", (IComponent*)GetInstance(),
 		InputStateChange);
 
 	//InitKeyStrings();
@@ -183,8 +187,8 @@ void CInputManager::Shutdown()
 void CInputManager::InputStateChange(IEvent* pEvent, IComponent* pComponent)
 {
 	// Cast event to CStateEvent
-	CStateEvent* pStateEvent = (CStateEvent*)pEvent;
-	GetInstance()->m_eGameState = pStateEvent->GetToState();
+	TStateEvent* pStateEvent = (TStateEvent*)pEvent->GetData();
+	GetInstance()->m_eGameState = pStateEvent->m_eToState;
 }
 
 void CInputManager::Shutdown(IEvent*, IComponent*)
@@ -213,7 +217,15 @@ void CInputManager::GetInput(IEvent*, IComponent*)
 			pIM->GetInputIntro();
 		}
 		break;
+	case WIN_STATE:
+	case LOSE_STATE:
+	case OPTIONS_STATE:
+	case CREDITS_STATE:
+	case KEYBIND_STATE:
+	case GAME_MODE_SELECT_STATE:
+	case CHARACTER_SELECT_STATE:
 	case PAUSE_STATE:
+	case HOW_TO_PLAY_STATE:
 	case MAIN_MENU_STATE:
 		{
 			pIM->GetInputMenu();
@@ -224,6 +236,10 @@ void CInputManager::GetInput(IEvent*, IComponent*)
 			pIM->GetInputGameplay();
 		}
 		break;
+	case CONSOLE_STATE:
+		{
+			pIM->GetInputConsole();
+		}
 	};
 }
 
@@ -233,7 +249,7 @@ void CInputManager::GetInputIntro()
 
 void CInputManager::GetInputMenu()
 {
-	CEventManager* pEM = CEventManager::GetInstance();
+	//CEventManager* pEM = CEventManager::GetInstance();
 
 #pragma region KEYBOARD
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,43 +261,35 @@ void CInputManager::GetInputMenu()
 
 	m_pKeyboard->GetDeviceState(sizeof(m_chKeys), (void*)m_chKeys);
 
-	if(KEYDOWN(m_chKeys, m_tAccept.m_chKeyboardKey) /*&& !KEYDOWN(m_chPrevKeys, 
-		m_tAccept.m_chKeyboardKey)*/)
+	if(KEYDOWN(m_chKeys, m_tAccept.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, 
+		m_tAccept.m_chKeyboardKey))
 	{
 		//m_cInput.push(m_tAccept);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-			CInputEvent(CIDGen::GetInstance()->GetID("Accept"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Accept", (IComponent*)GetInstance(), 0, 1.0f);
 	}
-	if(KEYDOWN(m_chKeys, m_tBack.m_chKeyboardKey) /*&& !KEYDOWN(m_chPrevKeys, 
-		m_tBack.m_chKeyboardKey)*/)
+	if(KEYDOWN(m_chKeys, m_tBack.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, 
+		m_tBack.m_chKeyboardKey))
 	{
 		//m_cInput.push(m_tBack);
-			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Back"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+			// - OR - //		
+		SendInputEvent("Back", (IComponent*)GetInstance(), 0, 1.0f);
 	}
-	if((KEYDOWN(m_chKeys, m_tUp.m_chKeyboardKey) /*&& !KEYDOWN(m_chPrevKeys, 
-		m_tUp.m_chKeyboardKey)*/) || (KEYDOWN(m_chKeys, DIK_UP) /*&& !KEYDOWN(
-		m_chPrevKeys, DIK_UP)*/))
+	if((KEYDOWN(m_chKeys, m_tUp.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, 
+		m_tUp.m_chKeyboardKey)) || (KEYDOWN(m_chKeys, DIK_UP) && !KEYDOWN(
+		m_chPrevKeys, DIK_UP)))
 	{
 		//m_cInput.push(m_tUp);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Up"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Up", (IComponent*)GetInstance(), 0, 1.0f);
 	}
-	if((KEYDOWN(m_chKeys, m_tDown.m_chKeyboardKey) /*&& !KEYDOWN(m_chPrevKeys, 
-		m_tDown.m_chKeyboardKey)*/) || (KEYDOWN(m_chKeys, DIK_DOWN) /*&& !KEYDOWN(
-		m_chPrevKeys, DIK_DOWN)*/))
+	if((KEYDOWN(m_chKeys, m_tDown.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, 
+		m_tDown.m_chKeyboardKey)) || (KEYDOWN(m_chKeys, DIK_DOWN) && !KEYDOWN(
+		m_chPrevKeys, DIK_DOWN)))
 	{
 		//m_cInput.push(m_tDown);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Down"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Down", (IComponent*)GetInstance(), 0, 1.0f);
 	}
 	if((KEYDOWN(m_chKeys, m_tLeft.m_chKeyboardKey) /*&& !KEYDOWN(m_chPrevKeys, 
 		m_tLeft.m_chKeyboardKey)*/) || (KEYDOWN(m_chKeys, DIK_LEFT) /*&& !KEYDOWN(
@@ -289,19 +297,22 @@ void CInputManager::GetInputMenu()
 	{
 		//m_cInput.push(m_tLeft);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Left"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Left", (IComponent*)GetInstance(), 0, 1.0f);
 	}
-	if((KEYDOWN(m_chKeys, m_tRight.m_chKeyboardKey) /*&& !KEYDOWN(m_chPrevKeys, 
+	if((KEYDOWN(m_chKeys, m_tRight.m_chKeyboardKey) /* && !KEYDOWN(m_chPrevKeys, 
 		m_tRight.m_chKeyboardKey)*/) || (KEYDOWN(m_chKeys, DIK_RIGHT) /*&& !KEYDOWN(
 		m_chPrevKeys, DIK_RIGHT)*/))
 	{
 		//m_cInput.push(m_tRight);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Right"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Right", (IComponent*)GetInstance(), 0, 1.0f);
+	}
+	if(KEYDOWN(m_chKeys, m_tDrift.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, m_tDrift.m_chKeyboardKey))
+	{
+		//m_cInput.push(m_tDrift);
+			// - OR - //
+		SendStateEvent("PushState", (IComponent*)GetInstance(), CONSOLE_STATE);
+		//SendInputEvent("Drift", NULL, 0, 1.0f);
 	}
 
 #undef KEYDOWN
@@ -335,12 +346,8 @@ void CInputManager::GetInputMenu()
 		{
 			//	Move Right
 			//m_cInput.push(m_tRight);
-
-			CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-			CInputEvent(CIDGen::GetInstance()->GetID(
-				"Right"), NULL, 0, m_pController->Gamepad.sThumbLX
+			SendInputEvent("Right", (IComponent*)GetInstance(), 0, m_pController->Gamepad.sThumbLX
 				/ 32767); // <- Max Value
-			pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
 		}
 		else if(m_pController->Gamepad.sThumbLX < 
 			-XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && (m_cInput.empty() || 
@@ -348,12 +355,8 @@ void CInputManager::GetInputMenu()
 		{
 			//	Move Left
 			//m_cInput.push(m_tLeft);
-
-			CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-			CInputEvent(CIDGen::GetInstance()->GetID(
-				"Left"), NULL, 0, m_pController->Gamepad.sThumbLX
+			SendInputEvent("Left", (IComponent*)GetInstance(), 0, m_pController->Gamepad.sThumbLX
 				/ 32767); // <- Max Value
-			pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
 		}
 		else if(m_pController->Gamepad.sThumbLY > 
 			XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && (m_cInput.empty() || 
@@ -361,11 +364,8 @@ void CInputManager::GetInputMenu()
 		{
 			//	Move Up
 			//m_cInput.push(m_tUp);
-			CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-			CInputEvent(CIDGen::GetInstance()->GetID(
-				"Up"), NULL, 0, m_pController->Gamepad.sThumbLY
+			SendInputEvent("Up", (IComponent*)GetInstance(), 0, m_pController->Gamepad.sThumbLY
 				/ 32767); // <- Max Value
-			pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
 		}
 		else if(m_pController->Gamepad.sThumbLY < 
 			-XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE && (m_cInput.empty() || 
@@ -373,11 +373,8 @@ void CInputManager::GetInputMenu()
 		{
 			//	Move Down
 			//m_cInput.push(m_tDown);
-			CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-			CInputEvent(CIDGen::GetInstance()->GetID(
-				"Down"), NULL, 0, m_pController.Gamepad.sThumbLY
+			SendInputEvent("Down", (IComponent*)GetInstance(), 0, m_pController->Gamepad.sThumbLY
 				/ 32767); // <- Max Value
-			pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
 		}
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -386,50 +383,32 @@ void CInputManager::GetInputMenu()
 			if(m_pController->Gamepad.wButtons == m_tAccept.m_nControllerButton)
 			{
 				//m_cInput.push(m_tAccept);
-				CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-				CInputEvent(CIDGen::GetInstance()->GetID(
-					"Accept"), NULL, 0, 1.0f);
-				pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+				SendInputEvent("Accept", (IComponent*)GetInstance(), 0, 1.0f);
 			}
 			if(m_pController->Gamepad.wButtons == m_tBack.m_nControllerButton)
 			{
 				//m_cInput.push(m_tBack);
-				CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-				CInputEvent(CIDGen::GetInstance()->GetID(
-					"Back"), NULL, 0, 1.0f);
-				pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+				SendInputEvent("Back", (IComponent*)GetInstance(), 0, 1.0f);
 			}
 			if(m_pController->Gamepad.wButtons == m_tUp.m_nControllerButton)
 			{
 				//m_cInput.push(m_tUp);
-				CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-				CInputEvent(CIDGen::GetInstance()->GetID(
-					"Up"), NULL, 0, 1.0f);
-				pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+				SendInputEvent("Up", (IComponent*)GetInstance(), 0, 1.0f);
 			}
 			if(m_pController->Gamepad.wButtons == m_tDown.m_nControllerButton)
 			{
 				//m_cInput.push(m_tDown);
-				CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-				CInputEvent(CIDGen::GetInstance()->GetID(
-					"Down"), NULL, 0, 1.0f);
-				pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+				SendInputEvent("Down", (IComponent*)GetInstance(), 0, 1.0f);
 			}
 			if(m_pController->Gamepad.wButtons == m_tLeft.m_nControllerButton)
 			{
 				//m_cInput.push(m_tLeft);
-				CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-				CInputEvent(CIDGen::GetInstance()->GetID(
-					"Left"), NULL, 0, 1.0f);
-				pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+				SendInputEvent("Left", (IComponent*)GetInstance(), 0, 1.0f);
 			}
 			if(m_pController->Gamepad.wButtons == m_tRight.m_nControllerButton)
 			{
 				//m_cInput.push(m_tRight);
-				CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-				CInputEvent(CIDGen::GetInstance()->GetID(
-					"Right"), NULL, 0, 1.0f);
-				pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+				SendInputEvent("Right", (IComponent*)GetInstance(), 0, 1.0f);
 			}
 		}
 		m_dwPrevState = m_pController->dwPacketNumber;
@@ -443,7 +422,7 @@ void CInputManager::GetInputMenu()
 
 void CInputManager::GetInputGameplay()
 {
-	CEventManager* pEM = CEventManager::GetInstance();
+	//CEventManager* pEM = CEventManager::GetInstance();
 
 ////////////////////////////////////////////////////////////////////////////////
 //	KEYBOARD INPUT
@@ -459,71 +438,72 @@ void CInputManager::GetInputGameplay()
 	{
 		//m_cInput.push(m_tMenu);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Menu"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Menu", (IComponent*)GetInstance(), 0, 1.0f);
 	}
 	if(KEYDOWN(m_chKeys, m_tShoveLeft.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, 
 		m_tShoveLeft.m_chKeyboardKey))
 	{
-		//m_cInput.push(m_tBack);
+		//m_cInput.push(m_tShoveLeft);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("ShoveLeft"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("ShoveLeft", (IComponent*)GetInstance(), 0, 1.0f);
 	}
 	if(KEYDOWN(m_chKeys, m_tShoveRight.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, 
 		m_tShoveRight.m_chKeyboardKey))
 	{
-		//m_cInput.push(m_tBack);
+		//m_cInput.push(m_tShoveRight);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("ShoveRight"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("ShoveRight", (IComponent*)GetInstance(), 0, 1.0f);
 	}
 	if((KEYDOWN(m_chKeys, m_tUp.m_chKeyboardKey) || KEYDOWN(m_chKeys, DIK_UP))
 		/*&& (m_cInput.empty() || m_cInput.back().m_nID != m_tUp.m_nID)*/)
 	{
 		//m_cInput.push(m_tUp);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Accelerate"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Accelerate", (IComponent*)GetInstance(), 0, 1.0f);
 	}
 	if((KEYDOWN(m_chKeys, m_tDown.m_chKeyboardKey) || KEYDOWN(m_chKeys, DIK_DOWN))
 		/*&& (m_cInput.empty() || m_cInput.back().m_nID != m_tDown.m_nID)*/)
 	{
 		//m_cInput.push(m_tDown);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("Decelerate"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Decelerate", (IComponent*)GetInstance(), 0, 1.0f);
 	}
 	if((KEYDOWN(m_chKeys, m_tLeft.m_chKeyboardKey) || KEYDOWN(m_chKeys, DIK_LEFT))
 		/*&& (m_cInput.empty() || m_cInput.back().m_nID != m_tLeft.m_nID)*/)
 	{
 		//m_cInput.push(m_tLeft);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("SteerLeft"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("SteerLeft", (IComponent*)GetInstance(), 0, 1.0f);
 	}
 	if((KEYDOWN(m_chKeys, m_tRight.m_chKeyboardKey) || KEYDOWN(m_chKeys, DIK_RIGHT))
 		/*&& (m_cInput.empty() || m_cInput.back().m_nID != m_tRight.m_nID)*/)
 	{
 		//m_cInput.push(m_tRight);
 			// - OR - //
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-		CInputEvent(CIDGen::GetInstance()->GetID("SteerRight"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("SteerRight", (IComponent*)GetInstance(), 0, 1.0f);
+	}
+	if(KEYDOWN(m_chKeys, m_tDrift.m_chKeyboardKey) && !KEYDOWN(m_chPrevKeys, m_tDrift.m_chKeyboardKey))
+	{
+		//m_cInput.push(m_tDrift);
+			// - OR - //
+		SendStateEvent("PushState", (IComponent*)GetInstance(), CONSOLE_STATE);
+		//SendInputEvent("Drift", NULL, 0, 1.0f);
 	}
 
 	// HACK: To Demonstrate Boosting
 	if(KEYDOWN(m_chKeys, DIK_SPACE) && !KEYDOWN(m_chPrevKeys, DIK_SPACE))
 	{
-		CInputEvent* pInputEvent = MMNEWEVENT(CInputEvent)
-			CInputEvent(CIDGen::GetInstance()->GetID("Boost"), NULL, 0, 1.0f);
-		pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+		SendInputEvent("Boost", (IComponent*)GetInstance(), 0, 1.0f);
+	}
+
+	// Iterating through keyframes
+	if(KEYDOWN(m_chKeys, DIK_NUMPAD4) && !KEYDOWN(m_chPrevKeys, DIK_NUMPAD4))
+	{
+		SendIEvent("PrevKeyframe", (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+	}
+	if(KEYDOWN(m_chKeys, DIK_NUMPAD6) && !KEYDOWN(m_chPrevKeys, DIK_NUMPAD6))
+	{
+		SendIEvent("NextKeyframe", (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
 	}
 
 #undef KEYDOWN
@@ -619,6 +599,37 @@ void CInputManager::GetInputGameplay()
 #endif
 
 	memcpy(m_chPrevKeys, m_chKeys, sizeof(m_chPrevKeys));
+}
+
+void CInputManager::GetInputConsole()
+{
+#define KEYDOWN(name, key) (name[key] & 0x80  ? true : false)
+
+	m_pKeyboard->Acquire();
+
+	m_pKeyboard->GetDeviceState(sizeof(m_chKeys), (void*)m_chKeys);
+
+	bool bShift = m_chKeys[DIK_LSHIFT] & 0x80 || m_chKeys[DIK_RSHIFT] & 0x80;
+
+	if(KEYDOWN(m_chKeys, DIK_A) && !KEYDOWN(m_chPrevKeys, DIK_A))
+	{
+		if(bShift)
+			SendInputEvent("KeyPressed", (IComponent*)GetInstance(), 'A', 1.0f);
+		else
+			SendInputEvent("KeyPressed", (IComponent*)GetInstance(), 'a', 1.0f);
+	}
+	if(KEYDOWN(m_chKeys, DIK_RETURN) && !KEYDOWN(m_chPrevKeys, DIK_RETURN))
+	{
+		SendInputEvent("KeyPressed", (IComponent*)GetInstance(), '\n', 1.0f);
+	}
+	if(KEYDOWN(m_chKeys, DIK_GRAVE) && !KEYDOWN(m_chPrevKeys, DIK_GRAVE))
+	{
+		SendIEvent("PopState", (IComponent*)GetInstance(), NULL, PRIORITY_INPUT);
+	}
+	
+	memcpy(m_chPrevKeys, m_chKeys, sizeof(m_chPrevKeys));
+	
+#undef KEYDOWN
 }
 
 ////////////////////////////////////////////////////////////////////////////////

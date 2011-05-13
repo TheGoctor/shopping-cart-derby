@@ -17,7 +17,8 @@
 #include "..\\..\\..\\..\\CObject.h"
 
 #include "../../../../Managers/Global Managers/Event Manager/CEventManager.h"
-#include "../../../../Managers/Global Managers/Event Manager/CRenderEvent.h"
+#include "../../../../Managers/Global Managers/Event Manager/EventStructs.h"
+using namespace EventStructs;
 #include "../../../../Managers/Global Managers/Memory Manager/CAllocator.h"
 
 //	For macros
@@ -55,8 +56,8 @@ CTextureManager::~CTextureManager(void)
 
 CTextureManager *CTextureManager::GetInstance(void)
 {
-	static CTextureManager Instance;
-	return &Instance;
+	static CTextureManager cTextureManager;
+	return &cTextureManager;
 }
 
 bool CTextureManager::InitTextureManager(LPDIRECT3DDEVICE9 _lpDevice, LPD3DXSPRITE _lpSprite)
@@ -69,10 +70,10 @@ bool CTextureManager::InitTextureManager(LPDIRECT3DDEVICE9 _lpDevice, LPD3DXSPRI
 
 	// Register for Events
 	CEventManager::GetInstance()->RegisterEvent("RenderSprites",
-		NULL, RenderSpritesCallback);
+		(IComponent*)GetInstance(), RenderSpritesCallback);
 
 	CEventManager::GetInstance()->RegisterEvent("Shutdown",
-		NULL, ShutdownCallback);
+		(IComponent*)GetInstance(), ShutdownCallback);
 
 	return (m_lpDevice && m_lpSprite);
 }
@@ -101,7 +102,7 @@ void CTextureManager::ShutdownTextureManager(void)
 		CSpriteComponent* pSC = *cIter;
 		if(pSC)
 		{
-			MMDEL(CSpriteComponent, pSC);
+			MMDEL(pSC);
 		}
 
 		cIter++;
@@ -329,32 +330,32 @@ bool CTextureManager::Draw(int _nID, int _nX, int _nY, float _fScaleX, float _fS
 int CTextureManager::CreateSpriteComp(lua_State* pLua)
 {
 	// Get Object and Values from LUA
-	CObject* pObj = (CObject*)lua_topointer(pLua, 1);
+	CObject* pObj = (CObject*)lua_topointer(pLua, -19);
 	
 	TSpriteData tSpriteData;
 	tSpriteData.m_nTexture = GetInstance()->LoadTexture(
-		(const char*)lua_tostring(pLua, 2));
-	tSpriteData.m_nX			= (int)lua_tonumber(pLua, 3);
-	tSpriteData.m_nY			= (int)lua_tonumber(pLua, 4);
-	tSpriteData.m_nZ			= (int)lua_tonumber(pLua, 5);
-	tSpriteData.m_fScaleX		= (float)lua_tonumber(pLua, 6);
-	tSpriteData.m_fScaleY		= (float)lua_tonumber(pLua, 7);
-	tSpriteData.m_fRotCenterX	= (float)lua_tonumber(pLua, 8);
-	tSpriteData.m_fRotCenterY	= (float)lua_tonumber(pLua, 9);
-	tSpriteData.m_fRot			= (float)lua_tonumber(pLua, 10);
+		(const char*)lua_tostring(pLua, -18));
+	tSpriteData.m_nX			= (int)lua_tonumber(pLua, -17);
+	tSpriteData.m_nY			= (int)lua_tonumber(pLua, -16);
+	tSpriteData.m_nZ			= (int)lua_tonumber(pLua, -15);
+	tSpriteData.m_fScaleX		= (float)lua_tonumber(pLua, -14);
+	tSpriteData.m_fScaleY		= (float)lua_tonumber(pLua, -13);
+	tSpriteData.m_fRotCenterX	= (float)lua_tonumber(pLua, -12);
+	tSpriteData.m_fRotCenterY	= (float)lua_tonumber(pLua, -11);
+	tSpriteData.m_fRot			= (float)lua_tonumber(pLua, -10);
 	
-	float fR = (float)lua_tonumber(pLua, 11);
-	float fG = (float)lua_tonumber(pLua, 12);
-	float fB = (float)lua_tonumber(pLua, 13);
-	float fA = (float)lua_tonumber(pLua, 14);
+	float fR = (float)lua_tonumber(pLua, -9);
+	float fG = (float)lua_tonumber(pLua, -8);
+	float fB = (float)lua_tonumber(pLua, -7);
+	float fA = (float)lua_tonumber(pLua, -6);
 	tSpriteData.m_dwColor = D3DXCOLOR(fR, fG, fB, fA);
 		
-	tSpriteData.m_tRect.left   = (LONG)lua_tonumber(pLua, 15);
-	tSpriteData.m_tRect.top	   = (LONG)lua_tonumber(pLua, 16);
-	tSpriteData.m_tRect.right  = (LONG)lua_tonumber(pLua, 17);
-	tSpriteData.m_tRect.bottom = (LONG)lua_tonumber(pLua, 18);
+	tSpriteData.m_tRect.left   = (LONG)lua_tonumber(pLua, -5);
+	tSpriteData.m_tRect.top	   = (LONG)lua_tonumber(pLua, -4);
+	tSpriteData.m_tRect.right  = (LONG)lua_tonumber(pLua, -3);
+	tSpriteData.m_tRect.bottom = (LONG)lua_tonumber(pLua, -2);
 
-	bool bActive = (0 != lua_toboolean(pLua, 19)); // To properly cast int to bool
+	bool bActive = (0 != lua_toboolean(pLua, -1)); // To properly cast int to bool
 
 	// Create Component
 	CSpriteComponent* pSpriteComp = CreateSpriteComp(pObj, tSpriteData, bActive);
@@ -368,8 +369,8 @@ CSpriteComponent* CTextureManager::CreateSpriteComp(CObject* pParent,
 		TSpriteData tSpriteData, bool bActive)
 {
 	// Create Component
-	CSpriteComponent *pComp = MMNEW(CSpriteComponent) CSpriteComponent(pParent,
-		tSpriteData);	
+	CSpriteComponent *pComp = MMNEW(CSpriteComponent(pParent,
+		tSpriteData));	
 
 	pComp->SetActive(bActive);
 
@@ -388,7 +389,7 @@ CBitmapFontComp* CTextureManager::CreateBitmapFontComp(CObject* pParent,
 		float fScale, DWORD dwColor, bool bActive)
 {
 	// Create Component
-	CBitmapFontComp *pComp = MMNEW(CBitmapFontComp) CBitmapFontComp(pParent, cFont, szWord, nX, nY, fScale, dwColor);	
+	CBitmapFontComp *pComp = MMNEW(CBitmapFontComp(pParent, cFont, szWord, nX, nY, fScale, dwColor));	
 
 	pComp->SetActive(bActive);
 
@@ -396,7 +397,10 @@ CBitmapFontComp* CTextureManager::CreateBitmapFontComp(CObject* pParent,
 	GetInstance()->m_cBitmapFontComps.insert(pComp);
 
 	// Add to Parent
-	pParent->AddComponent(pComp);
+	if(pParent)
+	{
+		pParent->AddComponent(pComp);
+	}
 
 	// Return Component
 	return pComp;

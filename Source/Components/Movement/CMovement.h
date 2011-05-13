@@ -2,12 +2,10 @@
 #ifndef _CMOVEMENT_H_
 #define _CMOVEMENT_H_
 
-// TODO: change vec3 to D3DXVECTOR3
 #include <D3dx9math.h>
 #include "..\..\IComponent.h"
 
 #include "..\..\Managers\Component Managers\CMovementManager.h"
-#include "..\..\Managers\Component Managers\CSteeringManager.h"
 
 class CObject;
 class IEvent;
@@ -16,35 +14,58 @@ class CMovement : public IComponent
 {
 private:
 	CObject*			m_pObject;
-	D3DXVECTOR3			m_vVelocity;
+	float				m_fSpeed;
 	EAccelerateBehavior	m_eAccelerateBehavior;
 	EAccelerateBehavior	m_eAccelerateBehaviorLastFrame;
-	bool				m_bIsPlayer;
 	ECartWeight			m_eWeight;
-	CMovementManager*	m_pcMovementManager;
-
+	
 	int					m_nPlayerNumber;
 
 	float				m_fMaxSpeed;
 	float				m_fMaxReverseSpeed;
-	D3DXVECTOR3			m_vStoredHeading; // heading sent from steering
-
+	float				m_fTurnRate;
+	
 	float				m_fTurnAmount;
 	float				m_fAccelerateCoefficient;
 	float				m_fBrakeCoefficient;
 	float				m_fReverseCoefficient;
 	float				m_fCoastCoefficient;
 	float				m_fTranslateThreshold;
+	
 	float				m_fRammingSpeed;
+	float				m_fTimeSinceRammedLast;
+	float				m_fRammedCooldown;
+
+	float				m_fShoveTimeLeft;
+	float				m_fShoveDuration;
+	float				m_fShovePower;
+	float				m_fShoveCooldown;
+	int					m_nShoveDirection;
+
+	D3DXMATRIX			m_mStartMatrix;
 
 	bool				m_bIsBackingUp;
 
 	float				m_fDeltaTime;
+	float				m_fTimerCounter;
+	float				m_fDtThreshold;
 	float				m_fSoundPlayingTime;
 
+	// Status effect variables
+	D3DXVECTOR3			m_vSlipDirection;
+	bool				m_bIsSlipping;
+	float				m_fSlipDuration;
+	float				m_fSlipTurnSpeed;
+
+	float				m_fStunDuration;
+	
+	float				m_fSlowDuration;
+	bool				m_bIsSlowed;
+	
+	float				m_fInvulnerableDuration;
+	
 	// HACK: until inventory handles it
 	bool				m_bBoostAvailable;
-
 
 public:
 
@@ -106,7 +127,6 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	void CalculateValuesFromWeight();
 
-
 	///////////////////////////////////////////////////////////////////////////
 	//	Name:			SetObject
 	//	Parameters:		CObject*	pObj	// The object this component
@@ -114,24 +134,25 @@ public:
 	//	Return:			void	
 	//	Description:	Sets the parent object member to the parameter passed in
 	///////////////////////////////////////////////////////////////////////////
-	void SetObject(CObject* pObj)
+	inline void SetObject(CObject* pObj)
 	{
 		m_pObject = pObj;
 	}
 
-	void SetPlayerNumber(int nNum)
+	inline void SetPlayerNumber(int nNum)
 	{
 		m_nPlayerNumber = nNum;
 	}
 	
-	int GetPlayerNumber()
+	inline int GetPlayerNumber()
 	{
 		return m_nPlayerNumber;
 	}
-
-
-
 	
+	void UpdateTimers(float fDt);
+	void ApplyShove(float fDt, D3DXVECTOR3& translateVec);
+	void PlayAccelerateOrBrakeSound(EAccelerateBehavior eInput);
+
 	///////////////////////////
 	//
 	//	Callback Functions
@@ -151,7 +172,7 @@ public:
 	//					 if each object is registered as a player
 	//					 and if so, sends an event to the HUD with the object.
 	///////////////////////////////////////////////////////////////////////////
-	void Update(IEvent* cEvent, IComponent* cCenter);
+	static void Update(IEvent* cEvent, IComponent* cCenter);
 	
 	///////////////////////////////////////////////////////////////////////////
 	//	Name:			HandleInput
@@ -166,48 +187,24 @@ public:
 	///////////////////////////////////////////////////////////////////////////
 	void HandleInput(EAccelerateBehavior eInput);
 	
-	///////////////////////////////////////////////////////////////////////////
-	//	Name:			RegisterPlayer
-	//	Parameters:		IComponent*		cSender	//The sender of the event
-	//					IEvent			cEvent	//Empty event
-	//	Return:			void		
-	//	Description:	Makes the m_bIsPlayer bool true which 
-	//					 enables broadcasting the object’s 
-	//					 location to the HUD.
-	///////////////////////////////////////////////////////////////////////////
-	void RegisterPlayer(IEvent* cEvent, IComponent* cCenter);
-	
-	///////////////////////////////////////////////////////////////////////////
-	//	Name:			UpdateHeading
-	//	Parameters:		IComponent*		cSender	//The sender of the event
-	//					IEvent			cEvent	//Actually a CHeadingEvent
-	//											// Holds a normalized vector
-	//	Return:			void	
-	//	Description:	Updates the direction of the velocity 
-	//					 while maintaining its magnitude.
-	///////////////////////////////////////////////////////////////////////////
-	void UpdateHeading(IEvent* cEvent, IComponent* cCenter);
-
-	///////////////////////////////////////////////////////////////////////////
-	//	Name:			SetWeight
-	//	Parameters:		IComponent*		cSender	//The sender of the event
-	//					IEvent			cEvent	//Actually a CWeightClassEvent
-	//											// Holds a normalized vector
-	//	Return:			void	
-	//	Description:	Sets the weight value in the event and updates values
-	//					 to match the weight
-	///////////////////////////////////////////////////////////////////////////
-	void SetWeight(IEvent* cEvent, IComponent* cCenter);
-	
-	
 	static void HandleCollision(IEvent* cEvent, IComponent* cCenter);
+	static void HandleShoveLeft(IEvent* cEvent, IComponent* cCenter);
+	static void HandleShoveRight(IEvent* cEvent, IComponent* cCenter);
+	static void HandleInputAccelerate(IEvent* cEvent, IComponent* cCenter);
+	static void HandleInputBrake(IEvent* cEvent, IComponent* cCenter);
+	static void HandleInputRight(IEvent* cEvent, IComponent* cCenter);
+	static void HandleInputLeft(IEvent* cEvent, IComponent* cCenter);
 	
-	void Boost();
-
-
-
-
+	static void Boost(IEvent* cEvent, IComponent* cCenter);
+	static void SetWeightCallback(IEvent* cEvent, IComponent* cCenter);
+	
+	static void SlipStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	static void StunStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	static void SlowStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	static void BlindStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	static void InvulnerableStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	
+	static void StartOfGame(IEvent* cEvent, IComponent* cCenter);
 };
-
 
 #endif // _CMOVEMENT_H_

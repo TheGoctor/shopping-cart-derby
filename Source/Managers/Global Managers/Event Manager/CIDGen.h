@@ -16,9 +16,13 @@
 using std::map;
 using std::string;
 
+#include "../Memory Manager/CAllocator.h"
+
 class CIDGen
 {
-	map<string, unsigned int> m_cRegister;
+	// TODO: possibly change the allocator to a different heap
+	map<string, unsigned int, less<string>, CAllocator<
+		pair<string, unsigned int>>> m_cRegister;
 
 	// Constructor
 	CIDGen();

@@ -1,7 +1,7 @@
 #include "DXRenderShape.h"
 #include "DXRenderContext.h"
 #include "DXMesh.h"
-#include "Camera.h"
+#include "../Camera Manager/Camera.h"
 
 #include "Direct3DManager.h"
 

@@ -47,7 +47,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -118,11 +118,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="Lua5.1.4\src;&quot;C:\Program Files\Audiokinetic\Wwise\SDK\include&quot;;&quot;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\include&quot;;&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include&quot;;&quot;C:\Program Files (x86)\Visual Leak Detector\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -138,7 +139,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="AkSoundEngine.lib AkMusicEngine.lib AkMemoryMgr.lib AkStreamMgr.lib AkVorbisDecoder.lib dxguid.lib ws2_32.lib AkAudioInputSource.lib AkDelayFX.lib AkPeakLimiterFX.lib AkSoundSeedImpactFX.lib AkMotionGenerator.lib AkRumble.lib AkRoomVerbFX.lib akparametriceqfx.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Audiokinetic\Wwise\SDK\Win32_vc90\Release(StaticCRT)\lib&quot;"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Audiokinetic\Wwise\SDK\Win32_vc90\Release(StaticCRT)\lib&quot;;&quot;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\Win32_vc90\Release(StaticCRT)\lib&quot;;&quot;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86&quot;"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBCMT"
 				GenerateDebugInformation="true"
@@ -183,6 +184,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\Enums.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\WinMain.cpp"
 				>
 			</File>
@@ -218,6 +223,18 @@
 				Name="Sound"
 				>
 			</Filter>
+			<Filter
+				Name="Shaders"
+				>
+				<File
+					RelativePath=".\Resource\Shaders\basic.fx"
+					>
+				</File>
+				<File
+					RelativePath=".\Resource\Shaders\Texture2D.fx"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="GlobalManagers"
@@ -249,6 +266,10 @@
 					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CMemoryManager.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CRenderAllocator.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="EventManager"
@@ -270,57 +291,17 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\Managers\Global Managers\Event Manager\EventStructs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Event Manager\EventStructs.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\Managers\Global Managers\Event Manager\IEvent.h"
 					>
 				</File>
-				<Filter
-					Name="Events"
-					>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CGoalItemCollected.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CGoalItemEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CHeadingEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CInputEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CMoveCameraEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CObjectEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CRamEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CRenderEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CStateEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CUpdateStateEvent.h"
-						>
-					</File>
-					<File
-						RelativePath=".\Source\Managers\Global Managers\Event Manager\CWeightClassEvent.h"
-						>
-					</File>
-				</Filter>
 			</Filter>
 			<Filter
 				Name="InputManager"
@@ -362,19 +343,11 @@
 				Name="Rendering Manager"
 				>
 				<File
-					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Camera.cpp"
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CAnimation.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Camera.h"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CCameraManager.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CCameraManager.h"
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CAnimation.h"
 					>
 				</File>
 				<File
@@ -502,6 +475,58 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="ConsoleManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Console Manager\CConsoleManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Console Manager\CConsoleManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="CameraManager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\Camera.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\Camera.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CCameraBehaviorBase.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CCameraManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CCameraManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CHardAttachBehavior.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CHardAttachBehavior.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CSoftAttachBehavior.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CSoftAttachBehavior.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Components"
@@ -521,6 +546,14 @@
 			<Filter
 				Name="Level"
 				>
+				<File
+					RelativePath=".\Source\Components\Level\CDepartment.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Level\CDepartment.h"
+					>
+				</File>
 				<File
 					RelativePath=".\Source\Components\Level\CGoalItemComponent.cpp"
 					>
@@ -551,20 +584,16 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="HasWon"
-				>
-				<File
-					RelativePath=".\Source\Components\HasWon\CHasWonComponent.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Components\HasWon\CHasWonComponent.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="Rendering"
 				>
+				<File
+					RelativePath=".\Source\Components\Rendering\CAnimateComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CAnimateComponent.h"
+					>
+				</File>
 				<File
 					RelativePath=".\Source\Components\Rendering\CRenderComponent.cpp"
 					>
@@ -595,18 +624,6 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="Sound"
-				>
-				<File
-					RelativePath=".\Source\Components\Sound\CSoundComponent.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Components\Sound\CSoundComponent.h"
-					>
-				</File>
-			</Filter>
-			<Filter
 				Name="StartOfRace"
 				>
 				<File
@@ -630,6 +647,42 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Inventory"
+				>
+				<File
+					RelativePath=".\Source\Components\Inventory\CInventoryComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Inventory\CInventoryComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="PickupItem"
+				>
+				<File
+					RelativePath=".\Source\Components\PickupItem\CPickupItemComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\PickupItem\CPickupItemComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Slider"
+				>
+				<File
+					RelativePath=".\Source\Components\Slider\CSliderComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Slider\CSliderComponent.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="ComponentManagers"
@@ -648,6 +701,14 @@
 			</File>
 			<File
 				RelativePath=".\Source\Managers\Component Managers\CCollisionManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CInventoryManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CInventoryManager.h"
 				>
 			</File>
 			<File
@@ -675,19 +736,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\Managers\Component Managers\CSpawningManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CSpawningManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\Managers\Component Managers\CStartOfRaceManager.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\Managers\Component Managers\CStartOfRaceManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Managers\Component Managers\CSteeringManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Managers\Component Managers\CSteeringManager.h"
 				>
 			</File>
 		</Filter>

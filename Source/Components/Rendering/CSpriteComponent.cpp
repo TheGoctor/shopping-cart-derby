@@ -12,7 +12,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Includes
 #include "CSpriteComponent.h"
-#include"..\\..\\Managers\\Global Managers\\Rendering Managers\\Texture Managers\\CTextureManager.h"
+#include"..\..\Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h"
 
 // Constructor
 CSpriteComponent::CSpriteComponent(CObject* pParent, TSpriteData tSpriteData)

@@ -13,6 +13,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
+using std::cout;
+
 // LUA TEST CODE //
 extern "C"
 {
@@ -26,14 +29,15 @@ extern "C"
 #include "Managers/Global Managers/Memory Manager/CMemoryManager.h"
 #include "Managers/Global Managers/Input Manager/CInputManager.h"
 #include "Managers/Global Managers/Event Manager/CEventManager.h"
-#include "Managers/Global Managers/Event Manager/CUpdateStateEvent.h"
+#include "Managers/Global Managers/Event Manager/EventStructs.h"
 #include "Managers/Global Managers/Event Manager/IEvent.h"
 #include "Managers/Global Managers/Event Manager/CIDGen.h"
 #include "Managers/Global Managers/Object Manager/CObjectManager.h"
 #include "Managers/Component Managers/CMovementManager.h"
+#include "Managers/Component Managers/CInventoryManager.h"
 #include "Managers/Global Managers/Rendering Managers/Renderer.h"
-#include "Managers/Global Managers/Event Manager/CRenderEvent.h"
 #include "Managers/Component Managers/CLevelManager.h"
+#include "Managers/Component Managers/CSpawningManager.h"
 #include "Managers/Component Managers/CAIManager.h"
 #include "Managers/Component Managers/CStartOfRaceManager.h"
 #include "Managers\Global Managers\Rendering Managers\Direct3DManager.h"
@@ -43,13 +47,14 @@ extern "C"
 #include "Managers\\Global Managers\\Rendering Managers\\Texture Managers\\CHUDManager.h"
 #include "Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
 #include "Managers\Global Managers\State Manager\CStateManager.h"
-#include "Components\\HasWon\\CHasWonComponent.h"
 #include "Components\\Button\\CButtonComponent.h"
+#include "Components\\Slider\\CSliderComponent.h"
+#include "Managers\Global Managers\Console Manager\CConsoleManager.h"
 
 
 /////////////////////
 // REMOVE THIS LATER
-#include "Managers/Global Managers/Rendering Managers/Camera.h"
+#include "Managers/Global Managers/Camera Manager/Camera.h"
 ////////////////////
 
 extern const AkGameObjectID OBJECTMUSIC = 0;
@@ -115,8 +120,7 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 	CAIManager::GetInstance()->Init();
 	m_pSound = CWwiseSoundManager::GetInstance();
 	m_pSound->InitSoundManager();
-	m_pSound->RegisterObject(OBJECTMUSIC);
-	m_pSound->PlayMusic(MUSICLOOP_PLAY);
+	m_pSound->RegisterObject(GLOBAL_ID);
 	
 	m_pEM = CEventManager::GetInstance();
 
@@ -168,16 +172,41 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 			&CTextureManager::CreateSpriteComp);
 		lua_register(pL, "CreateAIComponent",
 			&CAIManager::CreateAIComponent);
-		lua_register(pL, "CreateStartOfRaceComponent",
-			&CStartOfRaceManager::CreateStartOfRaceComponent);
 		lua_register(pL, "CreateCollideableComponent",
 			&CCollisionManager::CreateCollideableComponent);
-		lua_register(pL, "CreateHasWonComponent",
-			&CHasWonComponent::CreateHasWonComponent);
 		lua_register(pL, "CreateButtonComponent",
 			&CButtonComponent::CreateButtonComponent);
+		lua_register(pL, "CreateSliderComponent",
+			&CSliderComponent::CreateSliderComponent);
+		lua_register(pL, "SetSliderValue",
+			&CSliderComponent::SetSliderValue);
 		lua_register(pL, "SetNextButtonComponent",
 			&CButtonComponent::SetNextButtonComponent);
+		lua_register(pL, "CreateInventoryComp",
+			&CInventoryManager::CreateInventoryComp);
+
+		lua_register(pL, "CreateUpdateStateEvent",
+			&EventStructs::CreateUpdateStateEvent);
+		lua_register(pL, "CreateStateEvent",
+			&EventStructs::CreateStateEvent);
+		lua_register(pL, "CreateRenderEvent",
+			&EventStructs::CreateRenderEvent);
+		lua_register(pL, "CreateRamEvent",
+			&EventStructs::CreateRamEvent);
+		lua_register(pL, "CreateObjectEvent",
+			&EventStructs::CreateObjectEvent);
+		lua_register(pL, "CreateInputEvent",
+			&EventStructs::CreateInputEvent);
+		lua_register(pL, "CreateHeadingEvent",
+			&EventStructs::CreateHeadingEvent);
+		lua_register(pL, "CreateGoalItemEvent",
+			&EventStructs::CreateGoalItemEvent);
+		lua_register(pL, "CreateWeightClassEvent",
+			&EventStructs::CreateWeightClassEvent);
+		lua_register(pL, "CreateGoalItemCollectedEvent",
+			&EventStructs::CreateGoalItemCollectedEvent);
+		lua_register(pL, "CreateStatusEffectEvent",
+			&EventStructs::CreateStatusEffectEvent);/**/
 
 		if(luaL_dofile(pL, "Source/Scripts/luatest.lua"))
 		{
@@ -195,13 +224,22 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 		CMovementManager::GetInstance();
 
 	//// END LUA TEST CODE //
+
+		// TODO: Delete when collisions can add to set
 		test = CObjectManager::GetInstance()->GetObject();
 
+	// Inventory
+	CInventoryManager::GetInstance()->Init();
 
 	// HUD
 	CHUDManager::GetInstance()->Init();
 	CLevelManager::GetInstance()->Init();
+	CSpawningManager::GetInstance()->Init();
 	CStartOfRaceManager::GetInstance(); // create the mgr
+	
+	CConsoleManager::GetInstance()->Initialize();
+
+
 
 	// Screen Properties
 	m_nScreenWidth = nScreenWidth;
@@ -212,7 +250,7 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 	srand(GetTickCount());
 
 	// Register for Events
-	m_pEM->RegisterEvent("ShutdownGame", NULL, ShutdownCallback);
+	m_pEM->RegisterEvent("ShutdownGame", (IComponent*)GetInstance(), ShutdownCallback);
 
 	// Time
 	m_dwPrevTime = GetTickCount();
@@ -232,11 +270,9 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 void CGame::Shutdown()
 {
 	// Unregister Events
-	IEvent* pShutdownEvent = MMNEWEVENT(IEvent) IEvent(CIDGen::GetInstance()->
-		GetID("Shutdown"), NULL);
 	
 	m_pEM->ClearEvents();
-	m_pEM->PostEvent(pShutdownEvent, PRIORITY_IMMEDIATE);
+	SendIEvent("Shutdown", NULL, NULL, PRIORITY_IMMEDIATE);
 
 	// Shutdown Managers
 	if(CInputManager::GetInstance())
@@ -289,42 +325,30 @@ bool CGame::Main()
 		m_nFPS = m_nFrameCount;
 		m_fFrameTime = 0;
 		m_nFrameCount = 0;
+		cout << "FPS: " << m_nFPS << endl;
 	}
 	
 	// Input
-	IEvent* pInputEvent = MMNEWEVENT(IEvent) IEvent(CIDGen::GetInstance()->
-		GetID("GetInput"), NULL);
-
-	m_pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+	SendIEvent("GetInput", NULL, NULL, PRIORITY_INPUT);
 
 	// Update
-	CUpdateStateEvent* pUpdateEvent = MMNEWEVENT(CUpdateStateEvent) 
-		CUpdateStateEvent(CIDGen::GetInstance()->GetID("UpdateState"), 
-		NULL, m_fDT);
-
-	m_pEM->PostEvent(pUpdateEvent, PRIORITY_UPDATE);
+	SendUpdateEvent("UpdateState", NULL, m_fDT);
 
 	// Render
-	CRenderEvent* pE = MMNEWEVENT(CRenderEvent) CRenderEvent(CIDGen::
-			GetInstance()->GetID("AddToSet"), NULL, test);
-		CEventManager::GetInstance()->PostEvent(pE, PRIORITY_NORMAL);
 
-	IEvent* pRenderEvent = MMNEWEVENT(IEvent) IEvent(CIDGen::GetInstance()
-		->GetID("Render"), NULL);
+	// TODO: Delete When "AddToSet" is called by collision with frustum
+	SendRenderEvent("AddToSet", NULL, test, PRIORITY_NORMAL);
+	// END TODO
 
-	m_pEM->PostEvent(pRenderEvent, PRIORITY_RENDER);
+	SendIEvent("Render", NULL, NULL, PRIORITY_RENDER);
 
 	// Process Events
 	m_pEM->ProcessEvents();
 
-	// Render?
-	//m_pRenderer->RenderScene();
-
-	if(!m_bShutdown)
-	{
-		Shutdown();
-	}
+	//if(!m_bShutdown)
+	//{
+	//	Shutdown();
+	//}
 	
 	return m_bShutdown;
 }
-
