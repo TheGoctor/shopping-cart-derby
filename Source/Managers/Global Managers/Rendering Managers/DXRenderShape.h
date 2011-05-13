@@ -24,6 +24,10 @@ private:
 	static void SetLightHelper(DXRenderContext * pContextNode);
 	static void SetTextureHelper(DXRenderContext * pContextNode);
 
+	static void SetMVPBoneHelper(DXRenderShape &shapeNode, CFrame &frame);
+	static void SetWorldBoneHelper(DXRenderShape &shapeNode, CFrame &frame);
+	static void RenderBonesHelper(DXRenderShape &shapeNode, CFrame & frame, LPD3DXMESH sphere);
+
 public:
 	DXRenderShape(void);
 	~DXRenderShape(void);
@@ -50,10 +54,13 @@ public:
 	static void IndexedVertsTextureRenderFunc(RenderNode &node);
 	static void IndexedVertsLitTexturedRenderFunc(RenderNode &node);
 
+	// Testing Animation Hiarch
+	static void BonesRenderFunc(RenderNode &node);
+
 	// Accessor
 	static pfRenderFunc GetRenderFunc(ERenderFunc eRenderFunc)
 	{
-		static void (*m_pfRenderFuncs[RF_MAX])(RenderNode&) = { VertsRenderFunc, IndexedVertsRenderFunc, IndexedVertsTextureRenderFunc };
+		static void (*m_pfRenderFuncs[RF_MAX])(RenderNode&) = { VertsRenderFunc, IndexedVertsRenderFunc, IndexedVertsTextureRenderFunc, BonesRenderFunc };
 		return m_pfRenderFuncs[eRenderFunc]; 
 	}
 };

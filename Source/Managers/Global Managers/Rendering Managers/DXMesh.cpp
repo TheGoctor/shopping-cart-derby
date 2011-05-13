@@ -74,3 +74,16 @@ void DXMesh::CreateIndexBuffer(const DWORD *iIndices, unsigned int iIndexCount)
 	memcpy(buffer, iIndices, iBufferSize);
 	m_pIndexBuffer->Unlock();
 }
+
+void DXMesh::BuildHiearchy(void)
+{
+	int nNumBones = m_cJoints.size();
+	for(int bone = 0; bone < nNumBones; ++bone)
+	{
+		for(int child = 0; child < m_cJoints[bone].m_nNumChildren; ++child)
+		{
+			m_cJoints[bone].m_cFrame.AddChildFrame(
+				&m_cJoints[m_cJoints[bone].m_cChildrenIdxs[child]].m_cFrame);
+		}
+	}
+}

@@ -58,7 +58,6 @@ public:
 	static void Render(RenderSet &set);
 
 	static void AddToRenderSet(IEvent*, IComponent*);
-	static void DestroyObject(IEvent*, IComponent*);
 
 	void RenderScene(void);
 	
@@ -73,7 +72,6 @@ public:
 	// Callbacks
 	static void RenderCallback(IEvent* e, IComponent* comp);
 	static void ShutdownCallback(IEvent* e, IComponent* comp);
-	static void DestroyComponent(IEvent*, IComponent*);
 };
 
 #endif	// _RENDERER_H_

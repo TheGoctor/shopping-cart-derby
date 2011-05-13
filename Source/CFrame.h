@@ -28,6 +28,12 @@ private:
 public:
 	enum {DIRTY = 1};
 
+	inline void CloneLocal(CFrame& cFrame)
+	{
+		m_uFlags |= DIRTY;
+		m_mLocalMatrix = cFrame.GetLocalMatrix();
+	}
+
 	CFrame(void) : m_uFlags(0), m_pParent(NULL) 
 	{
 		// Set to Orginal
@@ -47,6 +53,11 @@ public:
 		m_pParent = pParent;
 	}
 
+	std::list<CFrame*, CAllocator<CFrame*>>* GetChildren(void)
+	{
+		return &m_vpChildren;
+	}
+
 	void AddChildFrame(CFrame *pChild)
 	{
 		if(pChild->m_pParent != NULL)
@@ -62,6 +73,7 @@ public:
 		{
 			m_vpChildren.push_back(pChild);
 			pChild->m_pParent = this;
+			pChild->Update();
 		}
 	}
 

@@ -24,13 +24,6 @@ using namespace EventStructs;
 #define   FONT_RECT   {0,0,1000,200}
 #define   FONT_COLOR   D3DCOLOR_XRGB(255,255,255)
 
-//Viewport hack
-//D3DVIEWPORT9 view1;
-//D3DVIEWPORT9 view2;
-//D3DVIEWPORT9 view3;
-//D3DVIEWPORT9 view4;
-//D3DVIEWPORT9  vps[4];
-
 Renderer::Renderer(void)
 {
 }
@@ -51,42 +44,7 @@ void Renderer::Init(HWND hWnd, int nScreenWidth,
 
 	m_pRCM = DXRenderContextManager::GetInstance();
 	m_pRCM->Initialize();
-	
-	/*
-	//////// Viewport Hack
-	view1.Height	= nScreenHeight/2;
-	view1.Width		= nScreenWidth/2 ;
-	view1.X			= 0;
-	view1.Y			= 0;
-	view1.MinZ		= 0.0f;
-	view1.MaxZ		= 1.0f;
 
-	view2.Height	= nScreenHeight/2;
-	view2.Width		= nScreenWidth/2 ;
-	view2.X			= nScreenWidth/2;
-	view2.Y			= 0;
-	view2.MinZ		= 0.0f;
-	view2.MaxZ		= 1.0f;
-
-	view2.Height	= nScreenHeight/2;
-	view2.Width		= nScreenWidth/2 ;
-	view2.X			= 0;
-	view2.Y			= nScreenHeight/2;
-	view2.MinZ		= 0.0f;
-	view2.MaxZ		= 1.0f;
-
-	view2.Height	= nScreenHeight/2;
-	view2.Width		= nScreenWidth/2 ;
-	view2.X			= nScreenWidth/2;
-	view2.Y			= nScreenHeight/2;
-	view2.MinZ		= 0.0f;
-	view2.MaxZ		= 1.0f;
-
-	vps[0] = view1;
-	vps[1] = view2;
-	vps[2] = view3;
-	vps[3] = view4;	
-*/
 	// Sprites
 	//CTextureManager::GetInstance()->InitTextureManager(m_pD3D->GetDirect3DDevice(), 
 
@@ -160,26 +118,22 @@ void Renderer::Init(HWND hWnd, int nScreenWidth,
 	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ShortShelf_FINShape_Collision.mesh");
 	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_TallShelf_FINShape_Collision.mesh");
 
+	ModelManager::GetInstance()->LoadModelWithBones("Resource/test_boxShape.mesh");
+	
+	ModelManager::GetInstance()->LoadAnimFile("Resource/testcubewalk.anim");
+
+	
+
 	// Register For Events
 	CEventManager* pEM = CEventManager::GetInstance();
 	pEM->RegisterEvent("Render",
-		(IComponent*)GetInstance(), RenderCallback);
+		NULL, RenderCallback);
 
 	pEM->RegisterEvent("AddToSet",
-		(IComponent*)GetInstance(), AddToRenderSet);
+		NULL, AddToRenderSet);
 
 	pEM->RegisterEvent("Shutdown",
-		(IComponent*)GetInstance(), ShutdownCallback);
-
-	pEM->RegisterEvent("DestroyObject", (IComponent*)GetInstance(), DestroyComponent);
-}
-
-void Renderer::DestroyObject(IEvent* pcEvent, IComponent*)
-{
-	TObjectEvent* pcObj = (TObjectEvent*)pcEvent->GetData();
-
-	GetInstance()->m_cRenderComps.erase(GetInstance()->m_cRenderComps.find(
-		pcObj->m_pcObj->GetID()));
+		NULL, ShutdownCallback);
 }
 
 void Renderer::Render(RenderSet &set)
@@ -206,12 +160,7 @@ void Renderer::RenderScene(void)
 	m_pD3D->DeviceBegin();
 
 	//
-	///Viewport Hack
-	//for (unsigned int i = 0; i < 4; ++i)
-	//{
-	
-		//m_pD3D->GetDirect3DDevice()->SetViewport(&vps[i]);
-		//m_pD3D->GetDirect3DDevice()->Clear(0L, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xffcccccc, 1.0f, 0L);
+
 		// Contexts
 		m_pRCM->RenderContexts();
 
@@ -231,7 +180,7 @@ void Renderer::RenderScene(void)
 		CConsoleManager::GetInstance()->DrawConsole();
 
 	//
-	//}
+
 	// stop the scene
 	m_pD3D->DeviceEnd();
 	
@@ -287,8 +236,8 @@ CRenderComponent* Renderer::CreateRenderComp(CObject* pParent, int nModelID,
 {
 	DXRenderContext* pRC = GetInstance()->m_pRCM->GetContext((ERenderContext)nRenderContextIdx);
 	
-	CRenderComponent* comp = MMNEW(CRenderComponent(pParent,
-		nModelID, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx)));	
+	CRenderComponent* comp = MMNEW(CRenderComponent) CRenderComponent(pParent,
+		nModelID, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx));	
 	
 	comp->Init();
 	pParent->AddComponent(comp);
@@ -303,8 +252,8 @@ CRenderComponent* Renderer::CreateRenderComp(CObject* pParent, DXMesh* pMesh,
 {
 	DXRenderContext* pRC = GetInstance()->m_pRCM->GetContext((ERenderContext)nRenderContextIdx);
 	
-	CRenderComponent* comp = MMNEW(CRenderComponent(pParent,
-		(DXMesh*)pMesh, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx)));	
+	CRenderComponent* comp = MMNEW(CRenderComponent) CRenderComponent(pParent,
+		(DXMesh*)pMesh, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx));	
 	
 	comp->Init();
 	pParent->AddComponent(comp);
@@ -335,22 +284,9 @@ void Renderer::Shutdown(void)
 	{
 		if(cIter->second)
 		{
-			MMDEL(cIter->second);
+			MMDEL(CRenderComponent, cIter->second);
 		}
 
 		cIter++;
-	}
-}
-
-void Renderer::DestroyComponent(IEvent* pEvent, IComponent* pComp)
-{
-	TObjectEvent* pObjEvent = (TObjectEvent*)pEvent->GetData();
-	int nID = pObjEvent->m_pcObj->GetID();
-	CRenderComponent* pRendComp = (CRenderComponent*)pEvent->GetSender();
-
-	if((*GetInstance()->m_cRenderComps.find(nID)).second == pRendComp)
-	{
-		MMDEL(pRendComp);
-		GetInstance()->m_cRenderComps.erase(nID);
 	}
 }
