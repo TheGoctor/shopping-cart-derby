@@ -271,3 +271,80 @@ void DXRenderShape::IndexedVertsLitTexturedRenderFunc(RenderNode &node)
 		pEffect->EndPass();
 	}
 }
+
+
+
+
+
+
+void DXRenderShape::SetMVPBoneHelper(DXRenderShape &shapeNode, CFrame &frame)
+{
+	// Get Context
+	DXRenderContext * pContextNode = shapeNode.GetRenderContext();
+
+	// Set MVP
+	D3DXMATRIX mMVP = frame.GetWorldMatrix();
+	mMVP = mMVP * CCamera::GetInstance()->GetViewProjectionMatrix();
+	pContextNode->SetMVP(mMVP);
+}
+
+void DXRenderShape::SetWorldBoneHelper(DXRenderShape & shapeNode, CFrame &frame)
+{
+	// Get Context
+	DXRenderContext * pContextNode = shapeNode.GetRenderContext();
+
+	// Set World
+	D3DXMATRIX mWorld = frame.GetWorldMatrix();
+	D3DXMatrixInverse(&mWorld, 0, &mWorld);
+	D3DXMatrixTranspose(&mWorld, &mWorld);
+	pContextNode->SetWorld(mWorld);
+}
+
+void DXRenderShape::RenderBonesHelper(DXRenderShape &shapeNode, CFrame & frame, LPD3DXMESH sphere)
+{
+	DXRenderContext * pContextNode = shapeNode.GetRenderContext();
+	ID3DXEffect * pEffect = pContextNode->GetShader();
+
+	UINT passes = 0;
+	pEffect->Begin(&passes, 0);
+	for(UINT i=0; i<passes; i++)
+	{
+		pEffect->BeginPass(i);
+
+		// Set Values
+		SetMVPBoneHelper(shapeNode, frame);
+		//SetWorldBoneHelper(shapeNode, frame);
+
+		// Commit Changes
+		pEffect->CommitChanges();
+
+		// Render Sphere
+		sphere->DrawSubset(0);
+
+		pEffect->EndPass();
+	}
+
+	list<CFrame*, CAllocator<CFrame*>>::iterator childIter = frame.GetChildren()->begin();
+
+	while(childIter != frame.GetChildren()->end())
+	{
+		RenderBonesHelper(shapeNode, *(*childIter), sphere);
+
+		childIter++;
+	}
+}
+
+void DXRenderShape::BonesRenderFunc(RenderNode &node)
+{
+	// Get Nodes
+	DXRenderShape & shapeNode = (DXRenderShape&)node;
+	//DXRenderContext * pContextNode = shapeNode.GetRenderContext();
+	//DXMesh * pMesh = shapeNode.GetMesh();
+	//ID3DXEffect * pEffect = pContextNode->GetShader();
+
+	LPD3DXMESH sphere;
+	D3DXCreateSphere(Direct3DManager::GetInstance()->GetDirect3DDevice(),
+		0.1f, 13, 13, &sphere, NULL);
+
+	RenderBonesHelper(shapeNode, *shapeNode.GetFrame(), sphere);
+}

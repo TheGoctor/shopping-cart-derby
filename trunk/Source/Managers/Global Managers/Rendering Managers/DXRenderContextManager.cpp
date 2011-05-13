@@ -141,6 +141,10 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_WALL].LoadShader("Resource/Shaders/Texture2D.fx");
 	m_cContexts[RC_WALL].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
 	m_cContexts[RC_WALL].CreateRenderSet();
+
+	m_cContexts[RC_BONES].LoadShader("Resource/Shaders/basic.fx");
+	m_cContexts[RC_BONES].RenderFunc = DXRenderContext::FlatRenderContextFunc;
+	m_cContexts[RC_BONES].CreateRenderSet();
 }
 
 void DXRenderContextManager::RenderContexts()
@@ -149,6 +153,7 @@ void DXRenderContextManager::RenderContexts()
 	{
 		m_cContexts[uRCIdx].RenderProcess();
 	}
+	//m_cContexts[RC_BONES].RenderProcess();
 }
 
 // Context Accessors
