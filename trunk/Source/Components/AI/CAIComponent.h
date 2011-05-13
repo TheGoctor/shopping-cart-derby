@@ -1,12 +1,16 @@
 /***********************************************
- * Filename:  		CAIComponent.h
+ * Filename:  		CAIComponent.cpp
  * Date:      		04/04/2011
- * Mod. Date: 		04/14/2011
+ * Mod. Date: 		05/09/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This is the AI's main class
 			which is responsable for changing
-			the AI's state based on weights
+			the AI's state based on weights.
+					The AI will have three main
+			states: Defensive, Collective, and 
+			Aggressive. Each state will dertermine
+			how the AI behaves in each situation.
  ************************************************/
 
 #ifndef _CAICOMPONENT_H_
@@ -21,9 +25,11 @@
 
 #include <list>
 #include <set>
+#include <map>
 #include <D3dx9math.h>
 using std::list;
 using std::set;
+using std::map;
 
 extern "C"
 {
@@ -34,12 +40,11 @@ extern "C"
 
 #include "..\..\IComponent.h"
 #include "..\..\Managers\Global Managers\Memory Manager\CAllocator.h"
+#include "..\..\Managers\Component Managers\CAIManager.h"
 
 class CEventManager;
-class CAIManager;
 class CObject;
 class IEvent;
-struct TNode;
 
 class CAIComponent : public IComponent
 {
@@ -48,17 +53,29 @@ private:
 	enum EStates { NOT_INIT = -1, COLLECTIVE = 0, AGGRESSIVE, DEFENSIVE };
 
 	// Pathplanning stuff
-	set<TNode*, less<unsigned int>, CAllocator<TNode*>> m_nOpen;
-	//map<TNode*, TNode*, CAllocator<pair<> m_Created;
+	struct TNodeCmp
+	{
+		bool operator()(const CVertex* lhs, const CVertex* rhs)
+		{
+			//if(lhs->m_nPriority == rhs->m_nPriority)
+			//{
+			//	return lhs < rhs;
+			//}
+			// Greater than operator
+			return lhs->m_dGivenCost > rhs->m_dGivenCost;
+		}
+	};
 
-	EStates m_eCurrentState;
-	float m_pfWeight[3];
-	float m_fTimer;
-	CObject* m_pObject;
+	set<CVertex*, TNodeCmp, CAllocator<CVertex*>> m_cOpen;
+	map<CVertex*, CVertex*, less<CEdge*>, CAllocator<
+		pair<CVertex*, CVertex*>>> m_cCreated;
+public:
+	bool m_bPathFound;
 
-	D3DXVECTOR3 m_cTargetItemPos;
-	D3DXVECTOR3 m_cTargetPlayerPos;
-	
+	list<D3DXVECTOR3, CAllocator<D3DXVECTOR3>> m_cPath;
+	CVertex* GetClosestWaypoint(D3DXVECTOR3& cPos);
+	//
+
 	// Steering Information
 	D3DXVECTOR3		m_vTargetPosition;
 
@@ -75,16 +92,28 @@ private:
 	int				m_nFramesToAccel;
 	//
 
+	// Needed Logic
+public:
+	EStates m_eCurrentState;
+//private:
+	float m_pfWeight[3];
+	float m_fTimer;
+	CObject* m_pObject;
+	D3DXVECTOR3 m_cTargetItemPos;
+	D3DXVECTOR3 m_cTargetPlayerPos;
+
 	void (CAIComponent::*m_pfUpdateState)();
 
+	void Update();
 	void UpdateCollective();
 	void UpdateAggressive();
 	void UpdateDefensive();
+	void PathPlan(const float fTimeSlice);
 
-	D3DXVECTOR3 GetOpponentPos(unsigned);
+	D3DXVECTOR3 GetOpponentPos(int);
 	CObject* GetClosestOpponent();
 
-	void PathFind();
+	float GetDistance(const D3DXVECTOR3 &cPos1, const D3DXVECTOR3 &cPos2) const;
 
 	/*****************************************************************
 	* TGoalItems	Holds the item's id and weight. Weight will
@@ -113,9 +142,9 @@ private:
 		//	o	In mini-map range
 		struct TPlayer
 		{
-			list<unsigned, CAllocator<unsigned>> m_cGoalItems;
+			list<unsigned int, CAllocator<unsigned int>> m_cGoalItems;
 			
-			unsigned m_nAggression;
+			unsigned int m_nAggression;
 			float m_fWeight;
 			int m_nPlayer;
 			int m_nItem;
@@ -128,10 +157,10 @@ private:
 		int m_nOpponentID;
 
 		list<TGoalItem, CAllocator<TGoalItem>> m_cGoalItemsInLevel;
-		list<unsigned, CAllocator<unsigned>> m_cNeededGoalItems;
+		list<unsigned int, CAllocator<unsigned int>> m_cNeededGoalItems;
 		char m_pchMyHeldItems[2];
 
-		unsigned m_nDistanceFromGoal;
+		unsigned int m_nDistanceFromGoal;
 
 	}m_tKnowledge;
 
@@ -148,7 +177,7 @@ private:
 	* Mod. Date:		      04/04/2011
 	* Mod. Initials:	      JS
 	*****************************************************************/
-	bool WithinRadar(const D3DXVECTOR3& cPos);
+	bool WithinRadar(const D3DXVECTOR3& cPos) const;
 
 	/*****************************************************************
 	* EvaluateStateWeights()	Adds up all the weight components and 
@@ -217,10 +246,12 @@ public:
 	*****************************************************************/
 	void Init();
 
-	void SetupOpponents(CObject* cPlayer);
-
 	// Events
-	void GoalItemInit(CObject* pObj);
+	static void SetupOpponents(IEvent*, IComponent*);
+
+	static void ItemDropped(IEvent*, IComponent*);
+
+	static void GoalItemInit(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* GoalItemCollected()	An event that tells the agent that a
@@ -236,7 +267,7 @@ public:
 	* Mod. Date:		      04/08/2011
 	* Mod. Initials:	      JS
 	*****************************************************************/
-	void GoalItemCollected(CObject* pCollector, CObject* pGoalItem);
+	static void GoalItemCollected(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* PlayerAttacked()	An event that tells the agent that a
@@ -252,7 +283,7 @@ public:
 	* Mod. Date:		      04/08/2011
 	* Mod. Initials:	      JS
 	*****************************************************************/
-	void PlayerAttacked(IEvent*, IComponent*);
+	static void PlayerAttacked(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* GoalItemSpawned()	An event that tells the agent that a
@@ -267,7 +298,7 @@ public:
 	* Mod. Date:		      04/08/2011
 	* Mod. Initials:	      JS
 	*****************************************************************/
-	void GoalItemSpawned(CObject* pObj);
+	static void GoalItemSpawned(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* GoalItemSpawned()	An event that tells the agent that a
@@ -282,7 +313,7 @@ public:
 	* Mod. Date:		      04/08/2011
 	* Mod. Initials:	      JS
 	*****************************************************************/
-	void GoalItemDespawned(CObject* pObj);
+	static void GoalItemDespawned(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* Update()	Update calls any function that needs calling
@@ -296,7 +327,7 @@ public:
 	* Mod. Date:		      04/16/2011
 	* Mod. Initials:	      JS
 	*****************************************************************/
-	void Update(const float fDT);
+	static void Update(IEvent*, IComponent*);
 
 
 

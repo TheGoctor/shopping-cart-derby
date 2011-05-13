@@ -195,7 +195,7 @@ technique AlphaTest
         //AlphaFunc = Greater;
       
 		ShadeMode = Flat;
-        //FillMode = Wireframe;
+        FillMode = Solid;
         CullMode = NONE;
         
         ZWriteEnable = true;

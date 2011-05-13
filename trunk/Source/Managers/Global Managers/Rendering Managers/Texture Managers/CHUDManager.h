@@ -13,21 +13,22 @@
 #define _CHUDMANAGER_H_
 
 #include <deque>
-using std::deque;
+#include <map>
+using namespace std;
 
 #include "..\\..\\Memory Manager\\CAllocator.h"
 #include "..\\..\\Rendering Managers\\Texture Managers\\CBitmapFont.h"
-#include "..\\..\\Event Manager\\CGoalItemEvent.h"
-//#include "..\\..\\..\\..\\Components\\Level\\CGoalItemComponent.h"
+#include "..\\..\\Rendering Managers\\dxutil.h"
 #include "CTextureManager.h"
 #include "CBitmapFont.h"
+#include "..\\..\\..\\Global Managers\\Event Manager\\EventStructs.h"
+using namespace EventStructs;
 
 class CObjectManager;
 class CObject;
 class CGoalItems;
-class CGoalItemCollectedEvent;
 
-#define TOTAL_GOAL_ITEMS (8)
+#define TOTAL_GOAL_ITEMS (9)
 
 enum EHUDElement { HUD_MIN = -1, HUD_SHOPPINGLIST, HUD_MAX };
 
@@ -41,32 +42,63 @@ struct TPlayerHUDInfo
 	DWORD dwColor;
 };
 
+struct TRadar
+{
+	VERTEX_POSCOLOR verts[4];
+};
+
+struct TShoppingListItem
+{
+	CSpriteComponent* pIconComponent;
+	int nItemID;
+	int nPlayerCollected; // -1 means not recently collected or collected by the human
+	bool bSpawned; // spawned in level or not (bSpawned && nPlayerCollected > 0) means it's "sold out" (in level but got collected)
+
+	bool operator==(TShoppingListItem other)
+	{
+		return (nItemID == other.nItemID) &&
+			nPlayerCollected == other.nPlayerCollected &&
+			bSpawned == other.bSpawned &&
+			pIconComponent == other.pIconComponent;
+	}
+};
+
 class CHUDManager
 {
 	// Singletons
 	CTextureManager* m_pTM;
 	CObjectManager*  m_pOM;
 
-	TPlayerHUDInfo m_tPlayerInfo[4];
-
-	// Icon Objs
-	CSpriteComponent* m_cListIconComps[TOTAL_GOAL_ITEMS];
-	CObject* m_pEnemyProgress;
-
-	// Icon Idxs
-	int m_nGoalIconsTex;
-	int m_nGoalIconIdxs[TOTAL_GOAL_ITEMS];
-	
-	deque<CGoalItems*, CAllocator<CGoalItems*>> m_cGoalItemsPool;
-	bool m_bPlayerItems[TOTAL_GOAL_ITEMS];
-	
-	TSpriteData m_tListIconData[TOTAL_GOAL_ITEMS];
 
 	// Inventory
 	CSpriteComponent* m_pInventory;
 	CSpriteComponent* m_pEnergyDrink;
 	CSpriteComponent* m_pEnemyProgressComponent;
 	CSpriteComponent* m_pRadarSpriteComponent;
+	bool			  m_bHasHitThisUpdateBefore; //Turn icons on in gameplay bool
+	
+	// Scoreboard
+	CObject* m_pEnemyProgress;
+	TPlayerHUDInfo m_tPlayerInfo[4];
+
+	// Radar
+	TRadar m_tRadar;
+
+	// Shopping List
+	
+	int m_nGoalIconsTex;
+
+	int m_nShoppingListBackgroundTex;
+	
+		// Map of goal items in this game (stored associciated with nItemID)
+	list<TShoppingListItem, CAllocator<TShoppingListItem>> 
+			m_tGoalItemsDespawnedPool;
+	list<TShoppingListItem, CAllocator<TShoppingListItem>> 
+			m_tGoalItemsSpawnedPool;
+	
+	TSpriteData m_tListIconData[TOTAL_GOAL_ITEMS];
+	int m_nGoalIconTextureIndices[TOTAL_GOAL_ITEMS]; // indices of picture in texture grid
+	
 
 	// Trilogy of Evil
 	CHUDManager(void);
@@ -81,6 +113,8 @@ class CHUDManager
 	RECT CellAlgo(int nID, int nNumCols,
 						   int nCellWidth, int nCellHeight);
 
+	int GetPlayerNum(CObject* player);
+
 public:
 
 	static CHUDManager* GetInstance(void) 
@@ -94,7 +128,7 @@ public:
 	void Render(void);
 
 	// Callbacks
-	void GoalItemSpawned(CGoalItemEvent* pcObjEvent);
+	void GoalItemSpawned(TGoalItemEvent* pcObjEvent);
 	static void GoalItemSpawnedCallback(IEvent* pEvent, IComponent* pComp);
 	
 	void GoalItemDespawned(EGoalItemType eType);
@@ -103,7 +137,7 @@ public:
 	void StartDespawnTimer(EGoalItemType eType);
 	static void StartDespawnTimerCallback(IEvent* pEvent, IComponent* pComp);
 
-	void GoalItemCollected(CGoalItemCollectedEvent* pcObjEvent);
+	void GoalItemCollected(TGoalItemCollectedEvent* pcObjEvent);
 	static void GoalItemCollectedCallback(IEvent* pEvent, IComponent* pComp);
 
 	void Update(void);
@@ -111,6 +145,15 @@ public:
 
 	static void GoalItemInitCallback(IEvent* pEvent, IComponent* pComp);
 	static void BoostCallback(IEvent* pEvent, IComponent* pComp);
+	static void MainMenuEnterCallback(IEvent* pEvent, IComponent* pComp);
+	static void GoalItemLostCallback(IEvent* pEvent, IComponent* pComp);
+
+	static void GameplayStateEntered(IEvent* pEvent, IComponent* pComp);
+	static void GameplayStateExited(IEvent* pEvent, IComponent* pComp);
+	static void GameplayStateInit(IEvent* pEvent, IComponent* pComp);
+	
+	static void PlayerPickupItem(IEvent* pEvent, IComponent* pComp);
+
 };
 
 #endif // _CHUDMANAGER_H_

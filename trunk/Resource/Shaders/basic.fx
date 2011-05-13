@@ -37,7 +37,7 @@ technique Basic
         vertexShader = compile vs_3_0 TransformVS();
         pixelShader  = compile ps_3_0 TransformPS();
 
-		//ShadeMode = Flat;
+		ShadeMode = Flat;
         FillMode = Wireframe;
         CullMode = None;
     }
@@ -50,7 +50,10 @@ technique Flat
         pixelShader  = compile ps_3_0 TransformPS();
 
 		ShadeMode = Flat;
-        //FillMode = Wireframe;
+        FillMode = Wireframe;
         CullMode = None;
+        
+        ZWriteEnable = true;
+        ZEnable = true;
     }
 }

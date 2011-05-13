@@ -35,15 +35,14 @@ private:
 	//CSGD_TextureManager*	m_pTM;
 
 	int		m_nImageID;
+	int		m_nCharWidth[128]; // an array of widths for kernning
 	int		m_nCharHeight;
-	int		m_nRectWidth;
 	int		m_nNumCols;
 	char	m_cStartChar;
 
-	CTextureManager* m_pTM;
+	int		m_nRectWidth;
 
-	// an array of widths for kernning
-	int		m_nWidths[128];
+	CTextureManager* m_pTM;
 
 	// private so only we can call it
 	RECT CellAlgorithm(int nID);
@@ -51,37 +50,31 @@ private:
 	
 public:
 	
-	CBitmapFont();
+	CBitmapFont(int nImageID = -1, int nRectWidth = 16,
+		int nCharHeight = 16, int nNumCols = 16, char chStartChar = ' ');
 	CBitmapFont(const CBitmapFont& bf)
 	{
-		for(int i = 0; i < 128; ++i)
-		{
-			m_nWidths[i] = bf.m_nWidths[i];
-		}
-
 		m_pTM = bf.m_pTM;
 
 		m_nImageID = bf.m_nImageID;
+		memcpy(m_nCharWidth, bf.m_nCharWidth, sizeof(int)*128);
 		m_nCharHeight = bf.m_nCharHeight;
-		m_nRectWidth = bf.m_nRectWidth;
 		m_nNumCols = bf.m_nNumCols;
 		m_cStartChar = bf.m_cStartChar;
+		m_nRectWidth = bf.m_nRectWidth;
 	}
 
 	CBitmapFont& operator=(const CBitmapFont&){return *this;}
 	~CBitmapFont();
-	static CBitmapFont* GetInstance();
 
 	//Accessors
 	int GetImageID(){return m_nImageID;}
-	int GetRectWidth(){return m_nRectWidth;}
 	int GetCharHeight(){return m_nCharHeight;}
 	int GetNumColumns(){return m_nNumCols;}
 	char GetStartChar(){return m_cStartChar;}
 
 	//Mutators
 	void SetImageID(int nImageID){m_nImageID = nImageID;}
-	void SetRectWidth(int nRectWidth){m_nRectWidth = nRectWidth;}
 	void SetCharHeight(int nCharHeight){m_nCharHeight = nCharHeight;}
 	void SetNumColumns(int nNumCol){m_nNumCols = nNumCol;}
 	void SetStartChar(char cStartChar){m_cStartChar = cStartChar;}

@@ -12,7 +12,7 @@
 #ifndef _COBJECTMANAGER_H_
 #define _COBJECTMANAGER_H_
 
-#include <map>
+//#include <map>
 #include <list>
 
 extern "C"
@@ -22,9 +22,11 @@ extern "C"
 #include "lauxlib.h"
 }
 
-#include "..\\..\\..\\CObject.h"
-#include "..\\State Manager\\CStateManager.h"
-#include "..\\Memory Manager\\CAllocator.h"
+#include "..\..\..\Enums.h"
+#include "..\Memory Manager\CAllocator.h"
+
+class CObject;
+class CFrame;
 
 class CObjectManager
 {
@@ -76,14 +78,21 @@ public:
 	////////////////////////////////////////////////////////////////////////////////
 	static CObjectManager* GetInstance(void) 
 	{ 
-		static CObjectManager instance;
-		return &instance; 
+		static CObjectManager cObjectManager;
+		return &cObjectManager; 
 	} 
 
 	// Game Object Factory Funcs
 	static int CreateObject(lua_State* pL);
-	static CObject* CreateObject(string szName,  float fPosX = 0.0f, float fPosY = 0.0f, float fPosZ = 0.0);
+	static CObject* CreateObject(string szName,
+		float fPosX = 0.0f, float fPosY = 0.0f, float fPosZ = 0.0,
+		CFrame* pcFramesParent = NULL);
+
+	// Destroy Object functions
+	static int DestroyObject(lua_State* pL);
+	static void DestroyObject(CObject* pObj);
 	
+	// TODO: Delete when collisions can add to set
 	CObject* GetObject()
 	{
 		return (*m_cObjects.begin());

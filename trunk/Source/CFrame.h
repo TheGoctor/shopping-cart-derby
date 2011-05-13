@@ -33,12 +33,15 @@ public:
 		// Set to Orginal
 		D3DXMatrixIdentity(&m_mLocalMatrix);
 		D3DXMatrixIdentity(&m_mWorldMatrix);
-		m_lastPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		m_lastPosition = D3DXVECTOR3(0,0,0);
 	};
 
 	virtual ~CFrame(void){};
 
-	CFrame *GetParentFrame(void){return m_pParent;}
+	CFrame *GetParentFrame(void)
+	{
+		return m_pParent;
+	}
 	void SetParent(CFrame *pParent)
 	{
 		m_pParent = pParent;
@@ -64,7 +67,6 @@ public:
 
 	CFrame *RemoveChildFrame(CFrame *pRChild)
 	{
-
 		CFrame *pTempFrame = NULL;
 		std::list<CFrame*, CAllocator<CFrame*>>::iterator iter;
 		for(iter = m_vpChildren.begin(); iter != m_vpChildren.end(); ++iter)
@@ -88,11 +90,12 @@ public:
 		{
 			(*iter)->SetChildFlags();
 		}
-
 	}
 
 	void Update(void)
 	{
+		m_lastPosition = D3DXVECTOR3(GetWorldMatrix()._41, 
+			GetWorldMatrix()._42 ,GetWorldMatrix()._43);
 		if(m_uFlags != DIRTY)
 		{
 			m_uFlags = DIRTY;
@@ -104,8 +107,10 @@ public:
 		}
 	}
 
-
-	D3DXMATRIX& GetLocalMatrix(void){return m_mLocalMatrix;}
+	D3DXMATRIX& GetLocalMatrix(void)
+	{
+		return m_mLocalMatrix;
+	}
 
 	const D3DXMATRIX& GetWorldMatrix(void)
 	{
@@ -167,39 +172,38 @@ public:
 	}
 
 protected:
+	static D3DXMATRIX QuatToRotMat(D3DXVECTOR4 tQuats)
+	{
+		float xx, xy, xz, xw,
+			yy, yz, yw,
+			zz, zw;
+		xx = tQuats.x * tQuats.x;
+		xy = tQuats.x * tQuats.y;
+		xz = tQuats.x * tQuats.z;
+		xw = tQuats.x * tQuats.w;
 
-static D3DXMATRIX QuatToRotMat(D3DXVECTOR4 tQuats)
-{
-	float xx, xy, xz, xw,
-		yy, yz, yw,
-		zz, zw;
-	xx = tQuats.x * tQuats.x;
-	xy = tQuats.x * tQuats.y;
-	xz = tQuats.x * tQuats.z;
-	xw = tQuats.x * tQuats.w;
+		yy = tQuats.y * tQuats.y;
+		yz = tQuats.y * tQuats.z;
+		yw = tQuats.y * tQuats.w;
 
-	yy = tQuats.y * tQuats.y;
-	yz = tQuats.y * tQuats.z;
-	yw = tQuats.y * tQuats.w;
+		zz = tQuats.z * tQuats.z;
+		zw = tQuats.z * tQuats.w;
 
-	zz = tQuats.z * tQuats.z;
-	zw = tQuats.z * tQuats.w;
-
-	D3DXMATRIX tRots;
-	D3DXMatrixIdentity(&tRots);
-	tRots[0] = 1 - 2 * (yy + zz);
-	tRots[1] =     2 * (xy - zw);
-	tRots[2] =     2 * (xz + yw);
-	tRots[4] =     2 * (xy + zw);
-	tRots[5] = 1 - 2 * (xx + zz);
-	tRots[6] =     2 * (yz - xw);
-	tRots[8] =     2 * (xz - yw);
-	tRots[9] =     2 * (yz + xw);
-	tRots[10]= 1 - 2 * (xx + yy);
-	tRots[3] = tRots[7] = tRots[11] = tRots[12] = tRots[13] = tRots[14] = 0.0f;
-	tRots[15] = 1;
-	return tRots;
-}
+		D3DXMATRIX tRots;
+		D3DXMatrixIdentity(&tRots);
+		tRots[0] = 1 - 2 * (yy + zz);
+		tRots[1] =     2 * (xy - zw);
+		tRots[2] =     2 * (xz + yw);
+		tRots[4] =     2 * (xy + zw);
+		tRots[5] = 1 - 2 * (xx + zz);
+		tRots[6] =     2 * (yz - xw);
+		tRots[8] =     2 * (xz - yw);
+		tRots[9] =     2 * (yz + xw);
+		tRots[10]= 1 - 2 * (xx + yy);
+		tRots[3] = tRots[7] = tRots[11] = tRots[12] = tRots[13] = tRots[14] = 0.0f;
+		tRots[15] = 1;
+		return tRots;
+	}
 };
 
 #endif	// _CFRAME_H_

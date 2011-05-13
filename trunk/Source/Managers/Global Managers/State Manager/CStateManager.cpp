@@ -1,10 +1,10 @@
 #include "CStateManager.h"
 #include "../Event Manager/CEventManager.h"
-#include "../Event Manager/CStateEvent.h"
-#include "../Event Manager/CUpdateStateEvent.h"
 #include "../Event Manager/CIDGen.h"
+#include "../Event Manager/EventStructs.h"
+using namespace EventStructs;
 
-CStateManager::CStateManager(void) : m_pEM(NULL)
+CStateManager::CStateManager(void) : m_pEM(NULL), m_bChangingState(false)
 {
 }
 
@@ -21,16 +21,22 @@ CStateManager::~CStateManager(void)
 void CStateManager::Init(void)
 {
 	m_pEM = CEventManager::GetInstance();
-	m_pEM->RegisterEvent("UpdateState", NULL, Update);
-	m_pEM->RegisterEvent("RenderState", NULL, Render);
-	m_pEM->RegisterEvent("Shutdown", NULL, Shutdown);
+	m_pEM->RegisterEvent("UpdateState", (IComponent*)GetInstance(), Update);
+	m_pEM->RegisterEvent("RenderState", (IComponent*)GetInstance(), Render);
+	m_pEM->RegisterEvent("Shutdown", (IComponent*)GetInstance(), Shutdown);
 
-	m_pEM->RegisterEvent("PauseGame", NULL, PushState);
-	m_pEM->RegisterEvent("BackPressed", NULL, PopState);
+	// Handle pushing the pause state when "Menu" input is pressed (should only happen in gameplay state)
+	m_pEM->RegisterEvent("Menu", (IComponent*)GetInstance(), PushPausedState);
+	//m_pEM->RegisterEvent("PauseGame", (IComponent*)GetInstance(), PushState); // gotta have the right data for the push
+	m_pEM->RegisterEvent("Back", (IComponent*)GetInstance(), PopState); // menu back
 
-	m_pEM->RegisterEvent("StateChange", NULL, ChangeState);
+	m_pEM->RegisterEvent("StateChange", (IComponent*)GetInstance(), ChangeState);
 
-	m_pEM->RegisterEvent("StateChangeGameplay", NULL, ChangeStateGameplay);
+	// Added for Console to work properly
+	m_pEM->RegisterEvent("PushState", (IComponent*)GetInstance(), PushState);
+	m_pEM->RegisterEvent("PopState", (IComponent*)GetInstance(), PopState);
+	
+	
 
 	// Start in Intro
 	ChangeState(MAIN_MENU_STATE);
@@ -48,12 +54,24 @@ void CStateManager::Init(void)
 ////////////////////////////////////////////////////////////////////////////////
 void CStateManager::PushState(EGameState eGameState)
 {
+	// if we had a state
+	if(!m_cStateStack.empty())
+	{
+		// DISABLE the objects
+		PostDisableObjectsEvent(m_cStateStack.top());
+	}
+
 	// Push on State
 	m_cStateStack.push(eGameState);
 
 	// Send Events
-	PostEnableObjectsEvent(eGameState);
+	// INIT the objects
+	PostInitObjectsEvent(eGameState);
 	PostInputChangeEvent(eGameState);
+	
+	// HACK: Enable the objects too (until everyone handles init)
+	//PostEnableObjectsEvent(eGameState);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,16 +84,33 @@ void CStateManager::PushState(EGameState eGameState)
 ////////////////////////////////////////////////////////////////////////////////
 void CStateManager::PopState(void)
 {
+	// so we don't try to pop to or from an empty stack
+	// (Unless its in the middle of a change state)
+	if( !m_bChangingState && m_cStateStack.size() <= 1)
+	{
+		return;
+	}
+
+
 	EGameState eGameState = m_cStateStack.top();
 
-	// Send Disable Event
+	// DISABLE objects in the previous state
 	PostDisableObjectsEvent(eGameState);
 
 	// Pop off top state
 	m_cStateStack.pop();
 
-	// Send InputStateChange
-	PostInputChangeEvent(eGameState);
+	// if we didn't pop everything off the stack just now
+	if(!m_cStateStack.empty())
+	{
+		eGameState = m_cStateStack.top(); // update the local gamestate var
+
+		// Send InputStateChange for the stack underneath
+		PostInputChangeEvent(eGameState);
+
+		// ENABLE the stuff underneath
+		PostEnableObjectsEvent(eGameState);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,11 +124,17 @@ void CStateManager::PopState(void)
 ////////////////////////////////////////////////////////////////////////////////
 void CStateManager::ChangeState(EGameState eGameState)
 {
+	// so we can pop the last state
+	GetInstance()->m_bChangingState = true;
+
 	// Pop All States
 	ClearAllStates();
 
 	// Push passed in state
 	PushState(eGameState);
+
+	// so pop wont pop the last state anymore
+	GetInstance()->m_bChangingState = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,30 +189,32 @@ void CStateManager::Shutdown(void)
 void CStateManager::ClearAllStates(void)
 {
 	// Pop off all states
-	while(false == m_cStateStack.empty())
+	m_bChangingState = true; // so we can pop ALL the states off
+	while(!m_cStateStack.empty())
 	{
 		PopState();
 	}
+	m_bChangingState = false;
 	//// Send Disable All Objects
 	//PostDisableObjectsEvent(MAX_STATE);
 }
 
 void CStateManager::Update(IEvent* pcEvent, IComponent* pcSender)
 {
-	CUpdateStateEvent* pcState = (CUpdateStateEvent*)pcEvent;
-	string szEvent = "Update";
-	szEvent += GetInstance()->m_cStateStack.top();
+	// so we don't try to act on an empty stack
+	if(GetInstance()->m_cStateStack.empty())
+	{
+		return;
+	}
 	
-	CUpdateStateEvent* pUpdateEvent = MMNEWEVENT(CUpdateStateEvent) 
-		CUpdateStateEvent(CIDGen::GetInstance()->GetID(szEvent), 
-		NULL, pcState->GetDeltaTime());
-	GetInstance()->m_pEM->PostEvent(pUpdateEvent, PRIORITY_UPDATE);
-	//GetInstance()->Update(pcState->GetDeltaTime());
+	float fDT = ((TUpdateStateEvent*)pcEvent->GetData())->m_fDeltaTime;
+	string szEvent = "Update";
+	szEvent += (char)GetInstance()->m_cStateStack.top();
+	SendUpdateEvent(szEvent, (IComponent*)GetInstance(), fDT);
 }
 
 void CStateManager::Render(IEvent* pcEvent, IComponent* pcSender)
 {
-	//GetInstance()->Render();
 }
 
 void CStateManager::Shutdown(IEvent* pcEvent, IComponent* pcSender)
@@ -181,58 +224,80 @@ void CStateManager::Shutdown(IEvent* pcEvent, IComponent* pcSender)
 
 void CStateManager::PushState(IEvent* pcEvent, IComponent* pcSender)
 {
-	CStateEvent* pcState = (CStateEvent*)pcEvent;
-	GetInstance()->PushState(pcState->GetToState());
-	
+	TStateEvent* pcState = (TStateEvent*)pcEvent->GetData();
+	GetInstance()->PushState(pcState->m_eToState);
 }
 
 void CStateManager::PopState(IEvent* pcEvent, IComponent* pcSender)
 {
-	EGameState fromState = GetInstance()->m_cStateStack.top();
 	GetInstance()->PopState();
-
 }
 
 void CStateManager::ChangeState(IEvent* pcEvent, IComponent* pcSender)
 {
-	CStateEvent* pcState = (CStateEvent*)pcEvent;
-	GetInstance()->ChangeState(pcState->GetToState());
-}
+	TStateEvent* pcState = (TStateEvent*)pcEvent->GetData();
 
-void CStateManager::PostEnableObjectsEvent(EGameState eGameState)
-{
-	string szEvent = "EnableObjects";
-	szEvent += eGameState;
-	// Send EnableObjects[State] Event
-	IEvent* pObjectEvent = MMNEWEVENT(IEvent) IEvent(CIDGen::GetInstance()->
-		GetID(szEvent), NULL);
-
-	m_pEM->PostEvent(pObjectEvent, PRIORITY_NORMAL);
+	GetInstance()->ChangeState(pcState->m_eToState);
 }
 
 void CStateManager::PostInputChangeEvent(EGameState eGameState)
 {
-	string szEvent = "InputStateChange";
-	//szEvent += eGameState;
 	// Send InputStateChange
-	CStateEvent* pInputEvent = MMNEWEVENT(CStateEvent) CStateEvent(CIDGen::GetInstance()->
-		GetID(szEvent), NULL, eGameState, eGameState);
-
-	m_pEM->PostEvent(pInputEvent, PRIORITY_INPUT);
+	if(GetInstance()->m_cStateStack.empty() == false)
+	{
+		SendStateEvent("InputStateChange", (IComponent*)GetInstance(), eGameState);
+	}
+	else
+	{
+		SendStateEvent("InputStateChange", (IComponent*)GetInstance(), eGameState);
+	}
 }
 
 void CStateManager::PostDisableObjectsEvent(EGameState eGameState)
 {
 	string szEvent = "DisableObjects";
-	szEvent += eGameState;
+	szEvent += (char)eGameState;
 	// Send DisableObjects[State] Event
-	IEvent* pObjectEvent = MMNEWEVENT(IEvent) IEvent(CIDGen::GetInstance()->
-		GetID(szEvent), NULL);
-
-	m_pEM->PostEvent(pObjectEvent, PRIORITY_NORMAL);
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
 }
 
-void CStateManager::ChangeStateGameplay(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::PostEnableObjectsEvent(EGameState eGameState)
 {
-	GetInstance()->ChangeState(GAMEPLAY_STATE);
+	string szEvent = "EnableObjects";
+	szEvent += (char)eGameState;
+	
+	// Send EnableObjects[State] Event
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+}
+
+void CStateManager::PostInitObjectsEvent(EGameState eGameState)
+{
+	string szEvent = "InitObjects";
+	szEvent += (char)eGameState;
+	
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+}
+
+void CStateManager::PostLoadObjectsEvent(EGameState eGameState)
+{
+	string szEvent = "LoadObjects";
+	szEvent += (char)eGameState;
+	
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+}
+
+void CStateManager::PostUnloadObjectsEvent(EGameState eGameState)
+{
+	string szEvent = "UnloadObjects";
+	szEvent += (char)eGameState;
+	
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+}
+
+
+void CStateManager::PushPausedState(IEvent* pcEvent, IComponent* pcSender)
+{
+	//TStateEvent* pcState = (TStateEvent*)pcEvent->GetData();
+
+	GetInstance()->PushState(PAUSE_STATE);
 }
