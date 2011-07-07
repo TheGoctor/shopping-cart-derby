@@ -28,6 +28,8 @@ public:
 
 	void Init(void);
 
+	void SetMesh(unsigned int nMeshID, DXRenderContext* pContext);
+
 	inline CObject* GetParent()
 	{
 		return m_pcParent;

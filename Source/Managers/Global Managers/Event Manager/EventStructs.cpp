@@ -7,11 +7,23 @@
 //	Purpose			:	Groups events structures with send functions
 ////////////////////////////////////////////////////////////////////////////////
 #include "EventStructs.h"
+#include "..\Console Manager\CConsoleManager.h"
 using namespace EventStructs;
 
 void EventStructs::SendIEvent(string szEventName, IComponent* pSender, void* pData,
 	EEventPriority ePriority)
 {
+#if _DEBUG
+	if(pSender == NULL)
+	{
+		// A sender was NULL
+		// If a component sends a message, set it as sender
+		// If a manager sends a message, put (IComponent*)GetInstance() as sender
+		// This makes debugging easier
+		throw;
+	}
+#endif
+
 	IEvent* pEvent = MMNEWEVENT(
 		IEvent(CIDGen::GetInstance()->GetID(szEventName), pSender, pData));
 	CEventManager::GetInstance()->PostEvent(pEvent, ePriority);
@@ -28,7 +40,7 @@ int EventStructs::CreateUpdateStateEvent(lua_State* pLua)
 }
 
 void EventStructs::SendUpdateEvent(string szEventName, IComponent* pSender,
-	float fDT, EEventPriority ePriority)
+	float fDT, EEventPriority)
 {
 	TUpdateStateEvent* ptUpdateData = MMNEWEVENT(TUpdateStateEvent(fDT));
 	SendIEvent(szEventName, pSender, ptUpdateData, PRIORITY_UPDATE);
@@ -45,10 +57,10 @@ int EventStructs::CreateStateEvent(lua_State* pLua)
 }
 
 void EventStructs::SendStateEvent(string szEventName, IComponent* pSender,
-	EGameState eTo, EEventPriority ePriority)
+	EGameState eTo, EEventPriority )
 {
 	TStateEvent* ptStateData = MMNEWEVENT(TStateEvent(eTo));
-	SendIEvent(szEventName, pSender, ptStateData, PRIORITY_INPUT);
+	SendIEvent(szEventName, pSender, ptStateData, PRIORITY_IMMEDIATE);
 }
 
 int EventStructs::CreateRenderEvent(lua_State* pLua)
@@ -105,30 +117,40 @@ void EventStructs::SendObjectEvent(string szEventName, IComponent* pSender, CObj
 
 int EventStructs::CreateInputEvent(lua_State* pLua)
 {
-	int nPlayer = (int)lua_tonumber(pLua, -2);
+	CObject* pPlayer = (CObject*)lua_topointer(pLua, -2);
 	float fAmount = (float)lua_tonumber(pLua, -1);
 	lua_pop(pLua, 2);
 
-	lua_pushlightuserdata(pLua, MMNEWEVENT(TInputEvent(nPlayer, fAmount)));
+	lua_pushlightuserdata(pLua, MMNEWEVENT(TInputEvent(pPlayer, fAmount)));
 
 	return 1;
 }
 
 void EventStructs::SendInputEvent(string szEventName, IComponent* pSender,
-	int nPlayer, float fAmount, EEventPriority ePriority)
+	CObject* pPlayer, float fAmount, EEventPriority )
 {
-	TInputEvent* ptInputData = MMNEWEVENT(TInputEvent(nPlayer, fAmount));
+	TInputEvent* ptInputData = MMNEWEVENT(TInputEvent(pPlayer, fAmount));
 	SendIEvent(szEventName, pSender, ptInputData, PRIORITY_INPUT);
 }
 
+int EventStructs::SendHeldItemCollectedEvent(lua_State* pLua)
+{
+	string szEventName = lua_tostring(pLua, -3);
+	string szItemName = lua_tostring(pLua, -2);
+	string szCollector = lua_tostring(pLua, -1);
 
+	//SendHeldItemCollectedEvent(szEventName, (IComponent*)&Debug, 
 
-void EventStructs::SendHeldItemEvent(string szEventName, IComponent* pSender, 
-	EHeldItemType eHeldItemType, CHeldItemComponent* pHeldItem,
+	lua_pop(pLua, 3);
+	return 0;
+}
+
+void EventStructs::SendHeldItemCollectedEvent(string szEventName, IComponent* pSender, 
+	CObject* pcHeldItem, CObject* pcCollector,
 	EEventPriority ePriority)
 {
-	THeldItemEvent* ptItemData = MMNEWEVENT(THeldItemEvent(eHeldItemType,
-		pHeldItem));
+	THeldItemCollected* ptItemData = MMNEWEVENT(THeldItemCollected(pcHeldItem,
+		pcCollector));
 	SendIEvent(szEventName, pSender, ptItemData, ePriority);
 }
 
@@ -203,13 +225,33 @@ int EventStructs::CreateGoalItemCollectedEvent(lua_State* pLua)
 }
 
 void EventStructs::SendGoalItemCollectedEvent(string szEventName, IComponent* pSender,
-		CObject* pGoalItem, CObject* pCollector, EGoalItemType eType, EEventPriority ePriority)
+		CObject* pGoalItem, CObject* pCollector, EEventPriority ePriority)
 {
 	TGoalItemCollectedEvent* ptGoalData = MMNEWEVENT(
-		TGoalItemCollectedEvent(pGoalItem, pCollector, eType));
+		TGoalItemCollectedEvent(pGoalItem, pCollector));
 	SendIEvent(szEventName, pSender, ptGoalData, ePriority);
 }
-
+int EventStructs::CreateImpactEvent(lua_State*)
+{
+//	CObject* pCollider = (CObject*)((int)lua_touserdata(pLua, -2));
+//	D3DXVECTOR3 vReflect = (D3DXVECTOR3)((D3DXVECTOR3)lua_touserdata(pLua, -1));
+//	lua_pop(pLua, 2);
+//	lua_pushlightuserdata(pLua, MMNEWEVENT(TImpactEvent(pCollider, vReflect)));
+	return -1;	//shouldn't be called in lua anyway, so please don't call it in lua
+}
+void EventStructs::SendImpactEvent(string szEventName, IComponent* pSender,
+								   CObject* pCollider, CObject* pCollidedwith, 
+								   D3DXVECTOR3 vNormal, EEventPriority ePriority)
+{
+	TImpactEvent* ptImpactData = MMNEWEVENT( TImpactEvent(pCollider, pCollidedwith, vNormal) );
+	SendIEvent(szEventName, pSender, ptImpactData, ePriority);
+}
+//void EventStructs::SendImpactEvent(string szEventName, IComponent* pSender, 
+//								   CObject* pCollider, CObject* pCollidedwith, EEventPriority ePriority /* = PRIORITY_NORMAL */)
+//{
+//	TImpactEvent* ptImpactData = MMNEWEVENT( TImpactEvent(pCollider, pCollidedwith) );
+//	SendIEvent(szEventName, pSender, ptImpactData, ePriority);
+//}
 void EventStructs::SendStatusEffectEvent(string szEventName, IComponent* pSender,
 		CObject* pObjectToAffect, float fDuration, EEventPriority ePriority)
 {
@@ -229,12 +271,103 @@ int EventStructs::CreateStatusEffectEvent(lua_State* pLua)
 	return 1;
 }
 
-
-
 void EventStructs::SendFloatEvent(string szEventName, IComponent* pSender,
 		float fValue, EEventPriority ePriority)
 {
 	TFloatEvent* ptFloatData = MMNEWEVENT(
 		TFloatEvent(fValue));
 	SendIEvent(szEventName, pSender, ptFloatData, ePriority);
+}
+
+//void EventStructs::SendCharacterEvent(string szEventName, IComponent* pSender,
+//									 ECharacter echaracter, EEventPriority ePriority)
+//{
+//	TCharacterEvent* ptCharacterData = MMNEWEVENT(
+//		TCharacterEvent(echaracter));
+//	SendIEvent(szEventName, pSender, ptCharacterData, ePriority);
+//}
+
+void EventStructs::SendSpawnPickupItemEvent(string szEventName, IComponent* pSender,
+							  D3DXVECTOR3 v1, D3DXVECTOR3 v2, int nID, EEventPriority ePriority)
+{
+	TSpawnPickupItemEvent* ptSendData = MMNEWEVENT(
+		TSpawnPickupItemEvent(v1, v2, nID));
+	SendIEvent(szEventName, pSender, ptSendData, ePriority);
+}
+
+
+void EventStructs::SendPickupItemCollectedEvent(string szEventName, IComponent* pSender,
+		CObject* pPickupItem, CObject* pCollector, EGoalItemType eType = NO_ITEM, EEventPriority ePriority)
+{
+	TPickupItemCollectedEvent* ptItemData = MMNEWEVENT(
+		TPickupItemCollectedEvent(pPickupItem, pCollector, eType));
+	SendIEvent(szEventName, pSender, ptItemData, ePriority);
+}
+
+void EventStructs::SendPickupItemEvent(string szEventName, IComponent* pSender,
+		CObject* pGoalItem, EGoalItemType eType, EEventPriority ePriority)
+{
+	TPickupItemEvent* ptItemData = MMNEWEVENT(
+		TPickupItemEvent(pGoalItem, eType));
+	SendIEvent(szEventName, pSender, ptItemData, ePriority);
+}
+
+void EventStructs::SendTwoIntEvent(string szEventName, IComponent* pSender,
+		int n1, int n2, EEventPriority ePriority)
+{
+	TTwoIntEvent* ptItemData = MMNEWEVENT(
+		TTwoIntEvent(n1, n2));
+	SendIEvent(szEventName, pSender, ptItemData, ePriority);
+}
+
+void EventStructs::SendMouseEvent(string szEventName, IComponent* pSender, 
+								  LONG nX, LONG nY, EEventPriority ePriority)
+{
+	TMouseEvent* ptMouseData = MMNEWEVENT(TMouseEvent(nX, nY));
+	SendIEvent(szEventName, pSender, ptMouseData, ePriority);
+}
+
+int EventStructs::SendLuaEvent(lua_State* pLua)
+{
+	string szEvent = lua_tostring(pLua, -1);
+	lua_pop(pLua, 1);
+	SendIEvent(szEvent, (IComponent*)&Debug, NULL, PRIORITY_NORMAL);
+
+	return 0;
+}
+
+void EventStructs::SendConsoleEvent(string szEventName, IComponent* pSender,
+									char chKey, EEventPriority ePriority)
+{
+	TConsoleEvent* ptConsoleData = MMNEWEVENT(TConsoleEvent(chKey));
+	SendIEvent(szEventName, pSender, ptConsoleData, ePriority);
+}
+
+void EventStructs::SendSpeedEvent(string szEventName, IComponent* pSender, 
+					CObject* pObject, float fSpeed, EEventPriority ePriority)
+{
+	TSpeedEvent* ptSpeedData = MMNEWEVENT(TSpeedEvent(pObject, fSpeed));
+	SendIEvent(szEventName, pSender, ptSpeedData, ePriority);
+}
+
+void EventStructs::SendHeldItemSpawnedEvent(string szEventName, IComponent* pSender, 
+		CHeldItemComponent*	pHeldItem,
+		EEventPriority ePriority)
+{
+	THeldItemSpawned* ptSpawnedData = MMNEWEVENT(THeldItemSpawned(pHeldItem));
+	SendIEvent(szEventName, pSender, ptSpawnedData, ePriority);
+}
+
+void EventStructs::SendStringEvent(string szEventName, IComponent* pSender, 
+		string&	pString, EEventPriority ePriority)
+{
+	TStringEvent* ptString = MMNEWEVENT(TStringEvent(pString));
+	SendIEvent(szEventName, pSender, ptString, ePriority);
+}
+
+void EventStructs::SendStringEvent(string szEventName, IComponent* pSender, 
+		char* pString, EEventPriority ePriority)
+{
+	TStringEvent* ptString = MMNEWEVENT(TStringEvent(pString));
+	SendIEvent(szEventName, pSender, ptString, ePriority);
 }

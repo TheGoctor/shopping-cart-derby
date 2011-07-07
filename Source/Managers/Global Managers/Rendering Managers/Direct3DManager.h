@@ -1,11 +1,24 @@
-#ifndef _CD3DMANAGER_H_
-#define _CD3DMANAGER_H_
+////////////////////////////////////////////////////////////////////////////////
+//	File			:	Direct3DManager.h
+//	Date			:	5/10/11
+//	Mod. Date		:	5/25/11
+//	Mod. Initials	:	JL
+//	Author			:	Joseph Leybovich
+//	Purpose			:	Encapsulates the Initializing and Shuting down of Direct
+//						3D Objects
+////////////////////////////////////////////////////////////////////////////////
 
+// Header Protection
+#ifndef _D3DMANAGER_H_
+#define _D3DMANAGER_H_
+
+// Includes
 #include "dxutil.h"
 #include "..\Event Manager\CEventManager.h"
+#include "..\Event Manager\EventStructs.h"
+using namespace EventStructs;
 
-#define SAFE_RELEASE(p)			if (p) { p->Release(); p = NULL; }
-
+// Direct 3D Manager
 class Direct3DManager
 {
 	LPDIRECT3D9				m_lpD3D;		 // The Direct3D object.
@@ -17,33 +30,39 @@ class Direct3DManager
 	HWND					m_hWnd;			 // The handle to the window Direct3D is initialized in.
 
 	// Vertex Decls
-	IDirect3DVertexDeclaration9 *  m_pVertPosDecl;
-	IDirect3DVertexDeclaration9 *  m_pVertPosNormTex2DDecl;
-	IDirect3DVertexDeclaration9 *  m_pVertPosTex3DDecl;
+	IDirect3DVertexDeclaration9*  m_pVertPosDecl;
+	IDirect3DVertexDeclaration9*  m_pVertPosNormTex2DDecl;
+	IDirect3DVertexDeclaration9*  m_pVertPosColTex2DDecl;
+	//IDirect3DVertexDeclaration9*  m_pVertPosTex3DDecl;
 
 	// Singleton stuff
-	static Direct3DManager	m_Instance;
 	Direct3DManager(void);
 	Direct3DManager(Direct3DManager &ref);
 	Direct3DManager &operator=(Direct3DManager &ref);
+	~Direct3DManager(void);
 
+	// Helper Funcs
 	void InitVertDecls(void);
+	void ShutdownDirect3D(void);
 
 	///////////////////////////////////////
-	
+	///array of 256 unsigned shorts for each color for gamma correction
+	///////////////////////////////////////////////////////////////////
+	unsigned short m_usRed[256];
+	unsigned short m_usBlue[256];
+	unsigned short m_usGreen[256];
+	float m_fGamma;
 
 public:
 
-	~Direct3DManager(void);
 	static Direct3DManager* GetInstance(void);
 	// Initalize Direct3D
-	bool InitDirect3D(HWND hWnd, int nScreenWidth, int nScreenHeight, bool bIsWindowed = true, bool bVsync = true);
-private:
-	// Shutdown Direct3D
-	void ShutdownDirect3D(void);
-public:
+	bool InitDirect3D(HWND hWnd, int nScreenWidth, int nScreenHeight, 
+		bool bIsWindowed = true, bool bVsync = true);
+
 	// Clear Screen
-	void Clear(unsigned char ucRed = 0, unsigned char ucGreen = 0, unsigned char ucBlue = 0);
+	void Clear(unsigned char ucRed = 0, unsigned char ucGreen = 0, 
+		unsigned char ucBlue = 0);
 
 	// Present to the Screen
 	void Present(void);
@@ -59,50 +78,34 @@ public:
 	bool SpriteBegin(void);
 	bool SpriteEnd(void);
 
-	void DrawMesh();
+	float GetGamma()
+	{
+		return m_fGamma;
+	}
+
+	// Check for Lost Device
+	bool CheckForLostDevice(void);
+	
+	//SetGamma for the game
+	void SetGamma(LPDIRECT3DDEVICE9 _lpD3D, float gamma);
 
 	// Accessors
-	LPDIRECT3D9	GetDirect3DObject(void) const 
-	{ 
-		return m_lpD3D;			 
-	} 
-	LPDIRECT3DDEVICE9 GetDirect3DDevice(void) const 
-	{ 
-		return m_lpDev;			 
-	}  
-	LPD3DXSPRITE GetSprite(void) const 
-	{ 
-		return m_lpSprite;		 
-	} 
-	LPD3DXLINE GetLine(void) const 
-	{ 
-		return m_lpLine;			 
-	}
-	LPD3DXFONT GetFont(void) const 
-	{ 
-		return m_lpFont;			 
-	} 
+	LPDIRECT3D9	GetDirect3DObject(void) const		{ return m_lpD3D;	 } 
+	LPDIRECT3DDEVICE9 GetDirect3DDevice(void) const { return m_lpDev;	 }  
+	LPD3DXSPRITE GetSprite(void) const				{ return m_lpSprite; } 
+	LPD3DXLINE GetLine(void) const					{ return m_lpLine;	 }
+	LPD3DXFONT GetFont(void) const					{ return m_lpFont;	 } 
+	const D3DPRESENT_PARAMETERS* GetPresentParams(void) const { return &m_PresentParams; } 
 
-	const D3DPRESENT_PARAMETERS * GetPresentParams(void) const 
-	{ 
-		return &m_PresentParams;	 
-	} 
+	// Vertex Declarations
+	IDirect3DVertexDeclaration9* GetVertColorDecl(void) const	  {	return m_pVertPosDecl;			}
+	IDirect3DVertexDeclaration9* GetVertNormTex2DDecl(void) const {	return m_pVertPosNormTex2DDecl; }
+	IDirect3DVertexDeclaration9* GetVertColTex2DDecl(void)  const {	return m_pVertPosColTex2DDecl;  }
+	//IDirect3DVertexDeclaration9* GetVertTex3DDecl(void) const	  {	return m_pVertPosTex3DDecl;		}
 
-	IDirect3DVertexDeclaration9 * GetVertNormTex2DDecl(void) const 
-	{ 
-		return m_pVertPosNormTex2DDecl; 
-	}
-	IDirect3DVertexDeclaration9 * GetVertColorDecl(void) const 
-	{ 
-		return m_pVertPosDecl; 
-	}
-	IDirect3DVertexDeclaration9 * GetVertTex3DDecl(void) const 
-	{ 
-		return m_pVertPosTex3DDecl; 
-	}
-
+	// Callbacks
 	static void Shutdown(IEvent*, IComponent*);
-
+	static void ChangeGamma(IEvent*, IComponent*);
 };
 
-#endif	// _CD3DMANAGER_H_
+#endif	// _D3DMANAGER_H_

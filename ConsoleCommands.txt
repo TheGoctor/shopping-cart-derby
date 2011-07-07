@@ -1,0 +1,30 @@
+Helpful Debugging Functions Accessible Throught the In-Game Console Window
+
+Players may access the in-game console by pressing the ~ key during gameplay.
+The following are functions the player can type into the console:
+
+// Used to attach the camera to the object with the specified name
+AttachCameraTo(string szPlayerName) //i.e. "Player0", "Player1", etc.
+
+// Used to set the maximum speed of the AI Agents. This speed cannot, and will
+// not, exceed the Max Speed set globally for all characters
+SetAISpeed(float fSpeed)
+
+// Used to spawn a specific held item in the endcaps.
+// The specified item will be the only item that spawns in the endcaps.
+SpawnHeldItem(ItemName) //i.e. banana, energyDrink, etc.
+
+// Function used to Enable/Disable the logic and movement for the AI Agents
+ToggleAI()
+
+// Used to Enable/Disable the drawing of debugging information specific to the AI
+// Agents. Information includes, current triange, target triangle, next triangle, 
+ToggleTris()
+
+TCol()
+
+TGeo()
+
+// Sets AI [PlayerNumber]'s Target Triangle to [TriangleIndex]
+AISetGoalTri(PlayerNumber, TriangleIndex)
+

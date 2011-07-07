@@ -2,6 +2,8 @@
 #define _EVENTSTRUCTS_H_
 
 #include <D3dx9math.h>
+#include <string>
+using std::string;
 
 extern "C"
 {
@@ -112,34 +114,35 @@ namespace EventStructs
 	////////////////////////////////////////////////////////////////////////////
 	struct TInputEvent 
 	{
-		int		m_nPlayer;
-		float	m_fAmount;
+		CObject*	m_pPlayer;
+		float		m_fAmount;
 
-		TInputEvent(int nPlayer, float fAmount) : m_nPlayer(nPlayer),
+		TInputEvent(CObject* pPlayer, float fAmount) : m_pPlayer(pPlayer),
 			m_fAmount(fAmount)
 		{
 		}
 	};
 	 int CreateInputEvent(lua_State* pLua);
 	void SendInputEvent(string szEventName, IComponent* pSender,
-		int nPlayer, float fAmount, EEventPriority ePriority = PRIORITY_INPUT);
+		CObject* pPlayer, float fAmount, EEventPriority ePriority = PRIORITY_INPUT);
 
 	////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////
-	struct THeldItemEvent 
+	struct THeldItemCollected
 	{
-		EHeldItemType m_eHeldItemType;
-		CHeldItemComponent* m_pcHeldItem;
+		CObject* m_pcHeldItem;
+		CObject* m_pcCollector;
 
-		THeldItemEvent(EHeldItemType eHeldItemType, CHeldItemComponent*
-			pHeldItem) : m_eHeldItemType(eHeldItemType), m_pcHeldItem(pHeldItem)
+		THeldItemCollected(CObject* pHeldItem, CObject* pCollector) :
+		m_pcHeldItem(pHeldItem), m_pcCollector(pCollector)
 		{
 		}
 	};
-	void SendHeldItemEvent(string szEventName, IComponent* pSender, 
-		EHeldItemType eHeldItemType, CHeldItemComponent* pHeldItem,
-		EEventPriority ePriority = PRIORITY_NORMAL);
+	int SendHeldItemCollectedEvent(lua_State* pLua);
+	void SendHeldItemCollectedEvent(string szEventName, IComponent* pSender,
+		CObject* pHeldItem, CObject* pCollector, EEventPriority ePriority = 
+		PRIORITY_NORMAL);
 
 	////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////
@@ -199,17 +202,36 @@ namespace EventStructs
 	{
 		CObject* m_pcGoalItem;
 		CObject* m_pcCollector;
-		EGoalItemType m_eType;
 
-		TGoalItemCollectedEvent(CObject* pGoalItem, CObject* pCollector, EGoalItemType eType = NO_ITEM) :
-			m_pcGoalItem(pGoalItem), m_pcCollector(pCollector), m_eType(eType)
+		TGoalItemCollectedEvent(CObject* pGoalItem, CObject* pCollector) :
+			m_pcGoalItem(pGoalItem), m_pcCollector(pCollector)
 		{
 		}
 	};
 	 int CreateGoalItemCollectedEvent(lua_State* pLua);
 	void SendGoalItemCollectedEvent(string szEventName, IComponent* pSender,
-		CObject* pGoalItem, CObject* pCollector, EGoalItemType eType = NO_ITEM, EEventPriority ePriority = 
+		CObject* pGoalItem, CObject* pCollector, EEventPriority ePriority = 
 		PRIORITY_NORMAL);
+
+	//event struct sent on collision with any object that reacts
+	//contains the object that is effected and the reflection vector from the object it hit
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct TImpactEvent
+	{
+		CObject* m_pcCollider;	//object to rebound
+		CObject* m_pCollidedWith;
+		D3DXVECTOR3 m_vNormal;	
+		TImpactEvent(CObject* pCollider, CObject* pCollidedwith, D3DXVECTOR3 vNorm) : 
+		m_pcCollider(pCollider), m_pCollidedWith(pCollidedwith), m_vNormal(vNorm)
+		{
+		}
+	};
+	int CreateImpactEvent(lua_State* pLua);
+	void SendImpactEvent(string szEventName, IComponent* pSender,
+		CObject* pCollider, CObject* pCollidedwith, D3DXVECTOR3 vNormal,
+		EEventPriority ePriority = PRIORITY_NORMAL);
 
 	////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////
@@ -243,6 +265,171 @@ namespace EventStructs
 	void SendFloatEvent(string szEventName, IComponent* pSender, 
 		float fValue, 
 		EEventPriority ePriority = PRIORITY_NORMAL);
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	/*struct TCharacterEvent
+	{
+		ECharacter eCharacter;
+
+		TCharacterEvent(ECharacter echaracter)
+		{
+		}	
+	};
+	void SendCharacterEvent(string szEventName, IComponent* pSender, 
+		ECharacter eCharacter, 
+		EEventPriority ePriority = PRIORITY_NORMAL);*/
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////
+	struct TSpawnPickupItemEvent 
+	{
+		D3DXVECTOR3 m_vVec1;
+		D3DXVECTOR3 m_vVec2;
+		int			m_nItemID;
+
+		TSpawnPickupItemEvent(D3DXVECTOR3 v1, D3DXVECTOR3 v2, int nID) : m_vVec1(v1), m_vVec2(v2), m_nItemID(nID)
+		{
+		}
+	};
+	void SendSpawnPickupItemEvent(string szEventName, IComponent* pSender, 
+		D3DXVECTOR3 v1, D3DXVECTOR3 v2, int nItemID,
+		EEventPriority ePriority = PRIORITY_NORMAL);
+
+
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct TPickupItemCollectedEvent 
+	{
+		CObject* m_pcPickupItem;
+		CObject* m_pcCollector;
+		EGoalItemType m_eItemType;
+
+		TPickupItemCollectedEvent(CObject* pPickupItem, CObject* pCollector, EGoalItemType eType = NO_ITEM) :
+			m_pcPickupItem(pPickupItem), m_pcCollector(pCollector), m_eItemType(eType)
+		{
+		}
+	};
+	void SendPickupItemCollectedEvent(string szEventName, IComponent* pSender,
+		CObject* pGoalItem, CObject* pCollector, EGoalItemType eType, EEventPriority ePriority = 
+		PRIORITY_NORMAL);
+
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct TPickupItemEvent 
+	{
+		CObject* m_pcPickupItem;
+		EGoalItemType m_eItemType;
+
+		TPickupItemEvent(CObject* pPickupItem, EGoalItemType eType = NO_ITEM) :
+			m_pcPickupItem(pPickupItem), m_eItemType(eType)
+		{
+		}
+	};
+	void SendPickupItemEvent(string szEventName, IComponent* pSender,
+		CObject* pGoalItem, EGoalItemType eType, EEventPriority ePriority = 
+		PRIORITY_NORMAL);
+
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct TTwoIntEvent 
+	{
+		int m_nInt1;
+		int m_nInt2;
+
+		TTwoIntEvent(int n1, int n2) :
+			m_nInt1(n1), m_nInt2(n2)
+		{
+		}
+	};
+	void SendTwoIntEvent(string szEventName, IComponent* pSender,
+		int n1, int n2, EEventPriority ePriority = PRIORITY_NORMAL);
+
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct TMouseEvent
+	{
+		LONG m_lMouseX;
+		LONG m_lMouseY;
+
+		TMouseEvent(LONG nX, LONG nY) : m_lMouseX(nX), m_lMouseY(nY)
+		{
+		}
+	};
+	void SendMouseEvent(string szEventName, IComponent* pSender,
+		LONG nX, LONG nY, EEventPriority ePriority = PRIORITY_INPUT);
+
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	int SendLuaEvent(lua_State*);
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+
+	struct TConsoleEvent
+	{
+		char m_chKeyPressed;
+
+		TConsoleEvent(char chKeyPressed) : m_chKeyPressed(chKeyPressed)
+		{
+		}
+	};
+	void SendConsoleEvent(string szEventName, IComponent* pSender,
+		char chKey, EEventPriority ePriority = PRIORITY_INPUT);
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct TSpeedEvent 
+	{
+		CObject*	m_pObject;
+		float		m_fSpeed;
+
+		TSpeedEvent(CObject* pObject, float fSpeed) : m_pObject(pObject), m_fSpeed(fSpeed)
+		{
+		}
+	};
+	void SendSpeedEvent(string szEventName, IComponent* pSender, 
+		CObject* pObject, float fSpeed, 
+		EEventPriority ePriority = PRIORITY_NORMAL);
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct THeldItemSpawned 
+	{
+		CHeldItemComponent*	m_pHeldItem;
+
+		THeldItemSpawned(CHeldItemComponent* pHeldItem) : m_pHeldItem(pHeldItem)
+		{
+		}
+	};
+	void SendHeldItemSpawnedEvent(string szEventName, IComponent* pSender, 
+		CHeldItemComponent*	pHeldItem,
+		EEventPriority ePriority = PRIORITY_NORMAL);
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////
+	struct TStringEvent 
+	{
+		string m_szString;
+
+		TStringEvent(string& szString) : m_szString(szString)
+		{
+		}
+
+		TStringEvent(char* szString)
+		{
+			m_szString = szString;
+		}
+	};
+	void SendStringEvent(string szEventName, IComponent* pSender, 
+		string&	pString, EEventPriority ePriority = PRIORITY_NORMAL);
+	void SendStringEvent(string szEventName, IComponent* pSender, 
+		char* pString, EEventPriority ePriority = PRIORITY_NORMAL);
 };
 
 #endif // _EVENTSTRUCTS_H_

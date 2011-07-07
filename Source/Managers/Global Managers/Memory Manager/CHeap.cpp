@@ -1,3 +1,6 @@
+#include <windows.h>
+#define LEAN_AND_MEAN
+
 #include <malloc.h>
 #include <assert.h>
 #include "CHeap.h"
@@ -7,7 +10,6 @@
 
 #if MM_LEAK_DETECTION
 // This version of the functions use Leak Detection
-	#include <windows.h>
 
 CHeap::CHeap()
 {
@@ -26,25 +28,31 @@ CHeap::~CHeap()
 	{
 		OutputDebugStringA("***** MEMORY LEAKS DETECTED *****\n");
 		char szNumLeaks[64];
-		sprintf(szNumLeaks, "Number of Leaks: %d\n", m_cLeakList.size());
+		sprintf_s(szNumLeaks, "Number of Leaks: %d\n", m_cLeakList.size());
 		OutputDebugStringA(szNumLeaks);
 		char szTotalLeak[64];
-		sprintf(szTotalLeak, "Total Memory Leaked: %d bytes\n", m_nTotalPoolSize-m_nMemoryAvailable);
+		sprintf_s(szTotalLeak, "Total Memory Leaked: %d bytes\n", m_nTotalPoolSize-m_nMemoryAvailable);
 		OutputDebugStringA(szTotalLeak);
 
 		//map<unsigned int, TLeakDetector>::iterator pIter;
 		//pIter = m_cLeakList.begin();
 		//while(pIter != m_cLeakList.end())
+		int nTotal = m_cLeakList.size() * (sizeof(THeader)+sizeof(TFooter));
 		while(m_cLeakList.empty() == false)
 		{
 			map<unsigned int, TLeakDetector>::iterator pIter = m_cLeakList.begin();
 			char szLeak[256];
-			sprintf(szLeak, "Leak at %d in file %s on line %d for %d bytes.\n",
+			sprintf_s(szLeak, "Leak at %d in file %s on line %d for %d bytes.\n",
 				pIter->first, pIter->second.szFile, pIter->second.nLine, pIter->second.nSize);
 			OutputDebugStringA(szLeak);
+			nTotal += pIter->second.nSize;
 			m_cLeakList.erase(pIter);
 			//pIter++;
 		}
+		char szTotalSize[256];
+		sprintf_s(szTotalSize, "Actual Amount of Memory Leaked: %d bytes\nDifference: %d bytes\n",
+			nTotal, (m_nTotalPoolSize-m_nMemoryAvailable) - nTotal);
+		OutputDebugStringA(szTotalSize);
 	}
 
 	free(m_pchPool);
@@ -65,11 +73,11 @@ CHeap::~CHeap()
 void CHeap::Init(unsigned int nPoolSizeInBytes)
 {
 	m_nTotalPoolSize = (nPoolSizeInBytes+(BYTE_ALIGN-1)) & ~(BYTE_ALIGN-1);
-	m_nMemoryAvailable = m_nTotalPoolSize;
 
 	// TODO: align malloc call to 4 bytes but not 8 bytes
 	// so end of first header is 8 byte-aligned
 	m_pchPool = (char*)malloc(m_nTotalPoolSize);
+	memset(m_pchPool, 0, m_nTotalPoolSize);
 
 	FindFreeMemory = &CHeap::FirstAvailable;
 
@@ -83,6 +91,7 @@ void CHeap::Init(unsigned int nPoolSizeInBytes)
 
 	m_ptFreeHead = ptHead;
 	m_ptEndPoolFooter = ptFoot;
+	m_nMemoryAvailable = m_ptFreeHead->m_nSize;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,17 +110,9 @@ void CHeap::Init(unsigned int nPoolSizeInBytes)
 CHeap::THeader * CHeap::FirstAvailable(unsigned int nAllocSize)
 {
 	if(m_ptFreeHead == NULL || m_ptFreeHead->m_nSize == 0)
-	{
 		return NULL;
-	}
 
-	//if(m_ptFreeHead->m_nSize >= nAllocSize)
-	//{
-	//	return m_ptFreeHead;
-	//}
-	//else
-	//{
-	THeader* ptIter = m_ptFreeHead;
+	THeader* ptIter = m_ptFreeHead->m_ptNext;
 	do
 	{
 		if(ptIter->m_nSize >= nAllocSize)
@@ -119,10 +120,11 @@ CHeap::THeader * CHeap::FirstAvailable(unsigned int nAllocSize)
 		else
 			ptIter = ptIter->m_ptNext;
 
-	} while(ptIter != m_ptFreeHead);
+	} while(ptIter != m_ptFreeHead->m_ptNext);
 
-	return NULL;
-//	}
+	// No More Memory
+	throw;
+	//return NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,9 +153,9 @@ char * CHeap::Allocate(unsigned int nAllocSize, char* szFile, unsigned int nLine
 	TFooter *ptFoot = (TFooter*)((char*)ptHead + ptHead->m_nSize + 
 		sizeof(THeader));
 
-	// REMOVE LATER
-	m_nMemoryAvailable -= nAllocSize;
-	m_nNumPtrs++;
+	// Remove the whole block in case we can't split
+	m_nMemoryAvailable -= ptHead->m_nSize;
+	++m_nNumPtrs;
 
 	// See if there's enough leftover memory for another chunk
 	if(ptHead->m_nSize - nAllocSize > (sizeof(THeader) + sizeof(TFooter)))
@@ -183,7 +185,9 @@ char * CHeap::Allocate(unsigned int nAllocSize, char* szFile, unsigned int nLine
 		}
 
 		ptNewFoot->m_nSize = ptNewHead->m_nSize;
-		m_nMemoryAvailable -= sizeof(THeader) + sizeof(TFooter);
+
+		// add back the memory from the split block
+		m_nMemoryAvailable += nBlockSize - (sizeof(THeader) + sizeof(TFooter) + nAllocSize);
 	}
 
 	if(ptHead == m_ptFreeHead) // the memory found was the head of the list
@@ -251,12 +255,45 @@ void CHeap::DeAllocate(char * pchData)
 	TFooter * ptFoot = (TFooter*)(pchData + ptHead->m_nSize);
 	ptFoot->m_nSize &= ~(1<<31);
 
-	// REMOVE LATER
+	// Clear the old memory
+	memset(pchData, 0, ptHead->m_nSize);
+
 	m_nMemoryAvailable += ptHead->m_nSize;
-	m_nNumPtrs--;
+	--m_nNumPtrs;
 
 	// Leak Detection
 	m_cLeakList.erase((unsigned int)pchData);
+
+	// See if you can merge right
+	THeader * ptNextHead = (THeader*)((char*)ptFoot + sizeof(TFooter));
+	if(((char*)ptNextHead < (char*)m_ptEndPoolFooter) && (ptNextHead->m_nSize & (1<<31)) == 0)
+	{
+		// Next block is free
+		TFooter * ptNextFoot = (TFooter*)((char*)ptNextHead + sizeof(THeader) + ptNextHead->m_nSize);
+
+		// Merge Right
+		ptHead->m_nSize += ptNextHead->m_nSize + sizeof(THeader) + sizeof(TFooter);
+		ptNextFoot->m_nSize = ptHead->m_nSize;
+
+		ptFoot->m_nSize = 0;
+
+		// Move foot pointer
+		ptFoot = ptNextFoot;
+
+		m_nMemoryAvailable += sizeof(THeader) + sizeof(TFooter);
+
+		m_ptFreeHead = ptNextHead->m_ptNext;
+
+		if(ptNextHead == m_ptFreeHead)
+		{
+			m_ptFreeHead = NULL;
+		}
+		else
+		{
+			ptNextHead->m_ptNext->m_ptPrev = ptNextHead->m_ptPrev;
+			ptNextHead->m_ptPrev->m_ptNext = ptNextHead->m_ptNext;
+		}
+	}
 
 	// See if you can merge left
 	TFooter * ptPrevFoot = (TFooter*)((char*)ptHead - sizeof(TFooter));
@@ -280,86 +317,25 @@ void CHeap::DeAllocate(char * pchData)
 		ptHead = ptPrevHead;
 
 		m_nMemoryAvailable += sizeof(THeader) + sizeof(TFooter);
+
+		return;
 	}
 
-	// See if you can merge right
-	THeader * ptNextHead = (THeader*)((char*)ptFoot + sizeof(TFooter));
-	if(((char*)ptNextHead < (char*)m_ptEndPoolFooter) && (ptNextHead->m_nSize & (1<<31)) == 0)
-	{
-		// Next block is free
-		TFooter * ptNextFoot = (TFooter*)((char*)ptNextHead + sizeof(THeader) + ptNextHead->m_nSize);
-
-		// Merge Right
-		ptHead->m_nSize += ptNextHead->m_nSize + sizeof(THeader) + sizeof(TFooter);
-		ptNextFoot->m_nSize = ptHead->m_nSize;
-
-		ptFoot->m_nSize = 0;
-
-		// Move foot pointer
-		ptFoot = ptNextFoot;
-
-		if(ptNextHead->m_ptPrev != ptHead)
-		{
-			ptHead->m_ptPrev = ptNextHead->m_ptPrev;
-		}
-		if(ptNextHead->m_ptNext != ptHead)
-		{
-			ptHead->m_ptNext = ptNextHead->m_ptNext;
-		}
-
-		if(ptHead->m_ptPrev == ptNextHead)
-		{
-			ptHead->m_ptPrev = ptHead;
-		}
-		if(ptHead->m_ptNext == ptNextHead)
-		{
-			ptHead->m_ptNext = ptHead;
-		}
-
-		if(ptHead->m_ptPrev != ptHead)
-		{
-			ptHead->m_ptPrev->m_ptNext = ptHead;
-		}
-		if(ptHead->m_ptNext != ptHead)
-		{
-			ptHead->m_ptNext->m_ptPrev = ptHead;
-		}
-
-
-		if(ptNextHead == m_ptFreeHead)
-		{
-			m_ptFreeHead = ptHead;
-		}
-
-		// Clear old memory
-		ptNextHead->m_ptPrev = ptNextHead->m_ptNext = NULL;
-		ptNextHead->m_nSize = 0;
-
-		m_nMemoryAvailable += sizeof(THeader) + sizeof(TFooter);
-	}
-
+	// Block did not merge left, reinsert into list
 	if(m_ptFreeHead != NULL)
 	{
 		// Set the head's prev (left)
-		if(ptHead->m_ptPrev == ptHead)
-		{
-			ptHead->m_ptPrev = m_ptFreeHead->m_ptPrev;
-			ptHead->m_ptPrev->m_ptNext = ptHead;
-		}
+		ptHead->m_ptPrev = m_ptFreeHead->m_ptPrev;
+		ptHead->m_ptPrev->m_ptNext = ptHead;
 
 		// Set the head's next (right)
-		if(ptHead->m_ptNext == ptHead)
-		{
-			ptHead->m_ptNext = m_ptFreeHead;
-			ptHead->m_ptNext->m_ptPrev = ptHead;
-		}
+		ptHead->m_ptNext = m_ptFreeHead;
+		ptHead->m_ptNext->m_ptPrev = ptHead;
 	}
 	else
 	{
 		m_ptFreeHead = ptHead;
 	}
-
-	//pchData = NULL;
 }
 
 #else
@@ -396,11 +372,11 @@ CHeap::~CHeap()
 void CHeap::Init(unsigned int nPoolSizeInBytes)
 {
 	m_nTotalPoolSize = (nPoolSizeInBytes+(BYTE_ALIGN-1)) & ~(BYTE_ALIGN-1);
-	m_nMemoryAvailable = m_nTotalPoolSize;
 
 	// TODO: align malloc call to 4 bytes but not 8 bytes
 	// so end of first header is 8 byte-aligned
 	m_pchPool = (char*)malloc(m_nTotalPoolSize);
+	memset(m_pchPool, 0, m_nTotalPoolSize);
 
 	FindFreeMemory = &CHeap::FirstAvailable;
 
@@ -414,6 +390,7 @@ void CHeap::Init(unsigned int nPoolSizeInBytes)
 
 	m_ptFreeHead = ptHead;
 	m_ptEndPoolFooter = ptFoot;
+	m_nMemoryAvailable = m_ptFreeHead->m_nSize;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -432,17 +409,9 @@ void CHeap::Init(unsigned int nPoolSizeInBytes)
 CHeap::THeader * CHeap::FirstAvailable(unsigned int nAllocSize)
 {
 	if(m_ptFreeHead == NULL || m_ptFreeHead->m_nSize == 0)
-	{
 		return NULL;
-	}
 
-	//if(m_ptFreeHead->m_nSize >= nAllocSize)
-	//{
-	//	return m_ptFreeHead;
-	//}
-	//else
-	//{
-	THeader* ptIter = m_ptFreeHead;
+	THeader* ptIter = m_ptFreeHead->m_ptNext;
 	do
 	{
 		if(ptIter->m_nSize >= nAllocSize)
@@ -450,10 +419,11 @@ CHeap::THeader * CHeap::FirstAvailable(unsigned int nAllocSize)
 		else
 			ptIter = ptIter->m_ptNext;
 
-	} while(ptIter != m_ptFreeHead);
+	} while(ptIter != m_ptFreeHead->m_ptNext);
 
-	return NULL;
-//	}
+	// No More Memory
+	throw;
+	//return NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -471,6 +441,9 @@ CHeap::THeader * CHeap::FirstAvailable(unsigned int nAllocSize)
 char * CHeap::Allocate(unsigned int nAllocSize)
 {
 	// Byte Align
+	if(nAllocSize == 0)
+		return NULL;
+
 	nAllocSize = (nAllocSize+(BYTE_ALIGN-1)) & ~(BYTE_ALIGN-1);
 	THeader *ptHead = FirstAvailable(nAllocSize);
 
@@ -482,9 +455,9 @@ char * CHeap::Allocate(unsigned int nAllocSize)
 	TFooter *ptFoot = (TFooter*)((char*)ptHead + ptHead->m_nSize + 
 		sizeof(THeader));
 
-	// REMOVE LATER
-	m_nMemoryAvailable -= nAllocSize;
-	m_nNumPtrs++;
+	// Remove the whole block in case we can't split
+	m_nMemoryAvailable -= ptHead->m_nSize;
+	++m_nNumPtrs;
 
 	// See if there's enough leftover memory for another chunk
 	if(ptHead->m_nSize - nAllocSize > (sizeof(THeader) + sizeof(TFooter)))
@@ -514,7 +487,9 @@ char * CHeap::Allocate(unsigned int nAllocSize)
 		}
 
 		ptNewFoot->m_nSize = ptNewHead->m_nSize;
-		m_nMemoryAvailable -= sizeof(THeader) + sizeof(TFooter);
+
+		// add back the memory from the split block
+		m_nMemoryAvailable += nBlockSize - (sizeof(THeader) + sizeof(TFooter) + nAllocSize);
 	}
 
 	if(ptHead == m_ptFreeHead) // the memory found was the head of the list
@@ -541,9 +516,7 @@ char * CHeap::Allocate(unsigned int nAllocSize)
 
 	ptFoot->m_nSize |= (1<<31);
 
-	char* pMemPtr = (char*)ptHead + sizeof(THeader);
-
-	return pMemPtr;
+	return (char*)ptHead + sizeof(THeader);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -575,9 +548,42 @@ void CHeap::DeAllocate(char * pchData)
 	TFooter * ptFoot = (TFooter*)(pchData + ptHead->m_nSize);
 	ptFoot->m_nSize &= ~(1<<31);
 
-	// REMOVE LATER
+	// Clear the old memory
+	memset(pchData, 0, ptHead->m_nSize);
+
 	m_nMemoryAvailable += ptHead->m_nSize;
-	m_nNumPtrs--;
+	--m_nNumPtrs;
+
+	// See if you can merge right
+	THeader * ptNextHead = (THeader*)((char*)ptFoot + sizeof(TFooter));
+	if(((char*)ptNextHead < (char*)m_ptEndPoolFooter) && (ptNextHead->m_nSize & (1<<31)) == 0)
+	{
+		// Next block is free
+		TFooter * ptNextFoot = (TFooter*)((char*)ptNextHead + sizeof(THeader) + ptNextHead->m_nSize);
+
+		// Merge Right
+		ptHead->m_nSize += ptNextHead->m_nSize + sizeof(THeader) + sizeof(TFooter);
+		ptNextFoot->m_nSize = ptHead->m_nSize;
+
+		ptFoot->m_nSize = 0;
+
+		// Move foot pointer
+		ptFoot = ptNextFoot;
+
+		m_nMemoryAvailable += sizeof(THeader) + sizeof(TFooter);
+
+		m_ptFreeHead = ptNextHead->m_ptNext;
+
+		if(ptNextHead == m_ptFreeHead)
+		{
+			m_ptFreeHead = NULL;
+		}
+		else
+		{
+			ptNextHead->m_ptNext->m_ptPrev = ptNextHead->m_ptPrev;
+			ptNextHead->m_ptPrev->m_ptNext = ptNextHead->m_ptNext;
+		}
+	}
 
 	// See if you can merge left
 	TFooter * ptPrevFoot = (TFooter*)((char*)ptHead - sizeof(TFooter));
@@ -601,86 +607,25 @@ void CHeap::DeAllocate(char * pchData)
 		ptHead = ptPrevHead;
 
 		m_nMemoryAvailable += sizeof(THeader) + sizeof(TFooter);
+
+		return;
 	}
 
-	// See if you can merge right
-	THeader * ptNextHead = (THeader*)((char*)ptFoot + sizeof(TFooter));
-	if(((char*)ptNextHead < (char*)m_ptEndPoolFooter) && (ptNextHead->m_nSize & (1<<31)) == 0)
-	{
-		// Next block is free
-		TFooter * ptNextFoot = (TFooter*)((char*)ptNextHead + sizeof(THeader) + ptNextHead->m_nSize);
-
-		// Merge Right
-		ptHead->m_nSize += ptNextHead->m_nSize + sizeof(THeader) + sizeof(TFooter);
-		ptNextFoot->m_nSize = ptHead->m_nSize;
-
-		ptFoot->m_nSize = 0;
-
-		// Move foot pointer
-		ptFoot = ptNextFoot;
-
-		if(ptNextHead->m_ptPrev != ptHead)
-		{
-			ptHead->m_ptPrev = ptNextHead->m_ptPrev;
-		}
-		if(ptNextHead->m_ptNext != ptHead)
-		{
-			ptHead->m_ptNext = ptNextHead->m_ptNext;
-		}
-
-		if(ptHead->m_ptPrev == ptNextHead)
-		{
-			ptHead->m_ptPrev = ptHead;
-		}
-		if(ptHead->m_ptNext == ptNextHead)
-		{
-			ptHead->m_ptNext = ptHead;
-		}
-
-		if(ptHead->m_ptPrev != ptHead)
-		{
-			ptHead->m_ptPrev->m_ptNext = ptHead;
-		}
-		if(ptHead->m_ptNext != ptHead)
-		{
-			ptHead->m_ptNext->m_ptPrev = ptHead;
-		}
-
-
-		if(ptNextHead == m_ptFreeHead)
-		{
-			m_ptFreeHead = ptHead;
-		}
-
-		// Clear old memory
-		ptNextHead->m_ptPrev = ptNextHead->m_ptNext = NULL;
-		ptNextHead->m_nSize = 0;
-
-		m_nMemoryAvailable += sizeof(THeader) + sizeof(TFooter);
-	}
-
+	// Block did not merge left, reinsert into list
 	if(m_ptFreeHead != NULL)
 	{
 		// Set the head's prev (left)
-		if(ptHead->m_ptPrev == ptHead)
-		{
-			ptHead->m_ptPrev = m_ptFreeHead->m_ptPrev;
-			ptHead->m_ptPrev->m_ptNext = ptHead;
-		}
+		ptHead->m_ptPrev = m_ptFreeHead->m_ptPrev;
+		ptHead->m_ptPrev->m_ptNext = ptHead;
 
 		// Set the head's next (right)
-		if(ptHead->m_ptNext == ptHead)
-		{
-			ptHead->m_ptNext = m_ptFreeHead;
-			ptHead->m_ptNext->m_ptPrev = ptHead;
-		}
+		ptHead->m_ptNext = m_ptFreeHead;
+		ptHead->m_ptNext->m_ptPrev = ptHead;
 	}
 	else
 	{
 		m_ptFreeHead = ptHead;
 	}
-
-	//pchData = NULL;
 }
 
 #endif

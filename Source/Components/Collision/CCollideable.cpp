@@ -3,48 +3,10 @@
 void CCollideable::Init(void)
 {
 }
-void CCollideable::BuildFrustum(D3DXMATRIX mViewProj)
-{
-	//view and proj combined
-
-	//Left
-	m_BVFrustum.tLeft.cPlaneNormal.x = mViewProj._14 + mViewProj._11;
-	m_BVFrustum.tLeft.cPlaneNormal.y = mViewProj._24 + mViewProj._21;
-	m_BVFrustum.tLeft.cPlaneNormal.z = mViewProj._34 + mViewProj._31;
-	m_BVFrustum.tLeft.fOffset = mViewProj._44 + mViewProj._41;
-
-	//Right
-	m_BVFrustum.tRight.cPlaneNormal.x = mViewProj._14 - mViewProj._11;
-	m_BVFrustum.tRight.cPlaneNormal.y = mViewProj._24 - mViewProj._21;
-	m_BVFrustum.tRight.cPlaneNormal.z = mViewProj._34 - mViewProj._31;
-	m_BVFrustum.tRight.fOffset = mViewProj._44 - mViewProj._41;
-
-	//Top
-	m_BVFrustum.tTop.cPlaneNormal.x = mViewProj._14 - mViewProj._12;
-	m_BVFrustum.tTop.cPlaneNormal.x = mViewProj._24 - mViewProj._22;
-	m_BVFrustum.tTop.cPlaneNormal.x = mViewProj._34 - mViewProj._32;
-	m_BVFrustum.tTop.fOffset = mViewProj._44 - mViewProj._42;
-
-	//Bottom
-	m_BVFrustum.tBottom.cPlaneNormal.x = mViewProj._14 + mViewProj._12;
-	m_BVFrustum.tBottom.cPlaneNormal.x = mViewProj._24 + mViewProj._22;
-	m_BVFrustum.tBottom.cPlaneNormal.x = mViewProj._34 + mViewProj._32;
-	m_BVFrustum.tBottom.fOffset = mViewProj._44 + mViewProj._42;
-
-	//Near
-	m_BVFrustum.tNear.cPlaneNormal.x = mViewProj._13;
-	m_BVFrustum.tNear.cPlaneNormal.y = mViewProj._23;
-	m_BVFrustum.tNear.cPlaneNormal.z = mViewProj._33;
-	m_BVFrustum.tNear.fOffset = mViewProj._43;
-
-	//Far
-	m_BVFrustum.tFar.cPlaneNormal.x = mViewProj._14 - mViewProj._13;
-	m_BVFrustum.tFar.cPlaneNormal.y = mViewProj._24 - mViewProj._23;
-	m_BVFrustum.tFar.cPlaneNormal.z = mViewProj._34 - mViewProj._33;
-	m_BVFrustum.tFar.fOffset = mViewProj._44 - mViewProj._43;
 
 
-}
+	
+	
 //////////////////////////////////////////////////////////////////////////
 //	Accessors
 //////////////////////////////////////////////////////////////////////////
@@ -71,23 +33,42 @@ int CCollideable::GetBVType()
 }
 TAABB CCollideable::GetAABB()
 {
-	return m_BVAABB;
+	TAABB aabb;
+	aabb.cBoxMin = (m_cCenterPoint - m_fExtents);
+	aabb.cBoxMax = (m_cCenterPoint + m_fExtents);
+	return aabb;
 }
 TOBB CCollideable::GetOBB()
 {
-	return m_BVOBB;
+	TOBB obb;
+	obb.cCenterPoint = m_cCenterPoint;
+	obb.tE = m_fExtents;
+	for(unsigned i = 0; i < 3; ++i)
+		obb.tU[i] = m_tLocalAxes[i];
+	return obb;
 }
 TSphere CCollideable::GetSphere()
 {
-	return m_BVSphere;
+	TSphere sphere;
+	sphere.cPosition = m_cCenterPoint;
+	sphere.fRadius = m_fExtents[0];
+	return sphere;
 }
-TPlane CCollideable::GetPlane()
+TCapsule CCollideable::GetCapsule()
 {
-	return m_BVPlane;
+	TCapsule kapsool;
+	kapsool.cFront = m_cFrontPoint;
+	kapsool.cRear = m_cCenterPoint;
+	kapsool.fRadius = m_fExtents.x;
+	return kapsool;
+	
 }
-TFrustum CCollideable::GetFrustum()
+TLine CCollideable::GetLine()
 {
-	return m_BVFrustum;
+	TLine line;
+	line.cLineStart = m_cCenterPoint;
+	line.cLineEnd = m_tLocalAxes[0] * m_fExtents.x;	//localeaxes[0] = linedir, fextents[0] = linedistance
+	return line;
 }
 bool CCollideable::GetWasChecked()
 {
@@ -101,6 +82,8 @@ bool CCollideable::GetReactor()
 {
 	return m_bIsReactor;
 }
+
+
 //////////////////////////////////////////////////////////////////////////
 //	Mutators
 //////////////////////////////////////////////////////////////////////////
@@ -131,56 +114,35 @@ void CCollideable::SetBVType(int type)
 }
 void CCollideable::SetAABB(TAABB taabb)
 {
-	//		m_BVAABB = taabb;
-	m_BVAABB.cBoxMax.x = taabb.cBoxMax.x;
-	m_BVAABB.cBoxMax.y = taabb.cBoxMax.y;
-	m_BVAABB.cBoxMax.z = taabb.cBoxMax.z;
-	m_BVAABB.cBoxMin.x = taabb.cBoxMin.x;
-	m_BVAABB.cBoxMin.y = taabb.cBoxMin.y;
-	m_BVAABB.cBoxMin.z = taabb.cBoxMin.z;
+
+	m_cCenterPoint = (taabb.cBoxMin + taabb.cBoxMax)/2;
+	//set local axes during test collision for each shape for ease
+	m_fExtents.x = fabs((taabb.cBoxMax.x - taabb.cBoxMin.x)/2.0f);
+	m_fExtents.y = fabs((taabb.cBoxMax.y - taabb.cBoxMin.y)/2.0f);
+	m_fExtents.z = fabs((taabb.cBoxMax.z - taabb.cBoxMin.z)/2.0f);
+	m_tLocalAxes[0] = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
+	m_tLocalAxes[1] = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	m_tLocalAxes[2] = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
 }
 void CCollideable::SetOBB(TOBB tobb)
 {
-	m_BVOBB = tobb; //TODOTODOTODO  
+	m_cCenterPoint = tobb.cCenterPoint;
+	m_fExtents = tobb.tE;
+	for(unsigned i = 0; i < 3; ++i)
+		m_tLocalAxes[i] = tobb.tU[i];
 }
 void CCollideable::SetSphere(TSphere tsphere)
 {
 	//		m_BVSphere = tsphere;
-	m_BVSphere.cPosition.x = tsphere.cPosition.x;
-	m_BVSphere.cPosition.y = tsphere.cPosition.y;
-	m_BVSphere.cPosition.z = tsphere.cPosition.z;
-	m_BVSphere.fRadius = tsphere.fRadius;
+	m_cCenterPoint = tsphere.cPosition;
+	m_fExtents.x = m_fExtents.y = m_fExtents.z = tsphere.fRadius;
+	//set local axes in test collision
 }
-void CCollideable::SetPlane(TPlane tplane)
+void CCollideable::SetCapsule(TCapsule capsool)
 {
-	//		m_BVPlane = tplane;
-	m_BVPlane.cPlaneNormal.x = tplane.cPlaneNormal.x;
-	m_BVPlane.cPlaneNormal.y = tplane.cPlaneNormal.y;
-	m_BVPlane.cPlaneNormal.z = tplane.cPlaneNormal.z;
-	m_BVPlane.cPlanePoint.x = tplane.cPlanePoint.x;
-	m_BVPlane.cPlanePoint.y = tplane.cPlanePoint.y;
-	m_BVPlane.cPlanePoint.z = tplane.cPlanePoint.z;
-	//	if(tplane.fOffset)		//NOTE: this s is bananas, but ideally planes should be normal.xyz and offset, so 
-	//								change may be imminent! -Raymoney
-	//	{
-	//		m_BVPlane.fOffset = tplane.fOffset;
-	//		m_BVPlane.cPlanePoint = m_BVPlane.cPlaneNormal*tplane.fOffset;
-	//	}
-}
-void CCollideable::SetFrustumPlane(TPlane frustplane, TPlane &target)
-{
-	target.cPlaneNormal = frustplane.cPlaneNormal;
-	target.fOffset = frustplane.fOffset;
-	target.cPlanePoint = target.cPlaneNormal*target.fOffset;
-}
-void CCollideable::SetFrustum(TFrustum tfrust)
-{
-	SetFrustumPlane(tfrust.tTop, m_BVFrustum.tTop);				//top
-	SetFrustumPlane(tfrust.tBottom, m_BVFrustum.tBottom);		//bottom	
-	SetFrustumPlane(tfrust.tLeft, m_BVFrustum.tLeft);				//left
-	SetFrustumPlane(tfrust.tRight, m_BVFrustum.tRight);			//right
-	SetFrustumPlane(tfrust.tNear, m_BVFrustum.tNear);				//near
-	SetFrustumPlane(tfrust.tFar, m_BVFrustum.tFar);				//far
+	m_cCenterPoint = capsool.cRear;
+	m_cFrontPoint = capsool.cFront;
+	m_fExtents.x = m_fExtents.y = m_fExtents.z = capsool.fRadius;
 }
 void CCollideable::SetObjType(unsigned int ntype)
 {

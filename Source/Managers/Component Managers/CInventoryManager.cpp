@@ -5,7 +5,7 @@
 //
 //  Date Created	:	04/17/11
 //
-//	Last Changed	:	04/17/11
+//	Last Changed	:	05/17/11
 //
 //  Purpose			:	A manager for inventory components
 ///////////////////////////////////////////////////////////////////////////////
@@ -20,12 +20,6 @@ using namespace EventStructs;
 
 void CInventoryManager::Init(void)
 {
-	// Register for Events
-	CEventManager* pEM = CEventManager::GetInstance();
-	
-
-	pEM->RegisterEvent("PlayerRammed",
-		(IComponent*)GetInstance(), PlayerRammedCallback);
 }
 
 int CInventoryManager::CreateInventoryComp(lua_State* pLua)
@@ -34,7 +28,7 @@ int CInventoryManager::CreateInventoryComp(lua_State* pLua)
 	CObject* pObj = (CObject*)lua_topointer(pLua, -1);
 	
 	// Create Component
-	CInventoryComponent* pSpriteComp = CreateInventoryComp(pObj);
+	/*CInventoryComponent* pSpriteComp = */CreateInventoryComp(pObj);
 
 	// End LUA
 	lua_pop(pLua, 1);
@@ -67,7 +61,7 @@ CInventoryManager* CInventoryManager::GetInstance(void)
 }
 
 // Callbacks
-void CInventoryManager::GoalItemCollectedCallback(IEvent* e, IComponent* comp)
+void CInventoryManager::GoalItemCollectedCallback(IEvent* /*e*/, IComponent*)
 {
 	// Get the Values from the Event
 	/*TGoalItemEvent* pcObjEvent = static_cast<TGoalItemEvent*>(e->GetData());
@@ -91,20 +85,21 @@ void CInventoryManager::GoalItemCollectedCallback(IEvent* e, IComponent* comp)
 	}/**/
 }
 
-void CInventoryManager::PlayerRammedCallback(IEvent* e, IComponent* comp)
+
+CInventoryComponent* CInventoryManager::GetInventoryComponent(CObject* pObj)
 {
-	// This should be moved to the inventorycomponent instead of the manager, no?
-	TRamEvent* pEvent = (TRamEvent*)e->GetData();
+	list<CInventoryComponent*, CAllocator<CInventoryComponent*>>::iterator iter;
+	iter = m_cInvComps.begin();
 
-	list<CInventoryComponent*, CAllocator<CInventoryComponent*>>
-		::iterator iter = GetInstance()->m_cInvComps.begin();
-
-	while(iter != GetInstance()->m_cInvComps.end())
+	while(iter != m_cInvComps.end())
 	{
-		if((*iter)->GetParent() == pEvent->m_pcRammee)
+		if((*iter)->GetParent() == pObj)
 		{
-			(*iter)->Rammed(pEvent->m_pcRammer, pEvent->m_pcRammee);
+			return (*iter);
 		}
 		iter++;
 	}
+
+	// didn't find it
+	return NULL;
 }

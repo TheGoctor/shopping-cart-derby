@@ -76,6 +76,9 @@ public:
 	CHeap(const CHeap &);
 	CHeap & operator=(const CHeap &);
 
+	unsigned int GetMemUsed() { return m_nTotalPoolSize - m_nMemoryAvailable; }
+	unsigned int GetPoolSize() { return m_nTotalPoolSize; }
+
 ////////////////////////////////////////////////////////////////////////////////
 // Init()	:	Initializes the Heap Object
 //
@@ -166,6 +169,9 @@ public:
 	~CHeap();
 	CHeap(const CHeap &);
 	CHeap & operator=(const CHeap &);
+	
+	unsigned int GetMemUsed() { return m_nTotalPoolSize - m_nMemoryAvailable; }
+	unsigned int GetPoolSize() { return m_nTotalPoolSize; }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Init()	:	Initializes the Heap Object

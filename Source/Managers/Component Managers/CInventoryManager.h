@@ -5,7 +5,7 @@
 //
 //  Date Created	:	04/17/11
 //
-//	Last Changed	:	04/17/11
+//	Last Changed	:	05/17/11
 //
 //  Purpose			:	A manager for inventory components
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,6 +27,7 @@ extern "C"
 // Includes
 #include "..\\Global Managers\\Memory Manager\\CAllocator.h"
 #include "..\\..\\Components\\Inventory\\CInventoryComponent.h"
+#include "..\\..\\CObject.h"
 
 // Foward Declares
 class IEvent;
@@ -62,7 +63,9 @@ public:
 
 	// Callbacks
 	static void GoalItemCollectedCallback(IEvent* e, IComponent* comp);
-	static void PlayerRammedCallback(IEvent* e, IComponent* comp);
+
+	CInventoryComponent* GetInventoryComponent(CObject* pObj);
+	
 };
 
 #endif

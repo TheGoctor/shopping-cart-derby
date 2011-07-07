@@ -23,6 +23,7 @@ extern "C"
 }
 
 #include "..\..\..\Enums.h"
+#include "..\Event Manager\CIDGen.h"
 #include "..\Memory Manager\CAllocator.h"
 
 class CObject;
@@ -86,17 +87,19 @@ public:
 	static int CreateObject(lua_State* pL);
 	static CObject* CreateObject(string szName,
 		float fPosX = 0.0f, float fPosY = 0.0f, float fPosZ = 0.0,
-		CFrame* pcFramesParent = NULL);
+		float fRot = 0.0f, CObject* pcFramesParent = NULL);
 
 	// Destroy Object functions
 	static int DestroyObject(lua_State* pL);
 	static void DestroyObject(CObject* pObj);
+
+	// Binding objects for animations/effects/anything else that needs it
+	static int BindObjects(lua_State* pL);
+	void BindObjects(CObject* pParent, CObject* pChild);
 	
-	// TODO: Delete when collisions can add to set
-	CObject* GetObject()
-	{
-		return (*m_cObjects.begin());
-	}
+	static int GetObjectByName(lua_State* pLua);
+	CObject* GetObjectByName(string szName);
+
 };
 
 #endif // _COBJECTMANAGER_H_

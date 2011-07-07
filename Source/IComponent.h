@@ -13,6 +13,14 @@
 
 class IComponent
 {
+	bool m_bIsActive;
+
+public:
+	IComponent() : m_bIsActive(true) { }
+
+	bool GetIsActive() { return m_bIsActive; }
+	void SetIsActive(bool bActive) { m_bIsActive = bActive; }
+	void ToggleIsActive() { m_bIsActive = !m_bIsActive; }
 };
 
 #endif

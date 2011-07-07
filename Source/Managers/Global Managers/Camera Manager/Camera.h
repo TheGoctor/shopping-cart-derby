@@ -19,13 +19,12 @@
 #include "../../../Components/Collision/CCollideable.h"
 #include <queue>
 using std::queue;
+class CWwiseSoundManager;
+
 
 class CCamera
 {
 private:
-	CCamera(void);
-	CCamera(const CCamera &);
-	CCamera &operator=(const CCamera &);
 
 	queue<D3DXMATRIX> m_Matrices;
 	size_t m_iQueueSize;
@@ -41,32 +40,36 @@ private:
 
 	CObject*			m_cFrustum;
 	CCollideable*		m_cFrustumBounds;
+	TSphere				m_tCameraSphere;	//Hack BV for camera
+	D3DXVECTOR3			m_collisiontransform;
+	CWwiseSoundManager* m_pSound;
 
 	CFrame				m_frame;
 	CFrame				*m_pTarget;
 
-	static CCamera		*m_pCCamera;
-
 public:
+	CCamera(void);
+	CCamera(const CCamera &);
+	CCamera &operator=(const CCamera &);
 	~CCamera(void);
 	CFrame					m_Target;
 	static D3DXVECTOR3 s_vWorldUp;
 
-	static CCamera* GetInstance();
+	//static CCamera* GetInstance();
 
 	///////////////////////////////////////////////
 	//Accessors
 	////////////////////////////////////////////
-	const D3DXMATRIX &GetProjectionMatrix() 
+	D3DXMATRIX &GetProjectionMatrix() 
 	{
-		return m_mProjectionMatrix;
+		return this->m_mProjectionMatrix;
 	}
 	const D3DXMATRIX &GetViewProjectionMatrix()
 	{
-		return m_mViewProjectionMatrix;
+		return this->m_mViewProjectionMatrix;
 	}
 
-	const D3DXMATRIX &GetViewMatrix();
+	D3DXMATRIX &GetViewMatrix();
 
 	CFrame *GetTarget(void)
 	{
@@ -76,6 +79,11 @@ public:
 	CFrame &GetFrame(void)
 	{
 		return m_frame;
+	}
+	
+	CFrame &GetTarget1(void)
+	{
+		return m_Target;
 	}
 
 	D3DXVECTOR3 GetEyePos()
@@ -111,6 +119,10 @@ public:
 	{
 		m_vEyePos = eyepos;
 	}
+
+	void ResetCamera();
+
+	  void SetViewMatrix(D3DXMATRIX *_mMatrix);
 	////////////////////////////////////////////////////////////////////////////
 	//Accesors
 	///////////////////////////////////////////////////////////////////////////
@@ -118,6 +130,15 @@ public:
 		float fZNear, float fZFar);
 	void Initialize();
 	void Update(float fDeltaTime);
+	
+	void ViewRotateLocalX(float fAngle);
+	void ViewRotateLocalY(float fAngle);
+	void ViewRotateLocalZ(float fAngle);
+	void ViewTranslateLocal(D3DXVECTOR3 vAxis, bool bFPS = false);
+	void ViewTranslateLocalX(float fScale, bool bFPS = false);
+	void ViewTranslateLocalY(float fScale, bool bFPS = false);
+	void ViewTranslateLocalZ(float fScale, bool bFPS = false);
+	
 
 };
 #endif //_CAMERA_H_

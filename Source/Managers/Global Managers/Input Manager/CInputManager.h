@@ -33,7 +33,7 @@ using namespace std;
 
 enum {CMD_ACCEPT = 1, CMD_BACK, CMD_ACCELERATE, CMD_DECELERATE, CMD_SHOVELEFT,
 CMD_SHOVERIGHT, CMD_STEERLEFT, CMD_STEERRIGHT, CMD_UP, CMD_DOWN, CMD_LEFT, 
-CMD_RIGHT, CMD_DRIFT, CMD_MENU};
+CMD_RIGHT, CMD_DRIFT, CMD_MENU, CMD_USEITEM1, CMD_USEITEM2, CMD_MAX};
 
 ////////////////////////////////////////////////////////////////////////////////
 //	Frame Structure
@@ -58,6 +58,7 @@ struct TCommand
 // Forward Declarations
 class IComponent;
 class IEvent;
+class CObject;
 
 class CInputManager
 {
@@ -65,14 +66,24 @@ private:
 
 	struct TPlayer
 	{
-		int m_nID;
+		CObject* pPlayerObj;
+		bool bController;
 		DWORD m_dwPrevState;
 	};
 
+	// Handle to the window for mouse coords
+	HWND m_hWnd;
+	RECT m_rClientRect;
 
 	// DirectInput Devices
 	IDirectInput8*			m_pDin;			// The DirectInput COM object
 	IDirectInputDevice8*	m_pKeyboard;	// The keyboard device
+	//IDirectInputDevice8*	m_pMouse;		// The mouse device
+
+	//// Current Mouse State
+	//DIMOUSESTATE m_MouseState;
+	bool m_bPrevLeftMouseDown;
+	//bool m_bPrevRightMouseDown;
 
 	// Current and Previous Keyboard States
 	BYTE	m_chKeys[256];	// The state of the keyboard this frame
@@ -102,15 +113,19 @@ private:
 	TCommand	m_tShoveLeft;	// The key and button used to shove left
 	TCommand	m_tShoveRight;	// The key and button used to shove right
 	TCommand	m_tDrift;		// The key and button used to enable drift
+	TCommand	m_tUseItem1;		// The key and button used to enable drift
+	TCommand	m_tUseItem2;		// The key and button used to enable drift
 	// TODO: Add more controls
-
-	queue<TCommand>	m_cInput;		// Queue of actions registered from input
 
 	string*	m_szKeyStrings;// An array of strings that describe the DIK key codes
 
 	EGameState	m_eGameState;	// The current game state, input done accordingly
 
-	void (CInputManager::*m_pfGetInput)();
+	// Player Object Pointers
+	CObject* m_pPlayer0;
+	CObject* m_pPlayer1;
+	CObject* m_pPlayer2;
+	CObject* m_pPlayer3;
 
 	//	Constructor
 	CInputManager();
@@ -134,12 +149,22 @@ public:
 
 	static void GetInput(IEvent*, IComponent*);
 	static void InputStateChange(IEvent*, IComponent*);
+	static void SetPlayer(IEvent*, IComponent*);
 	static void Shutdown(IEvent*, IComponent*);
 	
 	void GetInputIntro();
 	void GetInputMenu();
+	void GetInputOptions();
 	void GetInputGameplay();
 	void GetInputConsole();
+	void GetInputEndgame();
+	
+	int GetControllerButtonDown();
+
+	inline BYTE* GetKeys()
+	{
+		return m_chKeys;
+	}
 
 	EGameState GetState()
 	{

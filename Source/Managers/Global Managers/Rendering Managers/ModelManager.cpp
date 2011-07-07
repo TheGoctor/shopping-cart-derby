@@ -1,5 +1,6 @@
 #include "ModelManager.h"
 #include "Direct3DManager.h"
+#include "..\\Event Manager\\CEventManager.h"
 #include "..\\Event Manager\\CIDGen.h"
 #include <iostream>
 #include <fstream>
@@ -8,11 +9,10 @@ using namespace std;
 // Don't use for arrays and only use when fin is your fstream
 #define READ(var) (fin.read((char*)&var, sizeof(var)))
 
-ModelManager ModelManager::m_pInstance;
-
 ModelManager* ModelManager::GetInstance()
 {
-	return &m_pInstance;
+	static ModelManager cModelManager;
+	return &cModelManager;
 }
 
 ModelManager::ModelManager()
@@ -20,30 +20,69 @@ ModelManager::ModelManager()
 	currIndex = 0;
 }
 
+void ModelManager::Init(void)
+{
+	// Register for Events
+	CEventManager* pEM = CEventManager::GetInstance();
+	pEM->RegisterEvent("Shutdown", (IComponent*)GetInstance(), ShutdownCallback);
+}
+
+// Shutdown
+void ModelManager::ShutdownCallback(IEvent*, IComponent*)
+{
+	GetInstance()->Shutdown();
+}
+void ModelManager::Shutdown(void)
+{
+	// Meshs
+	map<unsigned int, DXMesh*, less<unsigned int>, CRenderAllocator<pair
+		<unsigned int, DXMesh*>>>::iterator meshIter = m_cMeshTemplates.begin();
+	while(meshIter != m_cMeshTemplates.end())
+	{
+		MMDEL(meshIter->second);
+
+		meshIter++;
+	}
+	m_cMeshTemplates.clear();
+
+	// Vertex Data
+	map<unsigned int, TMeshVertexInfo*, less<unsigned int>, CRenderAllocator
+		<pair<unsigned int, TMeshVertexInfo*>>>::iterator vertIter 
+		= m_cVertexTemplates.begin();
+	while(vertIter != m_cVertexTemplates.end())
+	{
+		MMDEL(vertIter->second);
+
+		vertIter++;
+	}
+	m_cVertexTemplates.clear();
+	
+	// Animations
+	map<unsigned int, CAnimation*, less<unsigned int>, CRenderAllocator
+		<pair<unsigned int, CAnimation*>>>::iterator animIter 
+		= m_cAnimationTemplates.begin();
+	while(animIter != m_cAnimationTemplates.end())
+	{
+		MMDEL(animIter->second);
+
+		animIter++;
+	}
+	m_cAnimationTemplates.clear();
+
+	// Clone Meshs
+	list<DXMesh*, CRenderAllocator<DXMesh*>>::iterator cloneIter 
+		= m_cClonedBonedMeshs.begin();
+	while(cloneIter != m_cClonedBonedMeshs.end())
+	{
+		MMDEL( (*cloneIter) );
+
+		cloneIter++;
+	}
+	m_cClonedBonedMeshs.clear();
+}
+
 ModelManager::~ModelManager()
 {
-	//// Map of Meshs (Key = ID of MeshName, Data = DXMesh)
-	//map<unsigned int, DXMesh*>::iterator meshIter = m_cMeshTemplates.begin();
-	//while(meshIter != m_cMeshTemplates.end())
-	//{
-	//	MMDEL(DXMesh, meshIter->second);
-
-	//	meshIter++;
-	//}
-
-	//// Map of Mesh Vertex Data (Key = ID of MeshName, Data = Vertex Data)
-	//map<unsigned int, TMeshVertexInfo*> m_cVertexTemplates;
-
-	//// Map of Animations (Key = ID of AnimName, Data = Animation)
-	//map<unsigned int, CAnimation*> m_cAnimationTemplates;
-
-
-	//// Map of Clone Meshs (Key = Idx, Data = Clone Animation)
-	//map<unsigned int, DXMesh*> m_cCloneAnimations;
-
-	//// Map of Mesh Vertex Data (Key = ID of MeshName, Data = Vertex Data)
-	//map<unsigned int, TMeshVertexInfo*> m_cCloneVertex;
-
 }
 
 int ModelManager::LoadModel(char* szFileName)
@@ -67,8 +106,11 @@ int ModelManager::LoadModel(char* szFileName)
 	{
 		D3DXVECTOR3 *pos_buffer;
 		D3DXVECTOR3 *norm_buffer;
-		D3DXVECTOR2	*uv_buffer;
-		DWORD		*indicies;
+		D3DXVECTOR2 *uv_buffer;
+		DWORD  *indicies;
+
+		
+
 
 		// strlen
 		fin.read((char*)&num, 4);
@@ -81,19 +123,29 @@ int ModelManager::LoadModel(char* szFileName)
 		pos_buffer = new D3DXVECTOR3[num];
 		norm_buffer = new D3DXVECTOR3[num];
 		uv_buffer = new D3DXVECTOR2[num];
+
+
+		TMeshVertexInfo* pVertInfo;
+		bool bStoringVerts = (strcmp(m_pMeshBuffer[currIndex].m_szName, "FFP_3D_CheckoutCollision_FIN") == 0);
+		if( bStoringVerts )
+		{
+			pVertInfo = MMNEW(TMeshVertexInfo);
+		}
+
 		// vertices
 		for(unsigned int i = 0; i < num; ++i)
 		{
 			fin.read((char*)&pos_buffer[i].x, sizeof(float));
 			fin.read((char*)&pos_buffer[i].y, sizeof(float));
 			fin.read((char*)&pos_buffer[i].z, sizeof(float));
-
 		}
 		for(unsigned int i = 0; i < num; ++i)
 		{
 			fin.read((char*)&norm_buffer[i].x, sizeof(float));
 			fin.read((char*)&norm_buffer[i].y, sizeof(float));
 			fin.read((char*)&norm_buffer[i].z, sizeof(float));
+
+			
 
 		}
 		for(unsigned int i = 0; i < num; ++i)
@@ -105,11 +157,19 @@ int ModelManager::LoadModel(char* szFileName)
 		{
 			verts[i].position.x = pos_buffer[i].x;
 			verts[i].position.y = pos_buffer[i].y;
-			verts[i].position.z = -pos_buffer[i].z;
+			verts[i].position.z = pos_buffer[i].z;
 
 			verts[i].normal = norm_buffer[i];
 			verts[i].uv.x = uv_buffer[i].x;
 			verts[i].uv.y = -uv_buffer[i].y;
+
+			if( bStoringVerts )
+			{
+				pVertInfo->m_vUV.push_back(verts[i].uv);
+				pVertInfo->m_vVertices.push_back(verts[i].position);
+				pVertInfo->m_vNormals.push_back(verts[i].normal);
+			}
+
 
 			//verts[i].color = D3DCOLOR_ARGB(255,rand()%255,rand()%255,rand()%255);
 		}
@@ -129,6 +189,12 @@ int ModelManager::LoadModel(char* szFileName)
 		}
 
 		this->m_pMeshBuffer[currIndex].CreateIndexBuffer(indicies, num*3);
+
+		if( bStoringVerts )
+		{
+			m_cVertexTemplates.insert(make_pair(CIDGen::GetInstance()->GetID(m_pMeshBuffer[currIndex].m_szName), pVertInfo));
+		}
+
 
 		delete [] pos_buffer;
 		delete [] norm_buffer;
@@ -160,7 +226,7 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 	//memset(buffer, 0, 128);
 
 	// Get Singletons
-	Direct3DManager* pD3DMan = Direct3DManager::GetInstance();
+	//Direct3DManager* pD3DMan = Direct3DManager::GetInstance();
 	CIDGen* pIDGen = CIDGen::GetInstance();
 
 	fstream fin(szFileName, ios_base::in | ios_base::binary);
@@ -173,8 +239,8 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 		DWORD		*indicies;
 
 		// Create Mesh
-		DXMesh* pMesh = MMNEW(DXMesh) DXMesh();
-		TMeshVertexInfo* pVertInfo = MMNEW(TMeshVertexInfo) TMeshVertexInfo();
+		DXMesh* pMesh = MMNEW(DXMesh);
+		TMeshVertexInfo* pVertInfo = MMNEW(TMeshVertexInfo);
 
 		// Get Mesh name
 		char szMeshName[64];
@@ -182,7 +248,7 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 		fin.read((char*)&nNameLen, sizeof(nNameLen));
 		fin.read(szMeshName, nNameLen);
 
-		strcpy(pMesh->m_szName,szMeshName);
+		strcpy_s(pMesh->m_szName,szMeshName);
 		// Copy szMeshName to m_pMeshBuffer[currIndex].m_szName
 		//memcpy(m_pMeshBuffer[currIndex].m_szName, szMeshName, 64);
 
@@ -223,7 +289,7 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 			// Get NumInfluences
 			unsigned int nNumInfluences;
 			READ(nNumInfluences);
-			pMesh->GetWeights()[nVert].resize(nNumInfluences);
+			//pMesh->GetWeights()[nVert].resize(2);
 
 			for(unsigned int nInfl = 0; nInfl < nNumInfluences; nInfl++)
 			{
@@ -239,9 +305,15 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 				READ(fVertWeight);
 				bi.m_fWeight = fVertWeight;
 
+				// If its 0 Weigh trow it out
+				if(bi.m_fWeight == 0.0f)
+					continue;
+
 				//pVertInfo->m_vWeights.push_back(bi);
 				pMesh->SetWeight(nVert, bi);
 			}
+
+			//pMesh->SizeWeightsToTwo(nVert);
 		}
 		VERTEX_POS3_NORM3_TEX2 *verts = new VERTEX_POS3_NORM3_TEX2[nVertCount];
 
@@ -249,7 +321,7 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 		{
 			verts[i].position.x = pos_buffer[i].x;
 			verts[i].position.y = pos_buffer[i].y;
-			verts[i].position.z = -pos_buffer[i].z;
+			verts[i].position.z = pos_buffer[i].z;
 
 			pVertInfo->m_vVertices.push_back(verts[i].position);
 
@@ -268,18 +340,21 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 			pD3DMan->GetVertNormTex2DDecl(), sizeof(VERTEX_POS3_NORM3_TEX2),
 			pMesh->GetMode());*/
 
-
-
 		// Get Polys
 		indicies = new DWORD[nPolyCount*3];
 		fin.read((char*)indicies, sizeof(DWORD)*nPolyCount*3);
 
+		for(unsigned int idx = 0; idx < nPolyCount*3; ++idx)
+		{
+			pVertInfo->m_vIndices.push_back(indicies[idx]);
+		}
+
 		//pVertInfo->m_vIndices.resize(nPolyCount*3);
 		//memcpy(pVertInfo->m_vIndices, indicies, sizeof(DWORD)*nPolyCount*3);
-		pMesh->SetVertexInfo(pVertInfo);
+		pMesh->SetIndexedTexturedVertexInfo(pVertInfo);//, true);
 
 		// Create Index Buffer
-		pMesh->CreateIndexBuffer(indicies, nVertCount*3);
+		//pMesh->CreateIndexBuffer(indicies, nPolyCount*3);
 		
 
 		// Get Bone Count
@@ -328,6 +403,12 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 			READ(mLocalMatrix._32);
 			READ(mLocalMatrix._33);
 			READ(mLocalMatrix._34);
+
+			//mLocalMatrix._31 *= -1;
+			//mLocalMatrix._32 *= -1;
+			//mLocalMatrix._33 *= -1;
+			////mLocalMatrix._34 *= -1;
+
 			
 			// Local W Axis
 			READ(mLocalMatrix._41);
@@ -346,6 +427,7 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 			tBone.m_nNumChildren = nChildCount;
 
 			// Get Children
+			//tBone.m_cChildrenIdxs.resize(nChildCount);
 			for(unsigned int nChild = 0; nChild < nChildCount; nChild++)
 			{
 				// Get Child Index (Joint Index)
@@ -362,7 +444,7 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 				char szChildName[64];
 				fin.read(szChildName, nChildNameLen);
 
-				int x = 0;
+				//int x = 0;
 			}
 
 			//pVertInfo->m_vJoints.push_back(tBone);
@@ -453,8 +535,6 @@ int ModelManager::LoadAABB(char* szMeshName)
 
 		// TODO: find the largest side and invert the coord of that axis
 		//ex. v z is longest side
-		m_pAABBBuffer[currAABBIndex].aabb.cBoxMax.z *= -1;
-		m_pAABBBuffer[currAABBIndex].aabb.cBoxMin.z *= -1;
 		int largestSide;
 		int xLen, yLen, zLen;
 		xLen = (int)(m_pAABBBuffer[currAABBIndex].aabb.cBoxMax.x - m_pAABBBuffer[currAABBIndex].aabb.cBoxMin.x);
@@ -466,21 +546,6 @@ int ModelManager::LoadAABB(char* szMeshName)
 			largestSide = 1;
 		if(zLen >= xLen && zLen >= yLen)
 			largestSide = 2;
-
-		//switch(largestSide)
-		//{
-		//case 0:
-		//	//			m_pAABBBuffer[currAABBIndex].aabb.cBoxMax.z *= -1;
-		//	m_pAABBBuffer[currAABBIndex].aabb.cBoxMax -= D3DXVECTOR3(0,0,zLen*2.0f);
-		//	m_pAABBBuffer[currAABBIndex].aabb.cBoxMin -= D3DXVECTOR3(0,0,zLen*2.0f);
-		//	break;
-		//case 1:
-		//	m_pAABBBuffer[currAABBIndex].aabb.cBoxMax.y *= -1;
-		//	break;
-		//case 2:
-		//	m_pAABBBuffer[currAABBIndex].aabb.cBoxMax.z *= -1;
-		//	break;
-		//};
 
 		delete [] pos_buffer;
 	}
@@ -496,20 +561,31 @@ int ModelManager::LoadAABB(char* szMeshName)
 //
 //}
 
-int ModelManager::GetMeshIndexByName(const char* szMeshName, bool bIsCollision)
+int ModelManager::GetMeshIndexByName(const char* szMeshName, bool bIsCollision, bool stripNumber, char** szStripedName)
 {
-	// Strip the Numbers from the End of the Mesh Name
 	char buffer[64];
 	memset(buffer, 0, 64);
 	int namelength = strlen(szMeshName);
 	int offset = 0;
-	while(isdigit(szMeshName[namelength - offset]) || 
-		szMeshName[namelength - offset] == '\0')
+
+	if(stripNumber)
 	{
-		++offset;
+		// Strip the Numbers from the End of the Mesh Name
+		while(isdigit(szMeshName[namelength - offset]) || 
+			szMeshName[namelength - offset] == '\0')
+		{
+			++offset;
+		}
 	}
+
 	memcpy(buffer, szMeshName, namelength - offset+1);
 	buffer[namelength - offset + 1] = '\0';
+
+	// Return Striped Name
+	/*if(szStripedName)
+	{
+		*szStripedName = buffer;
+	}*/
 
 	if(bIsCollision)
 	{
@@ -557,15 +633,15 @@ bool ModelManager::GetAABBByNameWithOffset(char* szMeshName,
 			// Rotate min and max
 			D3DXVec4Transform(&rotmin, &rotmin, &rot);
 			D3DXVec4Transform(&rotmax, &rotmax, &rot);
-			
+
 			// Find new min and max
 			D3DXVECTOR3 newmax(max(rotmin.x, rotmax.x),
-								max(rotmin.y, rotmax.y),
-								max(rotmin.z, rotmax.z) );
+				max(rotmin.y, rotmax.y),
+				max(rotmin.z, rotmax.z) );
 
 			D3DXVECTOR3 newmin(min(rotmin.x, rotmax.x),
-								min(rotmin.y, rotmax.y),
-								min(rotmin.z, rotmax.z) );
+				min(rotmin.y, rotmax.y),
+				min(rotmin.z, rotmax.z) );
 
 			// save for rendering
 			outLocalAABB.cBoxMax = m_pAABBBuffer[i].aabb.cBoxMax;
@@ -590,7 +666,7 @@ DXMesh* ModelManager::CreateCubeFromAABB(TAABB aabb)
 	// Create Verts
 		
 		// Position
-		VERTEX_POSCOLOR *verts = MMNEWARRAYEX(VERTEX_POSCOLOR,8,HEAPID_RENDER);
+	VERTEX_POSCOLOR *verts = MMNEWARRAYEX(VERTEX_POSCOLOR, 8, HEAPID_RENDER);
 		verts[0].position = aabb.cBoxMin;
 		verts[1].position = D3DXVECTOR3(aabb.cBoxMin.x, aabb.cBoxMax.y, aabb.cBoxMin.z);
 		verts[2].position = D3DXVECTOR3(aabb.cBoxMax.x, aabb.cBoxMax.y, aabb.cBoxMin.z);
@@ -610,6 +686,7 @@ DXMesh* ModelManager::CreateCubeFromAABB(TAABB aabb)
 		rendercube->CreateVertexBuffer(verts, 8, pD3DMan->GetVertColorDecl(),
 			sizeof(VERTEX_POSCOLOR), D3DPT_TRIANGLELIST);
 
+		MMDELARRAYEX(verts, HEAPID_RENDER);
 	// Create Indices
 		
 		const int nNumCubeIdxs = 36;
@@ -671,7 +748,7 @@ int ModelManager::LoadAnimFile(char* szFileName)
 		READ(nNumBones);
 
 		// Create Anim Struct
-		CAnimation* pAnimData = MMNEW(CAnimation) CAnimation();
+		CAnimation* pAnimData = MMNEW(CAnimation);
 		pAnimData->SetDuration(fDuration);
 		pAnimData->SetNumBones(nNumBones);
 
@@ -711,6 +788,12 @@ int ModelManager::LoadAnimFile(char* szFileName)
 				D3DXMATRIX mLocalMatrix;
 				D3DXMATRIX mWorldMatrix;
 				fin.read((char*)&mLocalMatrix, sizeof(mLocalMatrix));
+
+				//mLocalMatrix._31 *= -1;
+				//mLocalMatrix._32 *= -1;
+				//mLocalMatrix._33 *= -1;
+				////mLocalMatrix._34 *= -1;
+
 				fin.read((char*)&mWorldMatrix, sizeof(mWorldMatrix));
 
 				// Update KeyFrame
@@ -733,61 +816,145 @@ int ModelManager::LoadAnimFile(char* szFileName)
 		SAFE_CLOSE(fin);
 
 		//MMDEL(CAnimation, pAnimData);
+
+		return 1; // SUCCESS!
 	}
 
-	return -1;
-}
-
-// Animate Bones
-void ModelManager::SetUpBoneMesh(void)
-{
-	// Get Singletons
-	Direct3DManager* pD3DMan = Direct3DManager::GetInstance();
-
-	// Bone Info
-	//for(int i = 0; i < 10; ++i)
-	//{
-	//	// set up the weights
-	//	if( i == 0 || i == 8 || i == 2 || i == 4 || i == 6 ) //  i know this is stupid
-	//	{
-	//		TBoneInfluence inf;
-	//		inf.m_fWeight = 1.0f;
-	//		inf.m_nBoneIndex = 0;
-	//		m_pBoneMesh->SetWeight(i, inf);
-	//	}
-	//	else
-	//	{
-	//		TBoneInfluence inf;
-	//		inf.m_fWeight = 1.0f;
-	//		inf.m_nBoneIndex = 1;
-	//		m_pBoneMesh->SetWeight(i, inf);
-	//	}
-	//}
+	return 0; // Error
 }
 
 DXMesh* ModelManager::GetAnimMesh(string szMeshName)
 {
-	return (m_cMeshTemplates.find(CIDGen::GetInstance()->GetID(szMeshName)))->second;
+	//LoadModelWithBones
+	map<unsigned int, DXMesh*, less<unsigned int>, CRenderAllocator
+		<pair<unsigned int, DXMesh*>>>::iterator pMeshIter;
+	int nMeshID = CIDGen::GetInstance()->GetID(szMeshName);
+	pMeshIter = m_cMeshTemplates.find(nMeshID);
+	if(pMeshIter != m_cMeshTemplates.end())
+		return pMeshIter->second;
+
+	// Mesh is not already loaded, try to load it
+	string szMeshPath = "Resource/Character Models/";
+	szMeshPath += szMeshName;
+	szMeshPath += ".mesh";
+	if(LoadModelWithBones((char*)szMeshPath.c_str()) != -1)
+		return m_cMeshTemplates.find(nMeshID)->second;
+	else
+		return NULL; // Mesh File does not exist
 }
 
 CAnimation* ModelManager::GetAnim(string szAnimName)
 {
-	return (m_cAnimationTemplates.find(CIDGen::GetInstance()->GetID(szAnimName)))->second;
+	map<unsigned int, CAnimation*, less<unsigned int>, CRenderAllocator
+		<pair<unsigned int, CAnimation*>>>::iterator pAnimIter;
+	int nAnimID = CIDGen::GetInstance()->GetID(szAnimName);
+	pAnimIter = m_cAnimationTemplates.find(nAnimID);
+	if(pAnimIter != m_cAnimationTemplates.end())
+		return pAnimIter->second;
+
+	// Animation is not already loaded, try to load it
+	string szAnimPath = "Resource/Animations/";
+	szAnimPath += szAnimName;
+	if(LoadAnimFile((char*)szAnimPath.c_str()))
+		return m_cAnimationTemplates.find(nAnimID)->second;
+	else
+		return NULL; // Anim File does not exist
+	
+}
+
+CAnimation* ModelManager::GetAnim(unsigned int nAnimID)
+{
+	map<unsigned int, CAnimation*, less<unsigned int>, CRenderAllocator
+		<pair<unsigned int, CAnimation*>>>::iterator pAnimIter;
+	pAnimIter = m_cAnimationTemplates.find(nAnimID);
+	if(pAnimIter != m_cAnimationTemplates.end())
+		return pAnimIter->second;
+
+	// Animation is not already loaded, try to load it
+	string szAnimPath = "Resource/Animations/";
+	szAnimPath += (char*)nAnimID;
+	if(LoadAnimFile((char*)szAnimPath.c_str()))
+		return m_cAnimationTemplates.find(nAnimID)->second;
+	else
+		return NULL; // Anim File does not exist
 }
 
 DXMesh* ModelManager::GetCloneMesh(string szMeshName)
 {
-	// Create a Clone
-	DXMesh* pCloneMesh = MMNEW(DXMesh) DXMesh();
-
 	// Find Original Mesh
-	DXMesh* pOriginalMesh = (m_cMeshTemplates.find(CIDGen::GetInstance()->GetID(szMeshName)))->second;
+	DXMesh* pOriginalMesh = GetAnimMesh(szMeshName);
+
+	if(pOriginalMesh == NULL)
+		return NULL;
+
+	// Create a Clone
+	DXMesh* pCloneMesh = MMNEW(DXMesh);
+
+
+	// Find Original Verts
+	TMeshVertexInfo* pOriginalVerts = (m_cVertexTemplates.find(CIDGen::GetInstance()->GetID(szMeshName)))->second;
+
+	// Verts
+	pCloneMesh->SetIndexedTexturedVertexInfo(pOriginalVerts);//, true);
+
+	// Mesh Name
+	int nMeshNameLen = szMeshName.size();
+	for(int nChar = 0; nChar < nMeshNameLen+1; ++nChar)
+	{
+		pCloneMesh->m_szName[nChar] = szMeshName[nChar];
+	}
+
+	// Bones
+	int nNumBones = pOriginalMesh->GetBones().size();
+	for(int bone = 0; bone < nNumBones; ++bone)
+	{
+		TBindBone tBone;
+		tBone.m_nBoneIdx = pOriginalMesh->GetBones()[bone].m_nBoneIdx;
+		tBone.m_cFrame.CloneLocal(pOriginalMesh->GetBones()[bone].m_cFrame);
+		tBone.m_nParentBoneIdx = pOriginalMesh->GetBones()[bone].m_nParentBoneIdx;
+		
+		int nStrLen = pOriginalMesh->GetBones()[bone].m_szBoneName.size();
+		tBone.m_szBoneName.resize(nStrLen+1);
+		for(int nChar = 0; nChar < nStrLen+1; ++nChar)
+		{
+			tBone.m_szBoneName[nChar] = pOriginalMesh->GetBones()[bone].m_szBoneName[nChar];
+		}
+		
+		tBone.m_nNumChildren = pOriginalMesh->GetBones()[bone].m_nNumChildren;
+		tBone.m_cChildrenIdxs.resize(tBone.m_nNumChildren);
+		for(int child = 0; child < tBone.m_nNumChildren; ++child)
+		{
+			tBone.m_cChildrenIdxs[child] = pOriginalMesh->GetBones()[bone].m_cChildrenIdxs[child];
+		}
+
+		pCloneMesh->AddBoneToHiearchy(tBone);
+	}
+
+	pCloneMesh->BuildHiearchy();
+
+	// Weights
+	int nNumWeights = pOriginalMesh->GetWeights().size();
+	pCloneMesh->GetWeights().resize(nNumWeights);
+	for(int weight = 0; weight < nNumWeights; ++weight)
+	{
+		int nNumInf = pOriginalMesh->GetWeights()[weight].size();
+		pCloneMesh->GetWeights()[weight].resize(nNumInf);
+		for(int nInf = 0; nInf < nNumInf; ++nInf)
+		{
+			TBoneInfluence bi;
+			bi.m_nBoneIndex = pOriginalMesh->GetWeights()[weight][nInf].m_nBoneIndex;
+			bi.m_fWeight = pOriginalMesh->GetWeights()[weight][nInf].m_fWeight;
+
+			pCloneMesh->SetWeight(weight, bi);
+		}
+	}
 
 	// Clone
-	*pCloneMesh = *pOriginalMesh;
+	m_cClonedBonedMeshs.push_back(pCloneMesh);
+	//*pCloneMesh = *pOriginalMesh;
 
 	// Return the Clone
-	return pOriginalMesh;
+	return pCloneMesh;
 }
 
 TMeshVertexInfo* ModelManager::GetCloneVerts(string szMeshName)

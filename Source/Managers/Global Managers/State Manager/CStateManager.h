@@ -11,6 +11,14 @@
 #define _CSTATEMANAGER_H_
 
 #include <stack>
+
+extern "C"
+{
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
 #include "../Memory Manager/CAllocator.h"
 #include "../../../Enums.h"
 
@@ -149,6 +157,13 @@ public:
 	static void ChangeState(IEvent* pcEvent, IComponent* pcSender);
 	static void ChangeStateGameplay(IEvent* pcEvent, IComponent* pcSender);
 	static void PushPausedState(IEvent* pcEvent, IComponent* pcSender);
+	
+	
+	static void LoseFocus(IEvent* pcEvent, IComponent* pcSender);
+	
+	static int PushState(lua_State* pLua);
+	static int StateChange(lua_State* pLua);
+	static int Back(lua_State* pLua);
 
 };
 

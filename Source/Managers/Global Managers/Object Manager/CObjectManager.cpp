@@ -9,6 +9,17 @@ CObjectManager::CObjectManager(void)
 
 CObjectManager::~CObjectManager(void)
 {
+	list<CObject*, CAllocator<CObject*>>::iterator pIter;
+	pIter = m_cObjects.begin();
+	while(pIter != m_cObjects.end())
+	{
+		if((*pIter)->GetID() != 0)
+		{
+			MMDEL(*pIter);
+		}
+		++pIter;
+	}
+	m_cObjects.clear();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -21,7 +32,7 @@ CObjectManager::~CObjectManager(void)
 // Mod. Date		:	4/4/11
 // Mod. Initials	:	JL
 ////////////////////////////////////////////////////////////////////////////////
-void CObjectManager::EnableStateObjects(EGameState eGameState)
+void CObjectManager::EnableStateObjects(EGameState)
 {
 }
 
@@ -35,61 +46,24 @@ void CObjectManager::EnableStateObjects(EGameState eGameState)
 // Mod. Date		:	4/4/11
 // Mod. Initials	:	JL
 ////////////////////////////////////////////////////////////////////////////////
-void CObjectManager::DisableStateObjects(EGameState eGameState)
+void CObjectManager::DisableStateObjects(EGameState)
 {
 }
-
-static void stackDump(lua_State* l)
-{
-	int i;
-	int top = lua_gettop(l);
-	for(i=1; i<=top; i++)
-	{
-		int t = lua_type(l, i);
-		switch(t)
-		{
-		case LUA_TSTRING:
-			{
-				printf("%s", lua_tostring(l, i));
-				break;
-			}
-		case LUA_TBOOLEAN:
-			{
-				printf(lua_toboolean(l, i) ? "true" : "false");
-				break;
-			}
-		case LUA_TNUMBER:
-			{
-				printf("%g", lua_tonumber(l, i));
-				break;
-			}
-		default:
-			{
-				printf("%s", lua_typename(l, t));
-				break;
-			}
-		};
-		printf(" ");
-	}
-	printf("\n");
-}
-
 
 int CObjectManager::CreateObject(lua_State* pL)
 {
-	stackDump(pL);
-
 	// Get the Obj Name from LUA
-	string szName = lua_tostring(pL, -4);
-	float fPosX = (float)lua_tonumber(pL, -3);
-	float fPosY = (float)lua_tonumber(pL, -2);
-	float fPosZ = (float)lua_tonumber(pL, -1);
+	string szName = lua_tostring(pL, -5);
+	float fPosX = (float)lua_tonumber(pL, -4);
+	float fPosY = (float)lua_tonumber(pL, -3);
+	float fPosZ = (float)lua_tonumber(pL, -2);
+	float fRot  = (float)lua_tonumber(pL, -1);
 	
 	// Take the Data off the LUA Stack
-	lua_pop(pL, 4);
+	lua_pop(pL, 5);
 
 	// Create the Obj
-	CObject* pObj = CreateObject(szName, fPosX, fPosY, fPosZ);
+	CObject* pObj = CreateObject(szName, fPosX, fPosY, fPosZ, fRot);
 
 	// Push the Obj onto the LUA Stack
 	lua_pushlightuserdata(pL, pObj);
@@ -99,18 +73,19 @@ int CObjectManager::CreateObject(lua_State* pL)
 }
 
 CObject* CObjectManager::CreateObject(string szName,
-									  float fPosX, float fPosY, float fPosZ,
-									  CFrame* pcFramesParent)
+									  float fPosX, float fPosY, float fPosZ, float fRot,
+									  CObject* pcFramesParent)
 {
 	// Create the Object
 	CObject* pObj = MMNEW(CObject(szName));
 	
+	pObj->GetTransform()->TranslateFrame(D3DXVECTOR3(fPosX, fPosY, fPosZ));
+	pObj->GetTransform()->RotateFrame(D3DXVECTOR3(0,1,0), fRot);
 	// Set Transform Frame
 	if(pcFramesParent != NULL)
 	{
-		pcFramesParent->AddChildFrame(pObj->GetTransform());
+		GetInstance()->BindObjects(pcFramesParent, pObj);
 	}
-	pObj->GetTransform()->TranslateFrame(D3DXVECTOR3(fPosX, fPosY, fPosZ));
 	
 	// Add Obg to List
 	GetInstance()->m_cObjects.push_back(pObj);
@@ -119,7 +94,7 @@ CObject* CObjectManager::CreateObject(string szName,
 	return pObj;
 }
 
-int CObjectManager::DestroyObject(lua_State* pL)
+int CObjectManager::DestroyObject(lua_State*)
 {
 	// Not currently used, in here for future reference
 	return 0;
@@ -130,4 +105,48 @@ void CObjectManager::DestroyObject(CObject* pObj)
 	SendObjectEvent("DestroyObject", (IComponent*)GetInstance(), pObj, PRIORITY_IMMEDIATE);
 	GetInstance()->m_cObjects.remove(pObj);
 	MMDEL(pObj);
+}	
+
+int CObjectManager::BindObjects(lua_State* pL)
+{
+	CObject* pParent = (CObject*)lua_topointer(pL, -2);
+	CObject* pChild = (CObject*)lua_topointer(pL, -1);
+
+	GetInstance()->BindObjects(pParent, pChild);
+
+	lua_pop(pL, 2);
+
+	return 0;
+}
+
+void CObjectManager::BindObjects(CObject* pParent, CObject* pChild)
+{
+	pParent->GetTransform()->AddChildFrame(pChild->GetTransform());
+}
+
+int CObjectManager::GetObjectByName(lua_State* pLua)
+{
+	string szObjName = lua_tostring(pLua, -1);
+	lua_pop(pLua, 1);
+
+	CObject* pObj = GetInstance()->GetObjectByName(szObjName);
+
+	lua_pushlightuserdata(pLua, (void*)pObj);
+
+	return 1;
+}
+
+CObject* CObjectManager::GetObjectByName(string szName)
+{
+	list<CObject*, CAllocator<CObject*>>::iterator pIter;
+	pIter = m_cObjects.begin();
+	unsigned int nNameID = CIDGen::GetInstance()->GetID(szName);
+	while(pIter != m_cObjects.end())
+	{
+		if((*pIter)->GetID() == nNameID)
+			return *pIter;
+
+		++pIter;
+	}
+	return NULL;
 }

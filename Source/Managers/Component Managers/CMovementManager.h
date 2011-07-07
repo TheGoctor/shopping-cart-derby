@@ -32,7 +32,7 @@ class CMovement;
 
 enum EAccelerateBehavior
 {
-	ACC_ERR = -1, ACCELERATE, BRAKE, COAST, GORIGHT, GOLEFT, ACC_MAX
+	ACC_ERR = -1, ACCELERATE, BRAKE, COAST, GORIGHT, GOLEFT, DRIFTING, ACC_MAX
 };
 
 class CMovementManager
@@ -53,6 +53,13 @@ public:
 	}
 	static int CreateMovementComponent(lua_State* pLua);
 	static CMovement* CreateMovementComponent(CObject* pObj);
+	static void Shutdown(IEvent*, IComponent*);
+
+	static int SetCartWeight(lua_State* pLua);
+
+	bool PlayerIsInvincible(CObject* pPlayer);
+	float GetPlayerSpeed(CObject* pPlayer);
+	CMovement* GetMovementComponent(CObject* pOwner);
 
 };
 

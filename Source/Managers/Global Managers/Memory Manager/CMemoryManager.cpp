@@ -26,14 +26,8 @@ CMemoryManager* CMemoryManager::GetInstance()
 	return &cMemoryManager;
 }
 
-void CMemoryManager::Initialize()
-{
-	m_cGeneralHeap.Init(1048576);	// 1MB
-	m_cEventHeap.Init(1048576);	// 1MB
-	m_cRenderHeap.Init(1048576 * 5); // 5MB
-}
-
-void CMemoryManager::Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize, unsigned int nRenderHeapSize)
+void CMemoryManager::Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize, 
+	unsigned int nRenderHeapSize)
 {
 	m_cGeneralHeap.Init(nGeneralHeapSize);
 	m_cEventHeap.Init(nEventHeapSize);
@@ -119,14 +113,8 @@ CMemoryManager* CMemoryManager::GetInstance()
 	return &cMemoryManager;
 }
 
-void CMemoryManager::Initialize()
-{
-	m_cGeneralHeap.Init(1048576);	// 1MB
-	m_cEventHeap.Init(1048576);	// 1MB
-	m_cRenderHeap.Init(1048576 * 5); // 5MB
-}
-
-void CMemoryManager::Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize, unsigned int nRenderHeapSize)
+void CMemoryManager::Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize,
+	unsigned int nRenderHeapSize)
 {
 	m_cGeneralHeap.Init(nGeneralHeapSize);
 	m_cEventHeap.Init(nEventHeapSize);

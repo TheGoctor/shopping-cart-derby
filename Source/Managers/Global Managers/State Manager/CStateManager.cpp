@@ -36,10 +36,17 @@ void CStateManager::Init(void)
 	m_pEM->RegisterEvent("PushState", (IComponent*)GetInstance(), PushState);
 	m_pEM->RegisterEvent("PopState", (IComponent*)GetInstance(), PopState);
 	
+	m_pEM->RegisterEvent("FocusLost", (IComponent*)GetInstance(), LoseFocus);
+	
 	
 
 	// Start in Intro
+	
+#ifdef _DEBUG
 	ChangeState(MAIN_MENU_STATE);
+#else
+	ChangeState(INTRO_STATE);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +102,8 @@ void CStateManager::PopState(void)
 	EGameState eGameState = m_cStateStack.top();
 
 	// DISABLE objects in the previous state
-	PostDisableObjectsEvent(eGameState);
+	PostDisableObjectsEvent(eGameState); // send a disable for things that don't need to unload such as buttons
+	PostUnloadObjectsEvent(eGameState); // send shutdownobjects event
 
 	// Pop off top state
 	m_cStateStack.pop();
@@ -147,7 +155,7 @@ void CStateManager::ChangeState(EGameState eGameState)
 // Mod. Date		:	4/4/11
 // Mod. Initials	:	JL
 ////////////////////////////////////////////////////////////////////////////////
-void CStateManager::Update(float fDT)
+void CStateManager::Update(float )
 {
 }
 
@@ -199,7 +207,7 @@ void CStateManager::ClearAllStates(void)
 	//PostDisableObjectsEvent(MAX_STATE);
 }
 
-void CStateManager::Update(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::Update(IEvent* pcEvent, IComponent* )
 {
 	// so we don't try to act on an empty stack
 	if(GetInstance()->m_cStateStack.empty())
@@ -213,27 +221,27 @@ void CStateManager::Update(IEvent* pcEvent, IComponent* pcSender)
 	SendUpdateEvent(szEvent, (IComponent*)GetInstance(), fDT);
 }
 
-void CStateManager::Render(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::Render(IEvent* , IComponent* )
 {
 }
 
-void CStateManager::Shutdown(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::Shutdown(IEvent* , IComponent* )
 {
 	GetInstance()->Shutdown();
 }
 
-void CStateManager::PushState(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::PushState(IEvent* pcEvent, IComponent* )
 {
 	TStateEvent* pcState = (TStateEvent*)pcEvent->GetData();
 	GetInstance()->PushState(pcState->m_eToState);
 }
 
-void CStateManager::PopState(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::PopState(IEvent* , IComponent* )
 {
 	GetInstance()->PopState();
 }
 
-void CStateManager::ChangeState(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::ChangeState(IEvent* pcEvent, IComponent* )
 {
 	TStateEvent* pcState = (TStateEvent*)pcEvent->GetData();
 
@@ -243,14 +251,8 @@ void CStateManager::ChangeState(IEvent* pcEvent, IComponent* pcSender)
 void CStateManager::PostInputChangeEvent(EGameState eGameState)
 {
 	// Send InputStateChange
-	if(GetInstance()->m_cStateStack.empty() == false)
-	{
-		SendStateEvent("InputStateChange", (IComponent*)GetInstance(), eGameState);
-	}
-	else
-	{
-		SendStateEvent("InputStateChange", (IComponent*)GetInstance(), eGameState);
-	}
+	SendStateEvent("InputStateChange", (IComponent*)GetInstance(), eGameState, PRIORITY_IMMEDIATE);
+	
 }
 
 void CStateManager::PostDisableObjectsEvent(EGameState eGameState)
@@ -258,7 +260,7 @@ void CStateManager::PostDisableObjectsEvent(EGameState eGameState)
 	string szEvent = "DisableObjects";
 	szEvent += (char)eGameState;
 	// Send DisableObjects[State] Event
-	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_IMMEDIATE);
 }
 
 void CStateManager::PostEnableObjectsEvent(EGameState eGameState)
@@ -267,7 +269,7 @@ void CStateManager::PostEnableObjectsEvent(EGameState eGameState)
 	szEvent += (char)eGameState;
 	
 	// Send EnableObjects[State] Event
-	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_IMMEDIATE);
 }
 
 void CStateManager::PostInitObjectsEvent(EGameState eGameState)
@@ -275,7 +277,7 @@ void CStateManager::PostInitObjectsEvent(EGameState eGameState)
 	string szEvent = "InitObjects";
 	szEvent += (char)eGameState;
 	
-	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_IMMEDIATE);
 }
 
 void CStateManager::PostLoadObjectsEvent(EGameState eGameState)
@@ -283,21 +285,65 @@ void CStateManager::PostLoadObjectsEvent(EGameState eGameState)
 	string szEvent = "LoadObjects";
 	szEvent += (char)eGameState;
 	
-	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_IMMEDIATE);
 }
 
 void CStateManager::PostUnloadObjectsEvent(EGameState eGameState)
 {
-	string szEvent = "UnloadObjects";
+	string szEvent = "ShutdownObjects";
 	szEvent += (char)eGameState;
 	
-	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+	SendIEvent(szEvent, (IComponent*)GetInstance(), NULL, PRIORITY_IMMEDIATE);
 }
 
 
-void CStateManager::PushPausedState(IEvent* pcEvent, IComponent* pcSender)
+void CStateManager::PushPausedState(IEvent* , IComponent* )
 {
 	//TStateEvent* pcState = (TStateEvent*)pcEvent->GetData();
 
 	GetInstance()->PushState(PAUSE_STATE);
+}
+
+int CStateManager::PushState(lua_State* pLua)
+{
+	EGameState eState = (EGameState)lua_tointeger(pLua, -1);
+	lua_pop(pLua, 1);
+	CStateManager::GetInstance()->PushState(eState);
+
+	return 0;
+}
+
+int CStateManager::StateChange(lua_State* pLua)
+{
+	EGameState eState = (EGameState)lua_tointeger(pLua, -1);
+	lua_pop(pLua, 1);
+	CStateManager::GetInstance()->ChangeState(eState);
+
+	return 0;
+}
+
+int CStateManager::Back(lua_State* /*pLua*/)
+{
+	CStateManager::GetInstance()->PopState();
+
+	return 0;
+}
+
+
+
+void CStateManager::LoseFocus(IEvent* pcEvent, IComponent* pcSender)
+{
+	// if the stack isn't empty
+	if( ! GetInstance()->m_cStateStack.empty())
+	{
+		// check the top stack
+		EGameState eState = GetInstance()->m_cStateStack.top();
+
+		// if we're in the gameplay state
+		if(eState == GAMEPLAY_STATE)
+		{
+			// pause it for that bro who alt tabbed
+			GetInstance()->PushState(PAUSE_STATE);
+		}
+	}
 }

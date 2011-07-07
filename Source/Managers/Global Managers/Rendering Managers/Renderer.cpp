@@ -1,6 +1,5 @@
 #include "Renderer.h"
 #include "RenderNode.h"
-#include "RenderSet.h"
 
 #include "Direct3DManager.h"
 #include "ModelManager.h"
@@ -10,6 +9,7 @@
 #include "../../../CGame.h"
 #include "../../../Managers/Global Managers/Event Manager/CEventManager.h"
 #include "../../../Managers/Global Managers/Event Manager/EventStructs.h"
+#include "../../Component Managers/CAIManager.h"
 using namespace EventStructs;
 #include "../Console Manager/CConsoleManager.h"
 #include "../Camera Manager/CCameraManager.h"
@@ -19,6 +19,7 @@ using namespace EventStructs;
 #include "DXRenderShape.h"
 
 #include "DXRenderContextManager.h"
+#include "CEffectManager.h"
 #include "Texture Managers\\CHUDManager.h"
 
 #define   FONT_RECT   {0,0,1000,200}
@@ -94,90 +95,169 @@ void Renderer::Init(HWND hWnd, int nScreenWidth,
 	m_pCM = CCameraManager::GetInstance();
 	m_pCM->Init(nScreenWidth, nScreenHeight);
 
-	// Load
-	ModelManager::GetInstance()->LoadModel("Resource/Cart.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Ceiling_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Endcap_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Floor_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplayCircleL_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplayCircleM_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplayCircleS_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareL_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareM_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareS_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FrontDoor_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_GlassCounter_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_GlassFreezer_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_HalfWall_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_LobsterTank_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_OpenFreezerLeft_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_OpenFreezerRight_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ProduceLeft_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ProduceRight_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Register_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ShortShelf_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_TallShelf_FINShape.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Wall_FINShape.mesh");
+	// Models
+	//LoadModels();
 
-	// Circle
-	ModelManager::GetInstance()->LoadModel("Resource/pSphereShape1.mesh");
-
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_EmployeeDoor_FIN_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_Endcap_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FreeDisplaySquareL_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FreeDisplaySquareM_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FreeDisplaySquareS_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_FrontDoor_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_GlassCounter_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_GlassFreezer_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_HalfWall_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_LobsterTank_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_OpenFreezerLeft_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_OpenFreezerRight_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_ProduceLeft_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_ProduceRight_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_Register_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_ShortShelf_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadAABB("Resource/FFP_3D_TallShelf_FINShape_Collision.mesh");
-
-
-	// draw collision volumes
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_EmployeeDoor_FIN_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Endcap_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareL_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareM_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FreeDisplaySquareS_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_FrontDoor_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_GlassCounter_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_GlassFreezer_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_HalfWall_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_LobsterTank_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_OpenFreezerLeft_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_OpenFreezerRight_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ProduceLeft_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ProduceRight_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_Register_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_ShortShelf_FINShape_Collision.mesh");
-	ModelManager::GetInstance()->LoadModel("Resource/FFP_3D_TallShelf_FINShape_Collision.mesh");
-
-	ModelManager::GetInstance()->LoadModelWithBones("Resource/test_boxShape.mesh");
+	// Effects
+	//CEffectManager::GetInstance()->LoadEmitters();
 	
-	ModelManager::GetInstance()->LoadAnimFile("Resource/testcubewalk.anim");
-
-	
-
 	// Register For Events
-	CEventManager* pEM = CEventManager::GetInstance();
-	pEM->RegisterEvent("Render",
+	m_pEM->RegisterEvent("Render",
 		(IComponent*)GetInstance(), RenderCallback);
 
-	pEM->RegisterEvent("AddToSet",
+	m_pEM->RegisterEvent("AddToSet",
 		(IComponent*)GetInstance(), AddToRenderSet);
 
-	pEM->RegisterEvent("Shutdown",
+	m_pEM->RegisterEvent("Shutdown",
 		(IComponent*)GetInstance(), ShutdownCallback);
 
-	pEM->RegisterEvent("DestroyObject", (IComponent*)GetInstance(), DestroyComponent);
+	m_pEM->RegisterEvent("DestroyObject", (IComponent*)GetInstance(), DestroyComponent);
+}
+
+void Renderer::LoadModels(void)
+{
+	ModelManager* pMM = ModelManager::GetInstance();
+
+	// Load Level Geometry
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_AbandonedCart_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_ACDuct_FIN.mesh");				
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BakerySign_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BasicCutoutA_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BasicCutoutB_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BasicCutoutC_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BoysRestroom_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_ButcherBakeryWindow_FIN.mesh");	
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_ButcherSign_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_CardBoardBoxes_FIN.mesh");		
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_CeilingSet0_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_CeilingSet1_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_DairyItems_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_DeliSign_FIN.mesh");				
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_DeliWindow_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_EmployeeDoor_FIN.mesh");			
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_EmployeeOfTheMonth_FIN.mesh");	
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Endcap_FIN.mesh");				
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_ExitSign_FIN.mesh");				
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet0_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet1_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet2_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet3_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet4_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet5_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet6_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet7_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet8_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorSet9_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FloorTrim_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FrontDoor_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FSDCircleL_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FSDCircleM_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FSDCircleS_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FSDSquareL_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FSDSquareM_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_FSDSquareS_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_GirlsRestroom_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_GlassCounter_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_GlassFreezer_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_HalfWall_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_HelpDesk_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_LightFixtures_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_LobsterCutout_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_LobsterTank_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_MeatSection_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_OpenFreezerLeft_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_OpenFreezerRight_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Outside_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Pallet_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Pirate_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_ProduceLeft_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_ProduceRight_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Register_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Shelf_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_ShelfStuff_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Snowman_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartingLine_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Umbra_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_WallSet0_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_WallSet1_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_WallSupports_FIN.mesh");
+
+	// these meshes will be sharing a texture and render context, so they will be a special case when loading the level
+	/*pMM->LoadModel("Resource/Level Geo/FFP_3D_BasicCutoutA_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BasicCutoutB_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BasicCutoutC_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartBanner_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartFrame0_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartFrame1_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartLight0_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartLight1_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartLight2_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_StartLight3_FIN.mesh");*/
+
+
+
+	// Collision volumes
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_CardBoardBoxes_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Endcap_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_FrontDoor_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_FSDCircleL_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_FSDCircleM_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_FSDCircleS_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_FSDSquareL_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_FSDSquareM_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_FSDSquareS_FIN_Collision.mesh");
+	//pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_GlassCounter_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_GlassFreezer_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_HalfWall_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_HelpDesk_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_LobsterCutout_FIN_Collision.mesh");
+	//pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_LobsterTank_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_OpenFreezerLeft_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_OpenFreezerRight_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Pirate_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_ProduceLeft_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_ProduceRight_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Register_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Shelf_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Snowman_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Umbra_FIN_Collision.mesh");
+
+	// PowerUps
+	pMM->LoadModel("Resource/PowerUps/Banana_MShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/Chicken_NoodleSoup_MShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/DonutShape.mesh");
+
+	pMM->LoadModelWithBones("Resource/PowerUps/FFP_3D_DONUTS_FINShape.mesh");
+
+	pMM->LoadModel("Resource/PowerUps/FFP_3D_IceTurkeyBox_FIN.mesh");
+	pMM->LoadModel("Resource/PowerUps/Jam_MShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/Peanut_butter_MShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/Pie_MShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/Thors_Thunder_MShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/TurkeyShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/FFP_3D_PeanutPile_FINShape.mesh");
+	pMM->LoadModel("Resource/PowerUps/BubbleShape1.mesh");
+	pMM->LoadModel("Resource/PowerUps/BubbleShape2.mesh");
+
+	// Shadows
+	pMM->LoadModel("Resource/Character Models/Shadows/FFP_3D_BikerShadow_FIN.mesh");
+	pMM->LoadModel("Resource/Character Models/Shadows/FFP_3D_BanditosShadow_FIN.mesh");
+	pMM->LoadModel("Resource/Character Models/Shadows/FFP_3D_LarperShadow_FIN.mesh");
+	pMM->LoadModel("Resource/Character Models/Shadows/FFP_3D_ScientistShadow_FIN.mesh");
+	pMM->LoadModel("Resource/Character Models/Shadows/FFP_3D_SashaShadow_FIN.mesh");
+
+	// Level Shadows
+	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Circle_Small_M.mesh");
+	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Circle_Medium_M.mesh");
+	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Circle_Huge_M.mesh");
+	//pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Shelf_M.mesh");
+	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_FSD_Square_L.mesh");
+	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Special.mesh");
+	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Cashier_M.mesh");
+
+	int nMoo = pMM->LoadModel("Resource/Collision Volumes/FFP_3D_CheckoutCollision_FIN.mesh");
+
+	pMM->LoadModel("Resource/PowerUps/FFP_3D_BlueLight_FINShape.mesh"); // 86
 }
 
 void Renderer::DestroyObject(IEvent* pcEvent, IComponent*)
@@ -190,23 +270,36 @@ void Renderer::DestroyObject(IEvent* pcEvent, IComponent*)
 
 void Renderer::Render(RenderSet &set)
 {
-	RenderNode* pRenderNode = set.GetHead();
-	while(NULL != pRenderNode)	// While the node is a valid pointer
+	RenderSet::iterator pRenderNode;
+	pRenderNode = set.begin();
+	while(pRenderNode != set.end())	// While the node is a valid pointer
 	{
 		// Render each Node
-		pRenderNode->RenderProcess();
+		(*pRenderNode)->RenderProcess();
 
 		// Move pointer to the next one
-		pRenderNode = pRenderNode->GetNext();
+		++pRenderNode;
 	}
 
-	set.ClearRenderSet();
+	set.clear();
 }
 
 void Renderer::RenderScene(void)
 {
 	// clear the back buffer to blue
-	m_pD3D->Clear(128, 128, 128);
+	m_pD3D->Clear(0, 0, 0);
+
+	//// HACK: Add every renderable object to their render sets
+	//map<unsigned int, CRenderComponent*, less<unsigned int>, CAllocator<
+	//	pair<unsigned int, CRenderComponent*>>>::iterator pCompIter;
+	//pCompIter = m_cRenderComps.begin();
+	//while(pCompIter != m_cRenderComps.end())
+	//{
+	//	SendRenderEvent("AddToSet", (IComponent*)GetInstance(),
+	//		pCompIter->second->GetParent(), PRIORITY_IMMEDIATE);
+	//	++pCompIter;
+	//}
+	//// END HACK
 
 	// start the scene
 	m_pD3D->DeviceBegin();
@@ -222,19 +315,30 @@ void Renderer::RenderScene(void)
 		m_pRCM->RenderContexts();
 
 		// Sprites
-		SendIEvent("RenderSprites", NULL, NULL, PRIORITY_IMMEDIATE);
+		SendIEvent("RenderSprites", (IComponent*)GetInstance(),
+			NULL, PRIORITY_IMMEDIATE);
+#ifdef _DEBUG
 
 		// Cam Pos
-		char text[64];
-		sprintf_s(text, 64, "Camera Pos: X:%f Y:%f Z:%f\nFPS:%d",
+		char text[256];
+		sprintf_s(text, 256, "Camera Pos: X:%f Y:%f Z:%f\t\tMemory Used(General): %d / %d bytes\nFPS:%d\t\t\tMemory Used(Events): %d / %d bytes",
 			m_pCM->GetCam()->GetViewPosition().x, 
 			m_pCM->GetCam()->GetViewPosition().y,
 			m_pCM->GetCam()->GetViewPosition().z,
-			CGame::GetInstance()->GetFPS());
+			CMemoryManager::GetInstance()->GetGHeapMemUsed(),
+			CMemoryManager::GetInstance()->GetGHeapMemSize(),
+			CGame::GetInstance()->GetFPS(),
+			CMemoryManager::GetInstance()->GetEHeapMemUsed(),
+			CMemoryManager::GetInstance()->GetEHeapMemSize());
 		RECT fontRec = FONT_RECT;
 		m_pD3D->GetFont()->DrawText(0, text, -1, &fontRec, 0, FONT_COLOR);
-		
-		CConsoleManager::GetInstance()->DrawConsole();
+
+#else
+		RECT fontRec = FONT_RECT;
+		m_pD3D->GetFont()->DrawText(0, CAIManager::GetInstance()->GetAIInfo().c_str(), -1, &fontRec, 0, FONT_COLOR);
+#endif
+
+		CConsoleManager::GetInstance().DrawConsole();
 
 	//
 	//}
@@ -244,7 +348,7 @@ void Renderer::RenderScene(void)
 	m_pD3D->Present();
 }
 
-void Renderer::AddToRenderSet(IEvent* pcEvent, IComponent* pcSender)
+void Renderer::AddToRenderSet(IEvent* pcEvent, IComponent*)
 {
 	// do some lookup to find the right component in the list
 	TRenderEvent* pcRendEvent = (TRenderEvent*)pcEvent->GetData();
@@ -254,35 +358,50 @@ void Renderer::AddToRenderSet(IEvent* pcEvent, IComponent* pcSender)
 		CAllocator<pair<unsigned int, CRenderComponent*>>>::iterator cIter = 
 		Renderer::GetInstance()->m_cRenderComps.find(pParent->GetID());
 
-	CRenderComponent* pcRComp = (*cIter).second;
-	
-	pcRComp->GetRenderShape()->GetRenderContext()->
-		AddRenderNode(pcRComp->GetRenderShape());
-
-	/*map<unsigned int, CRenderComponent*, less<unsigned int>,
-		CAllocator<pair<unsigned int, CRenderComponent*>>>::iterator cIter;
-	cIter = Renderer::GetInstance()->m_cRenderComps.begin();
-	for(; cIter != Renderer::GetInstance()->m_cRenderComps.end(); cIter++)
+	if(cIter != GetInstance()->m_cRenderComps.end())
 	{
+		CRenderComponent* pcRComp = (*cIter).second;
+
+		pcRComp->GetRenderShape()->GetRenderContext()->
+			AddRenderNode(pcRComp->GetRenderShape());
+
+		/*map<unsigned int, CRenderComponent*, less<unsigned int>,
+		CAllocator<pair<unsigned int, CRenderComponent*>>>::iterator cIter;
+		cIter = Renderer::GetInstance()->m_cRenderComps.begin();
+		for(; cIter != Renderer::GetInstance()->m_cRenderComps.end(); cIter++)
+		{
 		CRenderComponent* pRC = (*cIter).second;
 
 		if(pRC->GetParent() == pParent)
 		{
-			pRC->GetRenderShape()->GetRenderContext()->
-				AddRenderNode(pRC->GetRenderShape());
+		pRC->GetRenderShape()->GetRenderContext()->
+		AddRenderNode(pRC->GetRenderShape());
 		}
-	}*/
+		}*/
+	}
 }
 
 int Renderer::CreateRenderComp(lua_State* pLua)
 {
 	CObject* pObj = (CObject*)lua_topointer(pLua, -4);
-	int nModelID = (int)lua_tonumber(pLua, -3);
+	
+	int nModelID = -1;
+	DXMesh* pMesh = NULL;
+
+	if(lua_type(pLua, -3) == LUA_TNUMBER)
+		nModelID = lua_tointeger(pLua, -3);
+	else
+		pMesh = (DXMesh*)lua_topointer(pLua, -3);
+
 	int nRC = (int)lua_tonumber(pLua, -2);
 	int nRendFunc = (int)lua_tonumber(pLua, -1);
 
-	CRenderComponent* pRend = CreateRenderComp(pObj, nModelID, 
-		nRC, nRendFunc);
+	CRenderComponent* pRend;
+
+	if(pMesh != NULL)
+		pRend = CreateRenderComp(pObj, pMesh, nRC, nRendFunc);
+	else
+		pRend = CreateRenderComp(pObj, nModelID, nRC, nRendFunc);
 
 	lua_pop(pLua, 4);
 	return 0;
@@ -292,7 +411,7 @@ CRenderComponent* Renderer::CreateRenderComp(CObject* pParent, int nModelID,
 								   int nRenderContextIdx, int nRenderFuncIdx)
 {
 	DXRenderContext* pRC = GetInstance()->m_pRCM->GetContext((ERenderContext)nRenderContextIdx);
-	
+
 	CRenderComponent* comp = MMNEW(CRenderComponent(pParent,
 		nModelID, pRC, DXRenderShape::GetRenderFunc((ERenderFunc)nRenderFuncIdx)));	
 	
@@ -320,13 +439,13 @@ CRenderComponent* Renderer::CreateRenderComp(CObject* pParent, DXMesh* pMesh,
 	return comp;
 }
 
-void Renderer::RenderCallback(IEvent* e, IComponent* comp)
+void Renderer::RenderCallback(IEvent*, IComponent*)
 {
 	Renderer::GetInstance()->RenderScene();
 }
 
 // Shutdown
-void Renderer::ShutdownCallback(IEvent* e, IComponent* comp)
+void Renderer::ShutdownCallback(IEvent*, IComponent*)
 {
 	GetInstance()->Shutdown();
 }
@@ -341,22 +460,28 @@ void Renderer::Shutdown(void)
 	{
 		if(cIter->second)
 		{
-			MMDEL(CRenderComponent, cIter->second);
+			MMDEL(cIter->second);
 		}
 
 		cIter++;
 	}
+
+	m_cRenderComps.clear();
 }
 
-void Renderer::DestroyComponent(IEvent* pEvent, IComponent* pComp)
+void Renderer::DestroyComponent(IEvent* pEvent, IComponent*)
 {
 	TObjectEvent* pObjEvent = (TObjectEvent*)pEvent->GetData();
 	int nID = pObjEvent->m_pcObj->GetID();
-	CRenderComponent* pRendComp = (CRenderComponent*)pEvent->GetSender();
 
-	if((*GetInstance()->m_cRenderComps.find(nID)).second == pRendComp)
+	map<unsigned int, CRenderComponent*, less<unsigned int>, 
+		CAllocator<pair<unsigned int, CRenderComponent*>>>::iterator pIter;
+	pIter = GetInstance()->m_cRenderComps.find(nID);
+	if(pIter != GetInstance()->m_cRenderComps.end())
 	{
-		MMDEL(pRendComp);
-		GetInstance()->m_cRenderComps.erase(nID);
+		pObjEvent->m_pcObj->RemoveComponent(pIter->second);
+		CEventManager::GetInstance()->UnregisterEventAll(pIter->second);
+		MMDEL(pIter->second);
+		GetInstance()->m_cRenderComps.erase(pIter);
 	}
 }

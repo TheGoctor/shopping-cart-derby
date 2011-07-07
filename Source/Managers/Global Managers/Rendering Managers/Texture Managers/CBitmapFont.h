@@ -102,7 +102,7 @@ private:
 	float m_fScale;
 	DWORD m_dwColor;
 
-	CBitmapFontComp(const CBitmapFontComp& bf)
+	CBitmapFontComp(const CBitmapFontComp& /*bf*/)
 	{
 	}
 
@@ -137,6 +137,15 @@ public:
 	inline void SetActive(bool bActive)
 	{
 		m_bActive = bActive;
+	}
+	inline void	SetX(int nX)
+	{
+		m_nX = nX;
+	}
+
+	inline void SetColor(DWORD nColor)
+	{
+		m_dwColor = nColor;
 	}
 
 };

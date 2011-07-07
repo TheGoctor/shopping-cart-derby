@@ -13,8 +13,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// Include the Windows Multimedia Library:
 #include <iostream>
-using std::cout;
+#include <fstream>
+using namespace std;
 
 // LUA TEST CODE //
 extern "C"
@@ -25,6 +27,7 @@ extern "C"
 }
 // END LUA TEST CODE //
 
+
 #include "CGame.h"
 #include "Managers/Global Managers/Memory Manager/CMemoryManager.h"
 #include "Managers/Global Managers/Input Manager/CInputManager.h"
@@ -33,24 +36,41 @@ extern "C"
 #include "Managers/Global Managers/Event Manager/IEvent.h"
 #include "Managers/Global Managers/Event Manager/CIDGen.h"
 #include "Managers/Global Managers/Object Manager/CObjectManager.h"
-#include "Managers/Component Managers/CMovementManager.h"
 #include "Managers/Component Managers/CInventoryManager.h"
 #include "Managers/Global Managers/Rendering Managers/Renderer.h"
 #include "Managers/Component Managers/CLevelManager.h"
 #include "Managers/Component Managers/CSpawningManager.h"
 #include "Managers/Component Managers/CAIManager.h"
 #include "Managers/Component Managers/CStartOfRaceManager.h"
+#include "Managers/Component Managers/CPickupItemManager.h"
+#include "Managers/Component Managers/CHeldItemManager.h"
 #include "Managers\Global Managers\Rendering Managers\Direct3DManager.h"
 #include "Managers\Global Managers\Rendering Managers\ModelManager.h"
-#include "Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h"
+#include "Managers\Global Managers\Keybind Manager\CKeybindsManager.h"
 #include "Managers\Component Managers\CCollisionManager.h"
-#include "Managers\\Global Managers\\Rendering Managers\\Texture Managers\\CHUDManager.h"
+#include "Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
+#include "Managers\Global Managers\Rendering Managers\Texture Managers\CIntroManager.h"
+#include "Managers\Global Managers\Rendering Managers\Texture Managers\CCreditManager.h"
+#include "Managers\Global Managers\Endgame Manager\CEndgameManager.h"
+
+//#include "Managers\\Global Managers\\\Rendering Managers\\Texture Managers\\CCharacterSelectManager.h";
 #include "Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
 #include "Managers\Global Managers\State Manager\CStateManager.h"
-#include "Components\\Button\\CButtonComponent.h"
-#include "Components\\Slider\\CSliderComponent.h"
 #include "Managers\Global Managers\Console Manager\CConsoleManager.h"
+#include "Managers\Component Managers\CAnimateManager.h"
 
+// Test Anim
+#include "Components\\Rendering\\CAnimateComponent.h"
+#include "Managers\Global Managers\Rendering Managers\DXRenderContextManager.h"
+#include "Managers\Global Managers\Rendering Managers\CEffectManager.h"
+
+// Not needed any more (I don't think)
+//#include "Managers/Component Managers/CMovementManager.h"
+//#include "Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h"
+//#include "Components\\Button\\CButtonComponent.h"
+//#include "Components\\Slider\\CSliderComponent.h"
+//#include "Components\\Scroller\\CScrollerComponent.h"
+//#include "Managers/Component Managers/CAnimateManager.h"
 
 /////////////////////
 // REMOVE THIS LATER
@@ -82,8 +102,8 @@ CGame::~CGame()
 ////////////////////////////////////////////////////////////////////////////////
 CGame* CGame::GetInstance()
 {
-	static CGame instance;
-	return &instance;
+	static CGame cGame;
+	return &cGame;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,152 +128,84 @@ CGame* CGame::GetInstance()
 void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth, 
 					   int nScreenHeight, bool bIsWindowed)
 {
+	
+	// Increase the accuracy/precision of the Windows timer:
+	timeGetDevCaps(&m_tTC, sizeof(TIMECAPS));
+	timeBeginPeriod(m_tTC.wPeriodMin);
+
+	// Rand
+	srand(timeGetTime()); //GetTickCount());
+
 	// Init Managers
-	CMemoryManager::GetInstance()->Initialize();
+	CMemoryManager::GetInstance()->Initialize(50 MB, 512 KB, 10 MB);
 	CInputManager::GetInstance()->Initialize(hWnd, hInstance);
 	CStateManager::GetInstance()->Init();
 	
 	m_pRenderer = Renderer::GetInstance();
 	m_pRenderer->Init(hWnd, nScreenWidth, nScreenHeight, bIsWindowed);
+	m_pRenderer->LoadModels();
 
-
-	CAIManager::GetInstance()->Init();
 	m_pSound = CWwiseSoundManager::GetInstance();
 	m_pSound->InitSoundManager();
 	m_pSound->RegisterObject(GLOBAL_ID);
-	
+	m_pSound->RegisterObject(BIKER_ID);
+	m_pSound->RegisterObject(LARPER_ID);
+	m_pSound->RegisterObject(SASHA_ID);
+	m_pSound->RegisterObject(BANDITOS_ID);
+	m_pSound->RegisterObject(SCIENTIST_ID);
+	m_pSound->RegisterObject(CRYGAME_ID);
+	m_pSound->RegisterObject(STORYTIME_ID);
+	m_pSound->RegisterObject(ITEM_ID);
 	m_pEM = CEventManager::GetInstance();
 
 	CCollisionManager::GetInstance()->Init();
-	
+	ModelManager::GetInstance()->Init();
 
-	//// LUA TEST CODE //
-	//// calling c++ func from lua
-	//	lua_State* pLuaStateC(lua_open());
-	//	luaL_openlibs(pLuaStateC);
-	//	lua_register(pLuaStateC, "TestLuaFunc", TestLuaFunc);
+	CAIManager::GetInstance()->Init();
+	// Place this where you want to initialize Lua
+	CConsoleManager::GetInstance().Initialize();
 
-	//	if(luaL_dofile(pLuaStateC, "Source/Scripts/luatest.lua"))
-	//	{
-	//		const char* error = lua_tostring(pLuaStateC, -1);
-	//		MessageBoxA(0, error, "luatest.lua", MB_OK);
-	//		lua_pop(pLuaStateC, 1);
-	//	}
-	//	lua_getglobal(pLuaStateC, "LuaToC");
-	//	lua_pcall(pLuaStateC, 0, 1, 0);
-	//	int nPowerLevel = (int)lua_tonumber(pLuaStateC, -1);
-	//	lua_pop(pLuaStateC, 1);
-	//	lua_close(pLuaStateC);
-	//// calling lua func from c++
-	//	lua_State* pLuaStateL(lua_open());
-	//	luaL_openlibs(pLuaStateL);
-
-	//	if(luaL_dofile(pLuaStateL, "Source/Scripts/luatest.lua"))
-	//	{
-	//		const char* error = lua_tostring(pLuaStateL, -1);
-	//		MessageBoxA(0, error, "luatest.lua", MB_OK);
-	//		lua_pop(pLuaStateL, 1);
-	//	}
-	//	lua_getglobal(pLuaStateL, "CToLua");
-	//	lua_pcall(pLuaStateL, 0, 1, 0);
-	//	//int nPowerLevel = (int)lua_tonumber(pLuaStateL, 1);
-	//	lua_pop(pLuaStateL, 1);
-	//	lua_close(pLuaStateL);
-
-		lua_State* pL(lua_open());
-		luaL_openlibs(pL);
-		lua_register(pL, "CreateObj", 
-			&CObjectManager::CreateObject);
-		lua_register(pL, "CreateMovementComponent", 
-			&CMovementManager::CreateMovementComponent);
-		lua_register(pL, "CreateRenderComp",
-			&Renderer::CreateRenderComp);
-		lua_register(pL, "CreateSpriteComp",
-			&CTextureManager::CreateSpriteComp);
-		lua_register(pL, "CreateAIComponent",
-			&CAIManager::CreateAIComponent);
-		lua_register(pL, "CreateCollideableComponent",
-			&CCollisionManager::CreateCollideableComponent);
-		lua_register(pL, "CreateButtonComponent",
-			&CButtonComponent::CreateButtonComponent);
-		lua_register(pL, "CreateSliderComponent",
-			&CSliderComponent::CreateSliderComponent);
-		lua_register(pL, "SetSliderValue",
-			&CSliderComponent::SetSliderValue);
-		lua_register(pL, "SetNextButtonComponent",
-			&CButtonComponent::SetNextButtonComponent);
-		lua_register(pL, "CreateInventoryComp",
-			&CInventoryManager::CreateInventoryComp);
-
-		lua_register(pL, "CreateUpdateStateEvent",
-			&EventStructs::CreateUpdateStateEvent);
-		lua_register(pL, "CreateStateEvent",
-			&EventStructs::CreateStateEvent);
-		lua_register(pL, "CreateRenderEvent",
-			&EventStructs::CreateRenderEvent);
-		lua_register(pL, "CreateRamEvent",
-			&EventStructs::CreateRamEvent);
-		lua_register(pL, "CreateObjectEvent",
-			&EventStructs::CreateObjectEvent);
-		lua_register(pL, "CreateInputEvent",
-			&EventStructs::CreateInputEvent);
-		lua_register(pL, "CreateHeadingEvent",
-			&EventStructs::CreateHeadingEvent);
-		lua_register(pL, "CreateGoalItemEvent",
-			&EventStructs::CreateGoalItemEvent);
-		lua_register(pL, "CreateWeightClassEvent",
-			&EventStructs::CreateWeightClassEvent);
-		lua_register(pL, "CreateGoalItemCollectedEvent",
-			&EventStructs::CreateGoalItemCollectedEvent);
-		lua_register(pL, "CreateStatusEffectEvent",
-			&EventStructs::CreateStatusEffectEvent);/**/
-
-		if(luaL_dofile(pL, "Source/Scripts/luatest.lua"))
-		{
-			const char* error = lua_tostring(pL, -1);
-			MessageBoxA(0, error, "luatest.lua", MB_OK);
-			lua_pop(pL, 1);
-		}
-		lua_getglobal(pL, "InitValues");
-		lua_pcall(pL, 0, 0, 0);
-		//lua_getglobal(pL, "CreateStateObjs");
-		//lua_pcall(pL, 0, 0, 0);
-		lua_close(pL);
-
-		CObjectManager::GetInstance();
-		CMovementManager::GetInstance();
-
-	//// END LUA TEST CODE //
-
-		// TODO: Delete when collisions can add to set
-		test = CObjectManager::GetInstance()->GetObject();
+	CObjectManager::GetInstance();
+	CMovementManager::GetInstance();
 
 	// Inventory
 	CInventoryManager::GetInstance()->Init();
 
 	// HUD
+	CIntroManager::GetInstance()->Init();
+	//CCreditManager::GetInstance()->Init();
+	//CCharacterSelectManager::GetInstance()->Init();
 	CHUDManager::GetInstance()->Init();
 	CLevelManager::GetInstance()->Init();
-	CSpawningManager::GetInstance()->Init();
+
+	 //level manager just made a whoooole bunch of boxes, I'm gonna fix this, HAS TO BE AFTER LEVEL MANAGER INIT!!!!!!!!! -Raymoney
+	CCollisionManager::GetInstance()->CombineLinedBoxes();	
+
 	CStartOfRaceManager::GetInstance(); // create the mgr
+	CSpawningManager::GetInstance()->Init();
+	CPickupItemManager::GetInstance()->Init();
+	CHeldItemManager::GetInstance()->Init();
+
+	CAnimateManager::GetInstance()->Init();
+
+	CEndgameManager::GetInstance()->Init();
+
+	// set the screen parameters
+	SetScreenWidth(nScreenWidth);
+	SetScreenHeight(nScreenHeight);
+	SetIsWindowed(bIsWindowed);
+
+	// Initialize Effect Manager
+	CEffectManager::GetInstance()->Init();
+
+	// init keybinds manager
+	CKeybindsManager::GetInstance()->Init();
 	
-	CConsoleManager::GetInstance()->Initialize();
-
-
-
-	// Screen Properties
-	m_nScreenWidth = nScreenWidth;
-	m_nScreenHeight = nScreenHeight;
-	m_bWindowed = bIsWindowed;
-
-	// Rand
-	srand(GetTickCount());
-
 	// Register for Events
 	m_pEM->RegisterEvent("ShutdownGame", (IComponent*)GetInstance(), ShutdownCallback);
 
 	// Time
-	m_dwPrevTime = GetTickCount();
+	m_dwPrevTime = timeGetTime();	//GetTickCount();
 }
 	
 ////////////////////////////////////////////////////////////////////////////////
@@ -272,7 +224,7 @@ void CGame::Shutdown()
 	// Unregister Events
 	
 	m_pEM->ClearEvents();
-	SendIEvent("Shutdown", NULL, NULL, PRIORITY_IMMEDIATE);
+	SendIEvent("Shutdown", (IComponent*)GetInstance(), NULL, PRIORITY_IMMEDIATE);
 
 	// Shutdown Managers
 	if(CInputManager::GetInstance())
@@ -284,6 +236,9 @@ void CGame::Shutdown()
 	m_pEM = NULL;
 
 	m_bShutdown = false;
+	
+	// Restore the accuracy/precision of the Windows timer:
+	timeEndPeriod(m_tTC.wPeriodMin);
 }
 
 void CGame::ShutdownCallback(IEvent*, IComponent*)
@@ -307,7 +262,7 @@ bool CGame::Main()
 {
 	// Time
 	m_pSound->Update();
-	DWORD dwStartTimeStamp = GetTickCount();
+	DWORD dwStartTimeStamp = timeGetTime(); //GetTickCount();
 	m_fDT = (float)(dwStartTimeStamp - m_dwPrevTime) / 1000.0f;
 	m_dwPrevTime = dwStartTimeStamp;
 
@@ -315,9 +270,9 @@ bool CGame::Main()
 	m_fFrameTime += m_fDT;
 
 	// Cap the dt
-	if(m_fDT > 0.1f)
+	if(m_fDT > .2f)
 	{
-		m_fDT = 0.1f;
+		m_fDT = .2f;
 	}
 
 	if(m_fFrameTime >= 1)
@@ -329,26 +284,22 @@ bool CGame::Main()
 	}
 	
 	// Input
-	SendIEvent("GetInput", NULL, NULL, PRIORITY_INPUT);
+	SendIEvent("GetInput", (IComponent*)GetInstance(), NULL, PRIORITY_INPUT);
+
+	// Check for Lost Device
+	Direct3DManager::GetInstance()->CheckForLostDevice();
 
 	// Update
-	SendUpdateEvent("UpdateState", NULL, m_fDT);
+	SendUpdateEvent("UpdateState", (IComponent*)GetInstance(), m_fDT);
+
+	// Collision Test
+	SendIEvent("Collision", (IComponent*)GetInstance(), NULL, PRIORITY_COLLISION);
 
 	// Render
-
-	// TODO: Delete When "AddToSet" is called by collision with frustum
-	SendRenderEvent("AddToSet", NULL, test, PRIORITY_NORMAL);
-	// END TODO
-
-	SendIEvent("Render", NULL, NULL, PRIORITY_RENDER);
+	SendIEvent("Render", (IComponent*)GetInstance(), NULL, PRIORITY_RENDER);
 
 	// Process Events
 	m_pEM->ProcessEvents();
-
-	//if(!m_bShutdown)
-	//{
-	//	Shutdown();
-	//}
 	
 	return m_bShutdown;
 }

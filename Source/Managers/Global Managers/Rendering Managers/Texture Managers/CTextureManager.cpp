@@ -94,7 +94,7 @@ void CTextureManager::ShutdownTextureManager(void)
 	m_Textures.clear();
 
 	// Components
-	set<CSpriteComponent*, less<CSpriteComponent*>,
+	set<CSpriteComponent*, TSpriteCompare,
 		CAllocator<CSpriteComponent*>>::iterator cIter;
 	cIter = m_cSpriteComps.begin();
 	while(cIter != m_cSpriteComps.end())
@@ -108,19 +108,19 @@ void CTextureManager::ShutdownTextureManager(void)
 		cIter++;
 	}
 
-	//set<CBitmapFontComp*, less<CBitmapFontComp*>,
-	//	CAllocator<CBitmapFontComp*>>::iterator cBitIter;
-	//cBitIter = m_cBitmapFontComps.begin();
-	//while(cBitIter != m_cBitmapFontComps.end())
-	//{
-	//	CBitmapFontComp* pBC = *cBitIter;
-	//	if(pBC)
-	//	{
-	//		MMDEL(m_cBitmapFontComps, pBC);
-	//	}
+	set<CBitmapFontComp*, less<CBitmapFontComp*>,
+		CAllocator<CBitmapFontComp*>>::iterator cBitIter;
+	cBitIter = m_cBitmapFontComps.begin();
+	while(cBitIter != m_cBitmapFontComps.end())
+	{
+		CBitmapFontComp* pBC = *cBitIter;
+		if(pBC)
+		{
+			MMDEL(pBC);
+		}
 
-	//	cBitIter++;
-	//}
+		cBitIter++;
+	}
 
 	//	Release our references to the sprite interface and d3d device
 	SAFE_RELEASE(m_lpSprite);
@@ -358,7 +358,7 @@ int CTextureManager::CreateSpriteComp(lua_State* pLua)
 	bool bActive = (0 != lua_toboolean(pLua, -1)); // To properly cast int to bool
 
 	// Create Component
-	CSpriteComponent* pSpriteComp = CreateSpriteComp(pObj, tSpriteData, bActive);
+	/*CSpriteComponent* pSpriteComp = */CreateSpriteComp(pObj, tSpriteData, bActive);
 
 	// End LUA
 	lua_pop(pLua, 19);
@@ -408,20 +408,20 @@ CBitmapFontComp* CTextureManager::CreateBitmapFontComp(CObject* pParent,
 
 
 // Render
-void CTextureManager::RenderSpritesCallback(IEvent* e, IComponent* comp)
+void CTextureManager::RenderSpritesCallback(IEvent*, IComponent*)
 {
 	GetInstance()->RenderSprites();
 }
 void CTextureManager::RenderSprites(void)
 {
 	// Components
-	set<CSpriteComponent*, less<CSpriteComponent*>,
+	set<CSpriteComponent*, TSpriteCompare,
 		CAllocator<CSpriteComponent*>>::iterator cIter;
 	cIter = m_cSpriteComps.begin();
 	while(cIter != m_cSpriteComps.end())
 	{
 		CSpriteComponent* pSC = *cIter;
-		if(pSC && pSC->IsActive())
+		if(pSC && pSC->IsActive() && pSC->GetSpriteData().m_nZ < 100)
 		{
 			pSC->DrawSprite();
 		}
@@ -442,10 +442,22 @@ void CTextureManager::RenderSprites(void)
 
 		cBitIter++;
 	}
+
+	cIter = m_cSpriteComps.begin();
+	while(cIter != m_cSpriteComps.end())
+	{
+		CSpriteComponent* pSC = *cIter;
+		if(pSC && pSC->IsActive() && pSC->GetSpriteData().m_nZ >= 100)
+		{
+			pSC->DrawSprite();
+		}
+
+		cIter++;
+	}
 }
 
 // Shutdown
-void CTextureManager::ShutdownCallback(IEvent* e, IComponent* comp)
+void CTextureManager::ShutdownCallback(IEvent*, IComponent*)
 {
 	GetInstance()->ShutdownTextureManager();
 }

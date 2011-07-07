@@ -26,8 +26,13 @@
 #include <fcntl.h>
 using namespace std;
 
+#include "..\resource.h"
+
 #include "CGame.h"		//	for our game
 #include "Managers/Global Managers/Sound Manager/CWwiseSoundManager.h"
+#include "Managers/Global Managers/Event Manager/CEventManager.h"
+#include "Managers/Global Managers/Event Manager/EventStructs.h"
+using namespace EventStructs;
 const char* g_szWINDOW_CLASS_NAME	= "SGDWindowClass";			//	Window Class Name.
 
 const char* g_szWINDOW_TITLE		= "Shopping Cart Derby";				//	Window Title.
@@ -38,7 +43,7 @@ const int	g_nWINDOW_HEIGHT		= 768;						//	Window Height.
 #ifdef _DEBUG
 	const BOOL	g_bIS_WINDOWED			= TRUE;						
 #else
-	const BOOL	g_bIS_WINDOWED			= TRUE;
+	const BOOL	g_bIS_WINDOWED			= FALSE;
 #endif
 	
 LONG WINAPI errorFunc(_EXCEPTION_POINTERS *pExceptionInfo)
@@ -95,6 +100,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else // losing focus
 			{
 				// pause game code here
+				SendIEvent("FocusLost", NULL, NULL, PRIORITY_NORMAL);
 			}
 		}
 		break;
@@ -172,9 +178,9 @@ BOOL RegisterWindowClass(HINSTANCE hInstance)
 	winClassEx.cbClsExtra		= 0;
 	winClassEx.cbWndExtra		= 0;
 	winClassEx.hInstance		= hInstance;
-	winClassEx.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
+	winClassEx.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	winClassEx.hIconSm			= NULL;
-	winClassEx.hCursor			= LoadCursor(NULL, IDC_ARROW);
+	winClassEx.hCursor			= LoadCursor(hInstance, MAKEINTRESOURCE(IDC_POINTER));
 	winClassEx.hbrBackground	= (HBRUSH)GetStockObject(BLACK_BRUSH);
 	winClassEx.lpszMenuName		= NULL; 
 	winClassEx.lpszClassName	= g_szWINDOW_CLASS_NAME;

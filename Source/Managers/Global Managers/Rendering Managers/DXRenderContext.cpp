@@ -1,14 +1,22 @@
-#include "DXRenderContext.h"
+////////////////////////////////////////////////////////////////////////////////
+//	File			:	DXRenderContext.cpp
+//	Date			:	5/10/11
+//	Mod. Date		:	5/25/11
+//	Mod. Initials	:	JL
+//	Author			:	Joseph Leybovich
+//	Purpose			:	Encapsulates the Data needed to Render a Set of Meshs
+////////////////////////////////////////////////////////////////////////////////
 
+// Includes
 #include <fstream> 
 using namespace std;
-
+#include "DXRenderContext.h"
 #include "Direct3DManager.h"
 #include "DXUtil.h"
 #include "Renderer.h"
 
-DXRenderContext::DXRenderContext(void) 
-				: m_pShaderEffect(NULL)
+// Default Constructor
+DXRenderContext::DXRenderContext(void) : RenderNode(), m_pShaderEffect(NULL), m_nTexID(1)
 {
 	for(unsigned int tex = 0; tex < MAX_TEXTURES; ++tex)
 	{
@@ -17,12 +25,16 @@ DXRenderContext::DXRenderContext(void)
 	}
 }
 
+// Destructor
 DXRenderContext::~DXRenderContext(void)
 {
 	//m_pRenderSet->ClearRenderSet();
-	SAFE_RELEASE(m_pShaderEffect);
+
+	// Release Shader
+	//SAFE_RELEASE(m_pShaderEffect);
 	//SAFE_DELETE(m_pRenderSet);
 
+	// Release Textures
 	for(unsigned int tex = 0; tex < MAX_TEXTURES; ++tex)
 	{
 		if(NULL != m_Textures[tex])
@@ -32,10 +44,13 @@ DXRenderContext::~DXRenderContext(void)
 	}
 }
 
-bool DXRenderContext::AddTexture(const char *pUniformName, const char *pFileName, bool bCubeMap)
+// Add Texture
+bool DXRenderContext::AddTexture(const char *pUniformName, const char *pFileName)
 {
+	// Get Device
 	LPDIRECT3DDEVICE9 pDev = Direct3DManager::GetInstance()->GetDirect3DDevice();
 
+	// Find the best Spot
 	int bestIndex = -1;
 	for(int i = MAX_TEXTURES-1; i >= 0; --i)
 	{
@@ -48,6 +63,7 @@ bool DXRenderContext::AddTexture(const char *pUniformName, const char *pFileName
 		}
 	}
 
+	// Create Texture
 	if( bestIndex != -1 )
 	{
 		D3DXCreateTextureFromFile(pDev, pFileName, &m_Textures[bestIndex]);	
@@ -58,6 +74,7 @@ bool DXRenderContext::AddTexture(const char *pUniformName, const char *pFileName
 	return false;
 }
 
+// Load Shader
 void DXRenderContext::LoadShader(const char *szFXFile)
 {
 	// Get Singletons
@@ -80,44 +97,65 @@ void DXRenderContext::LoadShader(const char *szFXFile)
 	}
 }
 
-void DXRenderContext::RenderContextFuncHelper(RenderNode &node, const char * szTech)
+// Helper Funcs
+void DXRenderContext::RenderContextFuncHelper(RenderNode &node, const char* szTech)
 {
 	// Get Context & Effect
-	DXRenderContext & contextNode = (DXRenderContext&)node;
-	ID3DXEffect * pEffect = contextNode.GetShader();
+	DXRenderContext& contextNode = (DXRenderContext&)node;
+	ID3DXEffect* pEffect = contextNode.GetShader();
 
 	// Use Shader
 	if(pEffect)
 	{
+		// Set Technique
 		pEffect->SetTechnique(szTech);
 
 		// Draw
 		Renderer::Render(contextNode.GetRenderSet());
 
+		// End Effect
 		pEffect->End();
 	}
 }
 
+// Context Funcs
 void DXRenderContext::FlatRenderContextFunc(RenderNode &node)
 {
 	RenderContextFuncHelper(node, "Flat");	
 }
-
 void DXRenderContext::TexturedRenderContextFunc(RenderNode &node)
 {
 	RenderContextFuncHelper(node, "AlphaTest");
 }
-
+void DXRenderContext::ParticleContextFunc(RenderNode &node)
+{
+	RenderContextFuncHelper(node, "Particle");
+}
+void DXRenderContext::ParticleAlphaContextFunc(RenderNode &node)
+{
+	RenderContextFuncHelper(node, "AlphaParticle");
+}
 void DXRenderContext::LitTexturedRenderContextFunc(RenderNode &node)
 {
 	RenderContextFuncHelper(node, "Tex2DDiffuse");
 }
-
-void DXRenderContext::SkyBoxRenderContextFunc(RenderNode &node)
+void DXRenderContext::AnimationRenderContextFunc(RenderNode &node)
 {
-	RenderContextFuncHelper(node, "AlphaBlend");
+	RenderContextFuncHelper(node, "Animated");
+}
+void DXRenderContext::TextureChangeContextFunc(RenderNode &node)
+{
+	RenderContextFuncHelper(node, "TextureChange");
+}
+void DXRenderContext::BlueLightContextFunc(RenderNode &node)
+{
+	RenderContextFuncHelper(node, "BlueLight");
 }
 
+//void DXRenderContext::SkyBoxRenderContextFunc(RenderNode &node)
+//{
+//	RenderContextFuncHelper(node, "AlphaBlend");
+//}
 void DXRenderContext::GroundRenderContextFunc(RenderNode &node)
 {
 	RenderContextFuncHelper(node, "MultiTexDiffuse");

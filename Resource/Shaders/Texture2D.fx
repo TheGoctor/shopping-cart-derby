@@ -2,6 +2,7 @@
 float4x4	gWorld;
 float4x4	gWVP;
 float3      gLightDirection;
+float3      gViewPosition;
 texture     Tex;
 texture		Tex2;
 texture		Tex3;
@@ -77,6 +78,29 @@ OutputVS TransformVS(float3 position:POSITION0, float3 normal:NORMAL0, float2 uv
     return outVS;
 }
 
+OutputVS OutlineVS(float3 position:POSITION0, float3 normal:NORMAL0, float2 uv0:TEXCOORD0)
+{
+	// output structure
+	OutputVS outVS;
+	
+	outVS.posH = mul(float4(position, 1.0f), gWVP);	
+	
+	//outVS.normal = float4(normal, 1.0);
+	
+	outVS.color.a = dot(normal, gViewPosition);
+	outVS.color.r = 0.0;
+	outVS.color.g = 0.0;
+	outVS.color.b = 0.0;
+	
+	outVS.texCoord0 = uv0;
+	outVS.texCoord1.x = dot(normal, gViewPosition);
+	outVS.texCoord1.y = 0.0;
+	if(outVS.texCoord1.x < 0.0f)
+		outVS.texCoord1 *= -1.0f;
+	
+    return outVS;
+}
+
 OutputVS DiffuseVS(float3 posLocal : POSITION0, float3 normalL : NORMAL0, float2 uv0:TEXCOORD0)
 {
     OutputVS Out = (OutputVS)0;
@@ -138,6 +162,20 @@ float4 DiffusePS(float4 color : COLOR0, float2 uv0:TEXCOORD0) : COLOR
 	return  (color + ambient) * texCol;
 }
 
+float4 AlphaPS(float4 color : COLOR0, float2 uv0:TEXCOORD0) : COLOR
+{
+	//return float4(uv0, 1, 1);
+	
+	float4 ambient = gAmbientMtrl * gAmbientLight;
+	
+	float4 texCol = tex2D(samp1, uv0);
+	
+	if(texCol.a <= 0.6)
+		discard;
+	
+	return  texCol;
+}
+
 // Pixel Shader ---------------------------------------------------------------------------
 float4 DiffuseMultPS(float4 color:COLOR0, float2 uv0:TEXCOORD0, float2 uv1:TEXCOORD1):COLOR
 {	
@@ -166,6 +204,21 @@ float4 DiffuseMultPS(float4 color:COLOR0, float2 uv0:TEXCOORD0, float2 uv1:TEXCO
     return outColor;
 }
 
+float4 BlackPS(float4 color : COLOR0, float2 uv0:TEXCOORD0, float2 uv1:TEXCOORD1) : COLOR
+{
+	float4 texCol = tex2D(samp1, uv0);
+	
+	if(texCol.a <= 0.6)
+		discard;
+	
+	float4 outCol = texCol;
+	
+	if(uv1.x <= 0.1)
+		outCol = float4(0.0, 0.0, 0.0, 1.0);
+		
+	return outCol;
+}
+
 // ----------------------------------------------------------------------------------------
 technique Tex2D
 {
@@ -185,14 +238,40 @@ technique Tex2D
 
 technique AlphaTest
 {
-    pass P0
+	pass P0
     {
         vertexShader = compile vs_2_0 TransformVS();
-        pixelShader  = compile ps_2_0 TransformPS();
+        pixelShader  = compile ps_2_0 AlphaPS();
         
         //AlphaTestEnable = true;
         //AlphaRef = 1.0f;
         //AlphaFunc = Greater;
+        
+        SrcBlend = 2;
+		DestBlend = 1;
+      
+		ShadeMode = Flat;
+        FillMode = Solid;
+        CullMode = NONE;
+        
+        ZWriteEnable = true;
+        ZEnable = true;
+    }
+}
+
+technique Outline
+{
+    pass P0
+    {
+        vertexShader = compile vs_2_0 OutlineVS();
+        pixelShader  = compile ps_2_0 BlackPS();
+        
+        //AlphaTestEnable = true;
+        //AlphaRef = 1.0f;
+        //AlphaFunc = Greater;
+        
+        SrcBlend = 2;
+		DestBlend = 1;
       
 		ShadeMode = Flat;
         FillMode = Solid;

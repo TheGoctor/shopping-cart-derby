@@ -77,6 +77,7 @@
 				<Event Id="4023349039" Name="Play_FX_3D_WeaponWhoosh" />
 				<Event Id="368551784" Name="Play_MX_Gameplay" />
 				<Event Id="1022453873" Name="Play_MX_Menu" />
+				<Event Id="656860145" Name="Play_SFX_Banana_Use" />
 				<Event Id="2127105977" Name="Play_SFX_Cart_Bike_Slip" />
 				<Event Id="489997781" Name="Play_SFX_Cart_Bike_Start" />
 				<Event Id="3312685852" Name="Play_SFX_Cart_Bike_Start_Fail" />
@@ -94,13 +95,35 @@
 				<Event Id="4036155509" Name="Play_SFX_GamePlay_Win" />
 				<Event Id="4175615188" Name="Play_SFX_Impact_Cart_Enemy" />
 				<Event Id="674762364" Name="Play_SFX_Impact_Cart_Wall" />
+				<Event Id="233061112" Name="Play_SFX_Item_Cart" />
+				<Event Id="3613244130" Name="Play_SFX_Item_ChickenSoup_Use" />
+				<Event Id="1288948046" Name="Play_SFX_Item_CreamPie_Use" />
+				<Event Id="419057718" Name="Play_SFX_Item_Doughnut_Aura" />
+				<Event Id="3984204929" Name="Play_SFX_Item_Doughnut_Impact" />
+				<Event Id="2865586440" Name="Play_SFX_Item_Doughnut_Use" />
+				<Event Id="2095117656" Name="Play_SFX_Item_EnergyDrink_Use" />
+				<Event Id="339837795" Name="Play_SFX_Item_GoalItem_AllCollected" />
+				<Event Id="1193296238" Name="Play_SFX_Item_GoalItem_Drop" />
+				<Event Id="153953338" Name="Play_SFX_Item_Jam_Use" />
+				<Event Id="3409434019" Name="Play_SFX_Item_PeanutButter_Use" />
+				<Event Id="3526221634" Name="Play_SFX_Item_Pickup" />
+				<Event Id="2474703931" Name="Play_SFX_Item_Turkey_Bounce" />
 				<Event Id="3519348969" Name="Play_SFX_Item_Turkey_Impact" />
 				<Event Id="837004335" Name="Play_SFX_Item_Turkey_Travel" />
 				<Event Id="1222678624" Name="Play_SFX_Item_Turkey_Use" />
-				<Event Id="3908685218" Name="Play_SFX_Main_Menu_Scissor" />
 				<Event Id="3750105340" Name="Play_SFX_Menu_Cancel" />
+				<Event Id="2237525028" Name="Play_SFX_Menu_CashRegister" />
+				<Event Id="1311015037" Name="Play_SFX_Menu_GoalRankScreen" />
+				<Event Id="4152653343" Name="Play_SFX_Menu_InvalidSelection" />
+				<Event Id="788432253" Name="Play_SFX_Menu_OptionChange" />
 				<Event Id="2151728965" Name="Play_SFX_Menu_Scroll" />
 				<Event Id="3759090466" Name="Play_SFX_Menu_Select" />
+				<Event Id="531062666" Name="Play_SFX_Player_Status_Blind" />
+				<Event Id="2163963135" Name="Play_SFX_Player_Status_Frozen" />
+				<Event Id="4231880252" Name="Play_SFX_Player_Status_Invulnerable" />
+				<Event Id="1869007965" Name="Play_SFX_Player_Status_RadarJam_01" />
+				<Event Id="3351683445" Name="Play_SFX_Player_Status_Slowed_01" />
+				<Event Id="37185357" Name="Play_SFX_Player_Status_Stun" />
 				<Event Id="3679762312" Name="Resume_All" />
 				<Event Id="1646171595" Name="Resume_MX_Gameplay" />
 				<Event Id="452547817" Name="Stop_All" />
@@ -118,7 +141,10 @@
 				<Event Id="3165009754" Name="Stop_MX_Gameplay" />
 				<Event Id="2638592923" Name="Stop_MX_Menu" />
 				<Event Id="1808949856" Name="Stop_SFX_Characters_BulldogMa_Speed" />
+				<Event Id="4052040880" Name="Stop_SFX_Item_Doughnut_Aura" />
 				<Event Id="1667376673" Name="Stop_SFX_Item_Turkey_Travel" />
+				<Event Id="3780720065" Name="Stop_SFX_Player_Status_Frozen" />
+				<Event Id="1950087590" Name="Stop_SFX_Player_Status_Invulnerable" />
 			</IncludedEvents>
 			<IncludedDialogueEvents />
 			<ReferencedStreamedFiles />
@@ -126,6 +152,10 @@
 				<File Id="1731146" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_CartLayer_07.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_CartLayer_07_95287D30.ogg</Path>
+				</File>
+				<File Id="10872318" Language="SFX">
+					<ShortName>SFX_Item_Jam.wav</ShortName>
+					<Path>SFX\SFX_Item_Jam_95287D30.ogg</Path>
 				</File>
 				<File Id="12951625" Language="SFX">
 					<ShortName>Rocket_Missile_Loop01.wav</ShortName>
@@ -138,6 +168,10 @@
 				<File Id="22097780" Language="SFX">
 					<ShortName>FFP_Cart_Bike_Drive.wav</ShortName>
 					<Path>SFX\FFP_Cart_Bike_Drive_95287D31.ogg</Path>
+				</File>
+				<File Id="24898906" Language="SFX">
+					<ShortName>MX_Gameplay.wav</ShortName>
+					<Path>SFX\MX_Gameplay_95287D31.ogg</Path>
 				</File>
 				<File Id="33543037" Language="SFX">
 					<ShortName>Bodyfall_Concrete01.wav</ShortName>
@@ -155,6 +189,10 @@
 					<ShortName>Whoosh_Deep01.wav</ShortName>
 					<Path>SFX\Whoosh_Deep01_444760E1.ogg</Path>
 				</File>
+				<File Id="47084314" Language="SFX">
+					<ShortName>DX_Announcer_Start_Go.wav</ShortName>
+					<Path>SFX\DX_Announcer_Start_Go_444760E1.ogg</Path>
+				</File>
 				<File Id="52791380" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_FlavorLayer_07.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_FlavorLayer_07_95287D30.ogg</Path>
@@ -166,6 +204,10 @@
 				<File Id="58847391" Language="SFX">
 					<ShortName>Foot_Dirt1_BootJump7.wav</ShortName>
 					<Path>SFX\Foot_Dirt1_BootJump7_444760E1.ogg</Path>
+				</File>
+				<File Id="62505095" Language="SFX">
+					<ShortName>SFX_Player_Status_Frozen.wav</ShortName>
+					<Path>SFX\SFX_Player_Status_Frozen_95287D31.ogg</Path>
 				</File>
 				<File Id="63517313" Language="SFX">
 					<ShortName>FFP_Cart_Bike_Start_Fail.wav</ShortName>
@@ -215,6 +257,10 @@
 					<ShortName>Wind_BlowingLoop1.wav</ShortName>
 					<Path>SFX\Wind_BlowingLoop1_444760E0.ogg</Path>
 				</File>
+				<File Id="121032647" Language="SFX">
+					<ShortName>SFX_Item_Doughnut_Aura.wav</ShortName>
+					<Path>SFX\SFX_Item_Doughnut_Aura_95287D31.ogg</Path>
+				</File>
 				<File Id="123122664" Language="SFX">
 					<ShortName>Foot_Dirt1_BootWalk08.wav</ShortName>
 					<Path>SFX\Foot_Dirt1_BootWalk08_444760E1.ogg</Path>
@@ -239,6 +285,10 @@
 					<ShortName>Agent_Hit_beanbag_03.wav</ShortName>
 					<Path>SFX\Agent_Hit_beanbag_03_444760E1.ogg</Path>
 				</File>
+				<File Id="139966956" Language="SFX">
+					<ShortName>SFX_PB_Stuck_Status_01.wav</ShortName>
+					<Path>SFX\SFX_PB_Stuck_Status_01_95287D30.ogg</Path>
+				</File>
 				<File Id="153260112" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_CartLayer_03.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_CartLayer_03_95287D30.ogg</Path>
@@ -254,6 +304,10 @@
 				<File Id="164332036" Language="SFX">
 					<ShortName>Foot_Dirt1_BootWalk04.wav</ShortName>
 					<Path>SFX\Foot_Dirt1_BootWalk04_444760E1.ogg</Path>
+				</File>
+				<File Id="164626975" Language="SFX">
+					<ShortName>DX_Announcer_Start_03.wav</ShortName>
+					<Path>SFX\DX_Announcer_Start_03_444760E1.ogg</Path>
 				</File>
 				<File Id="167185137" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_CartLayer_02.wav</ShortName>
@@ -347,13 +401,29 @@
 					<ShortName>FFP_GamePlay_Impact_MeatyLayer_01.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_MeatyLayer_01_95287D30.ogg</Path>
 				</File>
+				<File Id="299782389" Language="SFX">
+					<ShortName>SFX_Item_GoalItem_Drop.wav</ShortName>
+					<Path>SFX\SFX_Item_GoalItem_Drop_95287D30.ogg</Path>
+				</File>
 				<File Id="302312370" Language="SFX">
 					<ShortName>FFP_Ch_Ma_Victory.wav</ShortName>
 					<Path>SFX\FFP_Ch_Ma_Victory_444760E1.ogg</Path>
 				</File>
+				<File Id="303282487" Language="SFX">
+					<ShortName>DX_Announcer_Start_02.wav</ShortName>
+					<Path>SFX\DX_Announcer_Start_02_444760E1.ogg</Path>
+				</File>
+				<File Id="315019231" Language="SFX">
+					<ShortName>SFX_Banana_Use_01.wav</ShortName>
+					<Path>SFX\SFX_Banana_Use_01_95287D30.ogg</Path>
+				</File>
 				<File Id="330288857" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_FlavorLayer_04.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_FlavorLayer_04_95287D30.ogg</Path>
+				</File>
+				<File Id="335680466" Language="SFX">
+					<ShortName>SFX_Item_Donut_Impact_02.wav</ShortName>
+					<Path>SFX\SFX_Item_Donut_Impact_02_95287D30.ogg</Path>
 				</File>
 				<File Id="336676011" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_CartLayer_06.wav</ShortName>
@@ -366,6 +436,14 @@
 				<File Id="343496394" Language="SFX">
 					<ShortName>FFP_Ch_Bulldog_Collection_02.wav</ShortName>
 					<Path>SFX\FFP_Ch_Bulldog_Collection_02_444760E1.ogg</Path>
+				</File>
+				<File Id="349828708" Language="SFX">
+					<ShortName>SFX_Menu_CashRegister.wav</ShortName>
+					<Path>SFX\SFX_Menu_CashRegister_95287D30.ogg</Path>
+				</File>
+				<File Id="350882730" Language="SFX">
+					<ShortName>SFX_Item_CreamPie.wav</ShortName>
+					<Path>SFX\SFX_Item_CreamPie_95287D30.ogg</Path>
 				</File>
 				<File Id="377377763" Language="SFX">
 					<ShortName>Foot_Dirt1_BootWalk07.wav</ShortName>
@@ -391,9 +469,21 @@
 					<ShortName>FFP_Cart_Bike_Brake_01.wav</ShortName>
 					<Path>SFX\FFP_Cart_Bike_Brake_01_95287D30.ogg</Path>
 				</File>
+				<File Id="417846149" Language="SFX">
+					<ShortName>SFX_Jam_Status_01.wav</ShortName>
+					<Path>SFX\SFX_Jam_Status_01_95287D30.ogg</Path>
+				</File>
 				<File Id="419285226" Language="SFX">
 					<ShortName>Punch_Boxing_FaceHit1.wav</ShortName>
 					<Path>SFX\Punch_Boxing_FaceHit1_444760E1.ogg</Path>
+				</File>
+				<File Id="424138999" Language="SFX">
+					<ShortName>SFX_Item_ChickenSoup.wav</ShortName>
+					<Path>SFX\SFX_Item_ChickenSoup_95287D30.ogg</Path>
+				</File>
+				<File Id="426121508" Language="SFX">
+					<ShortName>SFX_Player_Status_Invulnerable.wav</ShortName>
+					<Path>SFX\SFX_Player_Status_Invulnerable_95287D31.ogg</Path>
 				</File>
 				<File Id="433711047" Language="SFX">
 					<ShortName>Agent_Land_01.wav</ShortName>
@@ -402,6 +492,10 @@
 				<File Id="439318752" Language="SFX">
 					<ShortName>Foot_Dirt1_BootJump6.wav</ShortName>
 					<Path>SFX\Foot_Dirt1_BootJump6_444760E1.ogg</Path>
+				</File>
+				<File Id="445178440" Language="SFX">
+					<ShortName>Hit_ImpactWood04.wav</ShortName>
+					<Path>SFX\Hit_ImpactWood04_95287D30.ogg</Path>
 				</File>
 				<File Id="447599507" Language="SFX">
 					<ShortName>FFP_Item_GoalItem_AllCollected.wav</ShortName>
@@ -427,6 +521,10 @@
 					<ShortName>Agent_Jump_05.wav</ShortName>
 					<Path>SFX\Agent_Jump_05_444760E1.ogg</Path>
 				</File>
+				<File Id="473810762" Language="SFX">
+					<ShortName>SFX_Cart_Start_01.wav</ShortName>
+					<Path>SFX\SFX_Cart_Start_01_95287D30.ogg</Path>
+				</File>
 				<File Id="477136874" Language="SFX">
 					<ShortName>Breathing_Speed_01.wav</ShortName>
 					<Path>SFX\Breathing_Speed_01_444760E0.ogg</Path>
@@ -439,9 +537,17 @@
 					<ShortName>Agent_Jump_06.wav</ShortName>
 					<Path>SFX\Agent_Jump_06_444760E1.ogg</Path>
 				</File>
+				<File Id="480464589" Language="SFX">
+					<ShortName>Hit_ImpactWood02.wav</ShortName>
+					<Path>SFX\Hit_ImpactWood02_95287D30.ogg</Path>
+				</File>
 				<File Id="484453347" Language="SFX">
 					<ShortName>FFP_Strat_Screen_Register.wav</ShortName>
 					<Path>SFX\FFP_Strat_Screen_Register_95287D30.ogg</Path>
+				</File>
+				<File Id="489703860" Language="SFX">
+					<ShortName>SFX_Cart_Start_03.wav</ShortName>
+					<Path>SFX\SFX_Cart_Start_03_95287D30.ogg</Path>
 				</File>
 				<File Id="500927666" Language="SFX">
 					<ShortName>Agent_Jump_04.wav</ShortName>
@@ -454,6 +560,14 @@
 				<File Id="517083021" Language="SFX">
 					<ShortName>Agent_Land_04.wav</ShortName>
 					<Path>SFX\Agent_Land_04_444760E1.ogg</Path>
+				</File>
+				<File Id="525191062" Language="SFX">
+					<ShortName>SFX_Jam_Use_01.wav</ShortName>
+					<Path>SFX\SFX_Jam_Use_01_95287D30.ogg</Path>
+				</File>
+				<File Id="528909752" Language="SFX">
+					<ShortName>SFX_Item_Doughnut.wav</ShortName>
+					<Path>SFX\SFX_Item_Doughnut_95287D30.ogg</Path>
 				</File>
 				<File Id="529610394" Language="SFX">
 					<ShortName>FFP_Cart_Bike_Slip.wav</ShortName>
@@ -470,10 +584,6 @@
 				<File Id="533718356" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_MeatyLayer_08.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_MeatyLayer_08_95287D30.ogg</Path>
-				</File>
-				<File Id="537989910" Language="SFX">
-					<ShortName>FFP_Main_Menu_Scissor.wav</ShortName>
-					<Path>SFX\FFP_Main_Menu_Scissor_95287D30.ogg</Path>
 				</File>
 				<File Id="540810594" Language="SFX">
 					<ShortName>Breathing_Speed_05.wav</ShortName>
@@ -503,6 +613,10 @@
 					<ShortName>Foot_Dirt1_BootWalk01.wav</ShortName>
 					<Path>SFX\Foot_Dirt1_BootWalk01_444760E1.ogg</Path>
 				</File>
+				<File Id="581594648" Language="SFX">
+					<ShortName>SFX_Menu_InvalidSelection.wav</ShortName>
+					<Path>SFX\SFX_Menu_InvalidSelection_95287D30.ogg</Path>
+				</File>
 				<File Id="596088622" Language="SFX">
 					<ShortName>Punch_Boxing_FaceHit5.wav</ShortName>
 					<Path>SFX\Punch_Boxing_FaceHit5_444760E1.ogg</Path>
@@ -531,6 +645,10 @@
 					<ShortName>FFP_Cart_Bike_Brake_02.wav</ShortName>
 					<Path>SFX\FFP_Cart_Bike_Brake_02_95287D30.ogg</Path>
 				</File>
+				<File Id="635887605" Language="SFX">
+					<ShortName>SFX_Menu_GoalRankScreen.wav</ShortName>
+					<Path>SFX\SFX_Menu_GoalRankScreen_95287D30.ogg</Path>
+				</File>
 				<File Id="636626847" Language="SFX">
 					<ShortName>MenuPause.wav</ShortName>
 					<Path>SFX\MenuPause_444760E1.ogg</Path>
@@ -543,6 +661,14 @@
 					<ShortName>Gun_Pistol_Shot01.wav</ShortName>
 					<Path>SFX\Gun_Pistol_Shot01_444760E1.ogg</Path>
 				</File>
+				<File Id="649689527" Language="SFX">
+					<ShortName>DX_Announcer_Start_01.wav</ShortName>
+					<Path>SFX\DX_Announcer_Start_01_444760E1.ogg</Path>
+				</File>
+				<File Id="652078962" Language="SFX">
+					<ShortName>SFX_Item_Pickup.wav</ShortName>
+					<Path>SFX\SFX_Item_Pickup_95287D30.ogg</Path>
+				</File>
 				<File Id="654905969" Language="SFX">
 					<ShortName>AssaultRifle_ShotLoop01.wav</ShortName>
 					<Path>SFX\AssaultRifle_ShotLoop01_444760E0.ogg</Path>
@@ -551,13 +677,17 @@
 					<ShortName>FFP_GamePlay_Impact_CartLayer_01.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_CartLayer_01_95287D30.ogg</Path>
 				</File>
-				<File Id="659108098" Language="SFX">
-					<ShortName>FFP_Cart_Bike_Start.wav</ShortName>
-					<Path>SFX\FFP_Cart_Bike_Start_95287D30.ogg</Path>
-				</File>
 				<File Id="661410750" Language="SFX">
 					<ShortName>Agent_Jump_03.wav</ShortName>
 					<Path>SFX\Agent_Jump_03_444760E1.ogg</Path>
+				</File>
+				<File Id="668056382" Language="SFX">
+					<ShortName>SFX_Item_EnergyDrink.wav</ShortName>
+					<Path>SFX\SFX_Item_EnergyDrink_95287D30.ogg</Path>
+				</File>
+				<File Id="669591630" Language="SFX">
+					<ShortName>SFX_Item_Donut_Impact_01.wav</ShortName>
+					<Path>SFX\SFX_Item_Donut_Impact_01_95287D30.ogg</Path>
 				</File>
 				<File Id="675283150" Language="SFX">
 					<ShortName>DX_Sidekick_GoCommand.wav</ShortName>
@@ -591,6 +721,10 @@
 					<ShortName>DX_Sidekick_Death_01.wav</ShortName>
 					<Path>SFX\DX_Sidekick_Death_01_444760E1.ogg</Path>
 				</File>
+				<File Id="718049334" Language="SFX">
+					<ShortName>SFX_Player_Status_Blind.wav</ShortName>
+					<Path>SFX\SFX_Player_Status_Blind_95287D30.ogg</Path>
+				</File>
 				<File Id="724412770" Language="SFX">
 					<ShortName>65Corvette_IdleLoop1.wav</ShortName>
 					<Path>SFX\65Corvette_IdleLoop1_444760E0.ogg</Path>
@@ -606,6 +740,10 @@
 				<File Id="749557529" Language="SFX">
 					<ShortName>Beep_GrenadeBombTimer1.wav</ShortName>
 					<Path>SFX\Beep_GrenadeBombTimer1_444760E1.ogg</Path>
+				</File>
+				<File Id="753007139" Language="SFX">
+					<ShortName>MX_GameStart.wav</ShortName>
+					<Path>SFX\MX_GameStart_95287D31.ogg</Path>
 				</File>
 				<File Id="757819000" Language="SFX">
 					<ShortName>Agent_Hit_Bullet_04.wav</ShortName>
@@ -627,13 +765,33 @@
 					<ShortName>Agent_Jump_01.wav</ShortName>
 					<Path>SFX\Agent_Jump_01_444760E1.ogg</Path>
 				</File>
+				<File Id="836628506" Language="SFX">
+					<ShortName>SFX_Item_PeanutButter.wav</ShortName>
+					<Path>SFX\SFX_Item_PeanutButter_95287D30.ogg</Path>
+				</File>
 				<File Id="838141253" Language="SFX">
 					<ShortName>Agent_Land_02.wav</ShortName>
 					<Path>SFX\Agent_Land_02_444760E1.ogg</Path>
 				</File>
+				<File Id="838322404" Language="SFX">
+					<ShortName>SFX_Player_Status_RadarJam.wav</ShortName>
+					<Path>SFX\SFX_Player_Status_RadarJam_95287D30.ogg</Path>
+				</File>
 				<File Id="845196286" Language="SFX">
 					<ShortName>Lever_LargeMetal_Switch01.wav</ShortName>
 					<Path>SFX\Lever_LargeMetal_Switch01_444760E1.ogg</Path>
+				</File>
+				<File Id="849391902" Language="SFX">
+					<ShortName>Hit_ImpactWood01.wav</ShortName>
+					<Path>SFX\Hit_ImpactWood01_95287D30.ogg</Path>
+				</File>
+				<File Id="850276247" Language="SFX">
+					<ShortName>SFX_Player_Status_Stun.wav</ShortName>
+					<Path>SFX\SFX_Player_Status_Stun_95287D30.ogg</Path>
+				</File>
+				<File Id="854436108" Language="SFX">
+					<ShortName>SFX_Item_Cart.wav</ShortName>
+					<Path>SFX\SFX_Item_Cart_95287D30.ogg</Path>
 				</File>
 				<File Id="856642211" Language="SFX">
 					<ShortName>Agent_Hit_Bullet_03.wav</ShortName>
@@ -662,6 +820,10 @@
 				<File Id="910922157" Language="SFX">
 					<ShortName>FFP_GamePlay_Impact_FlavorLayer_08.wav</ShortName>
 					<Path>SFX\FFP_GamePlay_Impact_FlavorLayer_08_95287D30.ogg</Path>
+				</File>
+				<File Id="919105042" Language="SFX">
+					<ShortName>SFX_Menu_OptionChange.wav</ShortName>
+					<Path>SFX\SFX_Menu_OptionChange_95287D30.ogg</Path>
 				</File>
 				<File Id="955280945" Language="SFX">
 					<ShortName>Agent_Jump_02.wav</ShortName>
@@ -711,10 +873,6 @@
 					<ShortName>FFP_Ch_Ma_Item_Use.wav</ShortName>
 					<Path>SFX\FFP_Ch_Ma_Item_Use_444760E1.ogg</Path>
 				</File>
-				<File Id="1044477226" Language="SFX">
-					<ShortName>FFP_GamePlay_StartRaceCountDown.wav</ShortName>
-					<Path>SFX\FFP_GamePlay_StartRaceCountDown_444760E1.ogg</Path>
-				</File>
 				<File Id="1046394917" Language="SFX">
 					<ShortName>Explo_Small_03.wav</ShortName>
 					<Path>SFX\Explo_Small_03_444760E1.ogg</Path>
@@ -723,9 +881,9 @@
 					<ShortName>DX_Sidekick_Death_03.wav</ShortName>
 					<Path>SFX\DX_Sidekick_Death_03_444760E1.ogg</Path>
 				</File>
-				<File Id="1055042976" Language="SFX">
-					<ShortName>FFP_Gameplay_Music.wav</ShortName>
-					<Path>SFX\FFP_Gameplay_Music_95287D31.ogg</Path>
+				<File Id="1066489637" Language="SFX">
+					<ShortName>SFX_Cart_Start_02.wav</ShortName>
+					<Path>SFX\SFX_Cart_Start_02_95287D30.ogg</Path>
 				</File>
 				<File Id="1067372270" Language="SFX">
 					<ShortName>FFP_GamePlay_ItemCollison.wav</ShortName>

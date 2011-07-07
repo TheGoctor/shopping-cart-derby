@@ -72,7 +72,20 @@ private:
 	static CTextureManager			m_Instance;			// An instance to this class.
 
 	// Components
-	std::set<CSpriteComponent*, less<CSpriteComponent*>,
+	struct TSpriteCompare
+	{
+		bool operator()(CSpriteComponent* lhs, CSpriteComponent* rhs)
+		{
+			if(lhs->GetSpriteData().m_nZ == rhs->GetSpriteData().m_nZ)
+			{
+				return lhs < rhs;
+			}
+			// Greater than operator
+			return lhs->GetSpriteData().m_nZ < rhs->GetSpriteData().m_nZ;
+		}
+	};
+
+	std::set<CSpriteComponent*, TSpriteCompare,
 		CAllocator<CSpriteComponent*>>	m_cSpriteComps;	// A list of all the Sprite Components
 
 	std::set<CBitmapFontComp*, less<CBitmapFontComp*>,

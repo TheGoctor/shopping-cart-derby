@@ -14,15 +14,24 @@
 
 #include "..\..\IComponent.h"
 #include "..\..\Enums.h"
+#include "..\..\Managers\Global Managers\Event Manager\CEventManager.h"
 
 class CObject;
+class IEvent;
+class IComponent;
+struct TSpawnLocation;
+class CRenderComponent;
 
 class CHeldItemComponent : public IComponent
 {
 	CObject* m_pParent;
+	TSpawnLocation* m_tSpawnLocation;
 	EHeldItemType m_eType;
+	float m_fSpawnTimer;
 	bool m_bSpawned;
 
+	CRenderComponent* m_pRenderComponent;
+	
 public:
 	// Constructor
 	CHeldItemComponent(CObject* pObj);
@@ -31,10 +40,11 @@ public:
 	// Destructor
 	~CHeldItemComponent();
 
-	void Init(EHeldItemType eType);
+	void Init();
 	void Spawn();
+	void Despawn();
 
-	void Update(const float fDT);
+	static void Update(IEvent*, IComponent*);
 
 	inline CObject* GetParent(void)
 	{
@@ -50,6 +60,17 @@ public:
 	{
 		return m_bSpawned;
 	}
+
+	void SetRenderComponent(CRenderComponent* pComp)
+	{
+		m_pRenderComponent = pComp;
+	}
+
+	////// CALLBACKS //////////////
+	static void HeldItemCollected(IEvent*, IComponent*);
+	static void HeldItemCollision(IEvent*, IComponent*);
+	static void PauseUpdateCallback(IEvent*, IComponent* pComp);
+	
 };
 
 #endif // _CHELDITEMCOMPONENT_H_

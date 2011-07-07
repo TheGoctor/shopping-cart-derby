@@ -8,6 +8,7 @@
 #include "..\..\Managers\Global Managers\Object Manager\CObjectManager.h"
 #include "..\..\Managers\Global Managers\Input Manager\CInputManager.h"
 #include "..\..\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
+#include "..\..\Managers\Global Managers\Console Manager\CConsoleManager.h"
 using namespace EventStructs;
 
 
@@ -16,67 +17,27 @@ using namespace EventStructs;
 #define BUTTON_LOCATION_OFFSET_Y -30
 
 
-CButtonComponent::CButtonComponent(CObject* pObj) : m_pObject(pObj), m_pNext(NULL), m_pPrevious(NULL)
+CButtonComponent::CButtonComponent(CObject* pObj) : m_pObject(pObj), m_pSelectDown(NULL), m_pSelectUp(NULL),
+					m_pSelectLeft(NULL), m_pSelectRight(NULL)
 {
 
-}
-
-static void stackDump(lua_State* l)
-{
-	int i;
-	int top = lua_gettop(l);
-	for(i=1; i<=top; i++)
-	{
-		int t = lua_type(l, i);
-		switch(t)
-		{
-		case LUA_TSTRING:
-			{
-				printf("%s", lua_tostring(l, i));
-				break;
-			}
-		case LUA_TBOOLEAN:
-			{
-				printf(lua_toboolean(l, i) ? "true" : "false");
-				break;
-			}
-		case LUA_TNUMBER:
-			{
-				printf("%g", lua_tonumber(l, i));
-				break;
-			}
-		default:
-			{
-				printf("%s", lua_typename(l, t));
-				break;
-			}
-		};
-		printf(" ");
-	}
-	printf("\n");
 }
 
 // Lua stuff
 int CButtonComponent::CreateButtonComponent(lua_State* pLua)
 {
-	stackDump(pLua);
-
 	// top down is in order in param list. Start at bottom with -1 and work your way to the more negative numbers
 	CObject* pObj = (CObject*)lua_topointer(pLua, -9);
 	string szEventName = (string)lua_tostring(pLua, -8);
-	string szButtonTexName = (string)lua_tostring(pLua, -7);
-	int nX = lua_tointeger(pLua, -6);
-	int nY = lua_tointeger(pLua, -5);
-	bool bStartSelected = (lua_toboolean(pLua, -4) != 0);
-	int eState = lua_tointeger(pLua, -3);
-	void* pData = (void*)lua_touserdata(pLua, -2);
+	string szOnScrolloverFunc = (string)lua_tostring(pLua, -7);
+	string szButtonTexName = (string)lua_tostring(pLua, -6);
+	int nX = lua_tointeger(pLua, -5);
+	int nY = lua_tointeger(pLua, -4);
+	bool bStartSelected = (lua_toboolean(pLua, -3) != 0);
+	int eState = lua_tointeger(pLua, -2);
 	int nTextureDepth = lua_tointeger(pLua, -1);
 
-
-	TStateEvent* stateevent = (TStateEvent*)pData;
-
-
-	CButtonComponent* pButton = CreateButtonComponent(pObj, szEventName, szButtonTexName, nX, nY, bStartSelected, eState, pData, nTextureDepth);
+	CButtonComponent* pButton = CreateButtonComponent(pObj, szEventName, szOnScrolloverFunc, szButtonTexName, nX, nY, bStartSelected, eState, nTextureDepth);
 
 	lua_pop(pLua, 9);
 
@@ -86,15 +47,13 @@ int CButtonComponent::CreateButtonComponent(lua_State* pLua)
 	return 1;
 }
 
-CButtonComponent* CButtonComponent::CreateButtonComponent(CObject* pObj, string szEventName, string szSpriteTextureName, 
-														  int nPosX, int nPosY, bool bStartSelected, int eGameState, void* pEventData, int nTextureDepth)
+CButtonComponent* CButtonComponent::CreateButtonComponent(CObject* pObj, string szEventName, string szOnRolloverFunc, string szSpriteTextureName, 
+														  int nPosX, int nPosY, bool bStartSelected, int eGameState, int nTextureDepth)
 {
 	CButtonComponent* comp = MMNEW(CButtonComponent(pObj));
 
-	
-
-	comp->m_szSelectionEvent = szEventName;
-	comp->m_pEventData = pEventData;
+	comp->m_szSelectionFunc = szEventName;
+	comp->m_szOnScrolloverFunc = szOnRolloverFunc;
 	comp->m_eAssociatedState = (EGameState)eGameState;
 
 
@@ -116,9 +75,14 @@ CButtonComponent* CButtonComponent::CreateButtonComponent(CObject* pObj, string 
 	szEvent += (char)comp->m_eAssociatedState;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ButtonStateInit);
 	
-	szEvent = "LoadObjects";
+	szEvent = "ShutdownObjects";
 	szEvent += (char)comp->m_eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ButtonStateLoad);
+	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ButtonStateDisable);
+
+	// HACK - update to gameplay to disable buttons to fix creeper  bug
+	szEvent = "Update";
+	szEvent += GAMEPLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, GameplayUpdate);
 
 	comp->Load(szSpriteTextureName, nTextureDepth, nPosX, nPosY);
 
@@ -132,18 +96,27 @@ CButtonComponent* CButtonComponent::CreateButtonComponent(CObject* pObj, string 
 
 int CButtonComponent::SetNextButtonComponent(lua_State* pLua)
 {
-	CButtonComponent* pCur = (CButtonComponent*)lua_topointer(pLua, -2);
-	CButtonComponent* pNext = (CButtonComponent*)lua_topointer(pLua, -1);
-	SetNextButtonComponent(pCur, pNext);
+	CButtonComponent* pMe = (CButtonComponent*)lua_topointer(pLua, -5);
+	CButtonComponent* pDown = (CButtonComponent*)lua_topointer(pLua, -4);
+	CButtonComponent* pUp = (CButtonComponent*)lua_topointer(pLua, -3);
+	CButtonComponent* pLeft = (CButtonComponent*)lua_topointer(pLua, -2);
+	CButtonComponent* pRight = (CButtonComponent*)lua_topointer(pLua, -1);
+	SetNextButtonComponent(pMe, pDown, pUp, pLeft, pRight);
 
-	lua_pop(pLua, 2);
+	lua_pop(pLua, 4);
 	return 0;
 }
 
-void CButtonComponent::SetNextButtonComponent(CButtonComponent* pCurrent, CButtonComponent* pNext)
+void CButtonComponent::SetNextButtonComponent(CButtonComponent* pMe, CButtonComponent* pDown, 
+											  CButtonComponent* pUp, CButtonComponent* pLeft, CButtonComponent* pRight)
 {
-	pCurrent->m_pNext = pNext;
-	pNext->m_pPrevious = pCurrent;
+	if(pMe)
+	{
+		pMe->m_pSelectDown = pDown;
+		pMe->m_pSelectUp = pUp;
+		pMe->m_pSelectLeft = pLeft;
+		pMe->m_pSelectRight = pRight;
+	}
 }
 
 
@@ -152,7 +125,7 @@ void CButtonComponent::SetNextButtonComponent(CButtonComponent* pCurrent, CButto
 
 
 
-void CButtonComponent::Init(string textureName, int nTextureDepth)
+void CButtonComponent::Init(string textureName, int /*nTextureDepth*/)
 {
 	
 	
@@ -179,7 +152,7 @@ void CButtonComponent::Load(string textureName, int nTextureDepth, int nPosX, in
 	// Init texture stuff
 	if(textureName.length() != 0) // if we have a filename
 	{
-		string szButtonTex = "Resource\\HUD\\";
+		string szButtonTex = "Resource/HUD/";
 		szButtonTex += textureName;
 		nTexID0 = CTextureManager::GetInstance()->LoadTexture(szButtonTex.c_str(), RGB(255,255,255));
 	}
@@ -244,6 +217,21 @@ void CButtonComponent::Load(string textureName, int nTextureDepth, int nPosX, in
 
 	SetScreenPosition(nPosX, nPosY);
 
+	///////////////////////////////////////////////////////////////////////////
+	//// Register for Events
+	///////////////////////////////////////////////////////////////////////////
+
+	string szEvent = "Update";
+	szEvent += (char)m_eAssociatedState;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
+	CEventManager::GetInstance()->RegisterEvent("Up", this, UpPressed);
+	CEventManager::GetInstance()->RegisterEvent("Down", this, DownPressed);
+	CEventManager::GetInstance()->RegisterEvent("Right", this, RightPressed); // make right and left invalid since it confuses the EPs
+	CEventManager::GetInstance()->RegisterEvent("Left", this, LeftPressed);
+	CEventManager::GetInstance()->RegisterEvent("Back", this, InvalidSelection);
+	CEventManager::GetInstance()->RegisterEvent("Accept", this, SelectPressed);
+
+
 
 }
 
@@ -271,11 +259,17 @@ void CButtonComponent::Activate()
 	{
 		m_pDisplayComponentSelection->SetActive(true);
 	}
+	// if we have a rollover event
+	if(m_szOnScrolloverFunc.length() != 0)
+	{
+		Debug.CallLuaFunc(m_szOnScrolloverFunc);
+	}
 }
 
 void CButtonComponent::Deactivate()
 {
 	m_bSelected = false;
+	m_fTimeSinceSelectionEntry = 0;
 	if(m_pDisplayComponentSelection != NULL)
 	{
 		m_pDisplayComponentSelection->SetActive(false);
@@ -286,6 +280,7 @@ void CButtonComponent::Unshow()
 {
 	//m_bSelectedStartValue = m_bSelected; // so we save the last time we were in here's spot
 	m_bSelected = false;
+	m_fTimeSinceSelectionEntry = 0;
 	if(m_pDisplayComponentSelection != NULL)
 	{
 		m_pDisplayComponentSelection->SetActive(false);
@@ -303,7 +298,7 @@ void CButtonComponent::SetScreenPosition(int nPosX, int nPosY)
 	m_tSpriteDataButton.m_nZ = 1;
 	m_tSpriteDataSelection.m_nX = nPosX + BUTTON_LOCATION_OFFSET_X;
 	m_tSpriteDataSelection.m_nY = nPosY + BUTTON_LOCATION_OFFSET_Y;
-	m_tSpriteDataSelection.m_nZ = 1;
+	m_tSpriteDataSelection.m_nZ = 6;
 
 	if(m_pDisplayComponentButton != NULL)
 	{
@@ -336,45 +331,75 @@ void CButtonComponent::Update(IEvent* cEvent, IComponent* cCenter)
 	}
 }
 
-void CButtonComponent::PreviousPressed(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::UpPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
 		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
 		
-		if(comp->m_pPrevious)
+		if(comp->m_pSelectUp)
 		{
 			comp->Deactivate();
-			comp->m_pPrevious->Activate();
+			comp->m_pSelectUp->Activate();
 		}
 	}
 	
 }
 
-void CButtonComponent::NextPressed(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::DownPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
 		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
 
-		if(comp->m_pNext)
+		if(comp->m_pSelectDown)
 		{
 			comp->Deactivate();
-			comp->m_pNext->Activate();
+			comp->m_pSelectDown->Activate();
 		}
 	}
 }
 
-void CButtonComponent::SelectPressed(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::RightPressed(IEvent* /*cEvent*/, IComponent* cCenter)
+{
+	CButtonComponent* comp = (CButtonComponent*)cCenter;
+	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
+	{
+		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
+
+		if(comp->m_pSelectRight)
+		{
+			comp->Deactivate();
+			comp->m_pSelectRight->Activate();
+		}
+	}
+}
+
+void CButtonComponent::LeftPressed(IEvent* /*cEvent*/, IComponent* cCenter)
+{
+	CButtonComponent* comp = (CButtonComponent*)cCenter;
+	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
+	{
+		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
+
+		if(comp->m_pSelectLeft)
+		{
+			comp->Deactivate();
+			comp->m_pSelectLeft->Activate();
+		}
+	}
+}
+
+void CButtonComponent::SelectPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && 
 		comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
 		// if we don't have an event
-		if(comp->m_szSelectionEvent.length() == 0)
+		if(comp->m_szSelectionFunc.length() == 0)
 		{
 			//Sound Hack
 			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_INVALID_SELECTION, GLOBAL_ID);
@@ -383,26 +408,30 @@ void CButtonComponent::SelectPressed(IEvent* cEvent, IComponent* cCenter)
 		{
 			//Sound Hack
 			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SELECT, GLOBAL_ID);
+			
+			Debug.CallLuaFunc(comp->m_szSelectionFunc);
+			//SendStateEvent(comp->m_szSelectionEvent, comp, (EGameState)comp->m_nToState, PRIORITY_NORMAL);
 
-			SendIEvent(comp->m_szSelectionEvent, comp, comp->m_pEventData, PRIORITY_NORMAL);
-
+			// Don't unshow selves. State changes handle that
+			/*
 			// Unshow all the elements
-			CButtonComponent* pCur = comp->m_pNext;
-			// while it's not null and isn't us (aka full loop)
+			CButtonComponent* pCur = comp->m_pSelectDown;
+			// while it's not null and isn't us (aka full loop) 
 			while(pCur && pCur != comp)
 			{
 				pCur->Unshow();
-				pCur = pCur->m_pNext;
+				pCur = pCur->m_pSelectDown;
 			}
 			// deactivate ourselves
 			comp->Unshow();
+			/**/
 		}
 		
 		comp->m_fTimeSinceSelectionEntry = 0.0f;
 	}
 }
 
-void CButtonComponent::InvalidSelection(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::InvalidSelection(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && 
@@ -414,7 +443,7 @@ void CButtonComponent::InvalidSelection(IEvent* cEvent, IComponent* cCenter)
 	}
 }
 
-void CButtonComponent::ButtonStateEnable(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::ButtonStateEnable(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
@@ -424,7 +453,7 @@ void CButtonComponent::ButtonStateEnable(IEvent* cEvent, IComponent* cCenter)
 	comp->m_fTimeSinceSelectionEntry = -.1f; // extra time to disable input to prevent carryover keypresses
 }
 
-void CButtonComponent::ButtonStateDisable(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::ButtonStateDisable(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
@@ -432,30 +461,27 @@ void CButtonComponent::ButtonStateDisable(IEvent* cEvent, IComponent* cCenter)
 	comp->Unshow();
 }
 
-void CButtonComponent::ButtonStateLoad(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::ButtonStateLoad(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
-	CButtonComponent* comp = (CButtonComponent*)cCenter;
+	//CButtonComponent* comp = (CButtonComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
 
 }
 
-void CButtonComponent::ButtonStateInit(IEvent* cEvent, IComponent* cCenter)
+void CButtonComponent::ButtonStateInit(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
 
-
-	string szEvent = "Update";
-	szEvent += (char)comp->m_eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, Update);
-	CEventManager::GetInstance()->RegisterEvent("Up", comp, PreviousPressed);
-	CEventManager::GetInstance()->RegisterEvent("Down", comp, NextPressed);
-	CEventManager::GetInstance()->RegisterEvent("Right", comp, InvalidSelection);
-	CEventManager::GetInstance()->RegisterEvent("Left", comp, InvalidSelection);
-	CEventManager::GetInstance()->RegisterEvent("Back", comp, InvalidSelection);
-	CEventManager::GetInstance()->RegisterEvent("Accept", comp, SelectPressed);
-
-
 	comp->ReInitValues();
 
+}
+
+
+//HACK: All buttons disable in gameplay
+void CButtonComponent::GameplayUpdate(IEvent* /*cEvent*/, IComponent* cCenter)
+{
+	CButtonComponent* pComp = (CButtonComponent*)cCenter;
+
+	pComp->Unshow();
 }

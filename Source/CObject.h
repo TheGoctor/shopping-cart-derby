@@ -80,7 +80,7 @@ public:
 		return &m_tTransform;
 	}
 
-	inline int GetID()
+	inline unsigned int GetID()
 	{
 		return m_nID;
 	}

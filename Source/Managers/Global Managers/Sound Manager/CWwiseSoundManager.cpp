@@ -19,13 +19,13 @@
 /////////////////////////////////////////
 #include <AK/SoundEngine/Common/AkMemoryMgr.h>
 #include <AK/SoundEngine/Common/AkModule.h>
-#include <AK/SoundEngine/Common/AkStreamMgrModule.h>
+////#include <AK/SoundEngine/Common/AkStreamMgrModule.h>
 #include <AK/SoundEngine/Common/IAkStreamMgr.h>
-#include <AK/Tools/Common/AkPlatformFuncs.h>
+////#include <AK/Tools/Common/AkPlatformFuncs.h>
 #include <AK/MusicEngine/Common/AkMusicEngine.h>
 #include <AK/SoundEngine/Common/AkSoundEngine.h>
-#include <AK/Tools/Common/AkMonitorError.h>
-#include <AK/Plugin/AkVorbisFactory.h>
+//#include <AK/Tools/Common/AkMonitorError.h>
+//#include <AK/Plugin/AkVorbisFactory.h>
 #ifdef _DEBUG
 #include <AK/Comm/AkCommunication.h>
 #endif
@@ -47,7 +47,7 @@ using namespace EventStructs;
 
 #define SOUND_VOLUME_DEFAULT 50.0f
 #define MUSIC_VOLUME_DEFAULT 25.0f
-#define DX_VOLUME_DEFAULT 100.0f
+#define DX_VOLUME_DEFAULT 75.0f
 ////////////////////////////////////////////////////////////////////////////////
 // Custom alloc/free functions. These are declared as "extern" in AkMemoryMgr.h
 // and MUST be defined by the game developer.
@@ -88,7 +88,7 @@ namespace AK
 }
 
 //Constructor
-CWwiseSoundManager::CWwiseSoundManager()
+CWwiseSoundManager::CWwiseSoundManager() :m_pObjectID(100)
 {
 }
 //Deconstuctor
@@ -137,74 +137,49 @@ void CWwiseSoundManager::Update()
 void CWwiseSoundManager::ShutdownManager()
 {
 	StopAll();
-
 	UnloadAll();
-
 	ShutdownWise();
 }
 ////////////////////////////////////////////////////////////////////////////////
 //Plays the sound associated with the object
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::PlayTheSound(SoundID soundid, EObjectID object)
+void CWwiseSoundManager::PlayTheSound(SoundID soundid, int object)
 {
 	AkGameObjectID obj = object;
 	AkUniqueID eventID = soundid;
 	AK::SoundEngine::PostEvent(eventID, obj);
 }
-////////////////////////////////////////////////////////////////////////////////
-//Plays the music
-////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::PlayMusic(SoundID soundid)
-{
-	AkGameObjectID obj = GLOBAL_ID;
-	AkUniqueID eventID = soundid;
-	AK::SoundEngine::PostEvent(eventID, obj);
-}
-////////////////////////////////////////////////////////////////////////////////
-//Pauses the sound
-////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::Pause(EObjectID object)
+void CWwiseSoundManager::PlayMusic(SoundID soundid, int object)
 {
 	AkGameObjectID obj = object;
-	AK::SoundEngine::PostEvent(AK::EVENTS::PAUSE_ALL, obj);
+	AkUniqueID eventID = soundid;
+	AK::SoundEngine::PostEvent(eventID, obj);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //Pauses all the sounds
 ////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::PauseAll()
 {
-	m_pObjectID = GLOBAL_ID;
-	AK::SoundEngine::PostEvent(AK::EVENTS::PAUSE_ALL, m_pObjectID);
+	AK::SoundEngine::PostEvent(AK::EVENTS::PAUSE_ALL, 1);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //Reumses the sound
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::Resume(EObjectID object)
+void CWwiseSoundManager::ResumeAll()
 {
-	AkGameObjectID obj = object;
-	AK::SoundEngine::PostEvent(AK::EVENTS::RESUME_ALL, obj);
-}
-////////////////////////////////////////////////////////////////////////////////
-//Stops sound
-////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::Stop(EObjectID object )
-{
-	AkGameObjectID obj = object;
-	AK::SoundEngine::PostEvent(AK::EVENTS::STOP_ALL, obj);
+	AK::SoundEngine::PostEvent(AK::EVENTS::RESUME_ALL, 1);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //Stops all the sounds in the game
 ////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::StopAll()
 {
-	m_pObjectID = GLOBAL_ID;
-	AK::SoundEngine::PostEvent(AK::EVENTS::STOP_ALL, m_pObjectID);
+	AK::SoundEngine::PostEvent(AK::EVENTS::STOP_ALL, 1);
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 //Sets the SFX volume
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::SetScale(EObjectID object, float scale)
+void CWwiseSoundManager::SetScale(int object, float scale)
 {
 	AkGameObjectID obj = object;
 	AK::SoundEngine::SetAttenuationScalingFactor(obj, scale);
@@ -223,7 +198,7 @@ void CWwiseSoundManager::SetMusicVolume(float volume)
 	{
 		m_fMusicVolume = 0.0f;
 	}
-	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::MX_VOLUME,m_fMusicVolume);
+	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::MX_VOLUME, m_fMusicVolume);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -241,8 +216,7 @@ void CWwiseSoundManager::SetSoundVolume(float volume)
 	{
 		m_fSoundVolume = 0.0f;
 	}
-	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::FX_VOLUME ,m_fSoundVolume);
-
+	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::FX_VOLUME, m_fSoundVolume);
 }
 ////////////////////////////////////////////////////////////////////////////////
 // Sets the DX Volume
@@ -250,62 +224,45 @@ void CWwiseSoundManager::SetSoundVolume(float volume)
 void CWwiseSoundManager::SetDXVolume(float volume)
 {
 	m_fDXvolume = volume;
-
-	if (m_fDXvolume > 100.0f)
-	{
-		m_fDXvolume = 100.0f;
-	}
-	else if (m_fDXvolume < 0.0f)
-	{
-		m_fDXvolume = 0.0f;
-	}
-
 	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::DX_VOLUME, m_fDXvolume);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //Sets the RPM value
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::SetRPMValue(float rpm , EObjectID object)
+void CWwiseSoundManager::SetRPMValueForSound(float rpm , int object)
 {
 	m_fRPM = rpm;
-	if(m_fRPM > 1000.0f)
-	{
-		m_fRPM = 1000.0f;
-	}
-	else if(m_fRPM < 100.0f)
-	{
-		m_fRPM = 100.0f;
-	}
 	AkGameObjectID obj = object;
-	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::RPM, m_fRPM, obj);
+	AK::SoundEngine::SetRTPCValue(AK::GAME_PARAMETERS::BULLDOG_SPEED, (AkRtpcValue)m_fRPM, obj);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //Sets the listers position, if the listener moves then call this in the 
 //listeners update
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::SetListener(D3DXVECTOR3 position, float scale, int listener)
+void CWwiseSoundManager::SetListenerPosition(D3DXVECTOR3 position, D3DXVECTOR3 forwardvec, 
+									 float scale, int listener)
 {
 	AkListenerPosition pos;
 	pos.Position.X = position.x;
 	pos.Position.Y = position.y;
 	pos.Position.Z = position.z;
 
-	pos.OrientationFront.X = 0.0f;
-	pos.OrientationFront.Y = 0.0f;
-	pos.OrientationFront.Z = 1.0f;
+	pos.OrientationFront.X = forwardvec.x;
+	pos.OrientationFront.Y = forwardvec.y;
+	pos.OrientationFront.Z = forwardvec.z;
 
 	pos.OrientationTop.X = 0.0f;
 	pos.OrientationTop.Y = 1.0f;
 	pos.OrientationTop.Z = 0.0f;
-
-	AK::SoundEngine::SetListenerPosition(pos , listener);
+	
+	AK::SoundEngine::SetListenerPosition(pos, listener);
 	AK::SoundEngine::SetListenerScalingFactor(0,scale);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //Sets an objects position, needs to be called and objects update
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::SetObjectPosition(EObjectID object, 
+void CWwiseSoundManager::SetObjectPosition(int object, 
 										   D3DXVECTOR3 position, float scale)
 {
 	AkSoundPosition pos;
@@ -313,9 +270,7 @@ void CWwiseSoundManager::SetObjectPosition(EObjectID object,
 	pos.Position.Y = position.y;
 	pos.Position.Z = position.z;
 
-	pos.Orientation.X = -1.0f;
-	pos.Orientation.Y = 0.0f;
-	pos.Orientation.Z = 0.0f;
+
 
 	AkGameObjectID obj= object;
 	AK::SoundEngine::SetPosition(obj, pos);
@@ -325,16 +280,24 @@ void CWwiseSoundManager::SetObjectPosition(EObjectID object,
 ////////////////////////////////////////////////////////////////////////////////
 //Registers a game object and all sounds the object needs to use
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::RegisterObject(EObjectID object)
+void CWwiseSoundManager::RegisterObject(int object)
 {
 	AkGameObjectID obj = object;
 	AK::SoundEngine::RegisterGameObj(obj);
 }
 
+int CWwiseSoundManager::RegisterHeldObject()
+{
+	int object  = m_pObjectID;
+	AK::SoundEngine::RegisterGameObj(m_pObjectID);
+	m_pObjectID++;
+	return object;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //Unregister an object
 ////////////////////////////////////////////////////////////////////////////////
-void CWwiseSoundManager::UnregisterObject(EObjectID object)
+void CWwiseSoundManager::UnregisterObject(int object)
 {
 	AkGameObjectID obj = object;
 	AK::SoundEngine::UnregisterGameObj(obj);
@@ -347,10 +310,8 @@ void CWwiseSoundManager::InitWise()
 	//////////////////////////////////////////////////////////////////////////
 	//The following code was taken from the Wwise documentation 
 	//////////////////////////////////////////////////////////////////////////
-
-
 	AkMemSettings memSettings;
-	memSettings.uMaxNumPools = 50;
+	memSettings.uMaxNumPools = 200;
 
 	if ( AK::MemoryMgr::Init( &memSettings ) != AK_Success )
 	{
@@ -526,10 +487,6 @@ void CWwiseSoundManager::InitBanks()
 
 }
 ////////////////////////////////////////////////////////////////////////////////
-//Initialize and load all sounds 
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
 // Load in the bank files needed to play sound and music
 ////////////////////////////////////////////////////////////////////////////////
 void CWwiseSoundManager::LoadBank(BankID bankid)
@@ -558,13 +515,13 @@ void CWwiseSoundManager::UnloadAll()
 
 ////// Event Callbacks
 
-void CWwiseSoundManager::SetMusicVolumeCallback(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::SetMusicVolumeCallback(IEvent* cEvent, IComponent* /*cCenter*/)
 {
 	TFloatEvent* tEvent = (TFloatEvent*)cEvent->GetData();
 	CWwiseSoundManager::GetInstance()->SetMusicVolume(tEvent->m_fValue);
 }
 
-void CWwiseSoundManager::SetSFXVolumeCallback(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::SetSFXVolumeCallback(IEvent* cEvent, IComponent* /*cCenter*/)
 {
 	TFloatEvent* tEvent = (TFloatEvent*)cEvent->GetData();
 	CWwiseSoundManager::GetInstance()->SetSoundVolume(tEvent->m_fValue);	
@@ -596,15 +553,19 @@ void CWwiseSoundManager::RegisterForEvents()
 	szEventNamePlay = "InitObjects";
 	szEventNamePause = "DisableObjects";
 	szEventNameResume = "EnableObjects";
+	string szEventNameUpDate = "Update";
 	szEventNamePlay += GAMEPLAY_STATE;
 	szEventNamePause += GAMEPLAY_STATE;
 	szEventNameResume += GAMEPLAY_STATE;
+	szEventNameUpDate += GAMEPLAY_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
 		(IComponent*)GetInstance(), PlayGameplayMusic);
 	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
 		(IComponent*)GetInstance(), PauseGameplayMusic);
 	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
 		(IComponent*)GetInstance(), ResumeGameplayMusic);
+	CEventManager::GetInstance()->RegisterEvent(szEventNameUpDate,
+		(IComponent*)GetInstance(), StopMenuMusic);
 
 	szEventNamePlay = "InitObjects";
 	szEventNamePause = "DisableObjects";
@@ -630,20 +591,20 @@ void CWwiseSoundManager::RegisterForEvents()
 	//	(IComponent*)GetInstance(), PlayMenuMusic);
 	//CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
 	//	(IComponent*)GetInstance(), PauseMenuMusic);
-	CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
-		(IComponent*)GetInstance(), ResumeMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
+	//	(IComponent*)GetInstance(), ResumeMenuMusic);
 	/**/
 	
-	szEventNamePlay = "InitObjects";
+	/*szEventNamePlay = "InitObjects";
 	szEventNamePause = "DisableObjects";
 	szEventNameResume = "EnableObjects";
 	szEventNamePlay += CHARACTER_SELECT_STATE;
 	szEventNamePause += CHARACTER_SELECT_STATE;
-	szEventNameResume += CHARACTER_SELECT_STATE;
+	szEventNameResume += CHARACTER_SELECT_STATE;*/
 	//CEventManager::GetInstance()->RegisterEvent(szEventNamePlay, 
 	//	(IComponent*)GetInstance(), PlayMenuMusic);
-	CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
-		(IComponent*)GetInstance(), PauseMenuMusic);
+	//CEventManager::GetInstance()->RegisterEvent(szEventNamePause, 
+		//(IComponent*)GetInstance(), PauseMenuMusic);
 	//CEventManager::GetInstance()->RegisterEvent(szEventNameResume, 
 	//	(IComponent*)GetInstance(), ResumeMenuMusic);
 	
@@ -741,59 +702,76 @@ void CWwiseSoundManager::RegisterForEvents()
 void CWwiseSoundManager::PlayMenuMusic(IEvent*, IComponent*)
 {
 	// us pushed on to state stack (InitObjects)
-	GetInstance()->PlayMusic(MENU_MUSIC_PLAY);
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY, GLOBAL_ID);
+	//GetInstance()->PlayTheSound(BULLDOG_SPEED_STOP, BIKER_ID);
 }
 
-void CWwiseSoundManager::PauseMenuMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::PauseMenuMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// State pushed on top of us (DisableObjects)
-	GetInstance()->PlayMusic(MENU_MUSIC_STOP); // TODO: Change this to pause
+	GetInstance()->PlayMusic(MENU_MUSIC_STOP, GLOBAL_ID); // TODO: Change this to pause
+	//GetInstance()->PlayTheSound(BULLDOG_SPEED_STOP, BIKER_ID);
 }
 
-void CWwiseSoundManager::ResumeMenuMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::ResumeMenuMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// State on top of us got popped (EnableObjects)
-	GetInstance()->PlayMusic(MENU_MUSIC_PLAY); // TODO: Change this to resume
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY, GLOBAL_ID); // TODO: Change this to resume
+	//GetInstance()->PlayTheSound(BULLDOG_SPEED_STOP, BIKER_ID);
 }
 
 //////
-void CWwiseSoundManager::PlayGameplayMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::PlayGameplayMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// us pushed on to state stack (InitObjects)
-	GetInstance()->PlayMusic(MENU_MUSIC_STOP); // To make sure we stop playing the menu music
-	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PLAY);
+	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PLAY, GLOBAL_ID);
+	GetInstance()->PlayMusic(MENU_MUSIC_STOP, GLOBAL_ID); // To make sure we stop playing the menu music
 }
 
-void CWwiseSoundManager::PauseGameplayMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::PauseGameplayMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// State pushed on top of us (DisableObjects)
-	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PAUSE);
+	//GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PAUSE, GLOBAL_ID);
+	//GetInstance()->PlayTheSound(BULLDOG_SPEED_STOP, GLOBAL_ID);
+	GetInstance()->PauseAll();
 }
 
-void CWwiseSoundManager::ResumeGameplayMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::ResumeGameplayMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// State on top of us got popped (EnableObjects)
-	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_RESUME);
+	GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PLAY, GLOBAL_ID);
+	GetInstance()->PlayTheSound(BULLDOG_SPEED_PLAY, BIKER_ID);
+	GetInstance()->PlayTheSound(BULLDOG_SPEED_PLAY, LARPER_ID);
+	GetInstance()->PlayTheSound(BULLDOG_SPEED_PLAY, SCIENTIST_ID);
+	GetInstance()->PlayTheSound(BULLDOG_SPEED_PLAY, BANDITOS_ID);
+
+	
 }
 
 ///////
-void CWwiseSoundManager::PlayPauseMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::PlayPauseMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// us pushed on to state stack (InitObjects)
-	GetInstance()->PlayMusic(MENU_MUSIC_PLAY);
+	//GetInstance()->PlayMusic(GAMEPLAY_MUSIC_PAUSE, GLOBAL_ID);
+	GetInstance()->PauseAll();
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY, GLOBAL_ID);
+	//GetInstance()->PlayTheSound(BULLDOG_SPEED_STOP, BIKER_ID);
 }
 
-
-void CWwiseSoundManager::PausePauseMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::PausePauseMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// State pushed on top of us (DisableObjects)
-	GetInstance()->PlayMusic(MENU_MUSIC_STOP);
+	GetInstance()->PlayMusic(MENU_MUSIC_STOP, GLOBAL_ID);
 }
 
-
-void CWwiseSoundManager::ResumePauseMusic(IEvent* cEvent, IComponent* cCenter)
+void CWwiseSoundManager::ResumePauseMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
 {
 	// State on top of us got popped (EnableObjects)
-	GetInstance()->PlayMusic(MENU_MUSIC_PLAY); // 
+	GetInstance()->PlayMusic(MENU_MUSIC_PLAY, GLOBAL_ID); // 
 }
 
+void CWwiseSoundManager::StopMenuMusic(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
+{
+	// State pushed on top of us (DisableObjects)
+	//GetInstance()->PlayMusic(MENU_MUSIC_STOP, GLOBAL_ID);
+}
