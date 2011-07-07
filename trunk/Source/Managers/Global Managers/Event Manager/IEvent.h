@@ -44,7 +44,7 @@ public:
 	// Destructor
 	~IEvent()
 	{
-		CMemoryManager::GetInstance()->Deallocate((char*)m_pData, HEAPID_EVENT);
+		MMDELEVENT(m_pData);
 	}
 
 	// Accessors

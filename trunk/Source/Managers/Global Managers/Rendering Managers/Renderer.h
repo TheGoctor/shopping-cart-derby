@@ -7,6 +7,7 @@
 #include <map>
 
 #include "..\\Memory Manager\\CAllocator.h"
+#include "DXRenderContext.h"
 
 extern "C"
 {
@@ -16,13 +17,11 @@ extern "C"
 }
 
 class CEventManager;
-class RenderSet;
 class RenderContext;
 class Direct3DManager;
 class CCameraManager;
 class ModelManager;
 class DXRenderContextManager;
-class DXRenderContext;
 class DXMesh;
 class CRenderComponent;
 class CHUDManager;
@@ -49,15 +48,18 @@ public:
 	
 	void Init(HWND hWnd, int nScreenWidth, int nScreenHeight, bool bIsWindowed);
 
+	void LoadModels(void);
+
 	static Renderer* GetInstance(void) 
 	{ 
-		static Renderer instance; 
-		return &instance; 
+		static Renderer cRenderer; 
+		return &cRenderer; 
 	}
 
 	static void Render(RenderSet &set);
 
 	static void AddToRenderSet(IEvent*, IComponent*);
+	static void DestroyObject(IEvent*, IComponent*);
 
 	void RenderScene(void);
 	
@@ -72,6 +74,7 @@ public:
 	// Callbacks
 	static void RenderCallback(IEvent* e, IComponent* comp);
 	static void ShutdownCallback(IEvent* e, IComponent* comp);
+	static void DestroyComponent(IEvent*, IComponent*);
 };
 
 #endif	// _RENDERER_H_

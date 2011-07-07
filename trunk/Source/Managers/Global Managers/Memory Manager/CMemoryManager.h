@@ -14,6 +14,10 @@
 #include "CAllocator.h"
 #include "..\..\..\Enums.h"
 
+// To make Memory Init more readable
+#define MB *1024 KB
+#define KB *1024
+
 #if MM_LEAK_DETECTION
 // The version of the class that uses Leak Detection
 
@@ -60,7 +64,7 @@ TYPE* NewArray(unsigned int nCount, EHeapID nHeap, char* szFile, int nLine)
 
 	// Loop and call placement new on each index
 	char* pIter = (char*)&(pNewMem[2]);
-	for(int n = 0; n < nCount; n++)
+	for(unsigned int n = 0; n < nCount; n++)
 	{
 		new (pIter) TYPE();
 		pIter += nTypeSize;
@@ -114,8 +118,15 @@ class CMemoryManager
 public:
 	static CMemoryManager* GetInstance();
 
-	void Initialize();
-	void Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize, unsigned int nRenderHeapSize);
+	unsigned int GetGHeapMemUsed() { return m_cGeneralHeap.GetMemUsed(); }
+	unsigned int GetGHeapMemSize() { return m_cGeneralHeap.GetPoolSize(); }
+	unsigned int GetEHeapMemUsed() { return m_cEventHeap.GetMemUsed(); }
+	unsigned int GetEHeapMemSize() { return m_cEventHeap.GetPoolSize(); }
+	unsigned int GetRHeapMemUsed() { return m_cRenderHeap.GetMemUsed(); }
+	unsigned int GetRHeapMemSize() { return m_cRenderHeap.GetPoolSize(); }
+
+	void Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize, 
+		unsigned int nRenderHeapSize);
 	void Shutdown();
 
 	char* Allocate(unsigned int nAllocSize, EHeapID eHeapIndx, char* szFile, int nLine);
@@ -139,7 +150,7 @@ public:
 
 // Memory Macros for Arrays in an Explicit Heap
 #define MMNEWARRAYEX(Type, Count, ID) NewArray<Type>(sizeof(Type), Count, ID)
-#define MMDELARRAYEX(Ptr, ID) DelArray(Ptr)
+#define MMDELARRAYEX(Ptr, ID) DelArray(Ptr, ID)
 
 template<typename TYPE>
 void MyDelete(TYPE* pPtr, EHeapID nHeap)
@@ -166,7 +177,7 @@ TYPE* NewArray(unsigned int nTypeSize, unsigned int nCount, EHeapID nHeap)
 
 	// Loop and call placement new on each index
 	char* pIter = (char*)&(pNewMem[2]);
-	for(int n = 0; n < nCount; n++)
+	for(unsigned int n = 0; n < nCount; n++)
 	{
 		new (pIter) TYPE();
 		pIter += nTypeSize;
@@ -179,23 +190,24 @@ TYPE* NewArray(unsigned int nTypeSize, unsigned int nCount, EHeapID nHeap)
 template<typename TYPE>
 void DelArray(TYPE* pPtr, EHeapID nHeap)
 {
+	char* pIter = (char*)pPtr;
+
 	// Get the size of the orignal type
-	int nTypeSize = *(pPtr - 8);	// 8 for 2 ints
+	int nTypeSize = *(pIter - 8);	// 8 for 2 ints
 
 	// Get the number of elements
-	int nCount = *(pPtr - 4);		// 4 for 1 int
-
-	char* pIter = (char*)pPtr;
+	int nCount = *(pIter - 4);		// 4 for 1 int
 
 	// Loop through the elements and call MMDEL on them
 	for(int n = 0; n < nCount; n++)
 	{
-		pIter->~TYPE();
+		((TYPE*)pIter)->~TYPE();
 		pIter += nTypeSize;
 	}
 
+	pIter = (char*)pPtr;
 	// Delete the whole array
-	MMDELEX(pPtr - 8, nHeap); // -8 to get beginning of array
+	MMDELEX(pIter - 8, nHeap); // -8 to get beginning of array
 }
 
 class CMemoryManager
@@ -218,9 +230,16 @@ class CMemoryManager
 
 public:
 	static CMemoryManager* GetInstance();
+	
+	unsigned int GetGHeapMemUsed() { return m_cGeneralHeap.GetMemUsed(); }
+	unsigned int GetGHeapMemSize() { return m_cGeneralHeap.GetPoolSize(); }
+	unsigned int GetEHeapMemUsed() { return m_cEventHeap.GetMemUsed(); }
+	unsigned int GetEHeapMemSize() { return m_cEventHeap.GetPoolSize(); }
+	unsigned int GetRHeapMemUsed() { return m_cRenderHeap.GetMemUsed(); }
+	unsigned int GetRHeapMemSize() { return m_cRenderHeap.GetPoolSize(); }
 
-	void Initialize();
-	void Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize, unsigned int nRenderHeapSize);
+	void Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize,
+		unsigned int nRenderHeapSize);
 	void Shutdown();
 
 	char* Allocate(unsigned int nAllocSize, EHeapID eHeapIndx);

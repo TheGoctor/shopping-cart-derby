@@ -7,6 +7,7 @@
 
 #include "..\..\Managers\Component Managers\CMovementManager.h"
 
+
 class CObject;
 class IEvent;
 
@@ -17,13 +18,18 @@ private:
 	float				m_fSpeed;
 	EAccelerateBehavior	m_eAccelerateBehavior;
 	EAccelerateBehavior	m_eAccelerateBehaviorLastFrame;
+	float				m_fAccelerateAmount;
 	ECartWeight			m_eWeight;
+
+	bool				m_bInputEnabled;
 	
 	int					m_nPlayerNumber;
 
 	float				m_fMaxSpeed;
 	float				m_fMaxReverseSpeed;
 	float				m_fTurnRate;
+	float				m_fOriginalTurnRate;
+	float				m_fSlowMovingTurnCoefficient;
 	
 	float				m_fTurnAmount;
 	float				m_fAccelerateCoefficient;
@@ -54,6 +60,7 @@ private:
 	// Status effect variables
 	D3DXVECTOR3			m_vSlipDirection;
 	bool				m_bIsSlipping;
+	float				m_fSlipTurnAmt;
 	float				m_fSlipDuration;
 	float				m_fSlipTurnSpeed;
 
@@ -61,11 +68,27 @@ private:
 	
 	float				m_fSlowDuration;
 	bool				m_bIsSlowed;
+	float				m_fSlowAmount;
 	
 	float				m_fInvulnerableDuration;
-	
-	// HACK: until inventory handles it
-	bool				m_bBoostAvailable;
+
+	float				m_fInvertedControlTimeLeft;
+
+	// Drifting stuff
+	D3DXVECTOR3			m_vPrevVel;
+	D3DXVECTOR3			m_vCurVel;
+	int					m_nDriftDirection;
+	bool				m_bIsDrifting;
+	int					m_nFramesDrifting;
+	float				m_fTimeToDrift;
+
+	// Bouncing off walls stuff
+	D3DXVECTOR3			m_vBounceVec;
+	float				m_fBounceOffTimeLeft;
+	float				m_fBounceOffWallDuration;
+	float				m_fBounceOffWallSpeed;
+
+	bool				m_bEndgameSlowingDown;
 
 public:
 
@@ -139,6 +162,11 @@ public:
 		m_pObject = pObj;
 	}
 
+	inline CObject* GetObject()
+	{
+		return m_pObject;
+	}
+
 	inline void SetPlayerNumber(int nNum)
 	{
 		m_nPlayerNumber = nNum;
@@ -148,10 +176,23 @@ public:
 	{
 		return m_nPlayerNumber;
 	}
+	inline float GetPlayerSpeed()
+	{
+		return m_fSpeed;
+	}
+	inline bool GetPlayerInvulnerable()	
+	{
+		return m_fInvulnerableDuration > 0.0f ? true : false;
+	}
 	
 	void UpdateTimers(float fDt);
 	void ApplyShove(float fDt, D3DXVECTOR3& translateVec);
 	void PlayAccelerateOrBrakeSound(EAccelerateBehavior eInput);
+
+	void ApplyStun(float fDuration);
+
+	void StoreStartMatrix();
+	void SetStartMatrix(D3DXMATRIX mMat);
 
 	///////////////////////////
 	//
@@ -185,7 +226,7 @@ public:
 	//					 processed before Update()’s event so the 
 	//					 flags will be properly set by the time Update() is called.
 	///////////////////////////////////////////////////////////////////////////
-	void HandleInput(EAccelerateBehavior eInput);
+	void HandleInput(EAccelerateBehavior eInput, float fAmount);
 	
 	static void HandleCollision(IEvent* cEvent, IComponent* cCenter);
 	static void HandleShoveLeft(IEvent* cEvent, IComponent* cCenter);
@@ -194,17 +235,32 @@ public:
 	static void HandleInputBrake(IEvent* cEvent, IComponent* cCenter);
 	static void HandleInputRight(IEvent* cEvent, IComponent* cCenter);
 	static void HandleInputLeft(IEvent* cEvent, IComponent* cCenter);
+	static void HandleInputDrift(IEvent* cEvent, IComponent* cCenter);
 	
 	static void Boost(IEvent* cEvent, IComponent* cCenter);
 	static void SetWeightCallback(IEvent* cEvent, IComponent* cCenter);
 	
 	static void SlipStatusCallback(IEvent* cEvent, IComponent* cCenter);
 	static void StunStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	static void FreezeStatusCallback(IEvent* cEvent, IComponent* cCenter);
 	static void SlowStatusCallback(IEvent* cEvent, IComponent* cCenter);
 	static void BlindStatusCallback(IEvent* cEvent, IComponent* cCenter);
 	static void InvulnerableStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	static void LobsteredStatusCallback(IEvent* cEvent, IComponent* cCenter);
+	
+	static void BounceCallbackPlayer(IEvent* cEvent, IComponent* cCenter);
+	static void BounceCallbackEnvironment(IEvent* cEvent, IComponent* cCenter);
 	
 	static void StartOfGame(IEvent* cEvent, IComponent* cCenter);
+	
+	static void DisableMovementInput(IEvent* cEvent, IComponent* cCenter);
+	static void EnableMovementInput(IEvent* cEvent, IComponent* cCenter);
+
+	// AI needs things
+	inline void PostSpeed();
+	static void SendMovementInformation(IEvent*, IComponent*);
+	
+	static void GameWonCallback(IEvent*, IComponent*);
 };
 
 #endif // _CMOVEMENT_H_

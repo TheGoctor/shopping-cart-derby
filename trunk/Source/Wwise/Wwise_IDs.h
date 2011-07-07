@@ -68,6 +68,7 @@ namespace AK
         static const AkUniqueID PLAY_FX_3D_WEAPONWHOOSH = 4023349039U;
         static const AkUniqueID PLAY_MX_GAMEPLAY = 368551784U;
         static const AkUniqueID PLAY_MX_MENU = 1022453873U;
+        static const AkUniqueID PLAY_SFX_BANANA_USE = 656860145U;
         static const AkUniqueID PLAY_SFX_CART_BIKE_SLIP = 2127105977U;
         static const AkUniqueID PLAY_SFX_CART_BIKE_START = 489997781U;
         static const AkUniqueID PLAY_SFX_CART_BIKE_START_FAIL = 3312685852U;
@@ -85,13 +86,35 @@ namespace AK
         static const AkUniqueID PLAY_SFX_GAMEPLAY_WIN = 4036155509U;
         static const AkUniqueID PLAY_SFX_IMPACT_CART_ENEMY = 4175615188U;
         static const AkUniqueID PLAY_SFX_IMPACT_CART_WALL = 674762364U;
+        static const AkUniqueID PLAY_SFX_ITEM_CART = 233061112U;
+        static const AkUniqueID PLAY_SFX_ITEM_CHICKENSOUP_USE = 3613244130U;
+        static const AkUniqueID PLAY_SFX_ITEM_CREAMPIE_USE = 1288948046U;
+        static const AkUniqueID PLAY_SFX_ITEM_DOUGHNUT_AURA = 419057718U;
+        static const AkUniqueID PLAY_SFX_ITEM_DOUGHNUT_IMPACT = 3984204929U;
+        static const AkUniqueID PLAY_SFX_ITEM_DOUGHNUT_USE = 2865586440U;
+        static const AkUniqueID PLAY_SFX_ITEM_ENERGYDRINK_USE = 2095117656U;
+        static const AkUniqueID PLAY_SFX_ITEM_GOALITEM_ALLCOLLECTED = 339837795U;
+        static const AkUniqueID PLAY_SFX_ITEM_GOALITEM_DROP = 1193296238U;
+        static const AkUniqueID PLAY_SFX_ITEM_JAM_USE = 153953338U;
+        static const AkUniqueID PLAY_SFX_ITEM_PEANUTBUTTER_USE = 3409434019U;
+        static const AkUniqueID PLAY_SFX_ITEM_PICKUP = 3526221634U;
+        static const AkUniqueID PLAY_SFX_ITEM_TURKEY_BOUNCE = 2474703931U;
         static const AkUniqueID PLAY_SFX_ITEM_TURKEY_IMPACT = 3519348969U;
         static const AkUniqueID PLAY_SFX_ITEM_TURKEY_TRAVEL = 837004335U;
         static const AkUniqueID PLAY_SFX_ITEM_TURKEY_USE = 1222678624U;
-        static const AkUniqueID PLAY_SFX_MAIN_MENU_SCISSOR = 3908685218U;
         static const AkUniqueID PLAY_SFX_MENU_CANCEL = 3750105340U;
+        static const AkUniqueID PLAY_SFX_MENU_CASHREGISTER = 2237525028U;
+        static const AkUniqueID PLAY_SFX_MENU_GOALRANKSCREEN = 1311015037U;
+        static const AkUniqueID PLAY_SFX_MENU_INVALIDSELECTION = 4152653343U;
+        static const AkUniqueID PLAY_SFX_MENU_OPTIONCHANGE = 788432253U;
         static const AkUniqueID PLAY_SFX_MENU_SCROLL = 2151728965U;
         static const AkUniqueID PLAY_SFX_MENU_SELECT = 3759090466U;
+        static const AkUniqueID PLAY_SFX_PLAYER_STATUS_BLIND = 531062666U;
+        static const AkUniqueID PLAY_SFX_PLAYER_STATUS_FROZEN = 2163963135U;
+        static const AkUniqueID PLAY_SFX_PLAYER_STATUS_INVULNERABLE = 4231880252U;
+        static const AkUniqueID PLAY_SFX_PLAYER_STATUS_RADARJAM_01 = 1869007965U;
+        static const AkUniqueID PLAY_SFX_PLAYER_STATUS_SLOWED_01 = 3351683445U;
+        static const AkUniqueID PLAY_SFX_PLAYER_STATUS_STUN = 37185357U;
         static const AkUniqueID RESUME_ALL = 3679762312U;
         static const AkUniqueID RESUME_MX_GAMEPLAY = 1646171595U;
         static const AkUniqueID STOP_ALL = 452547817U;
@@ -109,7 +132,10 @@ namespace AK
         static const AkUniqueID STOP_MX_GAMEPLAY = 3165009754U;
         static const AkUniqueID STOP_MX_MENU = 2638592923U;
         static const AkUniqueID STOP_SFX_CHARACTERS_BULLDOGMA_SPEED = 1808949856U;
+        static const AkUniqueID STOP_SFX_ITEM_DOUGHNUT_AURA = 4052040880U;
         static const AkUniqueID STOP_SFX_ITEM_TURKEY_TRAVEL = 1667376673U;
+        static const AkUniqueID STOP_SFX_PLAYER_STATUS_FROZEN = 3780720065U;
+        static const AkUniqueID STOP_SFX_PLAYER_STATUS_INVULNERABLE = 1950087590U;
     } // namespace EVENTS
 
     namespace SWITCHES

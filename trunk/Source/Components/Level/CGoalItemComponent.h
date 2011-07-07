@@ -29,6 +29,7 @@ public:
 	CObject* m_pObject;
 	bool m_bSpawned;
 	bool m_bDespawning;
+	bool m_bCollidable;
 	float m_fDespawnTimer;
 	EventID m_eEventID;
 
@@ -36,6 +37,7 @@ public:
 
 	// Constructor
 	CGoalItems(CObject* pObj);
+	CGoalItems(){}
 
 	// Destructor
 	~CGoalItems();
@@ -43,7 +45,8 @@ public:
 	void Init(EGoalItemType);
 
 	static void Update(IEvent*, IComponent*);
-	//static void GoalItemCollectedCallback(IEvent*, IComponent*);
+	static void ShutdownGoalItem(IEvent*, IComponent*);
+	void Spawn();
 	void Despawn();
 	void SetDespawnTimer(const float fDT);
 
@@ -51,6 +54,9 @@ public:
 	{
 		return m_pObject;
 	}
+
+	static void PauseUpdateCallback(IEvent*, IComponent* pComp);
+
 };
 
 #endif

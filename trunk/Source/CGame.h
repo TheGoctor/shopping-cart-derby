@@ -16,6 +16,8 @@
 #define _CGAME_H_
 
 #include <windows.h>
+#include <mmsystem.h>               // Multimedia header file.
+#pragma comment(lib, "winmm.lib")   // Multimedia import library.
 #include <vector>
 using namespace std;
 
@@ -41,6 +43,9 @@ private:
 	bool					m_bWindowed;		// Whether the game is windowed or fullscreen
 	bool					m_bShutdown;
 
+	// For a more accurate timer
+	TIMECAPS m_tTC;
+
 	// Time
 	float					m_fFrameTime;
 	int						m_nFrameCount;
@@ -50,7 +55,9 @@ private:
 
 	// TODO: Delete when collisions can add to set
 	CObject* test;
-
+	CObject* pAnimObj;
+	CObject* pAnimObj1;
+	
 	//	Constructor
 	CGame();
 
@@ -61,6 +68,12 @@ private:
 
 public:
 
+	int GetScreenWidth(){return m_nScreenWidth;}
+	int GetScreenHeight(){return m_nScreenHeight;}
+	bool GetIsWindowed(){return m_bWindowed;}
+	void SetScreenWidth(int nWidth){m_nScreenWidth = nWidth;}
+	void SetScreenHeight(int nHeight){m_nScreenHeight = nHeight;}
+	void SetIsWindowed(bool bIsWindowed){m_bWindowed = bIsWindowed;}
 	int GetFPS() { return m_nFPS; }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Function:	“Shutdown”

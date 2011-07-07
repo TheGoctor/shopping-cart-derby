@@ -2,16 +2,8 @@
 #define _DXRENDERCONTEXTMANAGER_H_
 
 #include "DXRenderContext.h"
+#include "..\\..\\..\\Enums.h"
 
-enum ERenderContext { RC_MIN = -1, 
-RC_FLAT, RC_CART, RC_CEILING, 
-RC_ENDCAP, RC_FLOOR, RC_FSD_C_L, 
-RC_FSD_C_M, RC_FSD_C_S, RC_FSD_S_L, 
-RC_FSD_S_M, RC_FSD_S_S, RC_FRONT_DOOR,
-RC_GLASS_COUNTER, RC_GLASS_FREEZER, RC_HALF_WALL, 
-RC_LOBSTER, RC_OPFR_L, RC_OPFR_R, 
-RC_PRODUCE_L, RC_PRODUCE_R, RC_REGISTER, 
-RC_SHELF_S, RC_SHELF_T, RC_WALL, RC_BONES, RC_MAX };
 
 class DXRenderContextManager
 {
@@ -24,13 +16,21 @@ private:
 	DXRenderContextManager &operator=(const DXRenderContextManager &) 
 	{
 	}
-	static DXRenderContextManager m_pInstance;
 
 	///////////////////////////////////////////////
 	// Render contexts
 	DXRenderContext m_cContexts[RC_MAX];
 
+	// Map of Contexts (Key = ID of Texture Name, Data = DXRenderContext)
+	map<unsigned int, DXRenderContext*, less<unsigned int>,
+		CAllocator<pair<unsigned int, DXRenderContext*>>> m_cDynamicContexts;
+
 	void BuildRenderContexts();
+	typedef map<unsigned int, ID3DXEffect*, less<unsigned int>, 
+		CRenderAllocator<pair<unsigned int, ID3DXEffect*>>> ShaderMap;
+	ShaderMap m_cShaderFiles;
+
+	ID3DXEffect* LoadShader(const char *szFXFile);
 
 public:
 	///////////////////////////////////////////////
@@ -45,6 +45,18 @@ public:
 	
 	void Initialize();
 	void RenderContexts();
+
+	// Init
+	void Init(void);
+
+	// Shutdown
+	static void ShutdownCallback(IEvent*, IComponent*);
+	void Shutdown(void);
+
+	// Factory
+	DXRenderContext* CreateRenderContext(string szTexFile = "default.jpg",
+		string szEffectFile = "Texture2D.fx",
+		void (*pRenderFunc)(RenderNode &node) = DXRenderContext::TexturedRenderContextFunc);
 
 	///////////////////////////////////////////////
 	// Render context accessors

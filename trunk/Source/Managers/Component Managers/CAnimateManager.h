@@ -16,12 +16,23 @@
 using namespace std;
 #include "..\\Global Managers\\Memory Manager\\CAllocator.h"
 
+// GOC & LUA!
+extern "C"
+{
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
 // Foward Declares
 class CAnimateComponent;
 class DXMesh;
 class CAnimation;
 class CObject;
+class IEvent;
+class IComponent;
 
+// Animate Manager
 class CAnimateManager
 {
 private:
@@ -39,13 +50,36 @@ public:
 	// Singleton
 	static CAnimateManager* GetInstance(void) 
 	{ 
-		static CAnimateManager instance; 
-		return &instance; 
+		static CAnimateManager pcAnimateMan; 
+		return &pcAnimateMan; 
 	}
 
 	// Factory
-	static CAnimateComponent* CreateAnimateComp(CObject* pParent, DXMesh* pMesh,
-							   CAnimation* pAnimation);
+	static int CreateAnimComp(lua_State* pLua);
+	static CAnimateComponent* CreateAnimateComp(CObject* pParent, DXMesh* pMesh);
+
+	// Init
+	void Init(void);
+
+	// Shutdown
+	static void ShutdownCallback(IEvent*, IComponent*);
+	void Shutdown(void);
+
+	// Disable
+	static void DisableCallback(IEvent*, IComponent*);
+	void Disable();
+
+	// Get Comp By ID
+	CAnimateComponent* GetComponent(unsigned int uID)
+	{
+		map<unsigned int, CAnimateComponent*, less<unsigned int>,
+			CAllocator<pair<unsigned int, CAnimateComponent*>>>::iterator compIter =
+				m_cAnimateComps.find(uID);
+		if(compIter == m_cAnimateComps.end())
+			return NULL;
+		else
+			return compIter->second;
+	}
 };
 
 #endif // _CANIMATEMANAGER_H_

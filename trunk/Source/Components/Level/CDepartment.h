@@ -25,24 +25,25 @@ using std::map;
 
 class IEvent;
 
+struct TGoalItemSpawnLocation
+{
+	D3DXVECTOR3 m_cPos;
+	CGoalItems* m_cGoalItem;
+	bool m_bSpawned;
+};
+
 class CDepartment : public IComponent
 {
-		struct TGoalItemSpawnLocation
-		{
-			D3DXVECTOR3 m_cPos;
-			EGoalItemType m_cGoalItem;
-			bool m_bSpawned;
-		};
+	CObject* m_pParent;
+	EDepartment m_eType;
+	bool m_bUsed;
 
-		CObject* m_pParent;
-		EDepartment m_eType;
-		bool m_bUsed;
-		map<int, TGoalItemSpawnLocation, less<unsigned int>,
-			CAllocator<pair<int, TGoalItemSpawnLocation>>> m_cGoalItemSpawnLocations;
-
-		D3DXVECTOR3 GetSpawnPosition(EDepartment eDepartment);
+	D3DXVECTOR3 GetSpawnPosition(EDepartment eDepartment);
 
 public:
+
+	map<int, TGoalItemSpawnLocation, less<unsigned int>,
+		CAllocator<pair<int, TGoalItemSpawnLocation>>> m_cGoalItemSpawnLocations;
 
 	CDepartment(CObject*);
 	~CDepartment();
@@ -57,7 +58,17 @@ public:
 		return m_bUsed;
 	}
 
+	inline void Deactivate()
+	{
+		// Setting this to true makes it so
+		// that the Spawning Manager ignores it
+		// while picking a Department to spawn
+		// Goal Items in
+		m_bUsed = true;
+	}
+
 	void Init(EDepartment eDepartment);
+	void AcknowledgeDepartments(int);
 	void Despawn();
 	void SpawnGoalItem();
 

@@ -31,7 +31,8 @@ public:
 	inline void CloneLocal(CFrame& cFrame)
 	{
 		m_uFlags |= DIRTY;
-		m_mLocalMatrix = cFrame.GetLocalMatrix();
+		memcpy(&m_mLocalMatrix, &cFrame.GetLocalMatrix(), sizeof(D3DXMATRIX));
+		//m_mLocalMatrix = cFrame.GetLocalMatrix();
 	}
 
 	CFrame(void) : m_uFlags(0), m_pParent(NULL) 
@@ -124,6 +125,12 @@ public:
 		return m_mLocalMatrix;
 	}
 
+	void SetWorld(D3DXMATRIX* m)
+	{
+		memcpy(&m_mWorldMatrix, m, sizeof(D3DXMATRIX));
+		//m_mWorldMatrix = m;
+	}
+
 	const D3DXMATRIX& GetWorldMatrix(void)
 	{
 		if(m_uFlags == DIRTY)
@@ -135,7 +142,8 @@ public:
 			}
 			else
 			{
-				m_mWorldMatrix = m_mLocalMatrix;
+				memcpy(&m_mWorldMatrix, &m_mLocalMatrix, sizeof(D3DXMATRIX));
+				//m_mWorldMatrix = m_mLocalMatrix;
 				return m_mWorldMatrix;
 			}
 		}
@@ -158,7 +166,7 @@ public:
 		D3DXMatrixMultiply(&m_mLocalMatrix, &m_mLocalMatrix, &scaleMat);
 		Update();
 	}
-	D3DXVECTOR3 GetLastWorldPosition()
+	D3DXVECTOR3& GetLastWorldPosition()
 	{
 		return m_lastPosition;
 	}
@@ -172,7 +180,7 @@ public:
 		return D3DXVECTOR3(GetLocalMatrix()._41, 
 			GetLocalMatrix()._42 ,GetLocalMatrix()._43);
 	}
-	void TranslateFrame(D3DXVECTOR3 vTrans)
+	void TranslateFrame(D3DXVECTOR3& vTrans)
 	{
 		m_lastPosition.x = GetWorldMatrix()._41;
 		m_lastPosition.y = GetWorldMatrix()._42;
@@ -184,7 +192,7 @@ public:
 	}
 
 protected:
-	static D3DXMATRIX QuatToRotMat(D3DXVECTOR4 tQuats)
+	static D3DXMATRIX QuatToRotMat(D3DXVECTOR4& tQuats)
 	{
 		float xx, xy, xz, xw,
 			yy, yz, yw,

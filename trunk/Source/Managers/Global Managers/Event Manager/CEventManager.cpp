@@ -28,19 +28,11 @@ CEventManager* CEventManager::GetInstance()
 EventID CEventManager::RegisterEvent(string szEventName, IComponent* pcListener,
 									 void(*pfCallback)(IEvent*, IComponent*))
 {
-	assert(pcListener != NULL);
-
-	// make listener obj
-	TListener* ptListener = MMNEWEVENT(TListener);
-	ptListener->m_pcListener = pcListener;
-	ptListener->m_pfCallback = pfCallback;
-
 	// Convert string to int
 	EventID nEventID = CIDGen::GetInstance()->GetID(szEventName);
 
-	// use generated int to pair with listener into map
-	// and add listener to map
-	m_cListeners.insert(make_pair(nEventID, ptListener));
+	// Register the Listener
+	RegisterEvent(nEventID, pcListener, pfCallback);
 
 	return nEventID;
 }
@@ -53,6 +45,18 @@ void CEventManager::RegisterEvent(EventID nEventID, IComponent* pcListener,
 {
 	// Make sure someone is actually listening
 	assert(pcListener != NULL);
+
+	// Make sure we don't re-register the same listener for the same event
+	pair<EventIter, EventIter> range;
+	range = m_cListeners.equal_range(nEventID);
+
+	for(EventIter cMapIter = range.first; cMapIter != range.second;
+		cMapIter++)
+	{
+		if(cMapIter->second->m_pcListener == pcListener &&
+			cMapIter->second->m_pfCallback == pfCallback)
+			return;	// The Listener is already registered
+	}
 
 	// Make Listener Object
 	TListener* ptListener = MMNEWEVENT(TListener);
@@ -69,14 +73,16 @@ void CEventManager::UnregisterEvents()
 	while(m_cUnregisterList.empty() == false)
 	{
 		TUnregister& pEvent = m_cUnregisterList.front();
-		if(pEvent.nEventID != 0)
+		if(pEvent.nEventID == 0)
 		{
 			ActuallyUnregisterEventAll(pEvent.pListener);
 		}
 		else
 		{
 			ActuallyUnregisterEvent(pEvent.nEventID, pEvent.pListener);
+			pEvent.pListener->SetIsActive(true);
 		}
+
 		m_cUnregisterList.pop_front();
 	}
 }
@@ -118,6 +124,7 @@ void CEventManager::UnregisterEvent(EventID nEventID, IComponent* pcListener)
 	TUnregister pEvent;
 	pEvent.nEventID = nEventID;
 	pEvent.pListener = pcListener;
+	pcListener->SetIsActive(false);
 	m_cUnregisterList.push_back(pEvent);
 }
 
@@ -129,6 +136,7 @@ void CEventManager::UnregisterEventAll(IComponent* pcListener)
 	TUnregister pEvent;
 	pEvent.nEventID = 0;
 	pEvent.pListener = pcListener;
+	pcListener->SetIsActive(false);
 	m_cUnregisterList.push_back(pEvent);
 }
 
@@ -150,12 +158,13 @@ void CEventManager::PostEvent(IEvent* pEvent, unsigned int nPriority)
 		for(EventIter cMapIter = range.first; cMapIter != range.second;
 			cMapIter++)
 		{
-			(*cMapIter).second->m_pfCallback(pEvent, 
-				pEvent->GetSender());
+			//if(cMapIter->second->m_pcListener->GetIsActive())
+			{
+				cMapIter->second->m_pfCallback(pEvent, 
+					cMapIter->second->m_pcListener);
+			}
 		}
 		MMDELEVENT(pEvent);
-		//CMemoryManager::GetInstance()->Deallocate((char*)pEvent, HEAPID_EVENT);
-		UnregisterEvents();
 	}
 }
 
@@ -170,8 +179,7 @@ void CEventManager::ClearEvents()
 	{
 		// Delete because the Event Manager is responsible for cleaning dynamic
 		// memory.
-		//CMemoryManager::GetInstance()->Deallocate((char*)(*cIter), HEAPID_EVENT);
-		MMDEL((char*)(*cIter));
+		MMDEL(*cIter);
 		cIter++;
 	}
 	
@@ -201,18 +209,15 @@ void CEventManager::ProcessEvents()
 		{
 			// Call the callback function of each listener listening for this
 			// event
-			cMapIter->second->m_pfCallback(pEvent, 
-				cMapIter->second->m_pcListener);
+			//if(cMapIter->second->m_pcListener->GetIsActive())
+			{
+				cMapIter->second->m_pfCallback(pEvent, 
+					cMapIter->second->m_pcListener);
+			}
 		}
 
-		//// Clean up the data structs memory first
-		//CMemoryManager::GetInstance()->Deallocate((char*)pEvent->GetData(),
-		//	HEAPID_EVENT);
-
+		// clean up the event's memory
 		MMDELEVENT(pEvent);
-		//// Then clean up the event's memory
-		//CMemoryManager::GetInstance()->Deallocate((char*)pEvent,
-		//	HEAPID_EVENT);
 
 		// Unregister any events
 		UnregisterEvents();
@@ -225,5 +230,11 @@ void CEventManager::ProcessEvents()
 void CEventManager::Shutdown()
 {
 	ClearEvents();
+	EventIter pIter = m_cListeners.begin();
+	while(pIter != m_cListeners.end())
+	{
+		MMDELEVENT(pIter->second);
+		++pIter;
+	}
 	m_cListeners.clear();
 }

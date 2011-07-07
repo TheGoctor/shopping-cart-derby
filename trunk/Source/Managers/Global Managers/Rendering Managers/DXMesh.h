@@ -1,186 +1,193 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	DXMesh.h
 //	Date			:	5/10/11
-//	Mod. Date		:	5/10/11
+//	Mod. Date		:	5/25/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
-//	Purpose			:	Encapsulates the Data needed to Render a Mesh
+//	Purpose			:	Encapsulates the Data needed to Render a Mesh,
+//						Acts as Base Class for other 3D Rendersbles
 ////////////////////////////////////////////////////////////////////////////////
 
 // Header Protexction
-#ifndef _CDXMESH_H_
-#define _CDXMESH_H_
+#ifndef _DXMESH_H_
+#define _DXMESH_H_
 
 // Includes
 #include "Direct3DManager.h"
 #include "CAnimation.h"
 
+// BonedMesh Data
 struct TBindBone
 {
 	string				 m_szBoneName;
 	unsigned int		 m_nBoneIdx;
 	unsigned int		 m_nParentBoneIdx;
-	int					 m_nNumKeyFrames;
 	CFrame				 m_cFrame;
 	int					 m_nNumChildren;
 	vector<unsigned int> m_cChildrenIdxs;
 };
 
+// Vertex Info
 struct TMeshVertexInfo
 {
 	vector<D3DXVECTOR3>					m_vVertices;
 	vector<D3DXVECTOR3>					m_vNormals;
+	vector<D3DCOLOR>					m_vColors;
 	vector<D3DXVECTOR2>					m_vUV;
-	//vector<DWORD>						m_vIndices;
+	vector<DWORD>						m_vIndices;
 	//vector<std::vector<TBoneInfluence>> m_vWeights;
 	//vector<TBone>						m_vJoints;
+
+	// Assignment Operator
+	TMeshVertexInfo& operator=(TMeshVertexInfo& rhs);
 };	
 
+// Mesh
 class DXMesh
 {
-	IDirect3DVertexBuffer9		 * m_pVertBuffer;
-	IDirect3DIndexBuffer9		 * m_pIndexBuffer;
-	IDirect3DVertexDeclaration9  * m_pVertDecl;
-	unsigned int			 m_iVertCount;
-	unsigned int			 m_iIndexCount;
-	unsigned int			 m_iVertSize;
-	D3DPRIMITIVETYPE		 m_Mode;
-	bool					 m_bIndexed;
+	// D3DX Info
+	IDirect3DVertexBuffer9*		 m_pVertBuffer;		// Vertex Buffer
+	IDirect3DIndexBuffer9*		 m_pIndexBuffer;	// Index Buffer
+	IDirect3DVertexDeclaration9* m_pVertDecl;		// Vertex Declaration
+	D3DPRIMITIVETYPE			 m_Mode;			// Primitive Type
 
-	TMeshVertexInfo*		 m_pVertInfo;
+	// Vert Info
+	unsigned int			 m_uVertCount;		// Number of Vertices
+	unsigned int			 m_uIndexCount;		// Number of Indices
+	unsigned int			 m_uVertSize;		// Size of Vertex
+	bool					 m_bIndexed;		// Is Indexed?
+	bool					 m_bCreateBuffer;	// Should the Buffers be Created?
+
+	bool					 m_bFlashingY;		// Is the Mesh Flashing Yellow?
+	bool					 m_bFlashingW;		// Is the Mesh Flashing White?
+	bool					 m_bFlashingB;		// Is the Mesh Flashing Blue?
+
+	float					 m_fFlashRate;		// the percent to flash
+
+protected:
+	TMeshVertexInfo			 m_tVertInfo;		// Raw Vertex Information
+private:
 	
 	// Animation Data
 	
 	// Bone Weights
-	vector<vector<TBoneInfluence>>	m_cWeights;
+	vector<vector<TBoneInfluence>>		m_cWeights;
 
 	// Bone Hierarchy
+	unsigned int						m_uNumBones;
 	vector<TBindBone>					m_cJoints;
 
-
-
 public:
+
+	// Default Constructor
 	DXMesh();
+
+	// Destructor
 	~DXMesh();
 
+	// Mesh Name
 	char					 m_szName[64];
 
+	TMeshVertexInfo& GetVertInfo() { return m_tVertInfo; }
+
+	// Assignment Operator
+	DXMesh& operator=(DXMesh& rhs);
+
+	// Create Buffers
 	void CreateVertexBuffer(const void *pVertArray, 
-		unsigned int iVertCount, IDirect3DVertexDeclaration9 * pVertDecl,
-		unsigned int iVertSize, D3DPRIMITIVETYPE mode);
-
+		unsigned int uVertCount, IDirect3DVertexDeclaration9 * pVertDecl,
+		unsigned int uVertSize, D3DPRIMITIVETYPE mode);
 	void CreateVertexNormalTexture2DBuffer(const VERTEX_POS3_NORM3_TEX2 *pVertArray, unsigned int iVertCount);
-	void CreateVertexTexture3DBuffer(const VERTEX_POS3_TEX3 *pVertArray, unsigned int iVertCount);
+	void CreateVertexColorTexture2DBuffer(const VERTEX_POS3_COL4_TEX2 *pVertArray, unsigned int iVertCount);
+	//void CreateVertexTexture3DBuffer(const VERTEX_POS3_TEX3 *pVertArray, unsigned int uVertCount);
+	void CreateIndexBuffer(const DWORD *dwpIndices, unsigned int uIndexCount);
 
-	void CreateIndexBuffer(const DWORD *iIndices, 
-		unsigned int iIndexCount);
-
-	IDirect3DVertexBuffer9		 * GetVertBuffer(void) const 
-	{ 
-		return m_pVertBuffer;  
-	}
-	IDirect3DIndexBuffer9		 * GetIndexBuffer(void) const 
-	{ 
-		return m_pIndexBuffer; 
-	}
-	IDirect3DVertexDeclaration9  * GetVertDecl(void) const 
-	{ 
-		return m_pVertDecl;	   
-	}
-	const unsigned int GetVertCount(void) const 
-	{ 
-		return m_iVertCount;  
-	}
-	const unsigned int GetIndexCount(void) const 
-	{ 
-		return m_iIndexCount; 
-	}
-	const unsigned int GetVertSize(void) const 
-	{ 
-		return m_iVertSize; 
-	}
-	const D3DPRIMITIVETYPE GetMode(void) const 
-	{ 
-		return m_Mode; 
-	}
-	char* GetName() 
-	{
-		return m_szName;
-	}
+	// Accessors
+	IDirect3DVertexBuffer9		 * GetVertBuffer(void)  const { return m_pVertBuffer;  }
+	IDirect3DIndexBuffer9		 * GetIndexBuffer(void) const {	return m_pIndexBuffer; }
+	IDirect3DVertexDeclaration9  * GetVertDecl(void)	const { return m_pVertDecl;	   }
+	
+	const unsigned int GetVertCount(void)  const { return m_uVertCount;  }
+	const unsigned int GetIndexCount(void) const { return m_uIndexCount; }
+	const unsigned int GetVertSize(void)   const { return m_uVertSize;   }
+	const D3DPRIMITIVETYPE GetMode(void)   const { return m_Mode;		 }
+	char* GetName()		   { return m_szName;		  }
+	string GetNameString() { return string(m_szName); }
+	
 	const unsigned int GetTriangleCount(void) const
 	{ 
-		if(true == m_bIndexed)
-			return m_iIndexCount / 3;
+		if(m_Mode == D3DPT_TRIANGLELIST)
+		{
+			if(true == m_bIndexed)
+				return m_uIndexCount / 3;
+			else
+				return m_uVertCount / 3;
+		}
+		else if(m_Mode == D3DPT_TRIANGLESTRIP)
+		{
+			if(true == m_bIndexed)
+				return m_uIndexCount - 2;
+			else
+				return m_uVertCount - 2;
+		}
 		else
-			return m_iVertCount / 3;
+		{
+			if(true == m_bIndexed)
+				return m_uIndexCount / 3;
+			else
+				return m_uVertCount / 3;
+		}
 	}
-	const bool IsIndexed(void) const 
-	{ 
-		return m_bIndexed; 
-	}
+	const bool IsIndexed(void) const  { return m_bIndexed; }
+	const bool IsFlashingYellow(void) const  { return m_bFlashingY; }
+	const bool IsFlashingWhite(void) const  { return m_bFlashingW; }
+	const bool IsFlashingBlue(void) const  { return m_bFlashingB; }
+	const float GetFlashRate(void) const { return m_fFlashRate; }
 
-	//string GetName(void)
-	//{
-	//	return m_szName;
-	//}
+	vector<TBindBone>& GetBones(void)				 { return m_cJoints;  }
+	vector<vector<TBoneInfluence>>& GetWeights(void) { return m_cWeights; }
 
-	void SetMode(D3DPRIMITIVETYPE mode) 
-	{ 
-		m_Mode = mode; 
-	}
-
+	// Mutators
+	void SetMode(D3DPRIMITIVETYPE mode)			{ m_Mode = mode;				  }
 	void SetWeight(int nIdx, TBoneInfluence bi)
-	{
+	{ 
 		m_cWeights[nIdx].push_back(bi);
 	}
-
-
-	///*void SetName(string szName) 
-	//{
-	//	m_szName = szName;
-	//}*/
-
-	void AddBoneToHiearchy(TBindBone tBone)
+	void SizeWeightsToTwo(int nIdx)
 	{
-		m_cJoints.push_back(tBone);
-	}
-
-	vector<TBindBone>& GetBones(void)
-	{
-		return m_cJoints;
-	}
-
-	vector<vector<TBoneInfluence>>& GetWeights(void)
-	{
-		return m_cWeights;
-	}
-
-	void SetVertexInfo(TMeshVertexInfo* pMeshInfo)
-	{
-		int nVertCount = pMeshInfo->m_vVertices.size();
-		VERTEX_POS3_NORM3_TEX2 *verts = new VERTEX_POS3_NORM3_TEX2[nVertCount];
-
-		for(int nVert = 0; nVert < nVertCount; ++nVert)
+		while(m_cWeights[nIdx].size() != 2)
 		{
-			verts[nVert].position.x = pMeshInfo->m_vVertices[nVert].x;
-			verts[nVert].position.y = pMeshInfo->m_vVertices[nVert].y;
-			verts[nVert].position.z = pMeshInfo->m_vVertices[nVert].z;
-
-			verts[nVert].normal = pMeshInfo->m_vNormals[nVert];
-
-			verts[nVert].uv.x = pMeshInfo->m_vUV[nVert].x;
-			verts[nVert].uv.y = pMeshInfo->m_vUV[nVert].y;
+			TBoneInfluence bi;
+			bi.m_fWeight = 0.0f;
+			bi.m_nBoneIndex = 0;
+			m_cWeights[nIdx].push_back(bi);
 		}
-
-		CreateVertexBuffer(verts, nVertCount, Direct3DManager::GetInstance()->GetVertNormTex2DDecl(), 
-			sizeof(VERTEX_POS3_NORM3_TEX2), GetMode());
-
-		m_pVertInfo = pMeshInfo;
-
-		delete [] verts;
 	}
 
+	void AddBoneToHiearchy(TBindBone tBone)		{ m_cJoints.push_back(tBone);     }
+	void SetIndexedTexturedVertexInfo(TMeshVertexInfo* pMeshInfo);//,// bool createVB = false);
+	void SetIndexedColoredTexturedVertexInfo(TMeshVertexInfo* pMeshInfo);//,// bool createVB = false);
+	void SetColoredTexturedVertexInfo(TMeshVertexInfo* pMeshInfo);//,// bool createVB = false);
+	
+	void SetFlashingYellow(bool bFlashingY) { m_bFlashingY = bFlashingY; }
+	void SetFlashingWhite(bool bFlashingW) { m_bFlashingW = bFlashingW; }
+	void SetFlashingBlue(bool bFlashingB) { m_bFlashingB = bFlashingB; }
+	void SetFlashRate(float fFlashRate) { m_fFlashRate = fFlashRate; }
+
+	// Reset Buffers
+	void ResetVertBuffer(const void *pVertArray, int nVertCount, unsigned int uVertSize);
+	void ResetIndexBuffer(const DWORD *dwpIdxArray, unsigned int uIdxCount);
+
+	// Build Bone Hiearchy
 	void BuildHiearchy(void);
+
+///////////////////////////////////////////////////////////////////////////////
+// CALLBACKS
+///////////////////////////////////////////////////////////////////////////////
+
+	// Lost Device
+	void LostDevice(void);
+	static void LostDeviceCallback(IEvent*, IComponent* pComp);
 };
 
-#endif
+#endif // _DXMESH_H_

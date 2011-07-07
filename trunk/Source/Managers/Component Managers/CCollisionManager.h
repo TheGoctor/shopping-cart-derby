@@ -27,96 +27,23 @@ extern "C"
 class IEvent;
 class CEventManager;
 class CObject;
+/*
+#ifndef HalfSpaceTest
+#define HalfSpaceTest(plane, testPoint) (dot_product( (plane).m_Normal, (testPoint) ) - (plane).m_Offset)
+#endif
+*/
 
-//defines the depth limit of the BVH
-#define BVHDEPTH_LIMIT 3
-//enum for splitting type(either splitting across x or z axis)
-enum ESPLITTYPE {XSPLIT = -1, ZSPLIT = 1};  //nextsplittype = ~prevsplittype
-class CBVHNode
-{
-private:
-	int m_nSplitType;			//set to X/Z-SPLIT to determine how the nodes children were split
-	bool m_bIsLeaf;
-	list<CCollideable*, CAllocator<CCollideable*>> m_pcObjects;	//objects in the node(only contains data in a leaf node
-	TAABB m_tBV;			//the bounding volume around this node's area
-	//	list<CBVHNode*> m_pChildren; 
-	CBVHNode* m_pParent;
-	CBVHNode* m_pRHS;	//right side split
-	CBVHNode* m_pLHS;	//left "
+#ifndef SameSign
+#define SameSign(a,b) ( ((*(unsigned int*)&(a)) & 0x80000000) == ((*(unsigned int*)&(b)) & 0x80000000) )
+#endif 
 
-public:
-	// Constructors
-	CBVHNode() : m_nSplitType(0), m_bIsLeaf(false), m_pParent(NULL), 
-		m_pRHS(NULL), m_pLHS(NULL)
-	{
-		m_tBV.cBoxMax = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-		m_tBV.cBoxMin = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	}
+//static bool FloatEquals(float fVal1, float fVal2, float fEpsilon)
+//{
+//	return ( fabs( fVal1 - fVal2 ) < fEpsilon );
+//}
 
-	CBVHNode(int nsplittype, TAABB tNodeBounds) : m_nSplitType(nsplittype),
-		m_tBV(tNodeBounds), m_bIsLeaf(false)
-	{
-	}
-
-	// Destructor
-	~CBVHNode()
-	{
-	}
-
-	// Accessors
-	CBVHNode* GetParent(void)
-	{
-		return m_pParent;
-	}
-	CBVHNode* GetRHS(void)
-	{
-		return m_pRHS;
-	}
-	TAABB GetBounds()
-	{
-		return m_tBV;
-	}
-	CBVHNode* GetLHS(void)
-	{
-		return m_pLHS;
-	}
-	int GetSplitType(void)
-	{
-		return m_nSplitType;
-	}
-	bool IsLeafNode(void)
-	{	
-		return m_bIsLeaf;
-	}
-	// Mutators
-	void SetParent(CBVHNode* pParent) 
-	{
-		m_pParent = pParent;
-	}
-	void SetSplitType(int nsplittype)
-	{
-		m_nSplitType = nsplittype;
-	}
-	void SetIsLeaf(bool bleaf)
-	{
-		m_bIsLeaf = bleaf;
-	}
-	void SetLHS(CBVHNode* lhs)
-	{
-		m_pLHS = lhs;
-	}
-	void SetRHS(CBVHNode* rhs)
-	{
-		m_pRHS = rhs;
-	}
-	void SetBounds(TAABB tbounds)
-	{
-		m_tBV.cBoxMax = tbounds.cBoxMax;
-		m_tBV.cBoxMin = tbounds.cBoxMin;
-	}
-
-	void SplitBV(CBVHNode* pParent, CBVHNode* plhs, CBVHNode* prhs);
-};
+typedef map<unsigned int, CCollideable*, less<unsigned int>, CAllocator<
+pair<unsigned int, CCollideable*>>> ColMap;
 
 /*******************************************************************************
 //  Collision Manager - handles all collideable components collisions/reactions
@@ -124,12 +51,16 @@ public:
 class CCollisionManager
 {
 private:
-	map<unsigned int, CCollideable*, less<unsigned int>, CAllocator<
-		pair<unsigned int, CCollideable*>>> m_cStaticObjects;
-	map<unsigned int, CCollideable*, less<unsigned int>, CAllocator<
-		pair<unsigned int, CCollideable*>>> m_cNonStaticObjects;
-	CBVHNode*							m_pRoot;				//BVH root node
-
+	ColMap m_cStaticObjects;
+	ColMap m_cNonStaticObjects;
+	ColMap m_cSeparatedBoxes;
+	D3DXVECTOR3 *m_pReflect;
+	D3DXVECTOR3 *m_pColpt;
+	float m_fElapsed;
+	
+	int		   m_nTriCount;
+	TTriangle* m_pWallTris;
+	
 	CEventManager* m_pEventManager;
 
 	//constructor
@@ -150,66 +81,51 @@ public:
 	*	Mod Date:			3/27/2011
 	*	Mod Initials:		RN
 	************************************************************************/
+	ColMap& GetStaticObjs() { return m_cStaticObjects; }
+
 	static void Update(IEvent* pEvent, IComponent* pComponent);
+	static bool FloatEquals(float fVal1, float fVal2, float fEpsilon)
+	{
+		return ( fabs( fVal1 - fVal2 ) < fEpsilon );
+	}
+	
+	void SetTime(float fT)
+	{
+		m_fElapsed = fT;
+	}
+	float GetTime(void)
+	{
+		return m_fElapsed;
+	}
+	//Condenses aisles made up of multiple objects into one collision shape
 
 	// accessors
+	void AddSepBox(CCollideable* cStatic, unsigned int nObjID);
 	void AddStatic(CCollideable* cStatic, unsigned int nObjID);
 	void AddNonStatic(CCollideable* cCollide, unsigned int nObjID);
 	// mutators
+	void RemoveSepBox(CCollideable* cStatic, unsigned int nObjID);
 	void RemoveStatic(CCollideable* cStatic, unsigned int nObjID);
 	void RemoveNonStatic(CCollideable* cCollide, unsigned int nObjID);
-
+	
 	//component functions
 	static int CreateCollideableComponent(lua_State* pLua);
 	static CCollideable* CreateCollideableComponent(CObject* pParent,
 		bool isStatic, bool isReactor, unsigned int objType);
 
 	//tests for collision between two components(called in update)
-	void SearchForCollision(void);
+	void SearchForCollision(float fDeltaTime);
 	bool TestCollision(CCollideable* obj1, CCollideable* obj2);
 	void CheckRam(CCollideable* obj1, CCollideable* obj2, D3DXVECTOR3 tvel1, D3DXVECTOR3 tvel2);
-	void InitBVH();
-	/************************************************************************
-	*	GenerateBVH :	Generates a BVH from all of the static and non-static
-	*					objects in the scene.  depth of the hierarchy is 
-	*					determined by the defined "BVHDEPTH_LIMIT"
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	void GenerateBVH(CBVHNode* pCurrNode, int ndepth);
-
-	/***************************************************************************
-	*	Traverse :		Traverses the BVH for collision detection/culling/etc
-	*
-	*	Mod Date:		4/12/11
-	*	Mod Initials:	RN
-	***************************************************************************/
-	void Traverse(void);
-
-	/************************************************************************
-	*	LoadBVH :		Loads a valid BVH from a file
-	*
-	*	Ins :			szfilename - the name of the file to read the BVH
-	*								from.  if no file exists, this function
-	*								calls "GenerateBVH" to recreate it
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	void LoadBVH(char* szfilename);		
-
-	/************************************************************************
-	*	SaveBVH :		saves the current BVH tree to a file
-	*
-	*	Ins :			szfilename - the name of the file to save the BVH to
-	*								if the file does not exist it will be
-	*								created
-	*
-	*	Mod Date:			3/27/2011
-	*	Mod Initials:		RN
-	************************************************************************/
-	void SaveBVH(char* szfilename);	
+	void CondenseCollisionBoxes(void);
+	void CreateRenderedComboBoxes(void);
+	void CombineLinedBoxes(void)
+	{
+		//by our powers combined
+		CondenseCollisionBoxes(); CondenseCollisionBoxes(); CondenseCollisionBoxes();
+		//we get pretty sweet collision shapes
+		CreateRenderedComboBoxes();
+	}
 
 	void SetAllNotChecked(void)
 	{
@@ -230,59 +146,96 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 
 
-	bool SphereToSphereIntersection(CCollideable* obj1, CCollideable* obj2);
-	bool SphereToSphereReaction(CCollideable* obj1, CCollideable* obj2);
+	bool SphereToSphereIntersection(CCollideable* obj1, CCollideable* obj2, 
+		D3DXVECTOR3* vReflect, bool bReact);
 
-	bool SphereToPlaneIntersection(CCollideable* obj1, CCollideable* obj2);
-	bool SphereToPlaneReaction(CCollideable* obj1, CCollideable* obj2);
 
-	bool SphereToOBBIntersection(CCollideable* obj1, CCollideable* obj2);
-	bool SphereToOBBReaction(CCollideable* obj1, CCollideable* obj2);
-
-	bool SphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2);
-	bool SphereToAABBReaction(CCollideable* obj1, CCollideable* obj2);
-
-	bool OBBToOBBIntersection(CCollideable* obj1, CCollideable* obj2);
-	bool OBBToOBBReaction(CCollideable* obj1, CCollideable* obj2);
-
-	bool OBBToPlaneIntersection(CCollideable* obj1, CCollideable* obj2);
-	bool OBBToPlaneReaction(CCollideable* obj1, CCollideable* obj2);
-
-	bool PlaneToPlaneIntersection(CCollideable* obj1, CCollideable* obj2);
+	bool SphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2,
+		D3DXVECTOR3* vReflect, bool bReact);
 
 	bool AABBTOAABBIntersection(CCollideable* obj1, CCollideable* obj2);
-	bool AABBToAABBReaction(CCollideable* obj1, CCollideable* obj2);
+
+	bool CapsuleToCapsuleIntersection(CCollideable* obj1, CCollideable* obj2,
+		D3DXVECTOR3* tPosition, bool bReact);
+	bool CapsuleToSphereIntersection(CCollideable* obj1, CCollideable* obj2,
+		D3DXVECTOR3* tPosition, bool bReact);
+	bool CapsuleToAABBIntersection(CCollideable* obj1, CCollideable* obj2,
+		D3DXVECTOR3* tPosition, bool bReact);
+	bool CapsuleToOBBIntersection(CCollideable* obj1, CCollideable* obj2,
+		D3DXVECTOR3* tPosition, bool bReact);
+
+	bool SphereToOBBIntersection(CCollideable* obj1, CCollideable* obj2,
+		D3DXVECTOR3* tPosition, bool bReact);	//bReact is pretty much always going to be true
+	bool OBBToOBBIntersection(CCollideable* obj1, CCollideable* obj2,
+		D3DXVECTOR3* tPosition, bool bReact);
+	bool OBBToAABBIntersection(CCollideable* obj1, CCollideable* obj2,
+						   D3DXVECTOR3* tPosition, bool bReact);
+
 
 	//frustum collisions
-	bool SphereToFrustum(CCollideable* obj1, CCollideable* obj2);
-	bool AABBToFrustum(CCollideable* obj1, CCollideable* obj2);
 
 	//////////////////////////////////////////////////////////////////////////
 	//Collision Line Functions
 	// these functions are used mostly by AI entities for pathfinding
 	//////////////////////////////////////////////////////////////////////////
 	bool LineToSphereIntersection(TLine tLine, TSphere tSphere, D3DXVECTOR3& tColPoint);
-	bool LineToPlaneIntersection(TLine tLine, TPlane tPlane, D3DXVECTOR3& tColPoint);
-	bool LineToOBBIntersection(TLine tLine, TOBB tOBB, D3DXVECTOR3& tColPoint);
 	bool LineToAABBIntersection(TLine tLine, TAABB tAABB, D3DXVECTOR3& tColPoint);
+	bool LineToTriangle(TLine tLine, TTriangle triangle, D3DXVECTOR3 & tColpoint);
+	bool RayToLineIntersection(TRay tRay, TLine tSegment);
+	bool PointInTriangle(TTriangle tTri, D3DXVECTOR3 tTestPt);
+	bool LineEquals(TLine Line1, TLine Line2)
+	{
+		if(Line1.cLineStart == Line2.cLineStart &&
+			Line1.cLineEnd == Line2.cLineEnd)
+			return true;
+		else
+			return false;
+	}
 
-	//////////////////////////////////////////////////////////////////////////
+	bool RayToSphereIntersection(TRay ray, TSphere sphere, float & t, D3DXVECTOR3 &intersect);
+	bool RayToTriangleIntersection(TTriangle tri, TRay ray, float &t);
+
+	bool MovingSphereToTriangleIntersection(CCollideable* obj, TTriangle* tri,
+		D3DXVECTOR3* vReflect, D3DXVECTOR3* tCol, float &t, bool bReact);
+	///////////////////////////////////////////////////////
 	//returns false and sets tClosestPt to the closest collision point
 	//returns true if the line reaches the waypoint uninterrupted
-	//////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////
 	bool LineToWayPoint(TLine tLine, D3DXVECTOR3 &tClosestPt);
+
+	///////////////////////////////////////////////////////
+	//returns true if the line collides with anything the player would collide with
+	//returns false if nothing is found along the line
+	///////////////////////////////////////////////////////
+	bool LineTestAvoidance(TLine tLine, float fRayDist, D3DXVECTOR3 &tSurfaceNorm);
 
 	//////////////////////////////////////////////////////////////////////////
 	//Collision Support Functions
 	// these functions serve to assist the collision check functions
 	// they will be only be called from within the collision manager
 	//////////////////////////////////////////////////////////////////////////
-
+	D3DXVECTOR3 GetAABBNormal(D3DXVECTOR3 colPt, TAABB colBox);
+	D3DXVECTOR3 GetSphereNormal(D3DXVECTOR3 colPt, TSphere colSphere);
+	D3DXVECTOR3 GetReflectedVector(D3DXVECTOR3 vDir, D3DXVECTOR3 vNorm);
 	bool PointInCone(D3DXVECTOR3 tPlayerMove, D3DXVECTOR3 tPlayerPos, 
 		D3DXVECTOR3 tTargetPos, float fCone);
 	void CheckFrustDist(float fDist, CCollideable* pCheck, bool &collide, bool &behind, bool &intersect);
 	D3DXVECTOR3 GetCloserPt(D3DXVECTOR3 tPt1, D3DXVECTOR3 tPt2, D3DXVECTOR3 tTestpt);
+	std::vector<TTriangle> GetAABBTriangles(TAABB aabb);
+	void ClosestPointToAABB(TAABB tBox, D3DXVECTOR3 tTestPt, D3DXVECTOR3& tClosest);
+	void ClosestPointToOBB(TOBB tBox, D3DXVECTOR3 tTestPt, D3DXVECTOR3& tClosest);
+	//	CObject* PickObject(D3DXVECTOR3 tMouseScreenCoord, 
+	//		D3DXMATRIX mMVMatrix, D3DXMATRIX mProjMatrix, )
+	int HalfSpaceTest(D3DXVECTOR3 tNorm, D3DXVECTOR3 tPlanePt, D3DXVECTOR3 tTest);
+	D3DXVECTOR3 ClosestPtPointTriangle(D3DXVECTOR3 p, D3DXVECTOR3 a, D3DXVECTOR3 b, D3DXVECTOR3 c);
+	bool MovingSphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2, D3DXVECTOR3 tVelocity,
+		D3DXVECTOR3* vReflect, bool bReact);
 
+	D3DXVECTOR3 ClosestPointOnLine(TLine line, D3DXVECTOR3 testpt);
+
+	int TestObjAgainstWall(CCollideable* obj1);
+	// this version is for the camera only
+	int TestObjAgainstWall(D3DXVECTOR3 &cameraFrame);
 };
 
 

@@ -1,5 +1,5 @@
 // FILE HEADER
-#ifndef _CPICKUPITEMOMPONENT_H_
+#ifndef _CPICKUPITEMCOMPONENT_H_
 #define _CPICKUPITEMCOMPONENT_H_
 
 #include <D3dx9math.h>
@@ -12,9 +12,11 @@ extern "C"
 }
 
 #include "..\..\IComponent.h"
+#include "..\..\Enums.h"
 
 class IEvent;
 class CObject;
+class CRenderComponent;
 
 class CPickupItemComponent : public IComponent
 {
@@ -25,6 +27,14 @@ private:
 	float				m_fLifetime;
 	float				m_fFlyOutSpeed;
 	float				m_fTimeToFly;
+
+	//int					m_nItemType;
+	EGoalItemType		m_nItemType;
+
+	bool				m_bRendering;
+	bool				m_bSpawned;
+
+	CRenderComponent*	m_pRenderComp;
 
 	D3DXVECTOR3			m_vDirectionToMove;
 
@@ -44,10 +54,32 @@ public:
 
 	static void DestroyPickupItem(CPickupItemComponent* toDestroy);
 
-	bool IsReadyToCollide()
+	inline bool IsReadyToCollide()
 	{
-		return m_fTimeLeft < m_fLifetime - m_fTimeToFly;
+		return (m_fTimeLeft < m_fLifetime - m_fTimeToFly) && (m_fTimeLeft > 0.0f);
 	}
+
+	inline CObject* GetObject()
+	{
+		return m_pObject;
+	}
+
+	inline EGoalItemType GetType()
+	{
+		return m_nItemType;
+	}
+
+	inline bool Spawned()
+	{
+		return m_bSpawned;
+	}
+
+	friend class CPickupItemManager;
+
+	void EventInit();
+
+	void SetMesh(unsigned int nMeshID);
+
 
 	///////////////////////////
 	//
@@ -66,7 +98,11 @@ public:
 	//					 called by the event system. 
 	///////////////////////////////////////////////////////////////////////////
 	static void Update(IEvent* cEvent, IComponent* cCenter);
-	static void GoalItemCollectionCallback(IEvent* cEvent, IComponent* cCenter);
+	static void PickupItemCollisionCallback(IEvent* cEvent, IComponent* cCenter);
+
+
+	static void PauseUpdateCallback(IEvent*, IComponent* pComp);
+
 };
 
 #endif

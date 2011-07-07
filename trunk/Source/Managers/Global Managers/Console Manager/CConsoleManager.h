@@ -32,6 +32,8 @@ extern "C"
 class IEvent;
 class CBitmapFontComp;
 
+#define Debug CConsoleManager::GetInstance()
+
 class CConsoleManager
 {
 private:
@@ -45,6 +47,9 @@ private:
 
 	bool m_bActive;
 
+	// Lua State Pointer
+	lua_State* m_pLua;
+
 	// Constructor
 	CConsoleManager();
 
@@ -54,24 +59,30 @@ private:
 	CConsoleManager& operator=(const CConsoleManager&);
 
 public:
-	static CConsoleManager* GetInstance();
+	static CConsoleManager& GetInstance();
 
 	bool Initialize();
-	void Shutdown();
+	static void Shutdown(IEvent*, IComponent*);
+
+	void RegisterCFunctions();
+	bool LoadLuaFile(string szFileName);
 
 	void DisplayConsole();
 	void HideConsole();
 
 	void DrawConsole();
 
+	void StackDump();
+
+	static int Print(lua_State* pLua);
 	void Print(string szTextToPrint);
+
+	void CallLuaFunc(string szFunc);
 
 	void Parse(string szCommand);
 
 	static void ToggleConsole(IEvent*, IComponent*);
 	static void Update(IEvent*, IComponent*);
 };
-
-typedef CConsoleManager Debug;
 
 #endif

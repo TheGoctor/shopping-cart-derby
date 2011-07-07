@@ -14,49 +14,12 @@ CSliderComponent::CSliderComponent(CObject* pObj) : CButtonComponent(pObj)
 
 }
 
-static void stackDump(lua_State* l)
-{
-	int i;
-	int top = lua_gettop(l);
-	for(i=1; i<=top; i++)
-	{
-		int t = lua_type(l, i);
-		switch(t)
-		{
-		case LUA_TSTRING:
-			{
-				printf("%s", lua_tostring(l, i));
-				break;
-			}
-		case LUA_TBOOLEAN:
-			{
-				printf(lua_toboolean(l, i) ? "true" : "false");
-				break;
-			}
-		case LUA_TNUMBER:
-			{
-				printf("%g", lua_tonumber(l, i));
-				break;
-			}
-		default:
-			{
-				printf("%s", lua_typename(l, t));
-				break;
-			}
-		};
-		printf(" ");
-	}
-	printf("\n");
-}
-
 // Lua stuff
 
 // Lua Prototype: CreateSliderComponent(Object, "EventName", "ButtonTexture.png", nBarStartX, nBarStartY, nBarEndX, nBarEndY, 
 //										nTextureDepth, bStartSelected, nActiveState)
 int CSliderComponent::CreateSliderComponent(lua_State* pLua)
 {
-	stackDump(pLua);
-
 	// top down is in order in param list. Start at bottom with -1 and work your way to the more negative numbers
 	CObject* pObj = (CObject*)lua_topointer(pLua, -10);
 	string szEventName = (string)lua_tostring(pLua, -9);
@@ -86,7 +49,7 @@ CSliderComponent* CSliderComponent::CreateSliderComponent(CObject* pObj, string 
 {
 	CSliderComponent* comp = MMNEW(CSliderComponent(pObj));
 
-	comp->m_szSelectionEvent = szEventName;
+	comp->m_szSelectionFunc = szEventName;
 	comp->m_eAssociatedState = (EGameState)eGameState;
 
 
@@ -104,12 +67,10 @@ CSliderComponent* CSliderComponent::CreateSliderComponent(CObject* pObj, string 
 // set slider to certain value
 int CSliderComponent::SetSliderValue(lua_State* pLua)
 {
-	stackDump(pLua);
-
 	// top down is in order in param list. Start at bottom with -1 and work your way to the more negative numbers
 	
 	CSliderComponent* pComp = (CSliderComponent*)lua_touserdata(pLua, -2);
-	float fAmount = lua_tonumber(pLua, -1);
+	float fAmount = (float)lua_tonumber(pLua, -1);
 
 	if(pComp)
 	{
@@ -136,6 +97,17 @@ void CSliderComponent::Init(string textureName, int nTextureDepth)
 	szEvent = "InitObjects";
 	szEvent += (char)m_eAssociatedState;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, SliderStateInit);
+
+	szEvent = "Update";
+	szEvent += (char)GetAssociatedState();
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
+	CEventManager::GetInstance()->RegisterEvent("Up", this, UpPressed);
+	CEventManager::GetInstance()->RegisterEvent("Down", this, DownPressed);
+	CEventManager::GetInstance()->RegisterEvent("Right", this, SlideRight);
+	CEventManager::GetInstance()->RegisterEvent("Left", this, SlideLeft);
+	CEventManager::GetInstance()->RegisterEvent("Back", this, InvalidSelection);
+	CEventManager::GetInstance()->RegisterEvent("Accept", this, SelectPressed);
+
 	
 
 	m_fTimeSinceSelectionEntry = 0;
@@ -240,7 +212,7 @@ void CSliderComponent::SetScreenPosition(int nPosX, int nPosY, int nEndX, int nE
 ///////////////////////////
 
 
-void CSliderComponent::SelectPressed(IEvent* cEvent, IComponent* cCenter)
+void CSliderComponent::SelectPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CSliderComponent* comp = (CSliderComponent*)cCenter;
 	if(comp->m_bSelected && 
@@ -252,7 +224,7 @@ void CSliderComponent::SelectPressed(IEvent* cEvent, IComponent* cCenter)
 	}
 }
 
-void CSliderComponent::SlideRight(IEvent* cEvent, IComponent* cCenter)
+void CSliderComponent::SlideRight(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CSliderComponent* comp = (CSliderComponent*)cCenter;
 	if(comp->m_bSelected && 
@@ -264,7 +236,7 @@ void CSliderComponent::SlideRight(IEvent* cEvent, IComponent* cCenter)
 	}
 }
 
-void CSliderComponent::SlideLeft(IEvent* cEvent, IComponent* cCenter)
+void CSliderComponent::SlideLeft(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CSliderComponent* comp = (CSliderComponent*)cCenter;
 	if(comp->m_bSelected && 
@@ -280,7 +252,7 @@ void CSliderComponent::SlideLeft(IEvent* cEvent, IComponent* cCenter)
 void CSliderComponent::CalculateAndSendFloatEvent()
 {
 	// from start to current position on the bar
-	D3DXVECTOR3 vVolumeVec = D3DXVECTOR3(m_tSpriteDataButton.m_nX, m_tSpriteDataButton.m_nY, 0.0f) - m_vStartPosition; 
+	D3DXVECTOR3 vVolumeVec = D3DXVECTOR3((float)m_tSpriteDataButton.m_nX, (float)m_tSpriteDataButton.m_nY, 0.0f) - m_vStartPosition; 
 	// from start to end (Entire bar)
 	D3DXVECTOR3 vSliderBarVec = m_vEndPosition - m_vStartPosition;
 
@@ -290,7 +262,7 @@ void CSliderComponent::CalculateAndSendFloatEvent()
 	float fVal = max(min(fVolumeMag / fSliderBarMag, 1.0f), 0.0f); // current/total 0-1 clamped between 0 and 1 (min(vals, 1) puts us from -inf to 1
 																	//			and max(newvals, 0) puts us 0 to inf, so the overlap is 0 to 1 
 	fVal *= 100; // make it 0-100 instead of 0-1
-	SendFloatEvent(m_szSelectionEvent, this, fVal, PRIORITY_NORMAL);
+	SendFloatEvent(m_szSelectionFunc, this, fVal, PRIORITY_NORMAL);
 }
 
 void CSliderComponent::MoveSliderOneTick(int nDirection)
@@ -318,12 +290,12 @@ void CSliderComponent::MoveSliderOneTick(int nDirection)
 	// else the new values are in bounds
 
 	// apply that movement to the slider
-	m_tSpriteDataButton.m_nX += vSliderBarDirection.x;
-	m_tSpriteDataButton.m_nY += vSliderBarDirection.y;
+	m_tSpriteDataButton.m_nX += (int)vSliderBarDirection.x;
+	m_tSpriteDataButton.m_nY += (int)vSliderBarDirection.y;
 
 	// apply that movement to the selected picture slider (so they match up on location)
-	m_tSpriteDataSelection.m_nX += vSliderBarDirection.x;
-	m_tSpriteDataSelection.m_nY += vSliderBarDirection.y;
+	m_tSpriteDataSelection.m_nX += (int)vSliderBarDirection.x;
+	m_tSpriteDataSelection.m_nY += (int)vSliderBarDirection.y;
 
 	// update with new sprite data locations
 	if(m_pDisplayComponentButton != NULL)
@@ -373,12 +345,12 @@ void CSliderComponent::SetSliderToValue(float fAmount)
 	// else the new values are in bounds
 
 	// apply that movement to the slider
-	m_tSpriteDataButton.m_nX = vNewPos.x;
-	m_tSpriteDataButton.m_nY = vNewPos.y;
+	m_tSpriteDataButton.m_nX = (int)vNewPos.x;
+	m_tSpriteDataButton.m_nY = (int)vNewPos.y;
 
 	// apply that movement to the selected picture slider (so they match up on location)
-	m_tSpriteDataSelection.m_nX = vNewPos.x;
-	m_tSpriteDataSelection.m_nY = vNewPos.y;
+	m_tSpriteDataSelection.m_nX = (int)vNewPos.x;
+	m_tSpriteDataSelection.m_nY = (int)vNewPos.y;
 
 	// update with new sprite data locations
 	if(m_pDisplayComponentButton != NULL)
@@ -389,23 +361,17 @@ void CSliderComponent::SetSliderToValue(float fAmount)
 	{
 		m_pDisplayComponentSelection->SetSpriteData(m_tSpriteDataSelection);
 	}
+
+	// let the slider stuff know that it changed.
+	CalculateAndSendFloatEvent();
 }
 
 
-void CSliderComponent::SliderStateInit(IEvent* cEvent, IComponent* cCenter)
+void CSliderComponent::SliderStateInit(IEvent* /*cEvent*/, IComponent* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
 
-	string szEvent = "Update";
-	szEvent += (char)comp->GetAssociatedState();
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, Update);
-	CEventManager::GetInstance()->RegisterEvent("Up", comp, PreviousPressed);
-	CEventManager::GetInstance()->RegisterEvent("Down", comp, NextPressed);
-	CEventManager::GetInstance()->RegisterEvent("Right", comp, SlideRight);
-	CEventManager::GetInstance()->RegisterEvent("Left", comp, SlideLeft);
-	CEventManager::GetInstance()->RegisterEvent("Back", comp, InvalidSelection);
-	CEventManager::GetInstance()->RegisterEvent("Accept", comp, SelectPressed);
 
 
 	comp->ReInitValues();

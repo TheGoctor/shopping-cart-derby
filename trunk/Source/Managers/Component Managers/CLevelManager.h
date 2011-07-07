@@ -33,21 +33,28 @@ class CRenderComponent;
 
 class CLevelManager
 {
-private:
-
+public:
 	struct CNode
 	{
-		char szName[40];
+		char szName[64];
 		D3DXMATRIX tLocalMatrix;
 		D3DXMATRIX tWorldMatrix;
 	};
+
+private:
+
 
 	list<CRenderComponent*, CAllocator<CRenderComponent*>> m_cLevelRenderComps;
 	list<CRenderComponent*, CAllocator<CRenderComponent*>> m_cLevelCollisionRenderComps;
 	
 	int	m_objectcount;
+	bool m_bDrawCollision;
+	bool m_bDrawGeometry;
 
 	CNode* m_levelNodes;
+	CNode* m_shadowNodes;
+
+	CNode	m_pCheckoutNode;
 
 	// Constructor
 	CLevelManager();
@@ -60,7 +67,13 @@ private:
 	CLevelManager& operator=(const CLevelManager&) {}
 
 	void BuildLevel(char* szNodeMap);
-	bool AddCollision(char* szMeshName);
+	void DrawCollision();
+	void DrawGeometry();
+	bool GetDrawCollision() { return m_bDrawCollision; }
+	bool GetDrawGeometry() { return m_bDrawGeometry; }
+
+	void FindAndCreateShadow(CObject* pParentObj, ERenderContext eObjRenContext);
+	void BuildShadows(char* szNodeMap);
 
 public:
 	
@@ -73,8 +86,27 @@ public:
 	void Init();
 	static void Shutdown(IEvent*, IComponent*);
 	static void Update(IEvent*, IComponent*);
+	static int  ToggleCollisionVision(lua_State* ptr);
+	static int	 ToggleGeometryVision(lua_State* ptr);
 
 	void AddRenderCollision(CRenderComponent* pRC);
+
+	inline CNode* GetLevelNodes()
+	{
+		return m_levelNodes;
+	}
+
+	inline int GetNumNodes()
+	{
+		return m_objectcount;
+	}
+
+	inline CNode* GetCheckoutNode()
+	{
+		return &m_pCheckoutNode;
+	}
+
+	void LoadLocations();
 
 	// Mutators
 };

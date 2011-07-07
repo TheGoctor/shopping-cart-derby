@@ -123,7 +123,7 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				WarningLevel="4"
+				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -213,12 +213,28 @@
 				RelativePath=".\Source\IComponent.h"
 				>
 			</File>
+			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\ShoppingCartDerby.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\T_Game_Cursor_D.cur"
+				>
+			</File>
+			<File
+				RelativePath=".\Resource\Icons\T_Game_Icon_D.ico"
+				>
+			</File>
 			<Filter
 				Name="Sound"
 				>
@@ -228,6 +244,26 @@
 				>
 				<File
 					RelativePath=".\Resource\Shaders\basic.fx"
+					>
+				</File>
+				<File
+					RelativePath=".\Resource\Shaders\Character.fx"
+					>
+				</File>
+				<File
+					RelativePath=".\Resource\Shaders\ChickenNoodle.fx"
+					>
+				</File>
+				<File
+					RelativePath=".\Resource\Shaders\MultiTexture.fx"
+					>
+				</File>
+				<File
+					RelativePath=".\Resource\Shaders\Particle.fx"
+					>
+				</File>
+				<File
+					RelativePath=".\Resource\Shaders\Shadows.fx"
 					>
 				</File>
 				<File
@@ -244,6 +280,10 @@
 				>
 				<File
 					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CAllocator.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Memory Manager\CDynArray.h"
 					>
 				</File>
 				<File
@@ -351,6 +391,46 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CBlindSpriteEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CBlindSpriteEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CEffectManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CEffectManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CJamSpriteEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CJamSpriteEffect.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CParticleEmitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CParticleEmitter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CStealEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\CStealEffect.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Direct3DManager.cpp"
 					>
 				</File>
@@ -423,14 +503,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\RenderSet.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\RenderSet.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Source\Managers\Global Managers\Rendering Managers\VertexStructs.h"
 					>
 				</File>
@@ -446,11 +518,27 @@
 						>
 					</File>
 					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CCreditManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CCreditManager.h"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.cpp"
 						>
 					</File>
 					<File
 						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CIntroManager.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Managers\Global Managers\Rendering Managers\Texture Managers\CIntroManager.h"
 						>
 					</File>
 					<File
@@ -510,20 +598,28 @@
 					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CCameraManager.h"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="Keybinds Manager"
+				>
 				<File
-					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CHardAttachBehavior.cpp"
+					RelativePath=".\Source\Managers\Global Managers\Keybind Manager\CKeybindsManager.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CHardAttachBehavior.h"
+					RelativePath=".\Source\Managers\Global Managers\Keybind Manager\CKeybindsManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Endgame Manager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Endgame Manager\CEndgameManager.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CSoftAttachBehavior.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CSoftAttachBehavior.h"
+					RelativePath=".\Source\Managers\Global Managers\Endgame Manager\CEndgameManager.h"
 					>
 				</File>
 			</Filter>
@@ -595,6 +691,46 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\Components\Rendering\CAnimatedDonutComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CAnimatedDonutComp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CBlueLightSpecialComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CBlueLightSpecialComp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CEffectComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CEffectComponent.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CInvulnerableVFX.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CInvulnerableVFX.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CPeanutButterVFXComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CPeanutButterVFXComp.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\Components\Rendering\CRenderComponent.cpp"
 					>
 				</File>
@@ -603,11 +739,51 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\Components\Rendering\CShadowComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CShadowComp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CSkidMarks.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CSkidMarks.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CSlipVFXComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CSlipVFXComp.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\Components\Rendering\CSpriteComponent.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\Source\Components\Rendering\CSpriteComponent.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CVictoryVFXComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CVictoryVFXComp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CWindSpriteEffect.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CWindSpriteEffect.h"
 					>
 				</File>
 			</Filter>
@@ -683,6 +859,118 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Scroller"
+				>
+				<File
+					RelativePath=".\Source\Components\Scroller\CScrollerComponent.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Scroller\CScrollerComponent.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="HeldItems"
+				>
+				<Filter
+					Name="Turkey"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Turkey\CTurkeyComponent.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Turkey\CTurkeyComponent.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Energy Drink"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Energy Drink\EnergyDrink.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Energy Drink\EnergyDrink.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Chicken Soup"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Chicken Soup\CChickenSoup.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Chicken Soup\CChickenSoup.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Donut"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Donut\Donut.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Donut\Donut.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Banana"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Banana\CBanana.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Banana\CBanana.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Cream Pie"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Cream Pie\CreamPie.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Cream Pie\CreamPie.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Ray Jam"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Jam\Jam.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\Jam\Jam.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Peanut Butter"
+					>
+					<File
+						RelativePath=".\Source\Components\HeldItems\PeanutButter\PeanutButter.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Components\HeldItems\PeanutButter\PeanutButter.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="ComponentManagers"
@@ -696,11 +984,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\Managers\Component Managers\CAnimateManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CAnimateManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\Managers\Component Managers\CCollisionManager.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Source\Managers\Component Managers\CCollisionManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CComponentManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CHeldItemManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CHeldItemManager.h"
 				>
 			</File>
 			<File
@@ -725,6 +1033,14 @@
 			</File>
 			<File
 				RelativePath=".\Source\Managers\Component Managers\CMovementManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CPickupItemManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Source\Managers\Component Managers\CPickupItemManager.h"
 				>
 			</File>
 			<File

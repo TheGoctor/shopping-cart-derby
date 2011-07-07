@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Filename:  		CSpawningManager.h
  * Date:      		05/04/2011
- * Mod. Date: 		05/09/2011
+ * Mod. Date: 		05/16/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This manager will be used to
@@ -31,6 +31,7 @@ extern "C"
 #include "..\..\Components\Level\CHeldItemComponent.h"
 #include "..\..\Components\Level\CGoalItemComponent.h"
 
+
 class CEventManager;
 class IEvent;
 class IComponent;
@@ -38,35 +39,40 @@ class CObject;
 class CRenderComponent;
 class CDepartment;
 
+
+struct TSpawnLocation
+{
+	D3DXVECTOR3 m_tPosition;
+	CObject* m_cEndCap;
+	D3DXMATRIX m_tRotation;
+	bool m_bUsed;
+};
+
 class CSpawningManager
 {
 private:
 	friend class CGoalItems;
+	friend class CHeldItemComponent;
 
-	// Held Items that are currently spawned within the level
-	map<unsigned int, CHeldItemComponent*, less<unsigned int>,
-		CAllocator<pair<unsigned int, CHeldItemComponent*>>> m_cSpawnedHeldItems;
 
-	// Each type of Held Item that is allowed to be spawned in the level
-	map<EHeldItemType, CHeldItemComponent, less<unsigned int>,
-		CAllocator<pair<unsigned int, CHeldItemComponent*>>> m_cHeldItemsPool;
+	struct TNode
+	{
+		char szName[40];
+		D3DXMATRIX tLocalMatrix;
+		D3DXMATRIX tWorldMatrix;
+	};
 
 	// Each Goal Item that is in the level
 	map<unsigned int, CGoalItems*, less<unsigned int>, 
 		CAllocator<pair<unsigned int, CGoalItems*>>> m_cGoalItems;
 
+	// Each Held Item that is in the level
 	map<unsigned int, CHeldItemComponent*, less<unsigned int>, 
 		CAllocator<pair<unsigned int, CHeldItemComponent*>>> m_cHeldItems;
 
 	// List of each department in the level
 	map<EDepartment, CDepartment*, less<unsigned int>,
 		CAllocator<pair<EDepartment, CDepartment*>>> m_cDepartments;
-
-	struct TSpawnLocation
-	{
-		D3DXVECTOR3 m_tPosition;
-		bool m_bUsed;
-	};
 
 	// List of all the locations that Held Items can spawn
 	list<TSpawnLocation, CAllocator<TSpawnLocation>> m_cHeldItemLocations;
@@ -88,15 +94,17 @@ private:
 	// Trilogy of Evil //
 	/////////////////////
 	~CSpawningManager();
-	CSpawningManager(const CSpawningManager&) : m_fGoalItemWaveTime(0), m_fHeldItemWaveTime(0), m_nMaxHeldItems(0) {}
+	CSpawningManager(const CSpawningManager&) :
+		m_fGoalItemWaveTime(0), m_fHeldItemWaveTime(0), m_nMaxHeldItems(0) {}
 	CSpawningManager& operator=(const CSpawningManager&) {}
 
 	void SpawnGoalItem();
 	void SpawnHeldItem();
 	void InitGoalItems();
 	void InitHeldItems();
+	void LoadGoalItemLocations();
+	void LoadHeldItemLocations();
 	void DespawnHeldItem(const CHeldItemComponent&);
-	void DespawnGoalItem(const CGoalItems&);
 
 public:
 	
@@ -105,28 +113,37 @@ public:
 		static CSpawningManager cSpawningManager;
 		return &cSpawningManager;
 	}
+	string m_szGoalItemNames[MAX_GOAL_ITEMS];
+	unsigned m_nGoalItems[MAX_GOAL_ITEMS];
+	unsigned m_nGoalItemRenderContexts[MAX_GOAL_ITEMS];
+
+	unsigned int m_nHeldItemMeshIDs[MAX_HELD_ITEMS];
+	unsigned int m_nHeldItemRenderCompIDs[MAX_HELD_ITEMS];
 
 	void Init();
 	static void Shutdown(IEvent*, IComponent*);
 	static void Update(IEvent*, IComponent*);
 	static void Despawned(IEvent*, IComponent*);
 	static void GoalItemCollected(IEvent*, IComponent*);
+	static void GoalItemCollision(IEvent*, IComponent*);
 	static void DestroyObject(IEvent*, IComponent*);
 
 	static void HandleEnableObjects(IEvent*, IComponent*);
 	static void HandleDisableObjects(IEvent*, IComponent*);
 	static void HandleInitObjects(IEvent*, IComponent*);
 
+	int GetGoalItemMeshID(int nItemID);
 
 	// Accessors
 	EGoalItemType GetGoalItemType(CObject* pcObject);
+	EHeldItemType GetHeldItemType(CObject* pcObject);
 
 	// Mutators
 
 	int CreateGoalItemComponent(lua_State* pLua);
 	CGoalItems* CreateGoalItemComponent(CObject* pObj, EGoalItemType);
 	int CreateHeldItemComponent(lua_State* pLua);
-	CHeldItemComponent* CreateHeldItemComponent(CObject* pObj, EHeldItemType eType);
+	CHeldItemComponent* CreateHeldItemComponent(CObject* pObj);
 	int CreateDepartmentComponent(lua_State* pLua);
 	CDepartment* CreateDepartmentComponent(CObject* pObj, EDepartment eType);
 

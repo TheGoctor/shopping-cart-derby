@@ -13,6 +13,7 @@
 #define _CCAMERACOMPONENT_H_
 
 #include "Camera.h"
+#include "..\Console Manager\CConsoleManager.h"
 
 //class CCamera;
 class CCameraManager
@@ -32,6 +33,7 @@ private:
 	/////////////////////
 	~CCameraManager()
 	{
+		MMDEL( m_pCam );
 	}
 	CCameraManager(const CCameraManager&)
 	{
@@ -63,6 +65,9 @@ public:
 	static void AttachToCamCallback(IEvent* e, IComponent* comp);
 	static void MoveCameraCallback(IEvent* e, IComponent* comp);
 	static void UpdateCallback(IEvent* e, IComponent* comp);
+	static void AttachToWinStateCallback(IEvent* e, IComponent* comp);
+	
+	static int CCameraManager::AttachCamToPlayer(lua_State* pLua);
 };
 
 #endif // _CCAMERACOMPONENT_H_

@@ -40,7 +40,7 @@ void CBitmapFont::DrawString(const char* szString, int nPosX, int nPosY,
 {
 	int originX = nPosX;
 	int len = strlen(szString);
-	int nCharWidth = 0;
+	//int nCharWidth = 0;
 
 	for (int i = 0; i<len; i++)
 	{
@@ -75,21 +75,7 @@ void CBitmapFont::LoadFont(const char *szFilename, const char* szFileWidths)
 	if(szFileWidths == NULL)
 		return;
 
-	// read in the character widths into the array
-	//ifstream fin(szFileWidths);
-	//if (fin.is_open())
-	//{
-	//	unsigned int i = 0;
-	//	char buffer[5];
-	//	while(!fin.eof())
-	//	{
-	//		fin.getline((char*)buffer, 5);
-	//		m_nCharWidth[i] = atoi((const char*)buffer);
-	//		++i;
-	//	}
-	//	fin.close();
-	//	fin.clear();
-	//}
+	// Load a binary file
 	ifstream fin(szFileWidths, ios_base::binary | ios_base::in);
 	if(fin.is_open())
 	{
@@ -97,14 +83,32 @@ void CBitmapFont::LoadFont(const char *szFilename, const char* szFileWidths)
 		fin.close();
 		fin.clear();
 	}
-
-	//ofstream out("Resource\\BitmapFont_Width.bin", ios_base::binary | ios_base::out);
-	//if(out.is_open())
-	//{
-	//	out.write((char*)m_nCharWidth, sizeof(int)*128);
-	//	out.close();
-	//	out.clear();
-	//}
+	else
+	{
+		// Binary file doesn't exist, so make one from a text file
+		// read in the character widths into the array
+		ifstream fin("Resource\\BitmapFont.txt");
+		if (fin.is_open())
+		{
+			unsigned int i = 0;
+			char buffer[5];
+			while(!fin.eof())
+			{
+				fin.getline((char*)buffer, 5);
+				m_nCharWidth[i] = atoi((const char*)buffer);
+				++i;
+			}
+			fin.close();
+			fin.clear();
+		}
+		ofstream out(szFileWidths, ios_base::binary | ios_base::out);
+		if(out.is_open())
+		{
+			out.write((char*)m_nCharWidth, sizeof(int)*128);
+			out.close();
+			out.clear();
+		}
+	}
 }
 
 void CBitmapFont::UnLoadFont()

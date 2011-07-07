@@ -43,7 +43,7 @@ private:
 
 	Bank  mBanks[MAX_BANKS];	// array that holds the banks
 
-	AkGameObjectID m_pObjectID; /// array of Object ID
+	AkGameObjectID m_pObjectID; /// Object ID
 
 	float m_fSoundVolume;		/// variable to change SFX volume
 	float m_fMusicVolume;		/// variable to change music volume
@@ -53,7 +53,7 @@ private:
 	float m_fDefSound;			/// variable that holds the default SFX volume
 	float m_fDefMusic;			/// variable that holds the default music volume
 	float m_fDefDXSound;		/// variable that holds the default DX volume
-	float m_fDefRPM;			/// variable tthat holds the default RPM 
+	float m_fDefRPM;			/// variable that holds the default RPM 
 
 	void InitWise();			// initialize Wwise
 	void ShutdownWise();		// Shutsdown Wwise
@@ -70,20 +70,20 @@ public:
 	void ShutdownManager();
 	void Update();
 
-	void PlayTheSound(SoundID soundid, EObjectID object);
-	void PlayMusic(SoundID soundid);
-	void Pause(EObjectID object);
+	void PlayTheSound(SoundID soundid, int object);
+	void PlayMusic(SoundID soundid, int object);
 	void PauseAll();
-	void Stop(EObjectID object);
-	void Resume(EObjectID object);
+	void ResumeAll();
 	void StopAll();
 
-	void SetScale(EObjectID object, float scale);
-	void SetListener(D3DXVECTOR3 position, float scale, int listener);
-	void SetObjectPosition(EObjectID object, D3DXVECTOR3 position, float scale);
+	void SetScale(int object, float scale);
+	void SetListenerPosition(D3DXVECTOR3 position, D3DXVECTOR3 forwardvec ,
+							float scale, int listener);
+	void SetObjectPosition(int object, D3DXVECTOR3 position, float scale);
 
-	void RegisterObject(EObjectID object);
-	void UnregisterObject(EObjectID object);
+	void RegisterObject(int object);
+	int RegisterHeldObject();
+	void UnregisterObject(int object);
 	void UnloadAll();
 
 	float GetMusicVolume() 
@@ -98,11 +98,19 @@ public:
 	{
 		return m_fDXvolume;
 	}
+	float GetDefaultMusicVolume()
+	{
+		return m_fDefMusic;
+	}
+	float GetDefaultSoundVolume()
+	{
+		return m_fDefSound;
+	}
 
 	void SetMusicVolume(float volume);
 	void SetSoundVolume(float volume);
 	void SetDXVolume(float volume);
-	void SetRPMValue(float rpm, EObjectID object);
+	void SetRPMValueForSound(float rpm, int object);
 
 	void SetDefaultSound(float volume) 
 	{ 
@@ -138,6 +146,7 @@ public:
 	static void PlayPauseMusic(IEvent* cEvent, IComponent* cCenter);
 	static void PausePauseMusic(IEvent* cEvent, IComponent* cCenter);
 	static void ResumePauseMusic(IEvent* cEvent, IComponent* cCenter);
+	static void StopMenuMusic(IEvent* cEvent, IComponent* cCenter);
 
 };
 

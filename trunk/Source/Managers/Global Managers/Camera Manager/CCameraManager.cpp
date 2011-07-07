@@ -11,9 +11,11 @@
 //
 //  Purpose			:	A manager for cameras
 ///////////////////////////////////////////////////////////////////////////////
-#include "../../../Managers/Global Managers/Event Manager/CEventManager.h"
+#include "../Event Manager/CEventManager.h"
+#include "../Event Manager/EventStructs.h"
+#include "../Object Manager/CObjectManager.h"
+#include "../../Component Managers/CCollisionManager.h"
 #include "../../../../Source/CObject.h"
-#include "../../../Managers/Global Managers/Event Manager/EventStructs.h"
 using namespace EventStructs;
 
 #include "CCameraManager.h"
@@ -22,24 +24,55 @@ using namespace EventStructs;
 void CCameraManager::Init(int nScreenWidth, int nScreenHeight)
 {
 	// Setup camera.
-	m_pCam = CCamera::GetInstance();
-	m_pCam->BuildPerspective(D3DX_PI * 0.5f, (float)nScreenWidth/(float)nScreenHeight,
-							1.0f, 100.0f);
+	CObject* pCam = CObjectManager::GetInstance()->CreateObject("Camera0");
+
+	m_pCam = MMNEW(CCamera);
+
+	//BuildPerspective(field of view, aspect ratio, near plane, far plane)
+	m_pCam->BuildPerspective(D3DX_PI/3.0f, (float)nScreenWidth/(float)nScreenHeight,
+							1.0f, 200.0f);
 	CEventManager* pEM = CEventManager::GetInstance();
 	pEM->RegisterEvent("AttachToCamera", (IComponent*)GetInstance(), AttachToCamCallback);
 	pEM->RegisterEvent("UpdateState", (IComponent*)GetInstance(), UpdateCallback);
+	pEM->RegisterEvent("AttachToCameraWin", (IComponent*)GetInstance(), AttachToWinStateCallback);
 }
 
 // Attach To Camera
+
+int CCameraManager::AttachCamToPlayer(lua_State* pLua)
+{
+	string szObjName = lua_tostring(pLua, -1);
+	lua_pop(pLua, 1);
+
+	CObject* pObj = CObjectManager::GetInstance()->GetObjectByName(szObjName);
+
+	if(pObj == NULL)
+	{
+		Debug.Print("Invalid Object Name");
+		return 0;
+	}
+
+	GetInstance()->m_pCam->m_Target.SetParent(pObj->GetTransform());
+	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->m_Target);
+	GetInstance()->m_pCam->SetFrameParent(pObj->GetTransform());
+
+	return 0;
+}
+
 void CCameraManager::AttachToCamCallback(IEvent* e, IComponent*)
 {
 	TObjectEvent* eObj = static_cast<TObjectEvent*>(e->GetData());
 
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
+	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
+
 	GetInstance()->m_pCam->m_Target.SetParent(eObj->m_pcObj->GetTransform());
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->m_Target.GetLocalMatrix());
+
 	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->m_Target);
 	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
-	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 4.0f, -2.0f));
-	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 0.0f, 5.0f));
+	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 4.5f, -4.0f));
+	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, 5.0f));
 }
 
 void CCameraManager::UpdateCallback(IEvent* e, IComponent*)
@@ -50,4 +83,19 @@ void CCameraManager::UpdateCallback(IEvent* e, IComponent*)
 
 	//// Update Camera
 	GetInstance()->m_pCam->Update(fDt);
+}
+void CCameraManager::AttachToWinStateCallback(IEvent* e, IComponent* comp)
+{
+	TObjectEvent* eObj = static_cast<TObjectEvent*>(e->GetData());
+
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
+	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
+
+	GetInstance()->m_pCam->m_Target.SetParent(eObj->m_pcObj->GetTransform());
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->m_Target.GetLocalMatrix());
+	
+	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->m_Target);
+	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
+	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 6.0f));
+	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, -2.0f));
 }

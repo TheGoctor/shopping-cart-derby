@@ -18,21 +18,26 @@ class CObject;
 class IEvent;
 class IComponent;
 class CSpriteComponent;
+class DXRenderContext;
 
 class CStartOfRaceManager
 {
 	float		m_fTotalDuration;
 	float		m_fCurrentTimerValue;
 	bool		m_bEnableInput;
+	bool		m_bHasPlayedSound;
+	bool		m_bBikeStarted;
 
-	CObject*			m_pDisplay0;
-	CObject*			m_pDisplay1;
-	CObject*			m_pDisplay2;
-	CObject*			m_pDisplay3;
-	CSpriteComponent*	m_pDisplayComponent0;
-	CSpriteComponent*	m_pDisplayComponent1;
-	CSpriteComponent*	m_pDisplayComponent2;
-	CSpriteComponent*	m_pDisplayComponent3;
+	//CObject*			m_pDisplay0;
+	//CObject*			m_pDisplay1;
+	//CObject*			m_pDisplay2;
+	//CObject*			m_pDisplay3;
+	//CSpriteComponent*	m_pDisplayComponent0;
+	//CSpriteComponent*	m_pDisplayComponent1;
+	//CSpriteComponent*	m_pDisplayComponent2;
+	//CSpriteComponent*	m_pDisplayComponent3;
+
+	DXRenderContext*	m_pStartingLightContex;
 
 public:
 	CStartOfRaceManager();
