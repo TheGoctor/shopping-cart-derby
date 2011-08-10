@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Filename:  		CGoalItemComponent.cpp
  * Date:      		05/01/2011
- * Mod. Date: 		05/09/2011
+ * Mod. Date: 		07/26/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This will represent the Goal Item in the world.
@@ -10,52 +10,59 @@
 					event and will despawn after a set period of time. This
 					time is set in the init function.
  ******************************************************************************/
-
-#include <string>
 #include "CGoalItemComponent.h"
-#include "..\..\Managers\Global Managers\Object Manager\CObjectManager.h"
 #include "..\..\Managers\Global Managers\Event Manager\CEventManager.h"
 #include "..\..\Managers\Global Managers\Event Manager\EventStructs.h"
-#include "..\..\Managers\Component Managers\CSpawningManager.h"
+#include "..\..\Enums.h"
 using namespace EventStructs;
 
 CGoalItems::CGoalItems(CObject* pObj) : m_pObject(pObj)
 {
 	std::string szEvent = "Update";
 	szEvent += GAMEPLAY_STATE;
-	m_eEventID = CEventManager::GetInstance()->RegisterEvent(szEvent, this, 
-		Update);
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
 		
 	szEvent = "Update";
 	szEvent += PAUSE_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
 	szEvent = "Update";
 	szEvent += CONSOLE_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
 	szEvent = "Update";
 	szEvent += PAUSE_OPTIONS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
 	szEvent = "Update";
 	szEvent += PAUSE_KEYBINDS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
 
+	szEvent = "Update";
+	szEvent += QUIT_CONFIRMATION_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
 
 	szEvent = "ShutdownObjects";
 	szEvent += GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, this, 
-		ShutdownGoalItem);
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, ShutdownGoalItem);
 }
 
 CGoalItems::~CGoalItems()
 {
-	//CEventManager::GetInstance()->UnregisterEventAll(this);
 }
 
-void CGoalItems::Init(EGoalItemType eType)
+void CGoalItems::Init(const EGoalItemType eType)
 {	
 	m_bBlink = false;
 	m_eType = eType;
-	m_fDespawnTimer = CSpawningManager::GetInstance()->m_fGoalItemWaveTime;
+	m_fDespawnTimer = 15.0f;
 	m_bDespawning = true;
 	m_bSpawned = false;
 	m_bCollidable = false;
@@ -66,11 +73,6 @@ void CGoalItems::Spawn()
 	m_bSpawned = true;
 	m_bCollidable = true;
 	SendGoalItemEvent("GoalItemSpawned", this, m_eType, this);
-}
-
-void CGoalItems::SetDespawnTimer(const float fDespawnTime)
-{
-	m_fDespawnTimer = fDespawnTime;
 }
 
 void CGoalItems::Update(IEvent* piEvent, IComponent* piComponent)
@@ -88,13 +90,14 @@ void CGoalItems::Update(IEvent* piEvent, IComponent* piComponent)
 	// Update the despawn timer
 	pcGoalItem->m_fDespawnTimer -= fDT;
 
-	// Show blinking if despawn timer is less then 1/3
-	// of its total despawn timer
+	pcGoalItem->m_pObject->GetTransform()->GetLocalMatrix()._42 = sin(pcGoalItem->m_fDespawnTimer * 2.5f)*.2f + 1.3f;
+	pcGoalItem->m_pObject->GetTransform()->RotateFrame(D3DXVECTOR3(0,1,0), fDT* 1.5f);
+
 	if(pcGoalItem->m_bCollidable == true)
 	{
-		if(pcGoalItem->m_fDespawnTimer <= 
-			(CSpawningManager::GetInstance()->m_fGoalItemWaveTime / 3))
+		if(pcGoalItem->m_fDespawnTimer <= 5.0f)
 		{
+			// Make us blink if we're despawning soon
 			pcGoalItem->m_bBlink = !pcGoalItem->m_bBlink;
 			SendGoalItemEvent("GoalItemBlinking", pcGoalItem, pcGoalItem->m_eType, pcGoalItem);
 		}
@@ -105,7 +108,7 @@ void CGoalItems::Update(IEvent* piEvent, IComponent* piComponent)
 			SendRenderEvent("AddToSet", pcGoalItem, pcGoalItem->GetParent(), PRIORITY_IMMEDIATE);
 		}
 	}
-
+	
 	// Goal Item is despawning so tell everyone about it
 	if((pcGoalItem->m_fDespawnTimer <= 0.0f) && 
 		(pcGoalItem->m_bDespawning == true))
@@ -121,26 +124,6 @@ void CGoalItems::Despawn()
 {
 	m_bCollidable = false;
 }
-
-//void CGoalItems::Collected()
-//{
-//	// Reinit everything but the timer and bspawned 
-//	//(so that "GoalItemDespawned" can happen after the timer finishes)
-//	
-//}
-
-
-//void CGoalItems::GoalItemCollectedCallback(IEvent* piEvent, IComponent* piComponent)
-//{
-//	CGoalItems* pComp = (CGoalItems*)piComponent;
-//	TGoalItemCollectedEvent* tEvent = (TGoalItemCollectedEvent*)piEvent->GetData();
-//
-//	if(pComp->GetParent() == tEvent->m_pcGoalItem)
-//	{
-//		SendGoalItemCollectedEvent("GoalItemCollectedMoo", pComp, pComp->GetParent(), tEvent->m_pcCollector, pComp->m_eType, PRIORITY_NORMAL);
-//	}
-//}
-
 
 void CGoalItems::ShutdownGoalItem(IEvent* /*piEvent*/, IComponent* piComponent)
 {

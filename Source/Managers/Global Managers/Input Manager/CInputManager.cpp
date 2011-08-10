@@ -27,19 +27,14 @@ using namespace std;
 #include "../../../CGame.h"
 #include "../Rendering Managers/Direct3DManager.h"
 #include "../Console Manager/CConsoleManager.h"
+#include "../Unlockable Manager/CUnlockableManager.h"
 using namespace EventStructs;
 
 #define KEYDOWN(name, key) (name[key] & 0x80  ? true : false)
 #define BUFFERED_KEYDOWN(key) ((KEYDOWN(m_chKeys, (key)) && !KEYDOWN(m_chPrevKeys, (key))) ? true : false)
 
-//#define MOUSEDOWN(key) (GetInstance()->m_MouseState.rgbButtons[key] & 0x80) ? true : false
-//#define LMB_CLICK (MOUSEDOWN(LMB_BUTTON) && !GetInstance()->m_bPrevLeftMouseDown) ? true : false
-//#define RMB_CLICK (MOUSEDOWN(RMB_BUTTON) && !GetInstance()->m_bPrevRightMouseDown) ? true : false
-//#define LMB_BUTTON 0
-//#define RMB_BUTTON 1
-
 //	Constructor
-CInputManager::CInputManager() //: m_bPrevLeftMouseDown(false), m_bPrevRightMouseDown(false)
+CInputManager::CInputManager()
 {
 	m_pController = new XINPUT_STATE();
 
@@ -195,11 +190,6 @@ void CInputManager::Shutdown()
 		delete m_pController;
 		m_pController = NULL;
 	}
-	//if(m_pMouse != NULL)
-	//{
-	//	m_pMouse->Release();
-	//	m_pMouse = NULL;
-	//}
 	if(m_pKeyboard != NULL)
 	{
 		m_pKeyboard->Release();
@@ -343,21 +333,22 @@ void CInputManager::GetInput(IEvent*, IComponent*)
 	case HOW_TO_PLAY_STATE13:
 	case HOW_TO_PLAY_STATE14:
 	case HOW_TO_PLAY_STATE15:
+	case IN_GAME_HOW_TO_PLAY_STATE:
+	case LEVEL_SELECT_STATE:
+	case LEVEL_SELECT_STATE2:
+	case QUIT_CONFIRMATION_STATE:
 	case MAIN_MENU_STATE:
 		{
-			//ShowCursor(true);
 			pIM->GetInputMenu();
 		}
 		break;
 	case GAMEPLAY_STATE:
 		{
-			//ShowCursor(false);
 			pIM->GetInputGameplay();
 		}
 		break;
 	case CONSOLE_STATE:
 		{
-			//ShowCursor(false);
 			pIM->GetInputConsole();
 		}
 		break;
@@ -365,7 +356,6 @@ void CInputManager::GetInput(IEvent*, IComponent*)
 	case PAUSE_KEYBINDS_STATE:
 	case OPTIONS_STATE:
 		{
-			//ShowCursor(true);
 			pIM->GetInputOptions(); // separate options input because sliders need left and right not buffered
 		}
 		break;
@@ -380,10 +370,14 @@ void CInputManager::GetInput(IEvent*, IComponent*)
 
 void CInputManager::GetInputIntro()
 {
-	if(BUFFERED_KEYDOWN(DIK_EQUALS))
+	if(CUnlockableManager::GetInstance()->GetIntroSkip())
 	{
-		SendStateEvent("StateChange", (IComponent*)GetInstance(),
-			MAIN_MENU_STATE, PRIORITY_IMMEDIATE);
+		if(BUFFERED_KEYDOWN(DIK_RETURN))
+		{
+			SendIEvent("PlayMenuMusic", (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+			SendStateEvent("StateChange", (IComponent*)GetInstance(),
+				MAIN_MENU_STATE, PRIORITY_IMMEDIATE);
+		}
 	}
 	if (BUFFERED_KEYDOWN(DIK_RETURN))
 	{
@@ -742,7 +736,6 @@ void CInputManager::GetInputGameplay()
 	if(KEYDOWN(m_chKeys, m_tDecelerate.m_chKeyboardKey))
 	{
 		SendInputEvent("Decelerate", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
-		// DO NOT SEND THIS!!! SendInputEvent("Reverse", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
 	if(KEYDOWN(m_chKeys, m_tSteerRight.m_chKeyboardKey))
 	{
@@ -756,6 +749,12 @@ void CInputManager::GetInputGameplay()
 	{
 		SendInputEvent("Drift", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
+
+	if(BUFFERED_KEYDOWN(DIK_RETURN))
+	{
+		SendStateEvent("GameplayEnterPressed", (IComponent*)GetInstance(), CONSOLE_STATE);
+	}
+
 
 	if(BUFFERED_KEYDOWN(DIK_GRAVE))
 	{
@@ -774,34 +773,11 @@ void CInputManager::GetInputGameplay()
 		SendInputEvent("UseHeldItem2", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
 
-
-	// HACK://////////////////////////////////////////////////////////////////////////////// HACK
-	// Drive player "1" (2nd player) cart with these buttons IJKL
-
-	if(KEYDOWN(m_chKeys, DIK_I))
+	// F1 Help
+	if(BUFFERED_KEYDOWN(DIK_F1))
 	{
-		SendInputEvent("Accelerate", (IComponent*)GetInstance(), m_pPlayer1, 1.0f);
+		SendStateEvent("PushState", (IComponent*)GetInstance(), IN_GAME_HOW_TO_PLAY_STATE);
 	}
-	if(KEYDOWN(m_chKeys, DIK_K))
-	{
-		SendInputEvent("Decelerate", (IComponent*)GetInstance(), m_pPlayer1, 1.0f);
-	}
-	if(KEYDOWN(m_chKeys, DIK_J))
-	{
-		SendInputEvent("SteerLeft", (IComponent*)GetInstance(), m_pPlayer1, 1.0f);
-	}
-	if(KEYDOWN(m_chKeys, DIK_L))
-	{
-		SendInputEvent("SteerRight", (IComponent*)GetInstance(), m_pPlayer1, 1.0f);
-	}
-
-	// HACK: To demonstrate Win/Lose animations
-	if(KEYDOWN(m_chKeys, DIK_LBRACKET))
-		SendInputEvent("TigerBlood", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
-	if(KEYDOWN(m_chKeys, DIK_RBRACKET))
-		SendInputEvent("GoodDaySir", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
-
-	//////////////////////////////////////////////////////////////////////////////////// ENDHACK
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -867,7 +843,13 @@ void CInputManager::GetInputGameplay()
 		}
 		if(m_pController->Gamepad.wButtons == m_tDrift.m_nControllerButton)
 		{
-				SendInputEvent("Drift", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
+			SendInputEvent("Drift", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
+
+		}
+		if(m_pController->Gamepad.wButtons == XINPUT_GAMEPAD_A)
+		{
+			// send input "A" button pressed for start of race splash screen
+			SendStateEvent("GameplayEnterPressed", (IComponent*)GetInstance(), CONSOLE_STATE);
 		}
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -889,11 +871,11 @@ void CInputManager::GetInputGameplay()
 			}
 			if(m_pController->Gamepad.wButtons == m_tUseItem1.m_nControllerButton)
 			{
-				SendInputEvent("UseHeldItem1", (IComponent*)GetInstance(), m_pPlayer0, 1.0f * nBackwards);
+				SendInputEvent("UseHeldItem1", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 			}
 			if(m_pController->Gamepad.wButtons == m_tUseItem2.m_nControllerButton)
 			{
-				SendInputEvent("UseHeldItem2", (IComponent*)GetInstance(), m_pPlayer0, 1.0f * nBackwards);
+				SendInputEvent("UseHeldItem2", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 			}
 		}
 
@@ -1247,15 +1229,6 @@ BYTE CInputManager::SetKeyboardCommand(int nCommandID, BYTE uchKeyCode)
 		{
 			m_tBack.m_chKeyboardKey = uchKeyCode;
 		}
-		break;
-	//case CMD_JUMP:
-	//	m_tJump.m_chKeyboardKey = uchKeyCode;
-	//	break;
-	//case CMD_ACTION:
-	//	m_tAction.m_chKeyboardKey = uchKeyCode;
-	//	break;
-	//case CMD_FLAIR:
-	//	m_tFlair.m_chKeyboardKey = uchKeyCode;
 		break;
 	case CMD_UP:
 		{
@@ -1858,12 +1831,6 @@ void CInputManager::InitKeyStrings()
 	m_szKeyStrings[DIK_MAIL] = "Mail";
 	m_szKeyStrings[DIK_MEDIASELECT] = "Media Select";
 }
-
-//#undef RMB_BUTTON
-//#undef LMB_BUTTON
-//#undef RMB_CLICK
-//#undef LMB_CLICK
-//#undef MOUSEDOWN
 
 #undef BUFFERED_KEYDOWN
 #undef KEYDOWN

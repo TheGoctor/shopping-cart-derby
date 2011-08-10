@@ -154,7 +154,7 @@ void CButtonComponent::Load(string textureName, int nTextureDepth, int nPosX, in
 	{
 		string szButtonTex = "Resource/HUD/";
 		szButtonTex += textureName;
-		nTexID0 = CTextureManager::GetInstance()->LoadTexture(szButtonTex.c_str(), RGB(255,255,255));
+		nTexID0 = CTextureManager::GetInstance()->LoadTexture(szButtonTex.c_str(), RGB(220,240,120));
 	}
 	
 	nTexID1 = CTextureManager::GetInstance()->LoadTexture("Resource\\HUD\\T_Pause_Icon_Glow_D.png", RGB(255,255,255));
@@ -336,10 +336,9 @@ void CButtonComponent::UpPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
-		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
-		
 		if(comp->m_pSelectUp)
 		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
 			comp->Deactivate();
 			comp->m_pSelectUp->Activate();
 		}
@@ -352,10 +351,9 @@ void CButtonComponent::DownPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
-		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
-
 		if(comp->m_pSelectDown)
 		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
 			comp->Deactivate();
 			comp->m_pSelectDown->Activate();
 		}
@@ -367,10 +365,9 @@ void CButtonComponent::RightPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
-		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
-
 		if(comp->m_pSelectRight)
 		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
 			comp->Deactivate();
 			comp->m_pSelectRight->Activate();
 		}
@@ -382,10 +379,9 @@ void CButtonComponent::LeftPressed(IEvent* /*cEvent*/, IComponent* cCenter)
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	if(comp->m_bSelected && comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
-		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
-
 		if(comp->m_pSelectLeft)
 		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
 			comp->Deactivate();
 			comp->m_pSelectLeft->Activate();
 		}

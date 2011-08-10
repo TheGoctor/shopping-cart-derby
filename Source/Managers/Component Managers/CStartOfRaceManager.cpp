@@ -14,9 +14,10 @@ using namespace EventStructs;
 
 #include "..\..\Components\StartOfRace\CStartOfRaceComponent.h"
 #include "..\..\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
+#include "..\..\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
 
 CStartOfRaceManager::CStartOfRaceManager() : m_fCurrentTimerValue(0.0f), 
-	m_fTotalDuration(3.0f), m_bEnableInput(true), m_bBikeStarted(false), m_pStartingLightContex(NULL)
+	m_fTotalDuration(3.0f), m_bEnableInput(true), m_bBikeStarted(false), m_pStartingLightContex(NULL), m_bWaitingForInput(false)
 {
 	string szEventName = "Update";
 	szEventName += (char)GAMEPLAY_STATE;
@@ -38,59 +39,41 @@ CStartOfRaceManager::CStartOfRaceManager() : m_fCurrentTimerValue(0.0f),
 	CEventManager::GetInstance()->RegisterEvent(szEventName, 
 		(IComponent*)GetInstance(), HandleStateInit);	
 
+	CEventManager::GetInstance()->RegisterEvent("GameplayEnterPressed", 
+		(IComponent*)GetInstance(), EnterPressed);	
 
-	// Load Sprite Sheet
-	//int nTexID0 = CTextureManager::GetInstance()->LoadTexture(
-	//	"Resource\\HUD\\Stoplight0.png", RGB(255,255,255));
-	//int nTexID1 = CTextureManager::GetInstance()->LoadTexture(
-	//	"Resource\\HUD\\Stoplight1.png", RGB(255,255,255));
-	//int nTexID2 = CTextureManager::GetInstance()->LoadTexture(
-	//	"Resource\\HUD\\Stoplight2.png", RGB(255,255,255));
-	//int nTexID3 = CTextureManager::GetInstance()->LoadTexture(
-	//	"Resource\\HUD\\Stoplight3.png", RGB(255,255,255));
+	
 
-	//// Create the Object
-	//m_pDisplay0 = CObjectManager::GetInstance()->CreateObject(
-	//	"StartOfRaceDisplay0");
-	//m_pDisplay1 = CObjectManager::GetInstance()->CreateObject(
-	//	"StartOfRaceDisplay1");
-	//m_pDisplay2 = CObjectManager::GetInstance()->CreateObject(
-	//	"StartOfRaceDisplay2");
-	//m_pDisplay3 = CObjectManager::GetInstance()->CreateObject(
-	//	"StartOfRaceDisplay3");
-
-	//// Get Inital Sprite Data
-	//TSpriteData tSpriteData;
-	//tSpriteData.m_nTexture = nTexID0;
-	//tSpriteData.m_nX = 400;
-	//tSpriteData.m_nY = 150;
-	//tSpriteData.m_fScaleX = .75f;
-	//tSpriteData.m_fScaleY = .75f;
-	//tSpriteData.m_fRotCenterX = 0.0f;
-	//tSpriteData.m_fRotCenterY = 0.0f;
-	//tSpriteData.m_fRot = 0.0f;
-	//tSpriteData.m_dwColor = (DWORD)-1;//RGB(1.0f, 1.0f, 1.0f);
-	//tSpriteData.m_tRect.top    = 0;
-	//tSpriteData.m_tRect.right  = 0;
-	//tSpriteData.m_tRect.left   = 0;
-	//tSpriteData.m_tRect.bottom = 0;
-
-	//// Add Sprite Comp
-	//m_pDisplayComponent0 = CTextureManager::GetInstance()->CreateSpriteComp(m_pDisplay3, tSpriteData, false);
-
-	//tSpriteData.m_nTexture = nTexID1;
-	//m_pDisplayComponent1 = CTextureManager::GetInstance()->CreateSpriteComp(m_pDisplay1, tSpriteData, false);
-	//
-	//tSpriteData.m_nTexture = nTexID2;
-	//m_pDisplayComponent2 = CTextureManager::GetInstance()->CreateSpriteComp(m_pDisplay2, tSpriteData, false);
-	//
-	//tSpriteData.m_nTexture = nTexID3;
-	//m_pDisplayComponent3 = CTextureManager::GetInstance()->CreateSpriteComp(m_pDisplay3, tSpriteData, false);
 
 	GetInstance()->m_bHasPlayedSound = false;
-
+	GetInstance()->m_bWelcomeSound = false;
+	GetInstance()->pSound = CWwiseSoundManager::GetInstance();
 	// Get Starting Light Context
 	m_pStartingLightContex = DXRenderContextManager::GetInstance()->GetContext(RC_STARTLIGHT);
+
+	TSpriteData tListData;
+
+	tListData.m_nTexture = CTextureManager::GetInstance()->LoadTexture("Resource\\HUD\\HowToPlay\\T_Start_How_To_Play_D.png");
+	tListData.m_nX = 0;
+	tListData.m_nY = 0;
+	tListData.m_nZ = 0;
+	tListData.m_fScaleX = 1.0f;
+	tListData.m_fScaleY = 1.0f;
+	tListData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	tListData.m_tRect.top    = 0;
+	tListData.m_tRect.right  = 0;
+	tListData.m_tRect.left   = 0;
+	tListData.m_tRect.bottom = 0;
+	tListData.m_fRotCenterX = 0.0f;
+	tListData.m_fRotCenterY = 0.0f;
+	tListData.m_fRot = 0.0f;
+
+	// Get Inital Sprite Data
+	CObject* pObj = CObjectManager::GetInstance()->CreateObject("DirectionsOverlay"); // TODO: Clean this up?
+
+	m_pDirectionsComp = CTextureManager::GetInstance()->CreateSpriteComp(
+		pObj, tListData, false);
+
 }
 
 
@@ -101,6 +84,24 @@ void CStartOfRaceManager::HandleUpdate(IEvent* cEvent, IComponent*)
 	// get dt here
 	float fDt = pEv->m_fDeltaTime;
 
+	if(GetInstance()->m_bWaitingForInput)
+	{
+		return;
+	}
+	
+	if(!GetInstance()->m_bWelcomeSound)
+	{
+		GetInstance()->pSound->PlayTheSound(WELCOME_TO, GLOBAL_ID);
+
+		for (unsigned int playernum = 0; playernum < 4; ++playernum)
+		{
+			GetInstance()->pSound->SetRPMValueForSound(0, 
+				CHUDManager::GetInstance()->GetPlayerCharID(playernum));
+		}
+
+		GetInstance()->pSound->PlayCartSounds();
+		GetInstance()->m_bWelcomeSound = true;
+	}
 
 
 	// if we're in the countdown
@@ -125,10 +126,7 @@ void CStartOfRaceManager::HandleUpdate(IEvent* cEvent, IComponent*)
 			// play sound
 			GetInstance()->m_pStartingLightContex->SetTexIdx(5);
 		
-			/*GetInstance()->m_pDisplayComponent3->SetActive(true);
-			GetInstance()->m_pDisplayComponent2->SetActive(false);
-			GetInstance()->m_pDisplayComponent1->SetActive(false);
-			GetInstance()->m_pDisplayComponent0->SetActive(false);*/
+			
 
 			if(GetInstance()->m_bEnableInput)
 			{
@@ -139,80 +137,69 @@ void CStartOfRaceManager::HandleUpdate(IEvent* cEvent, IComponent*)
 				GetInstance()->m_bEnableInput = false;
 
 				SendIEvent("RaceStarted", (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
+				
 			}
 		}
 		else if(GetInstance()->m_fCurrentTimerValue > 3.0f) // 2nd light
 		{
 			GetInstance()->m_pStartingLightContex->SetTexIdx(4);
 
-			// check/change hud element
-			/*GetInstance()->m_pDisplayComponent3->SetActive(false);
-			GetInstance()->m_pDisplayComponent2->SetActive(true);
-			GetInstance()->m_pDisplayComponent1->SetActive(false);
-			GetInstance()->m_pDisplayComponent0->SetActive(false);*/
-
-			if (!GetInstance()->m_bBikeStarted)
-			{
-				CWwiseSoundManager::GetInstance()->PlayTheSound(BULLDOG_BIKE_START, BIKER_ID);
-				
-				GetInstance()->m_bBikeStarted = true;
-			}
-			
-			
 		}
 		else if(GetInstance()->m_fCurrentTimerValue > 2.0f) // 1st light
 		{
 			GetInstance()->m_pStartingLightContex->SetTexIdx(3);
-
-			//change hud element
-			/*GetInstance()->m_pDisplayComponent3->SetActive(false);
-			GetInstance()->m_pDisplayComponent2->SetActive(false);
-			GetInstance()->m_pDisplayComponent1->SetActive(true);
-			GetInstance()->m_pDisplayComponent0->SetActive(false);*/
 	
 		}
 		else if(GetInstance()->m_fCurrentTimerValue > 1.0f ) // 1st light
 		{
 			GetInstance()->m_pStartingLightContex->SetTexIdx(2);
-
-			//change hud element
-			/*GetInstance()->m_pDisplayComponent3->SetActive(false);
-			GetInstance()->m_pDisplayComponent2->SetActive(false);
-			GetInstance()->m_pDisplayComponent1->SetActive(false);
-			GetInstance()->m_pDisplayComponent0->SetActive(true);*/
 			
 			if(!GetInstance()->m_bHasPlayedSound)
 			{
-				CWwiseSoundManager::GetInstance()->PlayTheSound(START_COUNTDOWN, GLOBAL_ID);
+				GetInstance()->pSound->PlayTheSound(START_COUNTDOWN, GLOBAL_ID);
 				GetInstance()->m_bHasPlayedSound = true;
 			}
-			// play sound
+			
 		}
 	}
 	else
 	{
-		// Unshow the component
-		/*GetInstance()->m_pDisplayComponent3->SetActive(false);
-		GetInstance()->m_pDisplayComponent2->SetActive(false);
-		GetInstance()->m_pDisplayComponent1->SetActive(false);
-		GetInstance()->m_pDisplayComponent0->SetActive(false);*/
+		
 	}
 }
 
 void CStartOfRaceManager::HandleStateEnter(IEvent*, IComponent*)
 {
+	
 }
 
 void CStartOfRaceManager::HandleStateExit(IEvent*, IComponent*)
 {
+	
 }
-
 
 void CStartOfRaceManager::HandleStateInit(IEvent*, IComponent*)
 {
-	CStartOfRaceManager::GetInstance()->m_fCurrentTimerValue = -2.5f;
+	CStartOfRaceManager::GetInstance()->m_fCurrentTimerValue = -5.0f;
 	CStartOfRaceManager::GetInstance()->m_bEnableInput = true;
 	CStartOfRaceManager::GetInstance()->m_bHasPlayedSound = false;
+	CStartOfRaceManager::GetInstance()->m_bWelcomeSound = false;
 	CStartOfRaceManager::GetInstance()->m_bBikeStarted = false;
 	CStartOfRaceManager::GetInstance()->m_pStartingLightContex->SetTexIdx(1);
+	CStartOfRaceManager::GetInstance()->m_pDirectionsComp->SetActive(true);
+	GetInstance()->m_bWaitingForInput = true;
+
+	// change input state to intro (aka disable input)
+	SendIEvent("DisableMovement", (IComponent*)GetInstance(),
+		NULL, PRIORITY_NORMAL);
+}
+
+
+void CStartOfRaceManager::EnterPressed(IEvent*, IComponent*)
+{
+	GetInstance()->m_bWaitingForInput = false;
+
+	// Unshow the directions overlay
+	GetInstance()->m_pDirectionsComp->SetActive(false);	
+	SendIEvent("OverlayUnshow", (IComponent*)GetInstance(), NULL, PRIORITY_NORMAL);
 }

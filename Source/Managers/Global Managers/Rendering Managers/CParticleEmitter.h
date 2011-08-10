@@ -13,10 +13,11 @@
 
 // Includes
 #include <string>
-#include <vector>
+//#include <vector>
 using namespace std;
 #include "dxutil.h"
 #include "DXMesh.h"
+#include "..\Memory Manager\CDynArray.h"
 
 // Foward Declares
 class CFrame;
@@ -28,7 +29,6 @@ enum EParticleEmitterSpawnAreaType { PE_SAT_MIN		= 0,
 									 PE_SAT_MAX };
 
 enum EParticleEmitterType { PE_TYPE_MIN,					// 0
-							PE_TYPE_SKID_MARKS,				// 1
 							PE_TYPE_BOOST_GLOW,				// 2
 							PE_TYPE_BOOST_LIGHTNING,		// 3
 							PE_TYPE_BOOST_CLOUD,			// 4
@@ -40,51 +40,50 @@ enum EParticleEmitterType { PE_TYPE_MIN,					// 0
 							PE_TYPE_TURKEY_SNOWFLAKE_BURST_A,			// 5
 							PE_TYPE_TURKEY_SNOWFLAKE_TRAIL_B,			// 5
 							PE_TYPE_TURKEY_SNOWFLAKE_BURST_B,			// 5
+							PE_TYPE_TURKEY_SNOWFLAKE_BURST_C,			// 5
+							PE_TYPE_TURKEY_PUFF,			// 5
 							PE_TYPE_BANANA_FLOOR_SPLAT,		// 6
 							PE_TYPE_BANANA_SHLOOP_POPUP,	// 7
-							PE_TYPE_BANANA_DRIP_LEFT,		// 8
-							PE_TYPE_BANANA_DRIP_RIGHT,		// 9
-							PE_TYPE_PEANUT_SPLASH,			// 10
+							PE_TYPE_BANANA_DRIP,		// 8
 							PE_TYPE_PEANUT_SQUISH_POPUP,	// 10
 							PE_TYPE_GOAL_ITEM_GLOW_GROW,	// 11
 							PE_TYPE_GOAL_ITEM_GLOW_SHRINK,	// 12
 							PE_TYPE_GOAL_ITEM_STARS,		// 13
 							PE_TYPE_GOAL_ITEM_SHINE,		// 14
 							PE_TYPE_GOAL_ITEM_ICON,			// 15
-							PE_TYPE_SALE_POPUP,				// 16
 
 							PE_TYPE_CRASH_SMALL,		// 17
 							PE_TYPE_CRASH_MID,		// 18
 							PE_TYPE_CRASH_BIG,		// 19
 							PE_TYPE_CRASH_POPUP,			// 20
 
-							PE_TYPE_POW_RED_SMALL,		// 17
-							PE_TYPE_POW_RED_MID,		// 18
-							PE_TYPE_POW_RED_BIG,		// 19
-							PE_TYPE_POW_POPUP,			// 20
+							PE_TYPE_BOLT_BURST,
+							PE_TYPE_SPARK_BURST,
 
-							PE_TYPE_NOODLE_TRAIL,			// 20
-							PE_TYPE_CHIKEN_TRAIL,			// 20
-							PE_TYPE_CARROT_TRAIL,			// 20
 							PE_TYPE_BUBBLE_TRAIL,			// 20
+							PE_TYPE_SOUP_SPARKLE,
 
-
-							PE_TYPE_JAM_ROCKET,				// 21
-							PE_TYPE_JAM_ROCKET_DOWN,		// 22
-							PE_TYPE_JAM_JAR,				// 23
-							PE_TYPE_JAM_JAR_DOWN,			// 24
+							PE_TYPE_JAM_TRAIL_UP,
+							PE_TYPE_JAM_TRAIL_DOWN,
 							PE_TYPE_JAM_HIT_BLOB,			// 25
 							PE_TYPE_JAM_HIT_POPUP,			// 26
+							PE_TYPE_JAM_BURST,
+
 							PE_TYPE_DONUT_PUFF,				// 27
+							
+							PE_TYPE_PIE_TRAIL_A,		// 28
+							PE_TYPE_PIE_TRAIL_B,		// 28
 							PE_TYPE_PIE_SPLAT_POPUP,		// 28
+							
 							PE_TYPE_FIRE_WORK_TRAIL,		// 29
 							PE_TYPE_FIRE_WORK_BURST,		// 29
 							PE_TYPE_CONFETTI_STRIP,		// 30
 							PE_TYPE_CONFETTI_STAR,		// 31
+
 							PE_TYPE_CART_DUST,		// 32
+							PE_TYPE_CART_MUD,		// 32
+
 							PE_TYPE_CAUTION_SIGN,		// 33
-							PE_TYPE_SCI_GLOW_GROW,		// 34
-							PE_TYPE_SCI_GLOW_SHRINK,		// 34
 							PE_TYPE_MAX };
 
 // Defines
@@ -126,7 +125,7 @@ struct TParticle
 // Quad
 struct TQuad
 {
-	vector<VERTEX_POS3_COL4_TEX2> m_cVerts;
+	CDynArray<VERTEX_POS3_COL4_TEX2> m_cVerts;
 
 	// Create
 	TQuad* CreateQuad(TParticle* pParticle, CParticleEmitter* pEmitter);
@@ -154,6 +153,8 @@ private:
 	bool	m_bOn;
 	CFrame* m_cParentFrame;
 	bool	m_bOnTarget;
+	bool	m_bSetFrame;
+	int     m_nCurrFrame;
 	EParticleEmitterType m_eType;
 
 	// Spawn Values
@@ -210,8 +211,8 @@ private:
 	float m_fAnimSwitchTime;
 
 	// Lists
-	vector<TParticle> m_cParticles;
-	vector<TQuad>	  m_cQuads;
+	CDynArray<TParticle> m_cParticles;
+	CDynArray<TQuad>	  m_cQuads;
 
 public:
 
@@ -402,5 +403,16 @@ public:
 		void SetNumRows(int nNumRows)					   { m_nNumRows		   = nNumRows;		  }
 		void SetNumCols(int nNumCols)					   { m_nNumCols		   = nNumCols;		  }
 		void SetAnimationSwitchTime(float fAnimSwitchTime) { m_fAnimSwitchTime = fAnimSwitchTime; }
+		void SetFrame(int nCurrFrame)
+		{
+			m_bSetFrame = true;
+			m_nCurrFrame = nCurrFrame;
+			//for (int p = 0; p < m_nMaxParticles; p++)
+			//{
+			//	// Get Pointer to Particle and Quad
+			//	TParticle* pPart = &m_cParticles[p];
+			//	pPart->m_nCurrentFrame = nCurrFrame;
+			//}
+		}
 };
 #endif // _CPARTICLEEMITTER_H_

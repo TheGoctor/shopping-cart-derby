@@ -5,7 +5,9 @@
 //
 //  Date Created	:	04/10/11
 //
-//	Last Changed	:	04/11/11
+//	Last Changed	:	07/24/11
+//
+//	Last Changed by :	HN
 //
 //  Purpose			:	Wrapper class for manageing HUD elements
 ////////////////////////////////////////////////////////
@@ -29,7 +31,8 @@ using namespace std;
 #define LIST_CELL_WIDTH		(128)
 #define LIST_CELL_HEIGHT	(128)
 #define ENEMY_PROGRESS_X	(875)
-#define CHECK_LIST_CELL_IDX (9)
+#define CHECK_LIST_CELL_IDX (11)
+#define CHECKOUT_FLAG_CELL_IDX (9)
 #define SOLD_OUT_CELL_IDX	(21)
 #define RANKS_Y_LOC			(50)
 
@@ -37,8 +40,7 @@ static const int g_yRankPos[4] = { 38, 100, 165, 228 };
 
 
 CHUDManager::CHUDManager(void) : m_pEnemyProgress(NULL), m_pTM(NULL) ,
-m_pButtonItem1(NULL), m_pButtonItem2(NULL), m_nPlayer1Char(0), m_nPlayer2Char(0),
-m_nPlayer3Char(0), m_nPlayer4Char(0)
+m_pButtonItem1(NULL), m_pButtonItem2(NULL), m_bUpdateSprites(false), m_fTimerAccumulator(0.0f)
 {
 }
 
@@ -64,33 +66,31 @@ RECT CHUDManager::CellAlgo(int nID, int nNumCols,
 
 	return rCell;
 }
-
+//Return the player number of the player passed in
 int CHUDManager::GetPlayerNum(CObject* player)
 {
-	//if( 0 == _stricmp((char*)player->GetID(), "Player0") )
+	
 	if(player->GetID() == CIDGen::GetInstance()->GetID("Player0"))
 	{
 		return 0;
 	}
 
-	//if( 0 == _stricmp((char*)player->GetID(), "Player1") )
 	if(player->GetID() == CIDGen::GetInstance()->GetID("Player1"))
 	{
 		return 1;
 	}
 
-	//if( 0 == _stricmp((char*)player->GetID(), "Player2") )
 	if(player->GetID() == CIDGen::GetInstance()->GetID("Player2"))
 	{
 		return 2;
 	}
 
-	//if( 0 == _stricmp((char*)player->GetID(), "Player3") )
+	
 	{
 		return 3;
 	}
 
-	//return -1;
+	
 }
 
 
@@ -132,13 +132,13 @@ void CHUDManager::Init(void)
 
 	pEM->RegisterEvent("GoalItemCollected",	(IComponent*)GetInstance(), 
 		GoalItemCollectedCallback);
+	pEM->RegisterEvent("GoalItemBlinking",	(IComponent*)GetInstance(), 
+		GoalItemDespawning);
 
 
 
 	pEM->RegisterEvent("PickupItemCollected",	(IComponent*)GetInstance(), 
 		PickupItemCollectedCallback);
-
-	pEM->RegisterEvent("RenderAiAgentonMiniMap", (IComponent*)GetInstance(), RenderAiAgentsOnMiniMapCallback);
 
 	string szEventName = "Update";
 	szEventName += (char)eAssociatedState; // catch update for only gameplay state
@@ -151,7 +151,6 @@ void CHUDManager::Init(void)
 	pEM->RegisterEvent("ItemDropped", (IComponent*)GetInstance(), GoalItemLostCallback);
 	pEM->RegisterEvent("IncrementRankScore", (IComponent*)GetInstance(), PlayerPickupItem);
 	pEM->RegisterEvent("Player1ObjectCreation", (IComponent*)GetInstance(), PlayerLocation);
-	pEM->RegisterEvent("RaceStarted", (IComponent*)GetInstance(), RaceStarted);
 	pEM->RegisterEvent("HeldItemCollected", (IComponent*)GetInstance(),
 		HeldItemCollectedCallBack);
 	pEM->RegisterEvent("UseHeldItem1Hud", (IComponent*)GetInstance(), UseHeldItem1);
@@ -174,9 +173,6 @@ void CHUDManager::Init(void)
 	szEventName += (char)eAssociatedState;
 	pEM->RegisterEvent(szEventName, (IComponent*)GetInstance(), GameplayStateExited);
 
-	// This was an old hack
-	//pEM->RegisterEvent("StateChange", (IComponent*)GetInstance(), MainMenuEnterCallback);
-
 }
 
 
@@ -185,16 +181,17 @@ void CHUDManager::InitShoppingList(void)
 	// Load Sprite Sheet
 	m_nGoalIconsTex = m_pTM->LoadTexture("Resource\\HUD\\FFP_2D_GoalItems_FIN.png");
 	m_nGoalIconsDarkenedTex = m_pTM->LoadTexture("Resource\\HUD\\FFP_2D_GoalItems_Darkened_FIN.png");
-	m_nGoalIconsCheckMarkTex = m_pTM->LoadTexture("Resource\\HUD\\T_Check_D.png");
-
+	
 	m_nShoppingListBackgroundTex[0] = m_pTM->LoadTexture("Resource\\HUD\\T_Biker_Shopping_List_D.png");
 	m_nShoppingListBackgroundTex[1] = m_pTM->LoadTexture("Resource\\HUD\\T_Banditos_Shopping_List_D.png");
 	m_nShoppingListBackgroundTex[2] = m_pTM->LoadTexture("Resource\\HUD\\T_Larpers_Shopping_List_D.png");
 	m_nShoppingListBackgroundTex[3] = m_pTM->LoadTexture("Resource\\HUD\\T_Scientist_Shopping_List_D.png");
 	m_nShoppingListBackgroundTex[4] = m_pTM->LoadTexture("Resource\\HUD\\T_Sasha_Shopping_List_D.png");
+	m_nShoppingListBackgroundTex[5] = m_pTM->LoadTexture("Resource\\HUD\\T_Fitz_Shopping_List_D.png");
+	m_nShoppingListBackgroundTex[6] = m_pTM->LoadTexture("Resource\\HUD\\T_Evelyn_Shopping_List_D.png");
 
 	// Load texture for the icons for radar
-	m_nRadarNodeTexture = m_pTM->LoadTexture("Resource\\HUD\\FFP_2D_Goal_Locators_FIN.png");
+	m_nRadarNodeTexture = m_nGoalIconsTex;//m_pTM->LoadTexture("Resource\\HUD\\FFP_2D_Goal_Locators_FIN.png");
 
 	// Idxs
 	m_nGoalIconTextureIndices[GORILLA_MILK] = 7; 
@@ -215,7 +212,7 @@ void CHUDManager::InitShoppingList(void)
 	tListData.m_nTexture = m_nShoppingListBackgroundTex[0];
 	tListData.m_nX = 27;
 	tListData.m_nY = 230;
-	tListData.m_nZ = 0;
+	tListData.m_nZ = 4;
 	tListData.m_fScaleX = 1.3f;
 	tListData.m_fScaleY = 1.3f;
 	tListData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
@@ -237,7 +234,7 @@ void CHUDManager::InitShoppingList(void)
 	m_tListIconData[7].m_nTexture = m_nGoalIconsDarkenedTex;
 	m_tListIconData[7].m_nX = 120;
 	m_tListIconData[7].m_nY = 670;
-	m_tListIconData[7].m_nZ = 1;
+	m_tListIconData[7].m_nZ = 6;
 	m_tListIconData[7].m_fScaleX = .4f;
 	m_tListIconData[7].m_fScaleY = .4f;
 	m_tListIconData[7].m_fRotCenterX = 0.0f;
@@ -270,8 +267,6 @@ void CHUDManager::InitShoppingList(void)
 
 	m_tListIconData[1] = m_tListIconData[3];
 	m_tListIconData[1].m_nY += 44;
-	m_tListIconData[1].m_fScaleX = .3f;
-	m_tListIconData[1].m_fScaleY = .3f;
 
 	m_tListIconData[0] = m_tListIconData[3];
 	m_tListIconData[0].m_nX += 55;
@@ -352,8 +347,6 @@ void CHUDManager::InitEnemyProgress(void)
 	tSpriteData.m_tRect.bottom = 0;
 
 	// Add Sprite Comp
-	//m_pEnemyProgressComponent = m_pTM->CreateSpriteComp(m_pEnemyProgress, tSpriteData, false);
-
 	// Font
 	CBitmapFont font(-1, 13, 15, 33);
 	font.LoadFont("Resource\\BitmapFont.png", "Resource\\BitmapFont_Width.bin");
@@ -417,11 +410,8 @@ void CHUDManager::InitEnemyProgress(void)
 		m_tPlayerInfo[bit].pScoreFontComps = m_pTM->CreateBitmapFontComp(pBitObj, "0/8", font, x,
 			y, scale, D3DXCOLOR(0, 200, 0, 255), false);
 
-
 		nCharIdx += 1;
 	}
-
-
 }
 
 void CHUDManager::InitMiniMap(void)
@@ -446,7 +436,7 @@ void CHUDManager::InitMiniMap(void)
 	tData.m_fRotCenterY = 0.0f;
 	tData.m_fRot = 0.0f;
 	tData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
-	tData.m_tRect = GetInstance()->CellAlgo(CHECK_LIST_CELL_IDX, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
+	tData.m_tRect = GetInstance()->CellAlgo(CHECKOUT_FLAG_CELL_IDX, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
 
 	string szObjName = "RadarNodeGoal";
 	CObject* pRadarSpriteObj = CObjectManager::GetInstance()->CreateObject(szObjName);
@@ -475,7 +465,7 @@ void CHUDManager::InitMiniMap(void)
 	tRadarNode.vTargetPosition = pPlayer1->GetTransform()->GetWorldPosition();
 
 	tData.m_nTexture = GetInstance()->m_nRadarNodeTexture;
-	tData.m_tRect = GetInstance()->CellAlgo(CHECK_LIST_CELL_IDX+1, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
+	tData.m_tRect = GetInstance()->CellAlgo(CHECKOUT_FLAG_CELL_IDX+1, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
 
 	szObjName = "RadarNodePlayer1";
 	CObject* pOBJ = CObjectManager::GetInstance()->CreateObject(szObjName);
@@ -504,7 +494,7 @@ void CHUDManager::InitMiniMap(void)
 	tRadarNode.vTargetPosition = pPlayer2->GetTransform()->GetWorldPosition();
 
 	tData.m_nTexture = GetInstance()->m_nRadarNodeTexture;
-	tData.m_tRect = GetInstance()->CellAlgo(CHECK_LIST_CELL_IDX+1, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
+	tData.m_tRect = GetInstance()->CellAlgo(CHECKOUT_FLAG_CELL_IDX+1, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
 
 	szObjName = "RadarNodePlayer2";
 	pOBJ = CObjectManager::GetInstance()->CreateObject(szObjName);
@@ -532,7 +522,7 @@ void CHUDManager::InitMiniMap(void)
 	tRadarNode.vTargetPosition = pPlayer3->GetTransform()->GetWorldPosition();
 
 	tData.m_nTexture = GetInstance()->m_nRadarNodeTexture;
-	tData.m_tRect = GetInstance()->CellAlgo(CHECK_LIST_CELL_IDX+1, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
+	tData.m_tRect = GetInstance()->CellAlgo(CHECKOUT_FLAG_CELL_IDX+1, LIST_NUM_COL, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
 
 	szObjName = "RadarNodePlayer3";
 	pOBJ = CObjectManager::GetInstance()->CreateObject(szObjName);
@@ -557,10 +547,6 @@ void CHUDManager::InitMiniMap(void)
 
 }
 
-void CHUDManager::UpdateMiniMap()
-{
-
-}
 
 void CHUDManager::InitInventory(void)
 {
@@ -673,12 +659,16 @@ void CHUDManager::GoalItemSpawned(TGoalItemEvent* pcObjEvent)
 		if(nodeIter->nGoalItemType == nSpawnedType && !bAlreadyCollected)
 		{
 			nodeIter->bSpawned = true;
+			nodeIter->bDespawning = false;
 			nodeIter->vTargetPosition = pcObjEvent->m_pcGoalItem->GetParent()->GetTransform()->GetWorldPosition();
 			break;
 			// update will handle the placement code
 		}
 		nodeIter++;
 	}
+
+	//GetInstance()->UpdateShoppingList();
+
 }
 
 void CHUDManager::GoalItemSpawnedCallback(IEvent* pEvent, IComponent* /*pComp*/)
@@ -719,11 +709,15 @@ void CHUDManager::GoalItemDespawned(EGoalItemType eType)
 		if(nodeIter->nGoalItemType == nSpawnedType)
 		{
 			nodeIter->bSpawned = false;
+			nodeIter->bDespawning = false;
 			break;
 		}
 		nodeIter++;
 
 	}
+
+	//GetInstance()->UpdateShoppingList();
+
 }
 
 void CHUDManager::GoalItemDespawnedCallback(IEvent* pEvent, IComponent* /*pComp*/)
@@ -806,7 +800,7 @@ void CHUDManager::HeldItemCollected(THeldItemCollected* pHeldItem)
 		}
 	};
 
-	if(m_pHeldItem1->IsActive() == false)
+	if(m_bShowHeld1 == false)
 	{
 		TSpriteData tSpriteData = m_pHeldItem1->GetSpriteData();
 
@@ -817,8 +811,11 @@ void CHUDManager::HeldItemCollected(THeldItemCollected* pHeldItem)
 		m_pHeldItem1->SetSpriteData(tSpriteData);
 		m_pHeldItem1->SetActive(true);
 		m_bShowHeld1 = true;
+
+		SendIEvent("HeldItemCollectedEffect", (IComponent*)m_pHeldItem1, NULL, PRIORITY_NORMAL);
+
 	}
-	else if(m_pHeldItem2->IsActive() == false)
+	else if(m_bShowHeld2 == false)
 	{
 		TSpriteData tSpriteData = m_pHeldItem2->GetSpriteData();
 
@@ -829,6 +826,9 @@ void CHUDManager::HeldItemCollected(THeldItemCollected* pHeldItem)
 		m_pHeldItem2->SetSpriteData(tSpriteData);
 		m_pHeldItem2->SetActive(true);
 		m_bShowHeld2 = true;
+
+		SendIEvent("HeldItemCollectedEffect", (IComponent*)m_pHeldItem2, NULL, PRIORITY_NORMAL);
+
 	}
 }
 
@@ -919,6 +919,7 @@ void CHUDManager::UseHeldItem1(IEvent* iEvent, IComponent*)
 	TInputEvent* tEvent = (TInputEvent*)iEvent->GetData();
 
 	// if we're the hud player (player 0)
+	CHUDManager::GetInstance()->PlayUseItemSound(tEvent->m_pPlayer);
 	if(tEvent->m_pPlayer == CObjectManager::GetInstance()->GetObjectByName("Player0"))
 	{
 		CHUDManager::GetInstance()->UseHeldItem(1);
@@ -929,6 +930,7 @@ void CHUDManager::UseHeldItem2(IEvent* iEvent, IComponent*)
 {
 	TInputEvent* tEvent = (TInputEvent*)iEvent->GetData();
 
+	CHUDManager::GetInstance()->PlayUseItemSound(tEvent->m_pPlayer);
 	// if we're the hud player (player 0)
 	if(tEvent->m_pPlayer == CObjectManager::GetInstance()->GetObjectByName("Player0"))
 	{
@@ -939,12 +941,14 @@ void CHUDManager::UseHeldItem(int nIndex)
 {
 	if(nIndex == 1)
 	{
-		m_pHeldItem1->SetActive(false);
+		//m_pHeldItem1->SetActive(false);
+		SendIEvent("HeldItemUsedEffect", (IComponent*)m_pHeldItem1, NULL, PRIORITY_NORMAL);
 		m_bShowHeld1 = false;
 	}
 	else
 	{
-		m_pHeldItem2->SetActive(false);
+		//m_pHeldItem2->SetActive(false);
+		SendIEvent("HeldItemUsedEffect", (IComponent*)m_pHeldItem2, NULL, PRIORITY_NORMAL);
 		m_bShowHeld2 = false;
 	}
 }
@@ -1017,6 +1021,7 @@ void CHUDManager::GoalItemCollected(TGoalItemCollectedEvent* pcObjEvent)
 		nodeIter++;
 	}
 
+	//GetInstance()->UpdateShoppingList();
 }
 
 void CHUDManager::GoalItemCollectedCallback(IEvent* pEvent, IComponent* /*pComp*/)
@@ -1048,110 +1053,32 @@ void CHUDManager::PickupItemCollectedCallback(IEvent* pEvent, IComponent* /*pCom
 
 		goalItemIter++;
 	}
+
+	// Make the radar node inactive
+	list<TRadarNode, CAllocator<TRadarNode>>::iterator nodeIter;
+	nodeIter = GetInstance()->m_lRadarNodes.begin();
+
+	while(nodeIter != GetInstance()->m_lRadarNodes.end())
+	{
+		if(nodeIter->nGoalItemType == nType)
+		{
+			nodeIter->bSpawned = false;
+			nodeIter->vTargetPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+			break;
+			// update will handle the placement code
+	}
+		nodeIter++;
+	}
+
+
+	//GetInstance()->UpdateShoppingList();
+
 }
 
 
 void CHUDManager::Update(void)
 {
-	// Upate List
-	int nItemType;
-	TSpriteData tSpriteData = {};
-	int nPosCounter = 0; // in loop counter
-	int nCurrentIcon = 0; // counter for all the loops (doesn't reset)
-
-	// Put correct marks on things that need it
-	list<TShoppingListItem, CAllocator<TShoppingListItem>>::iterator goalItemIter;
-	goalItemIter = m_tGoalItemsSpawnedPool.begin();
-	while(goalItemIter != m_tGoalItemsSpawnedPool.end())
-	{
-		// get the current iter's item type
-		nItemType = goalItemIter->nItemID;
-
-		// Get the list pos data
-		tSpriteData = m_tListIconData[nCurrentIcon];
-
-		//Set the position to the next spot on this list's section
-		RECT pos = CellAlgo(nPosCounter, 2, 44, 44);
-		float fListX = 35;
-		float fListY = 285;
-		tSpriteData.m_nX = (int)(fListX + pos.left);
-		tSpriteData.m_nY = (int)(fListY + pos.top);
-		tSpriteData.m_fScaleX = .4f;
-		tSpriteData.m_fScaleY = .4f;
-
-
-		// Lit or unlit check
-
-		// if no one's picked it up (it's in the level)
-		if(goalItemIter->bSpawned)
-		{
-			// Find the Cell for current icon
-			tSpriteData.m_tRect = CellAlgo(
-				m_nGoalIconTextureIndices[goalItemIter->nItemID], LIST_NUM_COL,
-				LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
-
-			// set to lit texture since it's spawned
-			tSpriteData.m_nTexture = m_nGoalIconsTex;
-
-			// Apply the normal icon
-			goalItemIter->pIconComponent->SetSpriteData(tSpriteData);
-			goalItemIter->pIconComponent->SetActive(true);
-		}
-		else // it's not spawned
-		{
-			tSpriteData.m_tRect = CellAlgo(
-				m_nGoalIconTextureIndices[goalItemIter->nItemID], LIST_NUM_COL,
-				LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
-
-			// set to UNlit texture since it's despawned
-			tSpriteData.m_nTexture = m_nGoalIconsDarkenedTex;
-
-
-			// Apply the normal icon
-			goalItemIter->pIconComponent->SetSpriteData(tSpriteData);
-			goalItemIter->pIconComponent->SetActive(true);
-		}
-
-		// Check mark check:
-
-		// if the item is collected by the player
-		if(goalItemIter->nPlayerCollected == 0)
-		{
-			// TODO: Put check mark over that slot
-
-			m_tCheckMarkSpriteInfo = tSpriteData;
-
-			// Set the sprite to show the whole image
-			m_tCheckMarkSpriteInfo.m_tRect.top = 0;
-			m_tCheckMarkSpriteInfo.m_tRect.bottom = 0;
-			m_tCheckMarkSpriteInfo.m_tRect.left = 0;
-			m_tCheckMarkSpriteInfo.m_tRect.right = 0;
-
-			m_tCheckMarkSpriteInfo.m_fScaleX = .4f;
-			m_tCheckMarkSpriteInfo.m_fScaleY = .4f;
-			m_tCheckMarkSpriteInfo.m_nZ += 1;
-
-
-			// make the texture the check mark
-			m_tCheckMarkSpriteInfo.m_nTexture = m_nGoalIconsCheckMarkTex;
-
-			// Apply the checkmark
-			m_pCheckMarkSpriteComp[goalItemIter->nItemID]->SetSpriteData(m_tCheckMarkSpriteInfo);
-			m_pCheckMarkSpriteComp[goalItemIter->nItemID]->SetActive(true);
-		}
-		else // make sure that the checkmark isn't showing
-		{
-			m_pCheckMarkSpriteComp[goalItemIter->nItemID]->SetActive(false);
-		}
-
-
-
-		// Inc Pos
-		++nPosCounter;
-		++nCurrentIcon;
-		goalItemIter++;
-	}
-
+	UpdateShoppingList();
 
 
 
@@ -1161,7 +1088,11 @@ void CHUDManager::Update(void)
 		for(int rank2 = rank+1; rank2 < 4; ++rank2)
 		{
 			if(m_tPlayerInfo[rank].nScore < m_tPlayerInfo[rank2].nScore)
-			{		
+			{	
+				if (rank == 0)
+				{
+					PlayLead(m_tPlayerInfo[rank2].nID);
+				}
 				swap(m_tPlayerInfo[rank], m_tPlayerInfo[rank2]);
 			}
 		}
@@ -1200,7 +1131,7 @@ void CHUDManager::Update(void)
 		TSpriteData tBorderData = m_tPlayerInfo[player].pBackgroundSpriteComp->GetSpriteData();
 		tBorderData.m_nX = tSprite.m_nX - 4;
 		tBorderData.m_nY = tSprite.m_nY - 4;
-		tBorderData.m_nZ = tSpriteData.m_nZ + 1;
+		tBorderData.m_nZ = 5 + 1;
 		tBorderData.m_fScaleX = m_tPlayerInfo[player].nID == 0 ? fPlayerScale : fDefaultScale;
 		tBorderData.m_fScaleY = tBorderData.m_fScaleX;
 		m_tPlayerInfo[player].pBackgroundSpriteComp->SetSpriteData(tBorderData);
@@ -1210,16 +1141,16 @@ void CHUDManager::Update(void)
 		// rank images
 		TSpriteData tRankNumData = GetInstance()->m_tPlayerInfo[player].pRankNumberComponent->GetSpriteData();
 		tRankNumData.m_fScaleX = tRankNumData.m_fScaleY = m_tPlayerInfo[player].nID == 0 ? fPlayerScale*.75f : fDefaultScale*.75f;
-		tRankNumData.m_nX = tBorderData.m_nX - 100*tRankNumData.m_fScaleX;
-		tRankNumData.m_nY = tBorderData.m_nY + 30*tRankNumData.m_fScaleY;
-		tRankNumData.m_nZ = tSpriteData.m_nZ-1;
+		tRankNumData.m_nX = int(tBorderData.m_nX - 100 * tRankNumData.m_fScaleX);
+		tRankNumData.m_nY = int(tBorderData.m_nY + 30 * tRankNumData.m_fScaleY);
+		tRankNumData.m_nZ = 5-1;
 		tRankNumData.m_nTexture = m_nRankNumberTextureIDs[player];
 		GetInstance()->m_tPlayerInfo[player].pRankNumberComponent->SetSpriteData(tRankNumData);
 
 		TSpriteData tRankNumBGData = GetInstance()->m_tPlayerInfo[player].pRankNumberBackgroundComponent->GetSpriteData();
 		tRankNumBGData.m_fScaleX = tRankNumBGData.m_fScaleY = m_tPlayerInfo[player].nID == 0 ? fPlayerScale*.75f : fDefaultScale*.75f;
-		tRankNumBGData.m_nX = tBorderData.m_nX - 100*tRankNumBGData.m_fScaleX;
-		tRankNumBGData.m_nY = tBorderData.m_nY - 10*tRankNumBGData.m_fScaleY;
+		tRankNumBGData.m_nX = int(tBorderData.m_nX - 100 * tRankNumBGData.m_fScaleX);
+		tRankNumBGData.m_nY = int(tBorderData.m_nY - 10 * tRankNumBGData.m_fScaleY);
 		tRankNumBGData.m_nZ = tRankNumData.m_nZ-1;
 		GetInstance()->m_tPlayerInfo[player].pRankNumberBackgroundComponent->SetSpriteData(tRankNumBGData);
 
@@ -1240,9 +1171,6 @@ void CHUDManager::Update(void)
 
 
 	}
-
-	// Update the minimap
-	UpdateMiniMap();
 
 	// Radar node stuff
 	list<TRadarNode, CAllocator<TRadarNode>>::iterator nodeIter;
@@ -1276,7 +1204,7 @@ void CHUDManager::Update(void)
 			TSpriteData tData = nodeIter->pIconSpriteComponent->GetSpriteData();
 
 			// scale the image to the size we want
-			tData.m_fScaleX = tData.m_fScaleY = .4f;
+			tData.m_fScaleX = tData.m_fScaleY = .5f; 
 
 			D3DXVECTOR2 toObj;
 			CObject* pPlayerObj = CObjectManager::GetInstance()->GetObjectByName("Player0");
@@ -1381,8 +1309,8 @@ void CHUDManager::Update(void)
 			tData.m_nY = (int)(toObj.y);
 
 			TSpriteData tBGData = nodeIter->pBackgroundSpriteComponent->GetSpriteData();
-			tBGData.m_fRotCenterX = 60 * tData.m_fScaleX*2.0f; // hard coded center of rot from looking at image
-			tBGData.m_fRotCenterY = 60 * tData.m_fScaleY*2.0f; // *2 because we halved the scale of the icons from when this was first calculated
+			tBGData.m_fRotCenterX = 48 * tData.m_fScaleX*2.0f; // hard coded center of rot from looking at image
+			tBGData.m_fRotCenterY = 50 * tData.m_fScaleY*2.0f; // *2 because we halved the scale of the icons from when this was first calculated
 
 			tBGData.m_nX = (int)(toObj.x); // offset the bg so the icon is right on it
 			tBGData.m_nY = (int)(toObj.y);
@@ -1396,7 +1324,7 @@ void CHUDManager::Update(void)
 			{
 				// negate it
 				fRotdd *= -1.0f; 
-			}/**/
+			}
 
 			// if it's right in front of us (same criteria for if we start scaling the offset from center)
 			if(bCloseAndFacingItem)
@@ -1406,11 +1334,23 @@ void CHUDManager::Update(void)
 			}
 			fRotdd += 3.14159f; // add half a revolution so it points the right way since the image points down at 0 rot
 
+			/**/
 			tBGData.m_fRot = fRotdd;
 			tBGData.m_tRect.bottom = 0;
 			tBGData.m_tRect.top = 0;
 			tBGData.m_tRect.right = 0;
 			tBGData.m_tRect.left = 0;
+
+			// handle flashing transparency thing if it's despawning
+			if(nodeIter->bDespawning)
+			{
+				tData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, .9f + sin(GetInstance()->m_fTimerAccumulator*20.0f)); // minval + sin(speed)
+			}
+			else
+			{
+				tData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f); // else make it fully visible 
+			}
+
 
 			nodeIter->pIconSpriteComponent->SetSpriteData(tData);
 			nodeIter->pIconSpriteComponent->SetActive(true);
@@ -1429,11 +1369,13 @@ void CHUDManager::Update(void)
 
 }
 
-void CHUDManager::UpdateCallback(IEvent* /*pEvent*/, IComponent* /*pComp*/)
+void CHUDManager::UpdateCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get values from the event
-	//TUpdateStateEvent* tEvent = (TUpdateStateEvent*)pEvent->GetData();
-	//float fDt = tEvent->m_fDeltaTime;
+	TUpdateStateEvent* tEvent = (TUpdateStateEvent*)pEvent->GetData();
+	float fDt = tEvent->m_fDeltaTime;
+
+	GetInstance()->m_fTimerAccumulator += fDt;
 
 	GetInstance()->Update();
 
@@ -1511,6 +1453,10 @@ void CHUDManager::GoalItemInitCallback(IEvent* pEvent, IComponent* /*pComp*/)
 	tNode.pBackgroundSpriteComponent = CTextureManager::GetInstance()->CreateSpriteComp(pRadarBGSpriteObj, tData, false);
 
 	GetInstance()->m_lRadarNodes.push_back(tNode);
+
+	GetInstance()->SetUpdateSpriteData(true);
+	GetInstance()->UpdateShoppingList();
+	GetInstance()->SetUpdateSpriteData(false);
 }
 
 void CHUDManager::MainMenuEnterCallback(IEvent* pEvent, IComponent* /*pComp*/)
@@ -1651,6 +1597,9 @@ void CHUDManager::GoalItemLostCallback(IEvent* pEvent, IComponent* /*pComp*/)
 			}
 		}
 	}/**/
+
+	GetInstance()->UpdateShoppingList();
+
 }
 
 
@@ -1670,7 +1619,7 @@ void CHUDManager::GameplayStateEntered(IEvent* /*pEvent*/, IComponent* /*pComp*/
 	else // controller
 	{
 		GetInstance()->m_pKey1Comp->SetWord(CInputManager::GetInstance()->GetStringController(
-			CInputManager::GetInstance()->GetKeyboardKey(CMD_USEITEM1)));
+			CInputManager::GetInstance()->GetControllerButton(CMD_USEITEM1)));
 	}
 
 	GetInstance()->m_pKey2Comp->SetActive(true);
@@ -1683,7 +1632,7 @@ void CHUDManager::GameplayStateEntered(IEvent* /*pEvent*/, IComponent* /*pComp*/
 	else // controller
 	{
 		GetInstance()->m_pKey2Comp->SetWord(CInputManager::GetInstance()->GetStringController(
-			CInputManager::GetInstance()->GetKeyboardKey(CMD_USEITEM2)));
+			CInputManager::GetInstance()->GetControllerButton(CMD_USEITEM2)));
 	}
 
 	GetInstance()->m_pShoppingListBackgroundSpriteComp->SetActive(true);
@@ -1744,6 +1693,8 @@ void CHUDManager::GameplayStateEntered(IEvent* /*pEvent*/, IComponent* /*pComp*/
 		}
 		iter2++;
 	}
+
+	GetInstance()->UpdateShoppingList();
 }
 
 void CHUDManager::GameplayStateExited(IEvent* /*pEvent*/, IComponent* /*pComp*/)
@@ -1773,9 +1724,7 @@ void CHUDManager::GameplayStateExited(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 		nodeIter++;
 	}
 
-
-	//CWwiseSoundManager::GetInstance()->PlayTheSound(BULLDOG_SPEED_STOP, GLOBAL_ID);
-
+	//Held items
 	if(GetInstance()->m_bShowHeld1 == true)
 	{
 		GetInstance()->m_pHeldItem1->SetActive(false);
@@ -1785,6 +1734,7 @@ void CHUDManager::GameplayStateExited(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 		GetInstance()->m_pHeldItem2->SetActive(false);
 	}
 
+	//Ranks
 	for(int i=0; i<4; i++)
 	{
 		GetInstance()->m_tPlayerInfo[i].pSpriteComp->SetActive(false);
@@ -1794,7 +1744,7 @@ void CHUDManager::GameplayStateExited(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 		GetInstance()->m_tPlayerInfo[i].pRankNumberBackgroundComponent->SetActive(false);
 	}
 
-
+	//Shopping list
 	list<TShoppingListItem, CAllocator<TShoppingListItem>>::iterator iter2;
 	iter2 = GetInstance()->m_tGoalItemsSpawnedPool.begin();
 
@@ -1811,6 +1761,14 @@ void CHUDManager::GameplayStateExited(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 
 void CHUDManager::GameplayStateInit(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 {
+	GetInstance()->m_bShowHeld1 = false;
+	GetInstance()->m_bShowHeld2 = false;
+
+	TSpriteData tSpriteData = GetInstance()->m_pHeldItem1->GetSpriteData();
+	tSpriteData.m_nTexture = 31;
+	tSpriteData = GetInstance()->m_pHeldItem2->GetSpriteData();
+	tSpriteData.m_nTexture = 31;
+
 	// show all hud elements
 	GetInstance()->m_pInventory->SetActive(true);
 	//GetInstance()->m_pHeldItem1->SetActive(true);
@@ -1839,7 +1797,7 @@ void CHUDManager::GameplayStateInit(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 	else // controller
 	{
 		GetInstance()->m_pKey1Comp->SetWord(CInputManager::GetInstance()->GetStringController(
-			CInputManager::GetInstance()->GetKeyboardKey(CMD_USEITEM1)));
+			CInputManager::GetInstance()->GetControllerButton(CMD_USEITEM1)));
 	}
 
 	GetInstance()->m_pKey2Comp->SetActive(true);
@@ -1852,7 +1810,7 @@ void CHUDManager::GameplayStateInit(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 	else // controller
 	{
 		GetInstance()->m_pKey2Comp->SetWord(CInputManager::GetInstance()->GetStringController(
-			CInputManager::GetInstance()->GetKeyboardKey(CMD_USEITEM2)));
+			CInputManager::GetInstance()->GetControllerButton(CMD_USEITEM2)));
 	}
 	//GetInstance()->m_pEnemyProgressComponent->SetActive(true);
 	GetInstance()->m_pHeldItem1->SetActive(false);
@@ -1894,6 +1852,10 @@ void CHUDManager::GameplayStateInit(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 	{
 		CHUDManager::GetInstance()->m_tPlayerInfo[i].nScore = 0;
 	}
+
+	GetInstance()->SetUpdateSpriteData(true);
+	GetInstance()->UpdateShoppingList();
+	GetInstance()->SetUpdateSpriteData(false);
 
 }
 
@@ -1990,21 +1952,6 @@ void CHUDManager::PlayerLocation(IEvent* pEvent, IComponent* /*pComp*/)
 	GetInstance()->m_pPlayerObject = tEvent->m_pcObj;	
 }
 
-void CHUDManager::RaceStarted(IEvent* /*pEvent*/, IComponent* /*pComp*/)
-{
-}
-
-void CHUDManager::RenderAiAgentsOnMiniMap(TObjectEvent* /*pcObjEvent*/)
-{
-
-}
-
-void CHUDManager::RenderAiAgentsOnMiniMapCallback(IEvent* pEvent, IComponent* /*pComp*/)
-{
-	TObjectEvent* pcObjEvent = (TObjectEvent*)pEvent->GetData();
-	GetInstance()->RenderAiAgentsOnMiniMap(pcObjEvent);
-}
-
 void CHUDManager::DisableImages(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 {
 	GetInstance()->m_pInventory->SetActive(false);
@@ -2063,6 +2010,18 @@ void CHUDManager::SendStolenItemEvent(int nSlot)
 }
 
 
+void CHUDManager::SendStolenVictimItemEvent(int nSlot)
+{
+	if(nSlot == 0)
+	{
+		SendIEvent("HeldItemStolenEffect", m_pHeldItem1, NULL, PRIORITY_NORMAL);
+	}
+	else // other slot
+	{
+		SendIEvent("HeldItemStolenEffect", m_pHeldItem2, NULL, PRIORITY_NORMAL);
+	}
+}
+
 
 int CHUDManager::SetCharacterPicked(lua_State* pLua)
 {
@@ -2078,23 +2037,17 @@ int CHUDManager::SetCharacterPicked(lua_State* pLua)
 			TSpriteData tData = GetInstance()->m_tPlayerInfo[i].pSpriteComp->GetSpriteData();
 			tData.m_tRect = GetInstance()->CellAlgo(nCharNum, 2, 190, 114);
 			GetInstance()->m_tPlayerInfo[i].pSpriteComp->SetSpriteData(tData);
-			GetInstance()->m_nPlayer[i] = nCharNum;
+			GetInstance()->SetPlayerChar(nPlayer, nCharNum);
 		}
 	}
 
 	// if it's the human hud user and a valid player type, set the shopping list texture to the char's one
-	if(nPlayer == 0 && nCharNum >= 0 && nCharNum < 5)
+	if(nPlayer == 0 && nCharNum >= 0 && nCharNum <7)
 	{
 		TSpriteData tData = GetInstance()->m_pShoppingListBackgroundSpriteComp->GetSpriteData();
 		tData.m_nTexture = GetInstance()->m_nShoppingListBackgroundTex[nCharNum];
 		GetInstance()->m_pShoppingListBackgroundSpriteComp->SetSpriteData(tData);
 	}
-
-	GetInstance()->SetPlayer1Char(GetInstance()->m_nPlayer[0]);
-	GetInstance()->SetPlayer2Char(GetInstance()->m_nPlayer[1]);
-	GetInstance()->SetPlayer3Char(GetInstance()->m_nPlayer[2]);
-	GetInstance()->SetPlayer4Char(GetInstance()->m_nPlayer[3]);
-
 	lua_pop(pLua, 2);
 	return 0;
 }
@@ -2122,182 +2075,285 @@ void CHUDManager::InitCheckoutLocation(IEvent* pEvent, IComponent* /*pComp*/)
 	}
 
 }
-
+////////////////////////////////////////////////////////////////////////////////
+//Return the character id for the correct player passed in
+//this helps with the correct sounds being played
+////////////////////////////////////////////////////////////////////////////////
 int CHUDManager::GetPlayerCharID(int playerNum)
 {
-	switch(playerNum)
+	switch(m_nPlayer[playerNum])
 	{
-	case PLAYER1:
+	case BIKER_CHARACTER:
 		{
-			int character = GetPlayer1Char();
-			switch(character)
-			{
-			case BIKER_CHARACTER:
-				{
-					return BIKER_ID;
-					break;
-				}
-			case BANDITOS_CHARACTER:
-				{
-					return BANDITOS_ID;
-					break;
-				}
-			case LARPERS_CHARACTER:
-				{
-					return LARPER_ID;
-					break;
-				}
-			case SCIENTIST_CHARACTER:
-				{
-					return SCIENTIST_ID;
-					break;
-				}
-			case SASHA_CHARACTER:
-				{
-					return SASHA_ID;
-					break;
-				}
-			case CRYGAME_CHARACTER:
-				{
-					return CRYGAME_ID;
-					break;
-				}
-			case STORYTIME_CHARACTER:
-				{
-					return STORYTIME_ID;
-					break;
-				}
-			}
+			return BIKER_ID;
 			break;
 		}
-	case PLAYER2:
+	case BANDITOS_CHARACTER:
 		{
-			int character = GetPlayer2Char();
-			switch(character)
-			{
-			case BIKER_CHARACTER:
-				{
-					return BIKER_ID;
-					break;
-				}
-			case BANDITOS_CHARACTER:
-				{
-					return BANDITOS_ID;
-					break;
-				}
-			case LARPERS_CHARACTER:
-				{
-					return LARPER_ID;
-					break;
-				}
-			case SCIENTIST_CHARACTER:
-				{
-					return SCIENTIST_ID;
-					break;
-				}
-			case SASHA_CHARACTER:
-				{
-					return SASHA_ID;
-					break;
-				}
-			case CRYGAME_CHARACTER:
-				{
-					return CRYGAME_ID;
-					break;
-				}
-			case STORYTIME_CHARACTER:
-				{
-					return STORYTIME_ID;
-					break;
-				}
-			}
+			return BANDITOS_ID;
 			break;
 		}
-	case PLAYER3:
+	case LARPERS_CHARACTER:
 		{
-			int character = GetPlayer3Char();
-			switch(character)
-			{
-			case BIKER_CHARACTER:
-				{
-					return BIKER_ID;
-					break;
-				}
-			case BANDITOS_CHARACTER:
-				{
-					return BANDITOS_ID;
-					break;
-				}
-			case LARPERS_CHARACTER:
-				{
-					return LARPER_ID;
-					break;
-				}
-			case SCIENTIST_CHARACTER:
-				{
-					return SCIENTIST_ID;
-					break;
-				}
-			case SASHA_CHARACTER:
-				{
-					return SASHA_ID;
-					break;
-				}
-			case CRYGAME_CHARACTER:
-				{
-					return CRYGAME_ID;
-					break;
-				}
-			case STORYTIME_CHARACTER:
-				{
-					return STORYTIME_ID;
-					break;
-				}
-			}
+			return LARPER_ID;
 			break;
 		}
-	case PLAYER4:
+	case SCIENTIST_CHARACTER:
 		{
-			int character = GetPlayer4Char();
-			switch(character)
-			{
-			case BIKER_CHARACTER:
-				{
-					return BIKER_ID;
-					break;
-				}
-			case BANDITOS_CHARACTER:
-				{
-					return BANDITOS_ID;
-					break;
-				}
-			case LARPERS_CHARACTER:
-				{
-					return LARPER_ID;
-					break;
-				}
-			case SCIENTIST_CHARACTER:
-				{
-					return SCIENTIST_ID;
-					break;
-				}
-			case SASHA_CHARACTER:
-				{
-					return SASHA_ID;
-					break;
-				}
-			case CRYGAME_CHARACTER:
-				{
-					return CRYGAME_ID;
-					break;
-				}
-			case STORYTIME_CHARACTER:
-				{
-					return STORYTIME_ID;
-					break;
-				}
-			}
+			return SCIENTIST_ID;
+			break;
+		}
+	case SASHA_CHARACTER:
+		{
+			return SASHA_ID;
+			break;
+		}
+	case CRYGAME_CHARACTER:
+		{
+			return CRYGAME_ID;
+			break;
+		}
+	case STORYTIME_CHARACTER:
+		{
+			return STORYTIME_ID;
 			break;
 		}
 	}
+	return 0;
+}
+////////////////////////////////////////////////////////////////////////////////
+//Play the character item use sound for the correct character
+////////////////////////////////////////////////////////////////////////////////
+void CHUDManager::PlayUseItemSound(CObject *player)
+{
+	switch(m_nPlayer[GetPlayerNum(player)])
+	{
+	case BIKER_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(BULLDOG_ITEM_USE, BIKER_ID);
+			break;
+		}
+	case BANDITOS_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(BANDITOS_ITEMUSE, BANDITOS_ID);
+			break;
+		}
+	case LARPERS_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(LARPER_ITEMUSE, LARPER_ID);
+			break;
+		}
+	case SCIENTIST_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(SCIENTIST_ITEMUSE, SCIENTIST_ID);
+			break;
+		}
+	case SASHA_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(SASHA_ITEMUSE, SASHA_ID);
+			break;
+		}
+	case CRYGAME_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(CRYGAME_ITEMUSE, CRYGAME_ID);
+			break;
+		}
+	case STORYTIME_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(STORYTIME_SHOVE, STORYTIME_ID);
+			break;
+		}
+	}
+}
+////////////////////////////////////////////////////////////////////////////////
+//
+////////////////////////////////////////////////////////////////////////////////
+CSpriteComponent* CHUDManager::GetListIconComponent(EGoalItemType eType)
+{
+	list<TShoppingListItem, CAllocator<TShoppingListItem>>::iterator goalItemIter;
+	goalItemIter = m_tGoalItemsSpawnedPool.begin();
+	while(goalItemIter != m_tGoalItemsSpawnedPool.end())
+	{
+		if(goalItemIter->nItemID == eType)
+		{
+			return goalItemIter->pIconComponent;
+		}
+
+		goalItemIter++;
+	}
+	return 0;
+}
+
+
+void CHUDManager::UpdateShoppingList()
+{	
+	// Upate List
+	int nItemType;
+	TSpriteData tSpriteData = {};
+	int nPosCounter = 0; // in loop counter
+	int nCurrentIcon = 0; // counter for all the loops (doesn't reset)
+
+	// Put correct marks on things that need it
+	list<TShoppingListItem, CAllocator<TShoppingListItem>>::iterator goalItemIter;
+	goalItemIter = m_tGoalItemsSpawnedPool.begin();
+	while(goalItemIter != m_tGoalItemsSpawnedPool.end())
+	{
+		// get the current iter's item type
+		nItemType = goalItemIter->nItemID;
+
+		// Get the list pos data
+		tSpriteData = m_tListIconData[nCurrentIcon];
+
+		if(true)
+		{
+			//Set the position to the next spot on this list's section
+			RECT pos = CellAlgo(nPosCounter, 2, 44, 44);
+			float fListX = 35;
+			float fListY = 285;
+			tSpriteData.m_nX = (int)(fListX + pos.left);
+			tSpriteData.m_nY = (int)(fListY + pos.top);
+			//tSpriteData.m_fScaleX = .4f;
+			//tSpriteData.m_fScaleY = .4f;
+		}
+
+
+		// Lit or unlit check
+
+		// if no one's picked it up (it's in the level)
+		if(goalItemIter->bSpawned)
+		{
+			// Find the Cell for current icon
+			tSpriteData.m_tRect = CellAlgo(
+				m_nGoalIconTextureIndices[goalItemIter->nItemID], LIST_NUM_COL,
+				LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
+
+			// set to lit texture since it's spawned
+			tSpriteData.m_nTexture = m_nGoalIconsTex;
+
+			// Apply the normal icon
+			goalItemIter->pIconComponent->SetSpriteData(tSpriteData);
+			//goalItemIter->pIconComponent->SetActive(true);
+		}
+		else // it's not spawned
+		{
+			tSpriteData.m_tRect = CellAlgo(
+				m_nGoalIconTextureIndices[goalItemIter->nItemID], LIST_NUM_COL,
+				LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
+
+			// set to UNlit texture since it's despawned
+			tSpriteData.m_nTexture = m_nGoalIconsDarkenedTex;
+
+
+			// Apply the normal icon
+			goalItemIter->pIconComponent->SetSpriteData(tSpriteData);
+			//goalItemIter->pIconComponent->SetActive(true);
+		}
+
+		// Check mark check:
+
+		// if the item is collected by the player
+		if(goalItemIter->nPlayerCollected == 0)
+		{
+			// TODO: Put check mark over that slot
+
+			m_tCheckMarkSpriteInfo = tSpriteData;
+
+			// make the texture the check mark
+			m_tCheckMarkSpriteInfo.m_nTexture = m_nGoalIconsTex;
+
+			// Set the sprite to show the check mark part
+			m_tCheckMarkSpriteInfo.m_tRect = CellAlgo(CHECK_LIST_CELL_IDX, 4, LIST_CELL_WIDTH, LIST_CELL_HEIGHT);
+
+			//m_tCheckMarkSpriteInfo.m_fScaleX = .4f;
+			//m_tCheckMarkSpriteInfo.m_fScaleY = .4f;
+			m_tCheckMarkSpriteInfo.m_nZ += 1; 
+
+
+			
+			// Apply the checkmark
+			m_pCheckMarkSpriteComp[goalItemIter->nItemID]->SetSpriteData(m_tCheckMarkSpriteInfo);
+			m_pCheckMarkSpriteComp[goalItemIter->nItemID]->SetActive(true);
+		}
+		else // make sure that the checkmark isn't showing
+		{
+			if(m_pCheckMarkSpriteComp[goalItemIter->nItemID])
+			{
+				m_pCheckMarkSpriteComp[goalItemIter->nItemID]->SetActive(false);
+			}
+		}
+
+		// Inc Pos
+		++nPosCounter;
+		++nCurrentIcon;
+		goalItemIter++;
+	}
+
+
+}
+////////////////////////////////////////////////////////////////////////////////
+//Play the character Lead taken sound for the correct character
+////////////////////////////////////////////////////////////////////////////////
+void CHUDManager::PlayLead(int playerNum)
+{
+	switch(m_nPlayer[playerNum])
+	{
+	case BIKER_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(LEADTAKEN_BIKERS, GLOBAL_ID);
+			break;
+		}
+	case BANDITOS_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(LEADTAKEN_BANDITOS, GLOBAL_ID);
+			break;
+		}
+	case LARPERS_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(LEADTAKEN_LARPERS, GLOBAL_ID);
+			break;
+		}
+	case SCIENTIST_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(LEADTAKEN_SCIENTISTS, GLOBAL_ID);
+			break;
+		}
+	case SASHA_CHARACTER:
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(LEADTAKEN_SASHA, GLOBAL_ID);
+			break;
+		}
+	case CRYGAME_CHARACTER:
+		{
+			break;
+		}
+	case STORYTIME_CHARACTER:
+		{
+			break;
+		}
+	}
+}
+
+
+void CHUDManager::GoalItemDespawning(IEvent* pEvent, IComponent* pComp)
+{
+	TGoalItemEvent* tEvent = (TGoalItemEvent*)pEvent->GetData();
+
+	int nType = tEvent->m_eGoalItemType;
+
+	// Make the radar node inactive
+	list<TRadarNode, CAllocator<TRadarNode>>::iterator nodeIter;
+	nodeIter = GetInstance()->m_lRadarNodes.begin();
+
+	while(nodeIter != GetInstance()->m_lRadarNodes.end())
+	{
+		if(nodeIter->nGoalItemType == nType)
+		{
+			nodeIter->bDespawning = true;
+			break;
+			// update will handle the placement code
+	}
+		nodeIter++;
+	}
+
+
 }

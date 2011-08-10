@@ -64,11 +64,8 @@ int CAnimateManager::CreateAnimComp(lua_State* pLua)
 		return 0;
 	}
 
-	// Create the Interpolator for the Animation component
-	Interpolator cInterp;
-
 	// Create the Animation Component
-	CAnimateComponent* pComp = MMNEW(CAnimateComponent(pObj, pMesh, cInterp));
+	CAnimateComponent* pComp = MMNEW(CAnimateComponent(pObj, pMesh));
 
 	// Get all the Event/Anim pairs
 	string szEventName, szPreAnimName, szLoopAnimName;
@@ -105,14 +102,9 @@ CAnimateComponent* CAnimateManager::CreateAnimateComp(CObject* pParent, DXMesh* 
 	// the best thing to do about it. Until then, try not to use this
 	// function.
 	//					- MR
-
-	// Create Interpolator
-	Interpolator cInterpolator;
-	//cInterpolator.SetAnimation(pAnimation);
-	//cInterpolator.SetMesh(pMesh);
 	
 	// Create Component
-	CAnimateComponent* comp = MMNEW(CAnimateComponent(pParent, pMesh, cInterpolator));
+	CAnimateComponent* comp = MMNEW(CAnimateComponent(pParent, pMesh));
 
 	comp->GetInterpolator().SetMesh(pMesh);
 	//comp->GetInterpolator().BuildHiearchy();

@@ -1,17 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	CEffectComponent.h
-//	Date			:	5/19/11
-//	Mod. Date		:	5/19/11
+//	Date			:	7/26/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Lets an Object have a Effect
 ////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
 // Header Protection
+///////////////////////////////////////////////////////////////////////////////
 #ifndef _CEFFECTCOMPONENT_H_
 #define _CEFFECTCOMPONENT_H_
 
+///////////////////////////////////////////////////////////////////////////////
 // Includes
+///////////////////////////////////////////////////////////////////////////////
 #include <list>
 #include <map>
 using namespace std;
@@ -19,165 +23,311 @@ using namespace std;
 #include "..\\..\\Managers\\Global Managers\\Memory Manager\\CAllocator.h"
 #include "..\\..\\Managers\\Global Managers\\Rendering Managers\\CParticleEmitter.h"
 
-// Foward Declars
+///////////////////////////////////////////////////////////////////////////////
+// Foward Declares
+///////////////////////////////////////////////////////////////////////////////
 class CRenderComponent;
 class IEvent;
 class CObject;
 class CFrame;
 
+///////////////////////////////////////////////////////////////////////////////
 // Enumerations
-enum EEmitterCompType	  { EC_TYPE_MIN,		    // 0
-							EC_TYPE_GOAL_ITEM,	    // 1
-							EC_TYPE_GOAL_ITEM_COLLECTION,	    // 1
-							EC_TYPE_CART_COLLISION_CRASH, // 2
-							//EC_TYPE_CART_COLLISION_POW, // 2
-							EC_TYPE_CART_SMOKE,	    // 3
-							EC_TYPE_CART_SKID_MARKS,// 4
-							EC_TYPE_BOOST,			// 5
-							EC_TYPE_HELD_ITEM,		// 6
-							EC_TYPE_TURKEY_STUN,	// 7
-							EC_TYPE_TURKEY_TRAIL,	// 8
-							EC_TYPE_CHICKEN_INV,	// 9
-							EC_TYPE_BANANA_SLIP,	// 10
-							EC_TYPE_PEANUT_SQUISH,	// 11
-							EC_TYPE_JAM_USE,		// 12
-							EC_TYPE_JAM_HIT_FALL,	// 13
-							EC_TYPE_JAM_HIT_POPUP,	// 14
-							EC_TYPE_DONUT_USE,		// 15
-							EC_TYPE_PIE_HIT,		// 16
-							EC_TYPE_FIREWORK_TRAIL,		// 17
-							EC_TYPE_FIREWORK_BURST,		// 18
-							EC_TYPE_CONFETTI,		// 19
-							EC_TYPE_CAUTION,		// 20
-							EC_TYPE_SCIENTIST_GLOW,		// 21
-							EC_TYPE_MAX };
+///////////////////////////////////////////////////////////////////////////////
+enum EEmitterCompType	  { EC_TYPE_MIN,					// 0
+							EC_TYPE_GOAL_ITEM,				// 1
+							EC_TYPE_GOAL_ITEM_COLLECTION,	// 2
+							EC_TYPE_CART_COLLISION_CRASH,	// 3
+							EC_TYPE_CART_SMOKE,				// 4
+							EC_TYPE_CART_MUD,				// 5
+							EC_TYPE_BOOST,					// 6
+							EC_TYPE_TURKEY_STUN,			// 8
+							EC_TYPE_TURKEY_TRAIL,			// 9
+							EC_TYPE_PIE_TRAIL,				// 10
+							EC_TYPE_CHICKEN_INV,			// 11
+							EC_TYPE_BANANA_SLIP,			// 12
+							EC_TYPE_PEANUT_SQUISH,			// 13
+							EC_TYPE_JAM_USE,				// 14
+							EC_TYPE_JAM_HIT_FALL,			// 15
+							EC_TYPE_JAM_HIT_FALL_B,			// 16
+							EC_TYPE_JAM_HIT_POPUP,			// 17
+							EC_TYPE_DONUT_USE,				// 18
+							EC_TYPE_PIE_HIT,				// 19
+							EC_TYPE_FIREWORK_TRAIL,			// 20
+							EC_TYPE_FIREWORK_BURST,			// 21
+							EC_TYPE_COL_BURST,				// 22
+							EC_TYPE_CONFETTI,				// 23
+							EC_TYPE_CAUTION,				// 24
+							EC_TYPE_MAX };					// 25
 
+///////////////////////////////////////////////////////////////////////////////
 // Type Definitions
+///////////////////////////////////////////////////////////////////////////////
 typedef map<CParticleEmitter*, CRenderComponent*, less<CParticleEmitter*>,
 		CAllocator<pair<CParticleEmitter*, CRenderComponent*>>> EmitterRenderCompMap;
 
-// Structures
+///////////////////////////////////////////////////////////////////////////////
+// Effect Structure
+///////////////////////////////////////////////////////////////////////////////
 struct TEffect
 {
-	// Map of RenderComps (Key = Emitter, Data = Render Comps)
-	EmitterRenderCompMap m_cEmitterRenderComps;
+	///////////////////////////////////////////////////////////////////////////
+	// Data Members
+	///////////////////////////////////////////////////////////////////////////
 
-	// Type
-	EEmitterCompType m_eType;
+		EmitterRenderCompMap m_cEmitterRenderComps; // Map of RenderComps (Key = Emitter, Data = Render Comps)
+		float m_fCooldown;							// Cooldown Timer
+		float m_fLifespan;							// Lifespane (Switch to Burst)
+		float m_fTimer;								// Timer to Turn On
+		float m_fDeadTimer;							// Dead Timer
+		int m_nEmitterCount;						// Count
+		EEmitterCompType m_eType;					// Type
+		bool m_bOn;									// On
 
-	// On
-	bool m_bOn;
-
-	// Cooldown Timer
-	float m_fCooldown;
-
-	// Lifespane (Switch to Burst)
-	float m_fLifespan;
-
-	// Timer to Turn On
-	float m_fTimer;
-
+	///////////////////////////////////////////////////////////////////////////
 	// Constructor
+	///////////////////////////////////////////////////////////////////////////
 	TEffect(void);
 
+	///////////////////////////////////////////////////////////////////////////
 	// Destructor
+	///////////////////////////////////////////////////////////////////////////
 	~TEffect(void);
 
-	// Update
+	///////////////////////////////////////////////////////////////////////////
+	// Function: “Update”
+	//
+	// Return: void
+	//
+	// Parameters: float fDT - The time since the last Frame
+	//
+	// Purpose: This Functions is used to Handle Updating the Effects by
+	//			Updating Timers, Emitters and Rendering the Effects.
+	///////////////////////////////////////////////////////////////////////////
 	void Update(float fDT);
 
-	// On/Off
-	void SwitchOnOffEmitters(bool bOn);
-
-	// Set on Target
-	void SetOnTarget(bool bOnTarget);
-
-	// Set Continuous
-	void SetContinuous(bool bContinuous);
-
-	// Set Parent Frame
-	void SetParentFrame(CFrame* pFrame);
-
-	// Timer
-	void SetETimer(float fTimer);
-
-	// Shutdown
+	///////////////////////////////////////////////////////////////////////////
+	// Function: “Shutdown”
+	//
+	// Return: void
+	//
+	// Parameters: void
+	//
+	// Purpose: This Functions is used to Handle Shuting down Emitter Objects
+	//			by Destroying the Objects associated with each Sub-Emitter on
+	//			Destruction of Parent Objects.
+	///////////////////////////////////////////////////////////////////////////
 	void Shutdown(void);
 
-	// Change Context
-	void ChangeContext(EParticleEmitterType eEmitterType, unsigned int uRenderContextIdx);
+	///////////////////////////////////////////////////////////////////////////
+	// Mutators
+	///////////////////////////////////////////////////////////////////////////
+
+		// On/Off (All Emitters)
+		void SwitchOnOffEmitters(bool bOn);
+
+		// On Target (All Emitters)
+		void SetOnTarget(bool bOnTarget);
+
+		// Continuous (All Emitters)
+		void SetContinuous(bool bContinuous);
+
+		// Parent Frame (All Emitters)
+		void SetParentFrame(CFrame* pFrame);
+
+		// Effect Timer (All Emitters)
+		void SetETimer(float fTimer) { m_fTimer = fTimer; }
+
+		// Dead Timer (All Emitters)
+		void SetDeadTimer(float fTimer) { m_fDeadTimer = fTimer; }
+
+		// Context (Passed in Emitter)
+		void ChangeContext(EParticleEmitterType eEmitterType,
+			unsigned int uRenderContextIdx);
+		
+		// Animation Frame (Passed in Emitter)
+		void SetFrame(EParticleEmitterType eEmitterType, int nFrame);
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// Type Definitions
+///////////////////////////////////////////////////////////////////////////////
 typedef map<EEmitterCompType, TEffect, less<EEmitterCompType>,
 		CAllocator<pair<EEmitterCompType, TEffect>>> EffectMap;
 
-// Effect Component
+///////////////////////////////////////////////////////////////////////////////
+// Effect Component Class
+///////////////////////////////////////////////////////////////////////////////
 class CEffectComponent : public IComponent
 {
 private:
 
-	// Parent Object
-	CObject* m_pcParent;
+	///////////////////////////////////////////////////////////////////////////
+	// Data Members
+	///////////////////////////////////////////////////////////////////////////
 
-	// List of Effects
-	EffectMap m_cEffectMap;
+		CObject* m_pcParent;	// Parent Object
+		EffectMap m_cEffectMap;	// Map of Effects
 
-	// Callback Handlers
-	void Update(float fDT);
+	///////////////////////////////////////////////////////////////////////////
+	// Event Handlers
+	///////////////////////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+		// Function: “Update”
+		//
+		// Return: void
+		//
+		// Parameters: float fDT - The time since the last Frame
+		//
+		// Purpose: This Functions is used to Handle Updating the Effects by
+		//			Updating each Effect in the Map.
+		///////////////////////////////////////////////////////////////////////
+		void Update(float fDT);
+
+		///////////////////////////////////////////////////////////////////////
+		// Function: “WinState”
+		//
+		// Return: void
+		//
+		// Parameters: void
+		//
+		// Purpose: This Functions is used to Handle Updating during Win State.
+		///////////////////////////////////////////////////////////////////////
+		void WinState(void);
 
 public:
+
+	///////////////////////////////////////////////////////////////////////////
+	// Function: “Shutdown”
+	//
+	// Return: void
+	//
+	// Parameters: void
+	//
+	// Purpose: This Functions is used to Handle Shuting down Emitter Objects
+	//			by Destroying the Objects associated with each Effect and 
+	//			Sub-Emitter on Destruction of Parent Objects.
+	///////////////////////////////////////////////////////////////////////////
+	void Shutdown(void);
 	
+	///////////////////////////////////////////////////////////////////////////
 	// Constructor
+	///////////////////////////////////////////////////////////////////////////
 	CEffectComponent(CObject* pParent);
 
+	///////////////////////////////////////////////////////////////////////////
 	// Destructor
+	///////////////////////////////////////////////////////////////////////////
 	~CEffectComponent(void);
 
-	// Callbacks
-	static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
-	static void ActivateCallback(IEvent* pEvent, IComponent* pComp);
-	static void WinStateCallback(IEvent* pEvent, IComponent* pComp);
-	static void DeactivateCallback(IEvent* pEvent, IComponent* pComp);
-	static void ShutdownCallback(IEvent* pEvent, IComponent* pComp);
-	void Shutdown(void);
-	void WinState(void);
-
-	static void DestroyObjectCallback(IEvent* pEvent, IComponent* pComp);
-
-
-	// Add Emitter
+	///////////////////////////////////////////////////////////////////////////
+	// Function: “AddEmitter”
+	//
+	// Return: void
+	//
+	// Parameters: EEmitterCompType eType		     - Effect Type to Add
+	//			   CParticleEmitter* pEmitter	     - Emitter to Add
+	//			   CRenderComponent* pRenderComp     - Render Comp of Emitter
+	//			   EParticleEmitterType eEmitterType - Emitter Type
+	//
+	// Purpose: This Functions is used to Add a Pair of Render Components and
+	//			Emitters to the Map of Effects.
+	///////////////////////////////////////////////////////////////////////////
 	void AddEmitter(EEmitterCompType eType, CParticleEmitter* pEmitter,
-		CRenderComponent* pRenderComp, CFrame* pParentFrame, EParticleEmitterType eEmitterType);
+		CRenderComponent* pRenderComp, CFrame* pParentFrame,
+		EParticleEmitterType eEmitterType);
 
-	// Switch Emiiter On/Off
-	void SwitchOnOffEmitters(EEmitterCompType eType, bool bOn);
-	void SetOnTarget(EEmitterCompType eType, bool bOnTarget);
+	///////////////////////////////////////////////////////////////////////////
+	// Event Callbacks
+	///////////////////////////////////////////////////////////////////////////
 
-	// Timer
-	void SetEffectTimer(EEmitterCompType eType, float fTimer);
+		///////////////////////////////////////////////////////////////////////
+		// Function: “UpdateCallback”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Functions is used to Handle Updating the Passed in
+		//			Component's Effects and Check for end to Switch Effects Off.
+		///////////////////////////////////////////////////////////////////////
+		static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
 
-	// Change Context
-	void ChangeContext(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, unsigned int uRenderContextIdx);
+		///////////////////////////////////////////////////////////////////////
+		// Function: “WinStateCallback”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Functions is used to Handle Updating the Passed in
+		//			Component's Effects during Win State.
+		///////////////////////////////////////////////////////////////////////
+		static void WinStateCallback(IEvent* pEvent, IComponent* pComp);
 
+		///////////////////////////////////////////////////////////////////////
+		// Function: “DestroyObjectCallback”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Functions is used to Handle Shutting down all Effects
+		//			associated with the Parent Object on Destruction.
+		///////////////////////////////////////////////////////////////////////
+		static void DestroyObjectCallback(IEvent* pEvent, IComponent* pComp);
+
+	///////////////////////////////////////////////////////////////////////////
 	// Accessors
-	CObject* GetParent(void) { return m_pcParent; }
-	float GetCooldown(EEmitterCompType eType) { return m_cEffectMap[eType].m_fCooldown; }
-	bool GetIsActiveEmitter(EEmitterCompType eType) { return m_cEffectMap[eType].m_bOn; }
-	//EEmitterCompType GetType(void) { return m_eType; }
-	//bool IsOn(void) { return m_bOn; }
+	///////////////////////////////////////////////////////////////////////////
+	
+		// Parent Object
+		CObject* GetParent(void) { return m_pcParent; }
 
+		// Cooldown Timer (Passed in Effect)
+		float GetCooldown(EEmitterCompType eType)
+		{ return m_cEffectMap[eType].m_fCooldown; }
+
+		// Active Flag (Passed in Effect)
+		bool GetIsActiveEmitter(EEmitterCompType eType)
+		{ return m_cEffectMap[eType].m_bOn; }
+
+	///////////////////////////////////////////////////////////////////////////
 	// Mutators
-	void SetCooldown(EEmitterCompType eType, float fCooldown)
-	{
-		m_cEffectMap[eType].m_fCooldown = fCooldown;
-	}
-	void SetLifespan(EEmitterCompType eType, float fLifespan)
-	{
-		m_cEffectMap[eType].SetContinuous(true);
-		m_cEffectMap[eType].m_fLifespan = fLifespan;
-	}
-	void SetContinuous(EEmitterCompType eType, bool bContinuous);
-	void SetParentFrame(EEmitterCompType eType, CFrame* pFrame);
-};
+	///////////////////////////////////////////////////////////////////////////
+	
+		// Cooldown (Passed in Effect)
+		void SetCooldown(EEmitterCompType eType, float fCooldown);
+		
+		// Lifespan (Passed in Effect)
+		void SetLifespan(EEmitterCompType eType, float fLifespan);
+	
+		// Coninuous (Passed in Effect)
+		void SetContinuous(EEmitterCompType eType, bool bContinuous);
+	
+		// Parent Frame (Passed in Effect)
+		void SetParentFrame(EEmitterCompType eType, CFrame* pFrame);
 
+		// On/Off (Passed in Effect)
+		void SwitchOnOffEmitters(EEmitterCompType eType, bool bOn);
+
+		// On Target (Passed in Effect)
+		void SetOnTarget(EEmitterCompType eType, bool bOnTarget);
+
+		// Effect Timer (Passed in Effect)
+		void SetEffectTimer(EEmitterCompType eType, float fTimer);
+		
+		// Dead Timer (Passed in Effect)
+		void SetDeadTimer(EEmitterCompType eType, float fTimer);
+
+		// Context (Passed in Effect, Passed in Emitter)
+		void ChangeContext(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, unsigned int uRenderContextIdx);
+ 
+		// Animation Frame (Passed in Effect, Passed in Emitter)
+		void SetFrame(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, int nFrame);
+};
 #endif // _CEFFECTCOMPONENT_H_

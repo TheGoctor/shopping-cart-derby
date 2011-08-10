@@ -11,7 +11,7 @@ using namespace EventStructs;
 
 #include "..\..\..\Managers\Component Managers\CHeldItemManager.h"
 #include "..\..\..\Managers\Component Managers\CCollisionManager.h"
-
+#include "..\..\..\Managers\Global Managers\Rendering Managers\CEffectManager.h"
 
 
 CTurkeyComponent::CTurkeyComponent(CObject* pObj) : m_pObject(pObj)
@@ -24,7 +24,7 @@ CTurkeyComponent* CTurkeyComponent::CreateTurkeyComponent(CObject* pObj, D3DXVEC
 {
 	CTurkeyComponent* comp = MMNEW(CTurkeyComponent(pObj));
 	
-
+	comp->TURKEY_ID = -1;
 	comp->m_vMoveDirection = vDirection;
 	D3DXVec3Normalize(&comp->m_vMoveDirection, &comp->m_vMoveDirection);
 
@@ -39,15 +39,16 @@ void CTurkeyComponent::FirstInit()
 {
 	m_fDuration = 30.0f;
 	m_fTimeLeft = m_fDuration;
-	m_fSpeed = 20.0f;
+	m_fSpeed = 28.0f;
 	m_fStunDuration = 2.0f;
-	TURKEY_ID = 0;
+	TURKEY_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 	// TODO: subscribe to events
 	string szEventName = "Update";
 	szEventName += GAMEPLAY_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
 	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldCollision", this, EnvironmentCollision);
 	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldPlayerCollision", this, PlayerCollision);
+	CEventManager::GetInstance()->RegisterEvent("TurkeyDestroyedByItem", this, ItemCollision);
 
 
 	szEventName = "Update";
@@ -66,8 +67,19 @@ void CTurkeyComponent::FirstInit()
 	szEventName += PAUSE_KEYBINDS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
 
+	szEventName = "Update";
+	szEventName += QUIT_CONFIRMATION_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
 
-	SendObjectEvent("TurkeyCreated", this, m_pObject);
+	szEventName = "Update";
+	szEventName += IN_GAME_HOW_TO_PLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
+	szEventName = "Update";
+	szEventName += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
+
+
+	SendObjectEvent("TurkeyCreated", this, m_pObject, PRIORITY_IMMEDIATE );
 
 }
 
@@ -77,16 +89,18 @@ void CTurkeyComponent::ReInit()
 	m_bSpawned = true;
 	TURKEY_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 	TSphere tsphere;
-	tsphere.cPosition = D3DXVECTOR3(0,5,0);
+//	tsphere.cPosition = D3DXVECTOR3(0,5,0);
+	tsphere.cPosition = m_pObject->GetTransform()->GetWorldPosition();
 	tsphere.fRadius = .5f;				// TODO: Is this the radius we want?
 	m_pCollidableComponent->SetBVType(BSPHERE);
 	m_pCollidableComponent->SetSphere(tsphere);
 
+	CWwiseSoundManager::GetInstance()->SetObjectPosition(TURKEY_ID, m_pObject->GetTransform()->GetWorldPosition(), 0.5f);
 	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_USE, TURKEY_ID);
-	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_TRAVEL, TURKEY_ID);
+
 
 	// let effect stuff know we're fired
-	SendObjectEvent("TurkeyEffect", this, m_pObject);
+	SendObjectEvent("TurkeyEffect", this, m_pObject, PRIORITY_IMMEDIATE);
 
 }
 
@@ -100,14 +114,14 @@ void CTurkeyComponent::Despawn()
 	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_TRAVEL_STOP, TURKEY_ID);
 	CWwiseSoundManager::GetInstance()->UnregisterObject(TURKEY_ID);
 	// dont remove because it crashes the collidable manager
-	//CCollisionManager::GetInstance()->RemoveNonStatic(m_pCollidableComponent, m_pObject->GetID());
+//	CCollisionManager::GetInstance()->RemoveNonStatic(m_pCollidableComponent, m_pObject->GetID());
 
 	// instead, just set the sphere's radius to 0
 	TSphere tsphere;
 	tsphere.cPosition = m_pObject->GetTransform()->GetWorldPosition();
 	tsphere.fRadius = 0.0f;				// TODO: Is this the radius we want?
-	m_pCollidableComponent->SetBVType(BSPHERE);
-	m_pCollidableComponent->SetSphere(tsphere);
+//	m_pCollidableComponent->SetBVType(BSPHERE);
+//	m_pCollidableComponent->SetSphere(tsphere);
 
 	SendObjectEvent("TurkeyDespawned", this, m_pObject);
 }
@@ -189,11 +203,13 @@ void CTurkeyComponent::EnvironmentCollision(IEvent* cEvent, IComponent* cCenter)
 		ColNormal = tEvent->m_vNormal;
 		D3DXVec3Normalize(&ColNormal, &ColNormal);
 
-		if(D3DXVec3Length(&ColNormal) == 0.0f)
-		{
-			//crap crap crap, bad normal!
-			return;//aye, there be no bounce happening here i guess
-		}
+//		if(D3DXVec3Length(&ColNormal) == 0.0f)
+//		{
+//			//crap crap crap, bad normal!
+//			return;//aye, there be no bounce happening here i guess
+//		}
+
+
 		//now that that's out of the way, lets do fancy stuff
 //		ReflectDir = MoveDir - (D3DXVec3Dot(&MoveDir, &ColNormal) * ColNormal * 2.0f);
 //		ReflectDir.y = 0.0f;
@@ -210,8 +226,11 @@ void CTurkeyComponent::EnvironmentCollision(IEvent* cEvent, IComponent* cCenter)
 		}
 		else
 		{
-			pComp->m_vMoveDirection.x *= -1.0f;
-			pComp->m_vMoveDirection.z *= -1.0f;
+//			pComp->m_vMoveDirection.x *= -1.0f;
+//			pComp->m_vMoveDirection.z *= -1.0f;
+			//R = -2*(V dot N)*N - V reflection formula
+			D3DXVECTOR3 ref = -2* (D3DXVec3Dot(&pComp->m_vMoveDirection, &ColNormal)) * ColNormal - pComp->m_vMoveDirection;
+			D3DXVec3Normalize(&pComp->m_vMoveDirection, &ref);
 		}
 
 		CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_EN_IMPACT, pComp->TURKEY_ID); // HACK: not global id
@@ -231,8 +250,6 @@ void CTurkeyComponent::PlayerCollision(IEvent* cEvent, IComponent* cCenter)
 		// send stun effect event to player
 		SendStatusEffectEvent("Stun", comp, tEvent->m_pcCollider, comp->m_fStunDuration);
 		// play sound
-
-		CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_TRAVEL_STOP, comp->TURKEY_ID); // HACK: not global id
 		CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_IMPACT, comp->TURKEY_ID);
 		CWwiseSoundManager::GetInstance()->PlayTheSound(STATUS_STUN, comp->TURKEY_ID);
 		// destroy me
@@ -245,7 +262,29 @@ void CTurkeyComponent::PlayerCollision(IEvent* cEvent, IComponent* cCenter)
 	}
 }
 
+void CTurkeyComponent::ItemCollision(IEvent* cEvent, IComponent* cCenter)
+{
+	CTurkeyComponent* pComp = (CTurkeyComponent*)cCenter;
+	TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
+	if(pComp->m_pObject == tEvent->m_pcCollider && pComp->m_bSpawned)
+	{
+		// HACK: not global id
+		CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_IMPACT, pComp->TURKEY_ID);
 
+		//effect stuff
+		D3DXVECTOR3 p1, p2, trans;
+		p2 = pComp->m_pCollidableComponent->GetSphere().cPosition;
+		p1 = CCollisionManager::GetInstance()->GetTurkeyDestroyObject()->GetTransform()->GetWorldPosition();
+		trans = p2 - p1;//vector to the turkeys position
+		CCollisionManager::GetInstance()->GetTurkeyDestroyObject()->GetTransform()->TranslateFrame(trans);
+		CEffectComponent* pEC = CEffectManager::GetInstance()->CreateStunComponent(CCollisionManager::GetInstance()->GetTurkeyDestroyObject());
+		pEC->SetDeadTimer(EC_TYPE_TURKEY_STUN, 0.0f);
+		pEC->SwitchOnOffEmitters(EC_TYPE_TURKEY_STUN, true);
+
+
+		pComp->Despawn();
+	}
+}
 void CTurkeyComponent::PauseUpdateCallback(IEvent*, IComponent* pComp)
 {
 	// Get the Effect Comp

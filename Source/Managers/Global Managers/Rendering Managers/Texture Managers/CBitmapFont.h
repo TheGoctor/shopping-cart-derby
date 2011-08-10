@@ -7,6 +7,10 @@
 //
 //  Date Created	:	4/02/2011
 //
+//	Last Changed	:	07/24/11
+//
+//	Changed By		:	HN			
+//
 //  Purpose			:	Handles the Rendering of Bitmap Fonts
 //
 ////////////////////////////////////////////////////////
@@ -49,9 +53,10 @@ private:
 	int GetWidth(char cLetter);
 	
 public:
-	
+		
 	CBitmapFont(int nImageID = -1, int nRectWidth = 16,
 		int nCharHeight = 16, int nNumCols = 16, char chStartChar = ' ');
+	//copy constructor
 	CBitmapFont(const CBitmapFont& bf)
 	{
 		m_pTM = bf.m_pTM;
@@ -63,8 +68,9 @@ public:
 		m_cStartChar = bf.m_cStartChar;
 		m_nRectWidth = bf.m_nRectWidth;
 	}
-
+	//Assignment operator
 	CBitmapFont& operator=(const CBitmapFont&){return *this;}
+	//Destructor
 	~CBitmapFont();
 
 	//Accessors

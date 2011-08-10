@@ -6,6 +6,8 @@
 #include "..\..\..\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
 #include "..\..\..\Managers\Component Managers\CHeldItemManager.h"
 #include "..\..\..\Managers\Component Managers\CCollisionManager.h"
+#include "..\..\..\Managers\Global Managers\Rendering Managers\CEffectManager.h"
+#include "..\..\..\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
 using namespace EventStructs;
 CWwiseSoundManager* m_pSound = CWwiseSoundManager::GetInstance();
 
@@ -24,6 +26,7 @@ void CBanana::FirstInit()
 	CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
 //	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldCollision", this, environment)
 	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldPlayerCollision", this, PlayerCollision);
+	CEventManager::GetInstance()->RegisterEvent("BananaDestroyedByItem", this, ItemCollision);
 
 	
 	szEventName = "Update";
@@ -75,13 +78,9 @@ void CBanana::PlayerCollision(IEvent* cEvent, IComponent* cCenter)
 	if(pComp->m_pObject == tEvent->m_pCollidedWith && pComp->m_bIsSpawned)
 	{
 		SendStatusEffectEvent("Slip", pComp, tEvent->m_pcCollider, SLOW_TIME);
-		m_pSound->PlayTheSound(BULLDOG_BIKE_SLIP, pComp->BANANA_ID);
 		pComp->Despawn();
 	}
 }
-
-
- 
 
 void CBanana::PauseUpdateCallback(IEvent*, IComponent* pComp)
 {
@@ -93,6 +92,27 @@ void CBanana::PauseUpdateCallback(IEvent*, IComponent* pComp)
 		SendRenderEvent("AddToSet", comp, comp->m_pObject, PRIORITY_UPDATE);
 	}
 	
+}
+
+
+void CBanana::ItemCollision(IEvent* cEvent, IComponent* cCenter)
+{
+	CBanana* pComp = (CBanana*)cCenter;
+	TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
+	if(pComp->m_pObject == tEvent->m_pcCollider && pComp->GetIsSpawned())
+	{	
+		//effect stuff
+		D3DXVECTOR3 p1, p2, trans;
+		p2 = pComp->m_pObject->GetTransform()->GetWorldPosition();
+		p1 = CCollisionManager::GetInstance()->GetBananaDestroyObject()->GetTransform()->GetWorldPosition();
+		trans = p2 - p1;//vector to the turkeys position
+		CCollisionManager::GetInstance()->GetBananaDestroyObject()->GetTransform()->TranslateFrame(trans);
+		CEffectComponent* pEC = CEffectManager::GetInstance()->CreateSlipComponent(CCollisionManager::GetInstance()->GetBananaDestroyObject());
+		pEC->SetDeadTimer(EC_TYPE_BANANA_SLIP, 0.0f);
+		pEC->SwitchOnOffEmitters(EC_TYPE_BANANA_SLIP, true);
+
+		pComp->Despawn();
+	}
 }
 
 

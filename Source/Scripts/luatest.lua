@@ -4,7 +4,7 @@ function InitValues()
 	
 	-- To create an object,
 	-- name it in CreateObj	
-	
+	unlocked = false;
 	radius = 0.8
 	
 	P0X = -6;
@@ -109,6 +109,15 @@ function InitValues()
 	statePauseOptions = stateEventHowToPlay15 + 1
 	-- pause keybinds menu state
 	statePauseKeybinds = statePauseOptions + 1
+	-- in game how to play state
+	stateInGameHowToPlay = statePauseKeybinds + 1
+	-- level select state
+	stateLevelSelect = stateInGameHowToPlay + 1
+	-- level select state2
+	stateLevelSelect2 = stateLevelSelect + 1
+	-- Quit Confirmation menu
+	stateEventQuitConfirmation = stateLevelSelect2 + 1
+	
 	
 	InitIntroState()
 	InitMainMenu()
@@ -123,6 +132,8 @@ function InitValues()
 	InitHowToPlayMenu()
 	InitPauseOptionsMenu()
 	InitOptionsKeybindsMenu()
+	InitLevelSelectMenu()
+	InitQuitConfirmationMenu()
 	
 end
 function InitIntroState()
@@ -142,11 +153,11 @@ function InitMainMenu()
 	-- From main to Options
 	
 	local background = CreateMenuButton("MainMenuBackground", "", "", "T_Main_Menu_D.png", 0, 0, false, stateEventMainMenu, -1);
-	local playGameButton = CreateMenuButton("PlayGameButton", "LuaPushState(stateEventCharacterSelect);", "",  "", 210, 245, true, stateEventMainMenu, 3);
-	local optionsGameButton = CreateMenuButton("OptionsButton", "LuaPushState(stateEventOptions);", "",  "", 205, 350, false, stateEventMainMenu, 3);	
-	local howToPlayButton = CreateMenuButton("HowToPlayButton", "LuaPushState(stateEventHowToPlay);", "",  "", 250, 425, false, stateEventMainMenu, 3);
-	local creditsButton = CreateMenuButton("CreditsButton", "LuaPushState(stateEventCredits);", "",  "", 210, 515, false, stateEventMainMenu, 3);
-	local exitGameButton = CreateMenuButton("ExitGameButton", "LuaSendEvent(\"ShutdownGame\");", "",  "", 240, 615, false, stateEventMainMenu, 3);
+	local playGameButton = CreateMenuButton("PlayGameButton", "LuaPushState(stateEventCharacterSelect);", "",  "", 290, 245, true, stateEventMainMenu, 3);
+	local optionsGameButton = CreateMenuButton("OptionsButton", "LuaPushState(stateEventOptions);", "",  "", 325, 340, false, stateEventMainMenu, 3);	
+	local howToPlayButton = CreateMenuButton("HowToPlayButton", "LuaPushState(stateEventHowToPlay);", "",  "", 380, 425, false, stateEventMainMenu, 3);
+	local creditsButton = CreateMenuButton("CreditsButton", "LuaPushState(stateEventCredits);", "",  "", 290, 515, false, stateEventMainMenu, 3);
+	local exitGameButton = CreateMenuButton("ExitGameButton", "LuaPushState(stateEventQuitConfirmation);", "",  "", 260, 615, false, stateEventMainMenu, 3);
 	
 	SetNextButtonComponent(playGameButton, optionsGameButton, exitGameButton, 0, 0);
 	SetNextButtonComponent(optionsGameButton, howToPlayButton, playGameButton, 0, 0);
@@ -154,6 +165,39 @@ function InitMainMenu()
 	SetNextButtonComponent(creditsButton, exitGameButton, howToPlayButton, 0, 0);
 	SetNextButtonComponent(exitGameButton, playGameButton, creditsButton, 0, 0);
 end
+
+
+function InitLevelSelectMenu()
+	
+	-- NOT CALLED ANYMORE
+	
+	--[[
+	local thisState1 = stateLevelSelect;
+	local thisState2 = stateLevelSelect2;
+	
+	
+	local background = CreateMenuButton("MainMenuBackground", "", "", "CharacterSelect/T_Select_Level_D.png", 0, 0, false, thisState1, -1);
+	local level1Button = CreateMenuButton("Level1Button", "LuaSendEvent(\"Level1Selected\");", "LuaStateChange(stateLevelSelect);",  "", 170, 220, true, thisState1, 3);
+	local level2Button = CreateMenuButton("Level2Button", "LuaStateChange(stateEventGameplay);", "LuaStateChange(stateLevelSelect2);",  "", 370, 220, false, thisState1, 3);
+	local backButton = CreateMenuButton("LevelSelectBackButton", "FromLevelSelectToCharSelect()", "",  "", 150, 625, false, thisState1, 3);
+	
+	SetNextButtonComponent(level1Button, backButton, backButton, level2Button, level2Button);
+	SetNextButtonComponent(level2Button, backButton, backButton, level1Button, level1Button);
+	SetNextButtonComponent(backButton, level1Button, level1Button, 0, 0 );
+	
+	local background2 = CreateMenuButton("MainMenuBackground2", "", "", "CharacterSelect/T_Select_Level2_D.png", 0, 0, false, thisState2, -1);
+	local level1Button2 = CreateMenuButton("Level1Button2", "LuaStateChange(stateEventGameplay);", "LuaStateChange(stateLevelSelect);",  "", 170, 220, false, thisState2, 3);
+	local level2Button2 = CreateMenuButton("Level2Button2", "LuaSendEvent(\"Level2Selected\");", "LuaStateChange(stateLevelSelect2);",  "", 370, 220, true, thisState2, 3);
+	local backButton2 = CreateMenuButton("LevelSelectBackButton2", "FromLevelSelectToCharSelect()", "",  "", 150, 625, false, thisState2, 3);
+	
+	SetNextButtonComponent(level1Button2, backButton2, backButton2, level2Button2, level2Button2);
+	SetNextButtonComponent(level2Button2, backButton2, backButton2, level1Button2, level1Button2);
+	SetNextButtonComponent(backButton2, level2Button2, level2Button2, 0, 0 );
+	
+	]]--
+	
+end
+
 
 function InitWinGameMenu()
 	
@@ -187,15 +231,30 @@ function InitPauseMenu()
 	--local thisState = stateEventPause;
 	
 	local background = CreateMenuButton("PauseBackground",  "", "", "T_Pause_Page_1_D.png", 0, 0, false, stateEventPause, 4);
-	local resumeButton = CreateMenuButton("PauseResumeAgainButton", "LuaBack();", "",  "", 385, 270, true, stateEventPause, 5);
-	local optionsButton = CreateMenuButton("PauseOptionsButton", "LuaPushState(statePauseOptions);",  "", "", 395, 345, false, stateEventPause, 5);
+	local resumeButton = CreateMenuButton("PauseResumeAgainButton", "LuaBack();", "",  "", 385, 280, true, stateEventPause, 5);
+	local optionsButton = CreateMenuButton("PauseOptionsButton", "LuaPushState(statePauseOptions);",  "", "", 395, 355, false, stateEventPause, 5);
 	local mainMenuButton = CreateMenuButton("PauseMainMenuButton", "LuaStateChange(stateEventMainMenu);", "",  "", 365, 425, false, stateEventPause, 5);
-	local quitMenuButton = CreateMenuButton("PauseQuitButton", "ShutdownGameFromPause();", "",  "", 360, 500, false, stateEventPause, 5);
+	local quitMenuButton = CreateMenuButton("PauseQuitButton", "LuaPushState(stateEventQuitConfirmation)", "",  "", 360, 510, false, stateEventPause, 5);
 		
 	SetNextButtonComponent(resumeButton, optionsButton, quitMenuButton, 0, 0);
 	SetNextButtonComponent(optionsButton, mainMenuButton, resumeButton, 0, 0);
 	SetNextButtonComponent(mainMenuButton, quitMenuButton, optionsButton, 0, 0);
 	SetNextButtonComponent(quitMenuButton, resumeButton, mainMenuButton, 0, 0);
+end
+
+
+function InitQuitConfirmationMenu()
+	
+	-- 3 is pause state
+	--local thisState = stateEventPause;
+	
+	local background = CreateMenuButton("QuitConfBackground",  "", "", "T_Quit_Game_D.png", 250, 180, false, stateEventQuitConfirmation, 4);
+	local yesbutton = CreateMenuButton("QuitConfYesButton", "ShutdownGameFromPause();", "",  "", 440, 470, false, stateEventQuitConfirmation, 5);
+	local nobutton = CreateMenuButton("QuitConfNoButton", "LuaBack()",  "", "", 590, 470, true, stateEventQuitConfirmation, 5);
+		
+	SetNextButtonComponent(yesbutton, nobutton, nobutton, nobutton, nobutton);
+	SetNextButtonComponent(nobutton, yesbutton, yesbutton, yesbutton, yesbutton);
+	
 end
 
 
@@ -205,21 +264,23 @@ function InitPauseOptionsMenu()
 	local background = CreateMenuButton("PauseOptionsBackground", "", "",  "T_Pause_Page_2_D.png", 0, 0, false, statePauseOptions, 2);
 	--local button1 = CreateMenuButton("OptionsMusicVolume", "", "MainMenuOptions.png", 350, 300, true, statePauseOptions, 3);
 	--local button2 = CreateMenuButton("OptionsSFXVolume", "", "MainMenuOptions.png", 350, 375, false, statePauseOptions, 3);
-	 PauseMusicVolButton = CreateMenuSlider("PauseOptionsMusicVolume", "SetMusicVolume", "T_Pause_Icon_D.png", 280, 230, 700, 230, true, statePauseOptions, 3);
-	 PauseSFXVolButton   = CreateMenuSlider("PauseOptionsSFXVolume", "SetSoundVolume", "T_Pause_Icon_D.png", 285, 300, 715, 300, false, statePauseOptions, 3);
-	 PauseGammaButton    = CreateMenuSlider("PauseOptionsGammaValue", "ChangeGamma",  "T_Pause_Icon_D.png", 280, 375, 700, 375, false, statePauseOptions, 3);
-	 PauseKeybindsButton = CreateMenuButton("PauseOptionsKeybindButton", "PushState(statePauseKeybinds);",  "", "", 200, 460, false, statePauseOptions, 3);
-	 PauseDefaultButton  = CreateMenuButton("PauseOptionsDefaultButton", "ResetDefaultOptions(PauseMusicVolButton, PauseSFXVolButton, PauseGammaButton);", "",  "", 200, 530, false, statePauseOptions, 3);
-	PauseBackButton     = CreateMenuButton("PauseOptionsReturnMenuButton", "LuaBack();", "",  "", 200, 595, false, statePauseOptions, 3);
+	 PauseMusicVolButton = CreateMenuSlider("PauseOptionsMusicVolume", "SetMusicVolume", "T_Pause_Icon_D.png", 280, 230, 700, 230, true, statePauseOptions, 1, 3);
+	 PauseSFXVolButton   = CreateMenuSlider("PauseOptionsSFXVolume", "SetSoundVolume", "T_Pause_Icon_D.png", 285, 300, 715, 300, false, statePauseOptions, 2, 3);
+	 PauseGammaButton    = CreateMenuSlider("PauseOptionsGammaValue", "ChangeGamma",  "T_Pause_Icon_D.png", 280, 375, 700, 375, false, statePauseOptions, 3, 3);
+	 PauseKeybindsButton = CreateMenuButton("PauseOptionsKeybindButton", "PushState(statePauseKeybinds);",  "", "", 200, 450, false, statePauseOptions, 3);
+	 PauseDefaultButton  = CreateMenuButton("PauseOptionsDefaultButton", "ResetDefaultOptions(PauseMusicVolButton, PauseSFXVolButton, PauseGammaButton);", "",  "", 200, 510, false, statePauseOptions, 3);
+	PauseBackButton     = CreateMenuButton("PauseOptionsReturnMenuButton", "LuaBack();", "",  "", 200, 565, false, statePauseOptions, 3);
+	PauseCancelButton     = CreateMenuButton("PauseOptionsCancelButton", "LuaCancelBackPause();", "",  "", 200, 625, false, statePauseOptions, 3);
 	
 	ResetDefaultOptions(PauseMusicVolButton, PauseSFXVolButton, PauseGammaButton);
 		
-	SetNextButtonComponent(PauseMusicVolButton,		PauseSFXVolButton,		PauseBackButton,		0, 0);
+	SetNextButtonComponent(PauseMusicVolButton,		PauseSFXVolButton,		PauseCancelButton,		0, 0);
 	SetNextButtonComponent(PauseSFXVolButton,		PauseGammaButton,		PauseMusicVolButton,	0, 0);
 	SetNextButtonComponent(PauseGammaButton,		PauseKeybindsButton,	PauseSFXVolButton,		0, 0);
 	SetNextButtonComponent(PauseKeybindsButton,		PauseDefaultButton,		PauseGammaButton,		0, 0);
 	SetNextButtonComponent(PauseDefaultButton,		PauseBackButton,		PauseKeybindsButton,	0, 0);
-	SetNextButtonComponent(PauseBackButton,			PauseMusicVolButton,	PauseDefaultButton,		0, 0);
+	SetNextButtonComponent(PauseBackButton,			PauseCancelButton,	PauseDefaultButton,		0, 0);
+	SetNextButtonComponent(PauseCancelButton,			PauseMusicVolButton,	PauseBackButton,		0, 0);
 end
 
 
@@ -234,26 +295,26 @@ function InitOptionsKeybindsMenu()
 	local button3 = CreateMenuButton("PauseKeybindButton3", "SetKey(2);", "", "", 190, 385, false, statePauseKeybinds, 3);
 	local button4 = CreateMenuButton("PauseKeybindButton4", "SetKey(3);", "", "", 190, 440, false, statePauseKeybinds, 3);
 	local button5 = CreateMenuButton("PauseKeybindButton5", "SetKey(4);", "", "", 190, 500, false, statePauseKeybinds, 3);
-	local button6 = CreateMenuButton("PauseKeybindButton6", "SetKey(5);", "", "", 590, 275, false, statePauseKeybinds, 3);
-	local button7 = CreateMenuButton("PauseKeybindButton7", "SetKey(6);", "", "", 590, 330, false, statePauseKeybinds, 3);
-	local button8 = CreateMenuButton("PauseKeybindButton8", "SetKey(7);", "", "", 590, 385, false, statePauseKeybinds, 3);
-	local button9 = CreateMenuButton("PauseKeybindButton9", "SetKey(8);", "", "", 590, 440, false, statePauseKeybinds, 3);
-	local button10 = CreateMenuButton("PauseKeybindButton10", "SetDefaultKeys();", "", "", 510, 550, false, statePauseKeybinds, 3);
-	local button11 = CreateMenuButton("PauseKeybindsReturnMenuButton", "LuaBack();",  "", "", 195, 595, false, statePauseKeybinds, 3);
+	local button6 = CreateMenuButton("PauseKeybindButton6", "SetKey(5);", "", "", 575, 275, false, statePauseKeybinds, 3);
+	local button7 = CreateMenuButton("PauseKeybindButton7", "SetKey(6);", "", "", 575, 325, false, statePauseKeybinds, 3);
+	local button8 = CreateMenuButton("PauseKeybindButton8", "SetKey(7);", "", "", 575, 380, false, statePauseKeybinds, 3);
+	local button9 = CreateMenuButton("PauseKeybindButton9", "SetKey(8);", "", "", 575, 440, false, statePauseKeybinds, 3);
+	local button10 = CreateMenuButton("PauseKeybindButton10", "SetDefaultKeys();", "", "", 565, 550, false, statePauseKeybinds, 3);
+	local button11 = CreateMenuButton("PauseKeybindsReturnMenuButton", "LuaBack();",  "", "", 195, 570, false, statePauseKeybinds, 3);
 	
 	--						me		down		up		left	right
 	SetNextButtonComponent(button1, button2, button11, button11, button6);
 	SetNextButtonComponent(button2, button3, button1, button11, button7);
 	SetNextButtonComponent(button3, button4, button2, button11, button8);
 	SetNextButtonComponent(button4, button5, button3, button11, button9);
-	SetNextButtonComponent(button5, button6, button4, button11, button10);
+	SetNextButtonComponent(button5, button11, button4, button11, button10);
 	
 	SetNextButtonComponent(button6, button7, button5, button1, button11);
 	SetNextButtonComponent(button7, button8, button6, button2, button11);
 	SetNextButtonComponent(button8, button9, button7, button3, button11);
 	SetNextButtonComponent(button9, button10, button8, button4, button11);
 	SetNextButtonComponent(button10, button11, button9, button5, button11);
-	SetNextButtonComponent(button11, button1, button10, button10, button1);
+	SetNextButtonComponent(button11, button1, button5, button10, button10);
 end
 
 
@@ -267,21 +328,23 @@ function InitOptionsMenu()
 	local background = CreateMenuButton("OptionsBackground", "", "",  "T_Main_Options_D.png", 0, 0, false, stateEventOptions, 2);
 	--local button1 = CreateMenuButton("OptionsMusicVolume", "", "MainMenuOptions.png", 350, 300, true, stateEventOptions, 3);
 	--local button2 = CreateMenuButton("OptionsSFXVolume", "", "MainMenuOptions.png", 350, 375, false, stateEventOptions, 3);
-	MusicVolButton = CreateMenuSlider("OptionsMusicVolume", "SetMusicVolume", "T_Pause_Icon_D.png", 280, 160, 720, 160, true, stateEventOptions, 3);
-	SFXVolButton   = CreateMenuSlider("OptionsSFXVolume", "SetSoundVolume", "T_Pause_Icon_D.png", 285, 250, 745, 250, false, stateEventOptions, 3);
-	GammaButton    = CreateMenuSlider("OptionsGammaValue", "ChangeGamma",  "T_Pause_Icon_D.png", 280, 350, 720, 350, false, stateEventOptions, 3);
+	MusicVolButton = CreateMenuSlider("OptionsMusicVolume", "SetMusicVolume", "T_Pause_Icon_D.png", 255, 160, 745, 160, true, stateEventOptions, 1, 3);
+	SFXVolButton   = CreateMenuSlider("OptionsSFXVolume", "SetSoundVolume", "T_Pause_Icon_D.png", 255, 250, 745, 250, false, stateEventOptions, 2, 3);
+	GammaButton    = CreateMenuSlider("OptionsGammaValue", "ChangeGamma",  "T_Pause_Icon_D.png", 255, 350, 745, 350, false, stateEventOptions, 3, 3);
 	KeybindsButton = CreateMenuButton("OptionsKeybindButton", "PushState(stateEventKeybinds);",  "", "", 50, 450, false, stateEventOptions, 3);
-	DefaultButton  = CreateMenuButton("OptionsDefaultButton", "ResetDefaultOptions(MusicVolButton, SFXVolButton, GammaButton);", "",  "", 100, 650, false, stateEventOptions, 3);
-	BackButton     = CreateMenuButton("OptionsReturnMenuButton", "LuaBack();", "",  "", 100, 560, false, stateEventOptions, 3);
+	BackButton     = CreateMenuButton("OptionsReturnMenuButton", "LuaBack();", "",  "", 75, 525, false, stateEventOptions, 3);
+	DefaultButton  = CreateMenuButton("OptionsDefaultButton", "ResetDefaultOptions(MusicVolButton, SFXVolButton, GammaButton);", "",  "", 75, 605, false, stateEventOptions, 3);
+	CancelButton     = CreateMenuButton("OptionsCancelButton", "LuaCancelBackMain();", "",  "", 75, 685, false, stateEventOptions, 3);
 		
 	ResetDefaultOptions(MusicVolButton, SFXVolButton, GammaButton);
 	
-	SetNextButtonComponent(MusicVolButton, SFXVolButton, DefaultButton, 0, 0);
+	SetNextButtonComponent(MusicVolButton, SFXVolButton, CancelButton, 0, 0);
 	SetNextButtonComponent(SFXVolButton, GammaButton, MusicVolButton, 0, 0);
 	SetNextButtonComponent(GammaButton, KeybindsButton, SFXVolButton, 0, 0);
 	SetNextButtonComponent(KeybindsButton, BackButton, GammaButton, BackButton, DefaultButton);
 	SetNextButtonComponent(BackButton, DefaultButton, KeybindsButton, KeybindsButton, BackButton);
-	SetNextButtonComponent(DefaultButton, MusicVolButton, BackButton, BackButton, KeybindsButton);
+	SetNextButtonComponent(DefaultButton, CancelButton, BackButton, CancelButton, KeybindsButton);
+	SetNextButtonComponent(CancelButton, MusicVolButton, DefaultButton, DefaultButton, KeybindsButton);
 end
 
 
@@ -345,14 +408,14 @@ function InitCharacterSelectMenu()
 
 	-- Select Bikers -- State 8
 	local bground = CreateMenuButton("CharSelectBackground1",		"", "", "CharacterSelect/T_Character_Select_BullDog_D.png", 0, 0, false, stateEventCharacterSelect, 2);
-	local button1 = CreateMenuButton("CharacterBulldogButton1",		"CreateBikersObj(Player0, 0);", "",  "", 130, 200, true, stateEventCharacterSelect, 3);
-	local button2 = CreateMenuButton("CharacterBanditosButton1",	"StateChange(stateEventCharacterSelect2)",  "StateChange(stateEventCharacterSelect2)", "", 475, 200, false, stateEventCharacterSelect, 3);
-	local button3 = CreateMenuButton("CharacterScientistButton1",	"StateChange(stateEventCharacterSelect3);", "StateChange(stateEventCharacterSelect3)", "", 120, 310, false, stateEventCharacterSelect, 3);
-	local button4 = CreateMenuButton("CharacterSashaButton1",		"StateChange(stateEventCharacterSelect4);", "StateChange(stateEventCharacterSelect4)", "", 450, 340, false, stateEventCharacterSelect, 3);
-	local button6 = CreateMenuButton("CharacterLarpersButton1",		"StateChange(stateEventCharacterSelect5);", "StateChange(stateEventCharacterSelect5)", "", 275, 425, false, stateEventCharacterSelect, 3);
-	local button38 = CreateMenuButton("CharacterCryGameButton1",	"StateChange(stateEventCharacterSelect6);", "StateChange(stateEventCharacterSelect6)", "", 120, 425, false, stateEventCharacterSelect, 3); 
-	local button39 = CreateMenuButton("CharacterStoryTimeButton1",	"StateChange(stateEventCharacterSelect7);", "StateChange(stateEventCharacterSelect7)", "", 450, 425, false, stateEventCharacterSelect, 3); 
-	local button7 = CreateMenuButton("CharacterSelectReturnMenuButton1", "StateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect, 3);
+	local button1 = CreateMenuButton("CharacterBulldogButton1",		"CreateBikersObj(Player0, 0);", "",  "", 130, 180, true, stateEventCharacterSelect, 3);
+	local button2 = CreateMenuButton("CharacterBanditosButton1",	"LuaStateChange(stateEventCharacterSelect2)",  "LuaStateChange(stateEventCharacterSelect2)", "", 475, 170, false, stateEventCharacterSelect, 3);
+	local button3 = CreateMenuButton("CharacterScientistButton1",	"LuaStateChange(stateEventCharacterSelect3);", "LuaStateChange(stateEventCharacterSelect3)", "", 130, 300, false, stateEventCharacterSelect, 3);
+	local button4 = CreateMenuButton("CharacterSashaButton1",		"LuaStateChange(stateEventCharacterSelect4);", "LuaStateChange(stateEventCharacterSelect4)", "", 470, 340, false, stateEventCharacterSelect, 3);
+	local button6 = CreateMenuButton("CharacterLarpersButton1",		"LuaStateChange(stateEventCharacterSelect5);", "LuaStateChange(stateEventCharacterSelect5)", "", 285, 415, false, stateEventCharacterSelect, 3);
+	local button38 = CreateMenuButton("CharacterCryGameButton1",	"LuaStateChange(stateEventCharacterSelect6);", "LuaStateChange(stateEventCharacterSelect6)", "", 110, 425, false, stateEventCharacterSelect, 3); 
+	local button39 = CreateMenuButton("CharacterStoryTimeButton1",	"LuaStateChange(stateEventCharacterSelect7);", "LuaStateChange(stateEventCharacterSelect7)", "", 470, 430, false, stateEventCharacterSelect, 3); 
+	local button7 = CreateMenuButton("CharacterSelectReturnMenuButton1", "LuaStateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect, 3);
 		
 		--					me		  down		up		left	right
 	SetNextButtonComponent(button1, button3, button7, button2, button2);
@@ -366,14 +429,14 @@ function InitCharacterSelectMenu()
 	
 	-- Select Banidtios -- State 9
 	local bground1 = CreateMenuButton("CharSelectBackground2",		"", "", "CharacterSelect/T_Character_Select_Banditos_D.png", 0, 0, false, stateEventCharacterSelect2, 2);
-	local button8 = CreateMenuButton("CharacterBulldogButton2",		"StateChange(stateEventCharacterSelect);",  "StateChange(stateEventCharacterSelect)",  "", 130, 200, false, stateEventCharacterSelect2, 3);
-	local button9 = CreateMenuButton("CharacterBanditosButton2",	"CreateBanditosObj(Player0, 0);", "", "", 475, 200, true,stateEventCharacterSelect2, 3);
-	local button10 = CreateMenuButton("CharacterScientistButton2",	"StateChange(stateEventCharacterSelect);",  "StateChange(stateEventCharacterSelect)",  "", 120, 310, false, stateEventCharacterSelect2, 3);
-	local button11 = CreateMenuButton("CharacterSashaButton2",		"StateChange(stateEventCharacterSelect4);", "StateChange(stateEventCharacterSelect4)", "", 450, 340, false, stateEventCharacterSelect2, 3);
-	local button12 = CreateMenuButton("CharacterLarpersButton2",	"StateChange(stateEventCharacterSelect5);", "StateChange(stateEventCharacterSelect5)", "", 275, 425, false, stateEventCharacterSelect2, 3);
-	local button40 = CreateMenuButton("CharacterCryGameButton2",	"StateChange(stateEventCharacterSelect6);", "StateChange(stateEventCharacterSelect6)", "", 120, 425, false, stateEventCharacterSelect2, 3); 
-	local button41 = CreateMenuButton("CharacterStoryTimeButton2",	"StateChange(stateEventCharacterSelect7);", "StateChange(stateEventCharacterSelect7)", "", 450, 425, false, stateEventCharacterSelect2, 3); 
-	local button13 = CreateMenuButton("CharacterSelectReturnMenuButton2", "StateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect2, 3);
+	local button8 = CreateMenuButton("CharacterBulldogButton2",		"LuaStateChange(stateEventCharacterSelect);",  "LuaStateChange(stateEventCharacterSelect)",  "", 130, 180, false, stateEventCharacterSelect2, 3);
+	local button9 = CreateMenuButton("CharacterBanditosButton2",	"CreateBanditosObj(Player0, 0);", "", "", 475, 170, true,stateEventCharacterSelect2, 3);
+	local button10 = CreateMenuButton("CharacterScientistButton2",	"LuaStateChange(stateEventCharacterSelect);",  "LuaStateChange(stateEventCharacterSelect)",  "", 130, 300, false, stateEventCharacterSelect2, 3);
+	local button11 = CreateMenuButton("CharacterSashaButton2",		"LuaStateChange(stateEventCharacterSelect4);", "LuaStateChange(stateEventCharacterSelect4)", "", 470, 340, false, stateEventCharacterSelect2, 3);
+	local button12 = CreateMenuButton("CharacterLarpersButton2",	"LuaStateChange(stateEventCharacterSelect5);", "LuaStateChange(stateEventCharacterSelect5)", "", 285, 415, false, stateEventCharacterSelect2, 3);
+	local button40 = CreateMenuButton("CharacterCryGameButton2",	"LuaStateChange(stateEventCharacterSelect6);", "LuaStateChange(stateEventCharacterSelect6)", "", 110, 425, false, stateEventCharacterSelect2, 3); 
+	local button41 = CreateMenuButton("CharacterStoryTimeButton2",	"LuaStateChange(stateEventCharacterSelect7);", "LuaStateChange(stateEventCharacterSelect7)", "", 470, 430, false, stateEventCharacterSelect2, 3); 
+	local button13 = CreateMenuButton("CharacterSelectReturnMenuButton2", "LuaStateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect2, 3);
 		
 		--					me		  down		up		left	right
 	SetNextButtonComponent(button8, button10, button13, button9, button9);
@@ -387,14 +450,14 @@ function InitCharacterSelectMenu()
  
 	 -- Select Scientist -- State 10
 	 local bground2 = CreateMenuButton("CharSelectBackground3",		"","", "CharacterSelect/T_Character_Select_Scientist_D.png", 0, 0, false, stateEventCharacterSelect3, 2);
-	local button14 = CreateMenuButton("CharacterBulldogButton3",	"StateChange(stateEventCharacterSelect);",  "StateChange(stateEventCharacterSelect)",  "", 130, 200, false, stateEventCharacterSelect3, 3);
-	local button15 = CreateMenuButton("CharacterBanditosButton3",	"StateChange(stateEventCharacterSelect2);", "StateChange(stateEventCharacterSelect2)", "", 475, 200, false, stateEventCharacterSelect3, 3);
-	local button16 = CreateMenuButton("CharacterScientistButton3",	"CreateScientistsObj(Player0, 0);", "", "", 120, 310, true, stateEventCharacterSelect3, 3);
-	local button17 = CreateMenuButton("CharacterSashaButton3",		"StateChange(stateEventCharacterSelect4);", "StateChange(stateEventCharacterSelect4)", "", 450, 340, false, stateEventCharacterSelect3, 3);
-	local button18 = CreateMenuButton("CharacterLarpersButton3",	"StateChange(stateEventCharacterSelect5);", "StateChange(stateEventCharacterSelect5)", "", 275, 425, false, stateEventCharacterSelect3, 3);
-	local button42 = CreateMenuButton("CharacterCryGameButton3",	"StateChange(stateEventCharacterSelect6);", "StateChange(stateEventCharacterSelect6)", "", 120, 425, false, stateEventCharacterSelect3, 3); 
-	local button43 = CreateMenuButton("CharacterStoryTimeButton3",	"StateChange(stateEventCharacterSelect7);", "StateChange(stateEventCharacterSelect7)", "", 450, 425, false, stateEventCharacterSelect3, 3); 
-	local button19 = CreateMenuButton("CharacterSelectReturnMenuButton3", "StateChange(stateEventMainMenu);",  "",  "",  150, 625, false, stateEventCharacterSelect3, 3);
+	local button14 = CreateMenuButton("CharacterBulldogButton3",	"LuaStateChange(stateEventCharacterSelect);",  "LuaStateChange(stateEventCharacterSelect)",  "", 130, 180, false, stateEventCharacterSelect3, 3);
+	local button15 = CreateMenuButton("CharacterBanditosButton3",	"LuaStateChange(stateEventCharacterSelect2);", "LuaStateChange(stateEventCharacterSelect2)", "", 475, 170, false, stateEventCharacterSelect3, 3);
+	local button16 = CreateMenuButton("CharacterScientistButton3",	"CreateScientistsObj(Player0, 0);", "", "", 130, 300, true, stateEventCharacterSelect3, 3);
+	local button17 = CreateMenuButton("CharacterSashaButton3",		"LuaStateChange(stateEventCharacterSelect4);", "LuaStateChange(stateEventCharacterSelect4)", "", 470, 340, false, stateEventCharacterSelect3, 3);
+	local button18 = CreateMenuButton("CharacterLarpersButton3",	"LuaStateChange(stateEventCharacterSelect5);", "LuaStateChange(stateEventCharacterSelect5)", "", 285, 415, false, stateEventCharacterSelect3, 3);
+	local button42 = CreateMenuButton("CharacterCryGameButton3",	"LuaStateChange(stateEventCharacterSelect6);", "LuaStateChange(stateEventCharacterSelect6)", "", 110, 425, false, stateEventCharacterSelect3, 3); 
+	local button43 = CreateMenuButton("CharacterStoryTimeButton3",	"LuaStateChange(stateEventCharacterSelect7);", "LuaStateChange(stateEventCharacterSelect7)", "", 470, 430, false, stateEventCharacterSelect3, 3); 
+	local button19 = CreateMenuButton("CharacterSelectReturnMenuButton3", "LuaStateChange(stateEventMainMenu);",  "",  "",  150, 625, false, stateEventCharacterSelect3, 3);
 		
 		--					me		  down		up		left	right
 	SetNextButtonComponent(button14, button18, button19, button15, button15); -- 1
@@ -408,14 +471,14 @@ function InitCharacterSelectMenu()
 	
 	-- Select SASHA -- State 11
 	local bground3 = CreateMenuButton("CharSelectBackground4",		"", "", "CharacterSelect/T_Character_Select_Sasha_D.png", 0, 0, false, stateEventCharacterSelect4, 2);
-	local button21 = CreateMenuButton("CharacterBulldogButton4",	"StateChange(stateEventCharacterSelect));", "StateChange(stateEventCharacterSelect)",  "", 130, 200, false, stateEventCharacterSelect4, 3);
-	local button22 = CreateMenuButton("CharacterBanditosButton4",	"StateChange(stateEventCharacterSelect2);", "StateChange(stateEventCharacterSelect2)", "", 475, 200, false, stateEventCharacterSelect4, 3);
-	local button23 = CreateMenuButton("CharacterScientistButton4",	"StateChange(stateEventCharacterSelect3);", "StateChange(stateEventCharacterSelect3)", "", 120, 310, false, stateEventCharacterSelect4, 3);
-	local button24 = CreateMenuButton("CharacterSashaButton4",		"CreateSashaObj(Player0, 0);", "", "", 450, 340, true, stateEventCharacterSelect4, 3);
-	local button26 = CreateMenuButton("CharacterLarpersButton4",	"StateChange(stateEventCharacterSelect5);", "StateChange(stateEventCharacterSelect5)", "", 275, 425, false, stateEventCharacterSelect4, 3);
-	local button44 = CreateMenuButton("CharacterCryGameButton4",	"StateChange(stateEventCharacterSelect6);", "StateChange(stateEventCharacterSelect6)", "", 120, 425, false, stateEventCharacterSelect4, 3); 
-	local button45 = CreateMenuButton("CharacterStoryTimeButton4",	"StateChange(stateEventCharacterSelect7);", "StateChange(stateEventCharacterSelect7)", "", 450, 425, false, stateEventCharacterSelect4, 3);
-	local button27 = CreateMenuButton("CharacterSelectReturnMenuButton4", "StateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect4, 3);
+	local button21 = CreateMenuButton("CharacterBulldogButton4",	"LuaStateChange(stateEventCharacterSelect));", "LuaStateChange(stateEventCharacterSelect)",  "", 130, 180, false, stateEventCharacterSelect4, 3);
+	local button22 = CreateMenuButton("CharacterBanditosButton4",	"LuaStateChange(stateEventCharacterSelect2);", "LuaStateChange(stateEventCharacterSelect2)", "", 475, 170, false, stateEventCharacterSelect4, 3);
+	local button23 = CreateMenuButton("CharacterScientistButton4",	"LuaStateChange(stateEventCharacterSelect3);", "LuaStateChange(stateEventCharacterSelect3)", "", 130, 300, false, stateEventCharacterSelect4, 3);
+	local button24 = CreateMenuButton("CharacterSashaButton4",		"CreateSashaObj(Player0, 0);", "", "", 470, 340, true, stateEventCharacterSelect4, 3);
+	local button26 = CreateMenuButton("CharacterLarpersButton4",	"LuaStateChange(stateEventCharacterSelect5);", "LuaStateChange(stateEventCharacterSelect5)", "", 285, 415, false, stateEventCharacterSelect4, 3);
+	local button44 = CreateMenuButton("CharacterCryGameButton4",	"LuaStateChange(stateEventCharacterSelect6);", "LuaStateChange(stateEventCharacterSelect6)", "", 110, 425, false, stateEventCharacterSelect4, 3); 
+	local button45 = CreateMenuButton("CharacterStoryTimeButton4",	"LuaStateChange(stateEventCharacterSelect7);", "LuaStateChange(stateEventCharacterSelect7)", "", 470, 430, false, stateEventCharacterSelect4, 3);
+	local button27 = CreateMenuButton("CharacterSelectReturnMenuButton4", "LuaStateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect4, 3);
 		
 		--					me		  down		up		left	right
 	SetNextButtonComponent(button21, button23, button27, button22, button22);
@@ -429,14 +492,14 @@ function InitCharacterSelectMenu()
 	
 	-- Select Larpers -- State 12
 	local bground4 = CreateMenuButton("CharSelectBackground5",		"", "", "CharacterSelect/T_Character_Select_Larpers_D.png", 0, 0, false, stateEventCharacterSelect5, 2);
-	local button31 = CreateMenuButton("CharacterBulldogButton5",	"StateChange(stateEventCharacterSelect);",  "StateChange(stateEventCharacterSelect)",  "", 130, 200, false, stateEventCharacterSelect5, 3);
-	local button32 = CreateMenuButton("CharacterBanditosButton5",	"StateChange(stateEventCharacterSelect2);", "StateChange(stateEventCharacterSelect2)", "", 475, 200, false, stateEventCharacterSelect5, 3);
-	local button33 = CreateMenuButton("CharacterScientistButton5",	"StateChange(stateEventCharacterSelect3);", "StateChange(stateEventCharacterSelect3)", "", 120, 310, false, stateEventCharacterSelect5, 3);
-	local button34 = CreateMenuButton("CharacterSashaButton5",		"StateChange(stateEventCharacterSelect4);", "StateChange(stateEventCharacterSelect4)", "", 450, 340, false, stateEventCharacterSelect5, 3);
-	local button36 = CreateMenuButton("CharacterLarpersButton5",	"CreateLarpersObj(Player0, 0);", "", "", 275, 425, true, stateEventCharacterSelect5, 3);
-	local button46 = CreateMenuButton("CharacterCryGameButton5",	"StateChange(stateEventCharacterSelect6);", "StateChange(stateEventCharacterSelect6)", "", 120, 425, false, stateEventCharacterSelect5, 3); 
-	local button47 = CreateMenuButton("CharacterStoryTimeButton5",	"StateChange(stateEventCharacterSelect7);", "StateChange(stateEventCharacterSelect7)", "", 450, 425, false, stateEventCharacterSelect5, 3);
-	local button37 = CreateMenuButton("CharacterSelectReturnMenuButton5", "StateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect5, 3);
+	local button31 = CreateMenuButton("CharacterBulldogButton5",	"LuaStateChange(stateEventCharacterSelect);",  "LuaStateChange(stateEventCharacterSelect)",  "", 130, 180, false, stateEventCharacterSelect5, 3);
+	local button32 = CreateMenuButton("CharacterBanditosButton5",	"LuaStateChange(stateEventCharacterSelect2);", "LuaStateChange(stateEventCharacterSelect2)", "", 475, 170, false, stateEventCharacterSelect5, 3);
+	local button33 = CreateMenuButton("CharacterScientistButton5",	"LuaStateChange(stateEventCharacterSelect3);", "LuaStateChange(stateEventCharacterSelect3)", "", 130, 300, false, stateEventCharacterSelect5, 3);
+	local button34 = CreateMenuButton("CharacterSashaButton5",		"LuaStateChange(stateEventCharacterSelect4);", "LuaStateChange(stateEventCharacterSelect4)", "", 470, 340, false, stateEventCharacterSelect5, 3);
+	local button36 = CreateMenuButton("CharacterLarpersButton5",	"CreateLarpersObj(Player0, 0);", "", "", 285, 415, true, stateEventCharacterSelect5, 3);
+	local button46 = CreateMenuButton("CharacterCryGameButton5",	"LuaStateChange(stateEventCharacterSelect6);", "LuaStateChange(stateEventCharacterSelect6)", "", 110, 425, false, stateEventCharacterSelect5, 3); 
+	local button47 = CreateMenuButton("CharacterStoryTimeButton5",	"LuaStateChange(stateEventCharacterSelect7);", "LuaStateChange(stateEventCharacterSelect7)", "", 470, 430, false, stateEventCharacterSelect5, 3);
+	local button37 = CreateMenuButton("CharacterSelectReturnMenuButton5", "LuaStateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect5, 3);
 		
 		--					me		  down		up		left	right
 	SetNextButtonComponent(button31, button33, button37, button32, button32);
@@ -449,15 +512,15 @@ function InitCharacterSelectMenu()
 	SetNextButtonComponent(button37, button31, button46, 0, 0);
 	
 	-- Select CryGame -- State 13
-	local bground5 = CreateMenuButton("CharSelectBackground6",		"", "", "CharacterSelect/T_Character_Select_Larpers_D.png", 0, 0, false, stateEventCharacterSelect6, 2);
-	local button48 = CreateMenuButton("CharacterBulldogButton6",	"StateChange(stateEventCharacterSelect);",  "StateChange(stateEventCharacterSelect)",  "", 130, 200, false, stateEventCharacterSelect6, 3);
-	local button49 = CreateMenuButton("CharacterBanditosButton6",	"StateChange(stateEventCharacterSelect2);", "StateChange(stateEventCharacterSelect2)", "", 475, 200, false, stateEventCharacterSelect6, 3);
-	local button50 = CreateMenuButton("CharacterScientistButton6",	"StateChange(stateEventCharacterSelect3);", "StateChange(stateEventCharacterSelect3)", "", 120, 310, false, stateEventCharacterSelect6, 3);
-	local button51 = CreateMenuButton("CharacterSashaButton6",		"StateChange(stateEventCharacterSelect4);", "StateChange(stateEventCharacterSelect4)", "", 450, 340, false, stateEventCharacterSelect6, 3);
-	local button52 = CreateMenuButton("CharacterLarpersButton6",	"StateChange(stateEventCharacterSelect5);", "StateChange(stateEventCharacterSelect5)", "", 275, 425, false, stateEventCharacterSelect6, 3);
-	local button53 = CreateMenuButton("CharacterCryGameButton6",	"CreateCryGameObj(Player0, 0);", "", "", 120, 425, true, stateEventCharacterSelect6, 3); 
-	local button54 = CreateMenuButton("CharacterStoryTimeButton6",	"StateChange(stateEventCharacterSelect7);", "StateChange(stateEventCharacterSelect7)", "", 450, 425, false, stateEventCharacterSelect6, 3);
-	local button55 = CreateMenuButton("CharacterSelectReturnMenuButton6", "StateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect6, 3);
+	local bground5 = CreateMenuButton("CharSelectBackground6",		"", "", "CharacterSelect/T_Character_Select_Secret_D.png", 0, 0, false, stateEventCharacterSelect6, 2);
+	local button48 = CreateMenuButton("CharacterBulldogButton6",	"LuaStateChange(stateEventCharacterSelect);",  "LuaStateChange(stateEventCharacterSelect)",  "", 130, 180, false, stateEventCharacterSelect6, 3);
+	local button49 = CreateMenuButton("CharacterBanditosButton6",	"LuaStateChange(stateEventCharacterSelect2);", "LuaStateChange(stateEventCharacterSelect2)", "", 475, 170, false, stateEventCharacterSelect6, 3);
+	local button50 = CreateMenuButton("CharacterScientistButton6",	"LuaStateChange(stateEventCharacterSelect3);", "LuaStateChange(stateEventCharacterSelect3)", "", 130, 300, false, stateEventCharacterSelect6, 3);
+	local button51 = CreateMenuButton("CharacterSashaButton6",		"LuaStateChange(stateEventCharacterSelect4);", "LuaStateChange(stateEventCharacterSelect4)", "", 470, 340, false, stateEventCharacterSelect6, 3);
+	local button52 = CreateMenuButton("CharacterLarpersButton6",	"LuaStateChange(stateEventCharacterSelect5);", "LuaStateChange(stateEventCharacterSelect5)", "", 285, 415, false, stateEventCharacterSelect6, 3);
+	local button53 = CreateMenuButton("CharacterCryGameButton6",	"CreateCryGameObj(Player0, 0);", "", "", 110, 425, true, stateEventCharacterSelect6, 3); 
+	local button54 = CreateMenuButton("CharacterStoryTimeButton6",	"LuaStateChange(stateEventCharacterSelect7);", "LuaStateChange(stateEventCharacterSelect7)", "", 470, 430, false, stateEventCharacterSelect6, 3);
+	local button55 = CreateMenuButton("CharacterSelectReturnMenuButton6", "LuaStateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect6, 3);
 		
 		--					me		  down		up		left	right
 	SetNextButtonComponent(button48, button50, button55, button49, button49);
@@ -470,15 +533,15 @@ function InitCharacterSelectMenu()
 	SetNextButtonComponent(button55, button48, button53, 0, 0);
 	
 	-- Select StoryTime -- State 14
-	local bground6 = CreateMenuButton("CharSelectBackground7",	"", "", "CharacterSelect/T_Character_Select_Larpers_D.png", 0, 0, false, stateEventCharacterSelect7, 2);
-	local button56 = CreateMenuButton("CharacterBulldogButton7",	"StateChange(stateEventCharacterSelect);",  "StateChange(stateEventCharacterSelect)",  "", 130, 200, false, stateEventCharacterSelect7, 3);
-	local button57 = CreateMenuButton("CharacterBanditosButton7",	"StateChange(stateEventCharacterSelect2);", "StateChange(stateEventCharacterSelect2)", "", 475, 200, false, stateEventCharacterSelect7, 3);
-	local button58 = CreateMenuButton("CharacterScientistButton7",	"StateChange(stateEventCharacterSelect3);", "StateChange(stateEventCharacterSelect3)", "", 120, 310, false, stateEventCharacterSelect7, 3);
-	local button59 = CreateMenuButton("CharacterSashaButton7",		"StateChange(stateEventCharacterSelect4);", "StateChange(stateEventCharacterSelect4)", "", 450, 340, false, stateEventCharacterSelect7, 3);
-	local button60 = CreateMenuButton("CharacterLarpersButton7",	"StateChange(stateEventCharacterSelect5);", "StateChange(stateEventCharacterSelect5)", "", 275, 425, false, stateEventCharacterSelect7, 3);
-	local button61 = CreateMenuButton("CharacterCryGameButton7",	"StateChange(stateEventCharacterSelect6);", "StateChange(stateEventCharacterSelect6)", "", 120, 425, false, stateEventCharacterSelect7, 3); 
-	local button62 = CreateMenuButton("CharacterStoryTimeButton7",	"CreateStoryTimeObj(Player0, 0);", "", "", 450, 425, true, stateEventCharacterSelect7, 3);
-	local button63 = CreateMenuButton("CharacterSelectReturnMenuButton7", "StateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect7, 3);
+	local bground6 = CreateMenuButton("CharSelectBackground7",	"", "", "CharacterSelect/T_Character_Select_Secret_D.png", 0, 0, false, stateEventCharacterSelect7, 2);
+	local button56 = CreateMenuButton("CharacterBulldogButton7",	"LuaStateChange(stateEventCharacterSelect);",  "LuaStateChange(stateEventCharacterSelect)",  "", 130, 180, false, stateEventCharacterSelect7, 3);
+	local button57 = CreateMenuButton("CharacterBanditosButton7",	"LuaStateChange(stateEventCharacterSelect2);", "LuaStateChange(stateEventCharacterSelect2)", "", 475, 170, false, stateEventCharacterSelect7, 3);
+	local button58 = CreateMenuButton("CharacterScientistButton7",	"LuaStateChange(stateEventCharacterSelect3);", "LuaStateChange(stateEventCharacterSelect3)", "", 130, 300, false, stateEventCharacterSelect7, 3);
+	local button59 = CreateMenuButton("CharacterSashaButton7",		"LuaStateChange(stateEventCharacterSelect4);", "LuaStateChange(stateEventCharacterSelect4)", "", 470, 340, false, stateEventCharacterSelect7, 3);
+	local button60 = CreateMenuButton("CharacterLarpersButton7",	"LuaStateChange(stateEventCharacterSelect5);", "LuaStateChange(stateEventCharacterSelect5)", "", 285, 415, false, stateEventCharacterSelect7, 3);
+	local button61 = CreateMenuButton("CharacterCryGameButton7",	"LuaStateChange(stateEventCharacterSelect6);", "LuaStateChange(stateEventCharacterSelect6)", "", 110, 425, false, stateEventCharacterSelect7, 3); 
+	local button62 = CreateMenuButton("CharacterStoryTimeButton7",	"CreateStoryTimeObj(Player0, 0);", "", "", 470, 430, true, stateEventCharacterSelect7, 3);
+	local button63 = CreateMenuButton("CharacterSelectReturnMenuButton7", "LuaStateChange(stateEventMainMenu);", "", "",  150, 625, false, stateEventCharacterSelect7, 3);
 		
 		--					me		  down		up		left	right
 	SetNextButtonComponent(button56, button58, button63, button57, button57);
@@ -499,13 +562,13 @@ function InitCreditsMenu()
 	--local thisState = stateEventCredits;
 	
 	local button3 = CreateMenuButton("CreditsBackground", "", "", "T_Credits_Backdrop_D.png", 0, 0, false, stateEventCredits, 2);
-	local background = CreateMenuButton("CreditsScrolling", "", "", "T_CreditsStart_D.png", 250, 768, false, stateEventCredits, 3);
-	local background2 = CreateMenuButton("CreditsScrolling", "","", "T_CreditsEnd_D.png", 250, 1792, false, stateEventCredits, 3);
-	local button1 = CreateMenuButton("CreditsReturnMenuButton", "LuaBack();", "", "", 70, 700, true, stateEventCredits, 3);
+--	local background = CreateMenuButton("CreditsScrolling", "", "", "T_CreditsStart_D.png", 250, 768, false, stateEventCredits, 3);
+--	local background2 = CreateMenuButton("CreditsScrolling", "","", "T_CreditsEnd_D.png", 250, 1792, false, stateEventCredits, 3);
+	local button1 = CreateMenuButton("CreditsReturnMenuButton", "LuaBack();", "", "", 160, 635, true, stateEventCredits, 3);
 	
 	
-	CreateScrollerComponent(background, 0, -60, 512, 1024)
-	CreateScrollerComponent(background2,0, -60, 512, 1024);
+--	CreateScrollerComponent(background, 0, -60, 512, 1024)
+--	CreateScrollerComponent(background2,0, -60, 512, 1024);
 	SetNextButtonComponent(button1, button1, button1, button1, button1);
 end
 
@@ -514,11 +577,18 @@ function InitHowToPlayMenu()
 	-- 12 is how to play state, each screen after will be the next one up in the enums list
 	--local thisState = stateEventHowToPlay;
 	
+		
+	prevX = 600
+	prevY = 680
+	nextX = 900
+	nextY = 690
+	
+	
 	-- Screen 0 - State 16
 	local background0 = CreateMenuButton("HowToPlayBackground0", "", "", "/HowToPlay/T_How_To_Play1_D.png", 0, 0, false, stateEventHowToPlay, 2);
 	local backtomainmenu0 = CreateMenuButton("HowToPlayReturnMenuButton0", "LuaStateChange(stateEventMainMenu);", "", "", 150, 625, false, stateEventHowToPlay, 3);
-	local prev0 = CreateMenuButton("HowToPlayNextButton0", "LuaStateChange(stateEventHowToPlay15);", "", "", 500, 690, false, stateEventHowToPlay, 3);
-	local next0 = CreateMenuButton("HowToPlayNextButton0", "LuaStateChange(stateEventHowToPlay1);",  "","", 855, 680, true, stateEventHowToPlay, 3);
+	local prev0 = CreateMenuButton("HowToPlayNextButton0", "LuaStateChange(stateEventHowToPlay6);", "", "", prevX, prevY, false, stateEventHowToPlay, 3);
+	local next0 = CreateMenuButton("HowToPlayNextButton0", "LuaStateChange(stateEventHowToPlay1);",  "","", nextX, nextY, true, stateEventHowToPlay, 3);
 	
 	SetNextButtonComponent(backtomainmenu0, prev0, next0, next0, prev0);
 	SetNextButtonComponent(prev0, next0, backtomainmenu0, backtomainmenu0, next0);
@@ -528,8 +598,8 @@ function InitHowToPlayMenu()
 	-- Screen 1 - State 17
 	local background1 = CreateMenuButton("HowToPlayBackground1", "", "", "/HowToPlay/T_How_To_Play2_D.png", 0, 0, false, stateEventHowToPlay1, 2);
 	local backtomainmenu1 = CreateMenuButton("HowToPlayReturnMenuButton1", "LuaStateChange(stateEventMainMenu);", "", "", 150, 625, false, stateEventHowToPlay1, 3);
-	local prev1 = CreateMenuButton("HowToPlayNextButton1", "LuaStateChange(stateEventHowToPlay);", "", "", 500, 690, false, stateEventHowToPlay1, 3);
-	local next1 = CreateMenuButton("HowToPlayNextButton1", "LuaStateChange(stateEventHowToPlay2);", "", "",855, 680, true, stateEventHowToPlay1, 3);
+	local prev1 = CreateMenuButton("HowToPlayNextButton1", "LuaStateChange(stateEventHowToPlay);", "", "", prevX, prevY, false, stateEventHowToPlay1, 3);
+	local next1 = CreateMenuButton("HowToPlayNextButton1", "LuaStateChange(stateEventHowToPlay2);", "", "",nextX, nextY, true, stateEventHowToPlay1, 3);
 	
 	SetNextButtonComponent(backtomainmenu1, prev1, next1, next1, prev1);
 	SetNextButtonComponent(prev1, next1, backtomainmenu1, backtomainmenu1, next1);
@@ -539,8 +609,8 @@ function InitHowToPlayMenu()
 	-- Screen 2 - State 18
 	local background2 = CreateMenuButton("HowToPlayBackground2", "",  "","/HowToPlay/T_How_To_Play3_D.png", 0, 0, false, stateEventHowToPlay2, 2);
 	local backtomainmenu2 = CreateMenuButton("HowToPlayReturnMenuButton2", "LuaStateChange(stateEventMainMenu);", "", "", 150, 625, false, stateEventHowToPlay2, 3);
-	local prev2 = CreateMenuButton("HowToPlayNextButton2", "LuaStateChange(stateEventHowToPlay1);",  "","", 500, 690, false, stateEventHowToPlay2, 3);
-	local next2 = CreateMenuButton("HowToPlayNextButton2", "LuaStateChange(stateEventHowToPlay3);", "", "", 855, 680, true, stateEventHowToPlay2, 3);
+	local prev2 = CreateMenuButton("HowToPlayNextButton2", "LuaStateChange(stateEventHowToPlay1);",  "","", prevX, prevY, false, stateEventHowToPlay2, 3);
+	local next2 = CreateMenuButton("HowToPlayNextButton2", "LuaStateChange(stateEventHowToPlay3);", "", "", nextX, nextY, true, stateEventHowToPlay2, 3);
 	
 	SetNextButtonComponent(backtomainmenu2, prev2, next2, next2, prev2);
 	SetNextButtonComponent(prev2, next2, backtomainmenu2, backtomainmenu2, next2);
@@ -550,8 +620,8 @@ function InitHowToPlayMenu()
 	-- Screen 3 - State 19
 	local background3 = CreateMenuButton("HowToPlayBackground3", "", "", "/HowToPlay/T_How_To_Play4_D.png", 0, 0, false, stateEventHowToPlay3, 2);
 	local backtomainmenu3 = CreateMenuButton("HowToPlayReturnMenuButton3", "LuaStateChange(stateEventMainMenu);", "", "", 150, 625, false, stateEventHowToPlay3, 3);
-	local prev3 = CreateMenuButton("HowToPlayNextButton3", "LuaStateChange(stateEventHowToPlay2);", "", "", 500, 690, false, stateEventHowToPlay3, 3);
-	local next3 = CreateMenuButton("HowToPlayNextButton3", "LuaStateChange(stateEventHowToPlay4);", "", "", 855, 680, true, stateEventHowToPlay3, 3);
+	local prev3 = CreateMenuButton("HowToPlayNextButton3", "LuaStateChange(stateEventHowToPlay2);", "", "", prevX, prevY, false, stateEventHowToPlay3, 3);
+	local next3 = CreateMenuButton("HowToPlayNextButton3", "LuaStateChange(stateEventHowToPlay4);", "", "", nextX, nextY, true, stateEventHowToPlay3, 3);
 	
 	SetNextButtonComponent(backtomainmenu3, prev3, next3, next3, prev3);
 	SetNextButtonComponent(prev3, next3, backtomainmenu3, backtomainmenu3, next3);
@@ -560,8 +630,8 @@ function InitHowToPlayMenu()
 	-- Screen 4 - State 20
 	local background4 = CreateMenuButton("HowToPlayBackground4", "", "", "/HowToPlay/T_How_To_Play5_D.png", 0, 0, false, stateEventHowToPlay4, 2);
 	local backtomainmenu4 = CreateMenuButton("HowToPlayReturnMenuButton4", "LuaStateChange(stateEventMainMenu);", "", "", 150, 625, false, stateEventHowToPlay4, 3);
-	local prev4 = CreateMenuButton("HowToPlayNextButton4", "LuaStateChange(stateEventHowToPlay3);", "", "", 500, 690, false, stateEventHowToPlay4, 3);
-	local next4 = CreateMenuButton("HowToPlayNextButton4", "LuaStateChange(stateEventHowToPlay5);", "", "", 855, 680, true, stateEventHowToPlay4, 3);
+	local prev4 = CreateMenuButton("HowToPlayNextButton4", "LuaStateChange(stateEventHowToPlay3);", "", "", prevX, prevY, false, stateEventHowToPlay4, 3);
+	local next4 = CreateMenuButton("HowToPlayNextButton4", "LuaStateChange(stateEventHowToPlay5);", "", "", nextX, nextY, true, stateEventHowToPlay4, 3);
 	
 	SetNextButtonComponent(backtomainmenu4, prev4, next4, next4, prev4);
 	SetNextButtonComponent(prev4, next4, backtomainmenu4, backtomainmenu4, next4);
@@ -571,8 +641,8 @@ function InitHowToPlayMenu()
 	-- Screen 5 - State 21
 	local background5 = CreateMenuButton("HowToPlayBackground5", "", "", "/HowToPlay/T_How_To_Play6_D.png", 0, 0, false, stateEventHowToPlay5, 2);
 	local backtomainmenu5 = CreateMenuButton("HowToPlayReturnMenuButton5", "LuaStateChange(stateEventMainMenu);", "", "", 150, 625, false, stateEventHowToPlay5, 3);
-	local prev5 = CreateMenuButton("HowToPlayNextButton5", "LuaStateChange(stateEventHowToPlay4);", "", "", 500, 690, false, stateEventHowToPlay5, 3);
-	local next5 = CreateMenuButton("HowToPlayNextButton5", "LuaStateChange(stateEventHowToPlay6);", "", "", 855, 680, true, stateEventHowToPlay5, 3);
+	local prev5 = CreateMenuButton("HowToPlayNextButton5", "LuaStateChange(stateEventHowToPlay4);", "", "", prevX, prevY, false, stateEventHowToPlay5, 3);
+	local next5 = CreateMenuButton("HowToPlayNextButton5", "LuaStateChange(stateEventHowToPlay6);", "", "", nextX, nextY, true, stateEventHowToPlay5, 3);
 	
 	SetNextButtonComponent(backtomainmenu5, prev5, next5, next5, prev5);
 	SetNextButtonComponent(prev5, next5, backtomainmenu5, backtomainmenu5, next5);
@@ -582,12 +652,14 @@ function InitHowToPlayMenu()
 	-- Screen 6 - State 22
 	local background6 = CreateMenuButton("HowToPlayBackground6", "", "", "/HowToPlay/T_How_To_Play7_D.png", 0, 0, false, stateEventHowToPlay6, 2);
 	local backtomainmenu6 = CreateMenuButton("HowToPlayReturnMenuButton6", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay6, 3);
-	local prev6 = CreateMenuButton("HowToPlayNextButton6", "LuaStateChange(stateEventHowToPlay5);", "", "", 500, 690, false, stateEventHowToPlay6, 3);
-	local next6 = CreateMenuButton("HowToPlayNextButton6", "LuaStateChange(stateEventHowToPlay7);", "", "", 855, 680, true, stateEventHowToPlay6, 3);
+	local prev6 = CreateMenuButton("HowToPlayNextButton6", "LuaStateChange(stateEventHowToPlay5);", "", "", prevX, prevY, false, stateEventHowToPlay6, 3);
+	local next6 = CreateMenuButton("HowToPlayNextButton6", "LuaStateChange(stateEventHowToPlay);", "", "", nextX, nextY, true, stateEventHowToPlay6, 3);
 	
 	SetNextButtonComponent(backtomainmenu6, prev6, next6, next6, prev6);
 	SetNextButtonComponent(prev6, next6, backtomainmenu6, backtomainmenu6, next6);
 	SetNextButtonComponent(next6, backtomainmenu6, prev6, prev6, backtomainmenu6);
+		
+	--[[ -- these aren't  being used anymore
 	
 	-- Screen 7 - State 23 
 	local background7 = CreateMenuButton("HowToPlayBackground7", "", "", "/HowToPlay/T_How_To_Play8_D.png", 0, 0, false, stateEventHowToPlay7, 2);
@@ -598,7 +670,7 @@ function InitHowToPlayMenu()
 	SetNextButtonComponent(backtomainmenu7, prev7, next7, next7, prev7);
 	SetNextButtonComponent(prev7, next7, backtomainmenu7, backtomainmenu7, next7);
 	SetNextButtonComponent(next7, backtomainmenu7, prev7, prev7, backtomainmenu7);
-	
+
 	-- Screen 8 - State 24
 	local background8 = CreateMenuButton("HowToPlayBackground8", "", "", "/HowToPlay/T_How_To_Play9_D.png", 0, 0, false, stateEventHowToPlay8, 2);
 	local backtomainmenu8 = CreateMenuButton("HowToPlayReturnMenuButton8", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay8, 3);
@@ -679,6 +751,12 @@ function InitHowToPlayMenu()
 	SetNextButtonComponent(prev15, next15, backtomainmenu15, backtomainmenu15, next15);
 	SetNextButtonComponent(next15, backtomainmenu15, prev15, prev15, backtomainmenu15);
 	
+	]]--
+	
+	
+	-- Make the f1 screen in game
+	local inGameHowToPlayBackground = CreateMenuButton("inGameHowToPlayBackground", "", "", "T_F1_How_To_Play_D.png", 0, 0, false, stateInGameHowToPlay, 2);
+	
 end
 
 
@@ -695,11 +773,11 @@ end
 
 --// Lua Prototype: CreateSliderComponent(Object, "EventName", "ButtonTexture.png", nBarStartX, nBarStartY, nBarEndX, nBarEndY, 
 --//										nTextureDepth, bStartSelected, nActiveState)
-function CreateMenuSlider(name, selectionEventName, buttonTextureName, nStartX, nStartY, nEndX, nEndY, bStartSelected, thisState, nTexDepth)
+function CreateMenuSlider(name, selectionEventName, buttonTextureName, nStartX, nStartY, nEndX, nEndY, bStartSelected, thisState, nSliderFor, nTexDepth)
 	newSlider = CreateObj(name, 0, 0, 0, 0);
 	print(name .. " Object Created")
 	sliderComponent = CreateSliderComponent(newButton, selectionEventName, buttonTextureName, nStartX, nStartY, nEndX, nEndY,
-						nTexDepth, bStartSelected, thisState);
+						nTexDepth, bStartSelected, nSliderFor, thisState);
 	print("Slider Component added to " .. name)
 	return sliderComponent
 	
@@ -718,7 +796,7 @@ function CreatePlayerObj(name, xPos, yPos, zPos, rot, isHuman)
 	
 	-- Player Object is an AI
 	if(isHuman == false) then
-		CreateAIComponent(NewObj);
+		CreateAIComponent(NewObj, false);
 		print("AI Component Added to " .. name)
 	end
 	
@@ -761,14 +839,14 @@ function CreateBikersObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		"Bulldog_Turn_Left_GOTO.anim",	"Bulldog_Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		"Bulldog_Turn_Right_GOTO.anim", "Bulldog_Turn_Right_LOOP.anim", -- 5
 		"Reverse",				"Bulldog_Reverse.anim",			"",								-- 6
-		"Boost",				"Bulldog_Boost.anim",			"",								-- 7
+		"BoostAnimation",		"Bulldog_Boost.anim",			"",								-- 7
 		"SlipEffect",			"Bulldog_Spin.anim",			"",								-- 8
 		"CartCollision",		"Bulldog_Collision.anim",		"",								-- 9
-		"Slow",					"Bulldog_Trudge_Goto.anim",		"Bulldog_Trudge_Loop.anim",		-- 10
+		"SlowAnimation",		"Bulldog_Trudge_Goto.anim",		"Bulldog_Trudge_Loop.anim",		-- 10
 		"TigerBlood",			"Bulldog_Victory.anim",			"Bulldog_Victory_Loop.anim",	-- 11
 		"GoodDaySir",			"Bulldog_Lose.anim",			"Bulldog_Lose.anim",			   12);
 	-- 47 is for RC_ANIM_BULLDOG and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj, MeshPtr, 75, 4);
+	CreateRenderComp(AnimObj, MeshPtr, 79, 4);
 	CreateInvulnerableVFXComponent(AnimObj, MeshPtr);
 	
 	-- Bind the Animated object to the player cart
@@ -787,15 +865,15 @@ function CreateBikersObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		"Ma_Turn_Left_GOTO.anim",	"Ma_Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		"Ma_Turn_Right_GOTO.anim",	"Ma_Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				"Ma_Reverse.anim",			"",							-- 6
-		"Boost",				"Ma_Boost.anim",			"",							-- 7
+		"BoostAnimation",		"Ma_Boost.anim",			"",							-- 7
 		"CartCollision",		"Ma_Collision.anim",		"",							-- 8
 		"SlipEffect",			"Ma_Spin.anim",				"",							-- 9
 		"GoalItemCollected",	"Ma_Collection.anim",		"",							-- 10
-		"Slow",					"Ma_Trudge_Goto.anim",		"Ma_Trudge_Loop.anim",		-- 11
+		"SlowAnimation",		"Ma_Trudge_Goto.anim",		"Ma_Trudge_Loop.anim",		-- 11
 		"TigerBlood",			"Ma_Victory.anim",			"Ma_Victory_Loop.anim",		-- 12
 		"GoodDaySir",			"Ma_Lose.anim",				"Ma_Lose.anim",				   13);
 	-- 48 is for RC_ANIM_MA and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj1, MeshPtr1, 76, 4);
+	CreateRenderComp(AnimObj1, MeshPtr1, 80, 4);
 	CreateInvulnerableVFXComponent(AnimObj1, MeshPtr1);
 	
 	-- Bind the Animated object to the player cart
@@ -815,14 +893,14 @@ function CreateBikersObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				header .. "Reverse.anim",			"",									-- 6
-		"Boost",				header .. "Boosting.anim",			"",									-- 7
+		"BoostAnimation",		header .. "Boosting.anim",			"",									-- 7
 		"SlipEffect",			header .. "Spin.anim",				"",									-- 8
 		"CartCollision",		header .. "Collision.anim",			"",									-- 9
-		"Slow",					header .. "Trudge_Goto.anim",		header .. "Trudge_Loop.anim",		--10
+		"SlowAnimation",		header .. "Trudge_Goto.anim",		header .. "Trudge_Loop.anim",		--10
 		"TigerBlood",			header .. "Victory.anim",			header .. "Victory_Loop.anim",		--11
 		"GoodDaySir",			header .. "Lose.anim",				header .. "Lose.anim",				  12);
 	-- 49 is for RC_ANIM_BIKCART and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj2, MeshPtr2, 77, 4);
+	CreateRenderComp(AnimObj2, MeshPtr2, 81, 4);
 	CreateInvulnerableVFXComponent(AnimObj2, MeshPtr2);
 	
 	-- Bind the Animated object to the player cart
@@ -879,14 +957,14 @@ function CreateLarpersObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",			header .. "Turn_Left_LOOP.anim",		-- 4
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",			header .. "Turn_Right_LOOP.anim",		-- 5
 		"Reverse",				header .. "Reverse.anim",					"",										-- 6
-		"Boost",				header .. "Boost.anim",						"",										-- 7
+		"BoostAnimation",		header .. "Boost.anim",						"",										-- 7
 		"SlipEffect",			header .. "Spin.anim",						"",										-- 8
 		"CartCollision",		header .. "Collision.anim",					"",										-- 9   
-		"Slow",					header .. "Trudge_Goto.anim",				header .. "Trudge_Loop.anim",			-- 10
+		"SlowAnimation",		header .. "Trudge_Goto.anim",				header .. "Trudge_Loop.anim",			-- 10
 		"TigerBlood",			"BanLarp_Larp_Driver_Victory_Goto.anim",	"BanLarp_Larp_Driver_Victory_Loop.anim", --11
 		"GoodDaySir",			"BanLarp_Larp_Driver_Lose.anim",			"BanLarp_Larp_Driver_Lose.anim",		   12);
 	-- 50 is for RC_ANIM_SEMOUR and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj, MeshPtr, 78, 4);
+	CreateRenderComp(AnimObj, MeshPtr, 82, 4);
 	CreateInvulnerableVFXComponent(AnimObj, MeshPtr);
 	
 	
@@ -907,15 +985,15 @@ function CreateLarpersObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		"BanLarp_Gunner_Turn_Left_GOTO.anim",		"BanLarp_Gunner_Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		"BanLarp_Gunner_Turn_Right_GOTO.anim",		"BanLarp_Gunner_Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				"BanLarp_Gunner_Reverse.anim",				"",										-- 6
-		"Boost",				"BanLarp_Gunner_Boost.anim",				"",										-- 7
+		"BoostAnimation",		"BanLarp_Gunner_Boost.anim",				"",										-- 7
 		"CartCollision",		"BanLarp_Gunner_Collision.anim",			"",										-- 8
 		"SlipEffect",			"BanLarp_Gunner_Spin.anim",					"",										-- 9
 		"GoalItemCollected",	"BanLarp_Gunner_Collection.anim",			"",										-- 10
-		"Slow",					"BanLarp_Gunner_Trudge_Goto.anim",			"BanLarp_Gunner_Trudge_Loop.anim",		-- 11
+		"SlowAnimation",		"BanLarp_Gunner_Trudge_Goto.anim",			"BanLarp_Gunner_Trudge_Loop.anim",		-- 11
 		"TigerBlood",			"BanLarp_Larp_Gunner_Victory_Goto.anim",	"BanLarp_Larp_Gunner_Victory_Loop.anim", --12
 		"GoodDaySir",			"BanLarp_Larp_Gunner_Lose.anim",			"BanLarp_Larp_Gunner_Lose.anim",		   13);
 	-- 51 is for RC_ANIM_DAVE and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj1, MeshPtr1, 79, 4);
+	CreateRenderComp(AnimObj1, MeshPtr1, 83, 4);
 	CreateInvulnerableVFXComponent(AnimObj1, MeshPtr1);
 	
 	-- Bind the Animated object to the player cart
@@ -933,14 +1011,14 @@ function CreateLarpersObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",	"BanLarp_Cart_Turn_Left_GOTO.anim",		"BanLarp_Cart_Turn_Left_LOOP.anim",		-- 2
 		"SteerRightAnim",	"BanLarp_Cart_Turn_Right_GOTO.anim",	"BanLarp_Cart_Turn_Right_LOOP.anim",	-- 3
 		"Reverse",			"BanLarp_Reverse.anim",					"",										-- 4
-		"Boost",			"BanLarp_Boost.anim",					"",										-- 5
+		"BoostAnimation",	"BanLarp_Boost.anim",					"",										-- 5
 		"SlipEffect",		"BanLarp_Spin.anim",					"",										-- 6
 		"CartCollision",	"BanLarp_Collision.anim",				"",										-- 7
-		"Slow",				"BanLarp_Cart_Trudge_Goto.anim",		"BanLarp_Cart_Trudge_Loop.anim",		-- 8
+		"SlowAnimation",	"BanLarp_Cart_Trudge_Goto.anim",		"BanLarp_Cart_Trudge_Loop.anim",		-- 8
 		"TigerBlood",		"BanLarp_Larp_Cart_Victory_Goto.anim",	"BanLarp_Larp_Cart_Victory_Loop.anim",	-- 9
 		"GoodDaySir",		"BanLarp_Larp_Cart_Lose.anim",			"BanLarp_Larp_Cart_Lose.anim",			   10);
 	-- 52 is for RC_ANIM_BANDCART and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj2, MeshPtr2, 80, 4);
+	CreateRenderComp(AnimObj2, MeshPtr2, 84, 4);
 	CreateInvulnerableVFXComponent(AnimObj2, MeshPtr2);
 	
 	-- Bind the Animated object to the player cart
@@ -999,14 +1077,14 @@ function CreateScientistsObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4 
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
-		"Boost",				header .. "Boost.anim",				"",									-- 7
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
 		"SlipEffect",			header .. "Spin.anim",				"",									-- 8
 		"CartCollision",		header .. "Collision.anim",			"",									-- 9
-		"Slow",					header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
 		"TigerBlood",			header .. "Win_GOTO.anim",			header .. "Victory_Loop.anim",		-- 11
-		"GoodDaySir",			header .. "Lose_GOTO.anim",			header .. "Lose_LOOP.anim",			   12);
+		"GoodDaySir",			header .. "Clap.anim",			header .. "Clap.anim",			   12);
 	-- 44 is for RC_ANIM_STEVE and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj, MeshPtr, 72, 4);
+	CreateRenderComp(AnimObj, MeshPtr, 76, 4);
 	CreateInvulnerableVFXComponent(AnimObj, MeshPtr);
 	
 	-- Bind the Animated object to the player cart
@@ -1027,15 +1105,15 @@ function CreateScientistsObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
-		"Boost",				header .. "Boost.anim",				"",									-- 7
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
 		"CartCollision",		header .. "Collision.anim",			"",									-- 8
 		"SlipEffect",			header .. "Spin.anim",				"",									-- 9
 		"GoalItemCollected",	header .. "Collection.anim",		"",									-- 10
-		"Slow",					header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 11
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 11
 		"TigerBlood",			header .. "Victory_Goto.anim",		header .. "Win_LOOP.anim",			-- 12
-		"GoodDaySir",			header .. "Lose_GOTO.anim",			header .. "Lose_LOOP.anim",			   13);
+		"GoodDaySir",			header .. "Clap.anim",			header .. "Clap.anim",			   13);
 	-- 45 is for RC_ANIM_EUGENE and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj1, MeshPtr1, 73, 4);
+	CreateRenderComp(AnimObj1, MeshPtr1, 77, 4);
 	CreateInvulnerableVFXComponent(AnimObj1, MeshPtr1);
 	
 	-- Bind the Animated object to the player cart
@@ -1056,14 +1134,14 @@ function CreateScientistsObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
-		"Boost",				header .. "Boost.anim",				"",									-- 7
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
 		"SlipEffect",			header .. "Spin.anim",				"",									-- 8
 		"CartCollision",		header .. "Collision.anim",			"",									-- 9
-		"Slow",					header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
 		"TigerBlood",			header .. "Win_GOTO.anim",			header .. "Victory_Loop.anim",		-- 11
-		"GoodDaySir",			header .. "Lose_GOTO.anim",			header .. "Lose_LOOP.anim",			   12);
+		"GoodDaySir",			header .. "Clap.anim",			header .. "Clap.anim",			   12);
 	-- 45 is for RC_ANIM_EUGENE and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj2, MeshPtr2, 74, 4);
+	CreateRenderComp(AnimObj2, MeshPtr2, 78, 4);
 	CreateInvulnerableVFXComponent(AnimObj2, MeshPtr2);
 	
 	-- Bind the Animated object to the player cart
@@ -1075,6 +1153,9 @@ function CreateScientistsObj(PlayerObj, PlayerNumber)
 	-- Skid Marks
 	CreateSkidMarksComponent(AnimObj2, 3);
 	CreatePBVFXComp(AnimObj2, 3);
+	
+	-- Scrolling UVs
+	CreateScrollingUVComponent(AnimObj2, MeshPtr2, 3); 
 	
 	-- tell movement what weight it is (L=1, M=2, H=3)
 	SetCartWeight(PlayerNumber, 2)
@@ -1116,15 +1197,15 @@ function CreateBanditosObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		"BanLarp_Driver_Turn_Left_GOTO.anim",	"BanLarp_Driver_Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		"BanLarp_Driver_Turn_Right_GOTO.anim",	"BanLarp_Driver_Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				"BanLarp_Driver_Reverse.anim",			"",										-- 6
-		"Boost",				"BanLarp_Driver_Boost.anim",			"",										-- 7
+		"BoostAnimation",		"BanLarp_Driver_Boost.anim",			"",										-- 7
 		"SlipEffect",			"BanLarp_Driver_Spin.anim",				"",										-- 8
 		"CartCollision",		"BanLarp_Driver_Collision.anim",		"",										-- 9
-		"Slow",					"BanLarp_Driver_Trudge_Goto.anim",		"BanLarp_Driver_Trudge_Loop.anim",		-- 10
+		"SlowAnimation",		"BanLarp_Driver_Trudge_Goto.anim",		"BanLarp_Driver_Trudge_Loop.anim",		-- 10
 		"TigerBlood",			"BanLarp_Ban_Driver_Victory_Goto.anim", "BanLarp_Ban_Driver_Victory_Loop.anim", -- 11
-		"GoodDaySir",			"BanLarp_Larp_Driver_Lose.anim",		"BanLarp_Larp_Driver_Lose.anim",		   12);
+		"GoodDaySir",			"BanLarp_Ban_Driver_Lose.anim",		"BanLarp_Ban_Driver_Lose.anim",		   12);
 		
 	-- 53 is for RC_ANIM_GERMINAL and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj, MeshPtr, 81, 4);
+	CreateRenderComp(AnimObj, MeshPtr, 85, 4);
 	CreateInvulnerableVFXComponent(AnimObj, MeshPtr);
 	
 	-- Bind the Animated object to the player cart
@@ -1144,15 +1225,15 @@ function CreateBanditosObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		"BanLarp_Gunner_Turn_Left_GOTO.anim",	"BanLarp_Gunner_Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		"BanLarp_Gunner_Turn_Right_GOTO.anim",	"BanLarp_Gunner_Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				"BanLarp_Gunner_Reverse.anim",			"",										-- 6
-		"Boost",				"BanLarp_Gunner_Boost.anim",			"",										-- 7
+		"BoostAnimation",		"BanLarp_Gunner_Boost.anim",			"",										-- 7
 		"CartCollision",		"BanLarp_Gunner_Collision.anim",		"",										-- 8
 		"SlipEffect",			"BanLarp_Gunner_Spin.anim",				"",										-- 9
 		"GoalItemCollected",	"BanLarp_Gunner_Collection.anim",		"",										-- 10
-		"Slow",					"BanLarp_Gunner_Trudge_Goto.anim",		"BanLarp_Gunner_Trudge_Loop.anim",		-- 11
+		"SlowAnimation",		"BanLarp_Gunner_Trudge_Goto.anim",		"BanLarp_Gunner_Trudge_Loop.anim",		-- 11
 		"TigerBlood",			"BanLarp_Ban_Gunner_Victory_Goto.anim", "BanLarp_Ban_Gunner_Victory_Loop.anim", -- 12
-		"GoodDaySir",			"BanLarp_Larp_Gunner_Lose.anim",		"BanLarp_Larp_Gunner_Lose.anim",		   13);
+		"GoodDaySir",			"BanLarp_Ban_Gunner_Lose.anim",		"BanLarp_Ban_Gunner_Lose.anim",		   13);
 	-- 54 is for RC_ANIM_RICO and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj1, MeshPtr1, 82, 4);
+	CreateRenderComp(AnimObj1, MeshPtr1, 86, 4);
 	CreateInvulnerableVFXComponent(AnimObj1, MeshPtr1);
 	
 	-- Bind the Animated object to the player cart
@@ -1170,14 +1251,14 @@ function CreateBanditosObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",	"BanLarp_Cart_Turn_Left_GOTO.anim",		"BanLarp_Cart_Turn_Left_LOOP.anim",		-- 2
 		"SteerRightAnim",	"BanLarp_Cart_Turn_Right_GOTO.anim",	"BanLarp_Cart_Turn_Right_LOOP.anim",	-- 3
 		"Reverse",			"BanLarp_Reverse.anim",					"",										-- 4
-		"Boost",			"BanLarp_Boost.anim",					"",										-- 5
+		"BoostAnimation",	"BanLarp_Boost.anim",					"",										-- 5
 		"SlipEffect",		"BanLarp_Spin.anim",					"",										-- 6
 		"CartCollision",	"BanLarp_Collision.anim",				"",										-- 7	  
-		"Slow",				"BanLarp_Cart_Trudge_Goto.anim",		"BanLarp_Cart_Trudge_Loop.anim",		-- 8
+		"SlowAnimation",	"BanLarp_Cart_Trudge_Goto.anim",		"BanLarp_Cart_Trudge_Loop.anim",		-- 8
 		"TigerBlood",		"BanLarp_Ban_Cart_Victory_Goto.anim",	"BanLarp_Ban_Cart_Victory_Loop.anim",	-- 9
-		"GoodDaySir",		"BanLarp_Larp_Cart_Lose.anim",			"BanLarp_Larp_Cart_Lose.anim",			   10);
+		"GoodDaySir",		"BanLarp_Ban_Cart_Lose.anim",			"BanLarp_Ban_Cart_Lose.anim",			   10);
 	-- 55 is for RC_ANIM_BANDCART and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj2, MeshPtr2, 83, 4);
+	CreateRenderComp(AnimObj2, MeshPtr2, 87, 4);
 	CreateInvulnerableVFXComponent(AnimObj2, MeshPtr2);
 	
 	-- Bind the Animated object to the player cart
@@ -1232,15 +1313,15 @@ function CreateSashaObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		"Sasha_Turn_Left_GOTO.anim",	"Sasha_Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		"Sasha_Turn_Right_GOTO.anim",	"Sasha_Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				"SASHA_Reverse.anim",			"",								-- 6
-		"Boost",				"SASHA_Boost.anim",				"",								-- 7
+		"BoostAnimation",		"SASHA_Boost.anim",				"",								-- 7
 		"CartCollision",		"SASHA_Collision.anim",			"",								-- 8
 		"SlipEffect",			"SASHA_Spin.anim",				"",								-- 9
 		"GoalItemCollected",	"SASHA_Collection.anim",		"",								-- 10
-		"Slow",					"SASHA_Trudge_Goto.anim",		"SASHA_Trudge_Loop.anim",		-- 11  
+		"SlowAnimation",		"SASHA_Trudge_Goto.anim",		"SASHA_Trudge_Loop.anim",		-- 11  
 		"TigerBlood",			"SASHA_Victory.anim",			"SASHA_Victory_Loop.anim",		-- 12
 		"GoodDaySir",			"SASHA_Lose.anim",				"SASHA_Lose_Loop.anim",			   13);
 	-- 56 is for RC_ANIM_SASHA and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj, MeshPtr, 84, 4);
+	CreateRenderComp(AnimObj, MeshPtr, 88, 4);
 	CreateInvulnerableVFXComponent(AnimObj, MeshPtr);
 	
 	-- Bind the Animated object to the player cart
@@ -1296,14 +1377,14 @@ function CreateCryGameObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4 
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
-		"Boost",				header .. "Boost.anim",				"",									-- 7
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
 		"SlipEffect",			header .. "Spin.anim",				"",									-- 8
 		"CartCollision",		header .. "Collision.anim",			"",									-- 9
-		"Slow",					header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
-		"TigerBlood",			header .. "Win_GOTO.anim",			header .. "Victory_Loop.anim",		-- 11
-		"GoodDaySir",			header .. "Lose_GOTO.anim",			header .. "Lose_LOOP.anim",			   12);
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
+		"TigerBlood",			"EndGame_Driver_Win_GOTO.anim",		"EndGame_Driver_Win_Loop.anim",		-- 11
+		"GoodDaySir",			header .. "Clap.anim",			header .. "Clap.anim",			   12);
 	-- 44 is for RC_ANIM_STEVE and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj, MeshPtr, 86, 4);
+	CreateRenderComp(AnimObj, MeshPtr, 90, 4);
 	CreateInvulnerableVFXComponent(AnimObj, MeshPtr);
 	
 	-- Bind the Animated object to the player cart
@@ -1324,15 +1405,15 @@ function CreateCryGameObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
-		"Boost",				header .. "Boost.anim",				"",									-- 7
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
 		"CartCollision",		header .. "Collision.anim",			"",									-- 8
 		"SlipEffect",			header .. "Spin.anim",				"",									-- 9
 		"GoalItemCollected",	header .. "Collection.anim",		"",									-- 10
-		"Slow",					header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 11
-		"TigerBlood",			header .. "Victory_Goto.anim",		header .. "Win_LOOP.anim",			-- 12
-		"GoodDaySir",			header .. "Lose_GOTO.anim",			header .. "Lose_LOOP.anim",			   13);
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 11
+		"TigerBlood",			"EndGame_Gunner_Win_Goto.anim",	"EndGame_Gunner_Win_LOOP.anim",			-- 12
+		"GoodDaySir",			header .. "Clap.anim",			header .. "Clap.anim",			   13);
 	-- 45 is for RC_ANIM_EUGENE and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj1, MeshPtr1, 85, 4);
+	CreateRenderComp(AnimObj1, MeshPtr1, 89, 4);
 	CreateInvulnerableVFXComponent(AnimObj1, MeshPtr1);
 	
 	-- Bind the Animated object to the player cart
@@ -1353,14 +1434,14 @@ function CreateCryGameObj(PlayerObj, PlayerNumber)
 		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4
 		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
 		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
-		"Boost",				header .. "Boost.anim",				"",									-- 7
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
 		"SlipEffect",			header .. "Spin.anim",				"",									-- 8
 		"CartCollision",		header .. "Collision.anim",			"",									-- 9
-		"Slow",					header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
-		"TigerBlood",			header .. "Win_GOTO.anim",			header .. "Victory_Loop.anim",		-- 11
-		"GoodDaySir",			header .. "Lose_GOTO.anim",			header .. "Lose_LOOP.anim",			   12);
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
+		"TigerBlood",			"EndGame_Cart_Win_GOTO.anim",		"EndGame__Cart_Win_Loop.anim",		-- 11
+		"GoodDaySir",			header .. "Clap.anim",			header .. "Clap.anim",			   12);
 	-- 45 is for RC_ANIM_EUGENE and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj2, MeshPtr2, 87, 4);
+	CreateRenderComp(AnimObj2, MeshPtr2, 91, 4);
 	CreateInvulnerableVFXComponent(AnimObj2, MeshPtr2);
 	
 	-- Bind the Animated object to the player cart
@@ -1373,10 +1454,13 @@ function CreateCryGameObj(PlayerObj, PlayerNumber)
 	CreateSkidMarksComponent(AnimObj2, 3);
 	CreatePBVFXComp(AnimObj2, 3);
 	
+	-- Scrolling UVs
+	CreateScrollingUVComponent(AnimObj2, MeshPtr2, 6); 
+	
 	-- tell movement what weight it is (L=1, M=2, H=3)
 	SetCartWeight(PlayerNumber, 2)
 	-- tell HUD which player you are (number relating to index of picture in portraits image)
-	SetCharacterPicked(PlayerNumber, 3)
+	SetCharacterPicked(PlayerNumber, 5)
 	
 	-- Shadow Time!
 	CreateShadowComponent(PlayerObj, 3);
@@ -1398,7 +1482,122 @@ function CreateCryGameObj(PlayerObj, PlayerNumber)
 end
 
 function CreateStoryTimeObj(PlayerObj, PlayerNumber)
-
+	-- Create a separate object for the animated model and attach
+	-- it to the player's cart
+	AnimName = "Player".. PlayerNumber .. "Anim0";
+	print(AnimName);
+	local AnimObj = CreateObj(AnimName, 0, 0, 0, 0);
+	-- ... is any number of {EventName, AnimName} combos
+	-- CreateAnimComp(ObjectPtr, MeshName, EventName, AnimName, ..., NumAnims);
+	local header = "Scientist_Driver_"
+	local MeshPtr = CreateAnimComp(AnimObj, "FFP_3D_Shade_FINShape",
+		"Default",				header .. "Idle.anim",				"",									-- 1
+		"ShoveLeftAnimation",	header .. "ShoveLeft.anim",			"",									-- 2
+		"ShoveRightAnimation",	header .. "ShoveRight.anim",		"",									-- 3
+		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4 
+		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
+		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
+		"SlipEffect",			header .. "Spin.anim",				"",									-- 8
+		"CartCollision",		header .. "Collision.anim",			"",									-- 9
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
+		"TigerBlood",			"StoryTime_Driver_Win_Goto.anim",	"StoryTime_Driver_Win_Loop.anim",		-- 11
+		"GoodDaySir",			header ..  "Clap.anim",				header .. "Clap.anim",			   12);
+	-- 44 is for RC_ANIM_STEVE and 4 is for RF_ANIM
+	CreateRenderComp(AnimObj, MeshPtr, 93, 4);
+	CreateInvulnerableVFXComponent(AnimObj, MeshPtr);
+	
+	-- Bind the Animated object to the player cart
+	BindObjects(PlayerObj, AnimObj);
+	
+	-- Create a separate object for the animated model and attach
+	-- it to the player's cart
+	AnimName = "Player".. PlayerNumber .. "Anim1";
+	print(AnimName);
+	local AnimObj1 = CreateObj(AnimName, 0, 0, 0, 0);
+	-- ... is any number of {EventName, AnimName} combos
+	-- CreateAnimComp(ObjectPtr, MeshName, EventName, AnimName, ..., NumAnims);
+	local header = "Scientist_Gunner_"
+	local MeshPtr1 = CreateAnimComp(AnimObj1, "FFP_3D_Evelyn_FINShape",
+		"Default",				header .. "Idle.anim",				"",									-- 1
+		"ShoveLeftAnimation",	header .. "ShoveLeft.anim",			"",									-- 2
+		"ShoveRightAnimation",	header .. "ShoveRight.anim",		"",									-- 3
+		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4
+		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
+		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
+		"CartCollision",		header .. "Collision.anim",			"",									-- 8
+		"SlipEffect",			header .. "Spin.anim",				"",									-- 9
+		"GoalItemCollected",	header .. "Collection.anim",		"",									-- 10
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 11
+		"TigerBlood",			"StoryTime_Gunner_Win_Goto.anim",	"StoryTime_Gunner_Win_Loop.anim",		-- 12
+		"GoodDaySir",			header ..  "Clap.anim",				header .. "Clap.anim",			   13);
+	-- 45 is for RC_ANIM_EUGENE and 4 is for RF_ANIM
+	CreateRenderComp(AnimObj1, MeshPtr1, 92, 4);
+	CreateInvulnerableVFXComponent(AnimObj1, MeshPtr1);
+	
+	-- Bind the Animated object to the player cart
+	BindObjects(PlayerObj, AnimObj1);
+	
+	-- Create a separate object for the animated model and attach
+	-- it to the player's cart
+	AnimName = "Player".. PlayerNumber .. "Anim2";
+	print(AnimName);
+	local AnimObj2 = CreateObj(AnimName, 0, 0, 0, 0);
+	-- ... is any number of {EventName, AnimName} combos
+	-- CreateAnimComp(ObjectPtr, MeshName, EventName, AnimName, ..., NumAnims);
+	local header = "Scientist_Cart_"
+	local MeshPtr2 = CreateAnimComp(AnimObj2, "FFP_3D_CombinedNightlightCart_FIN",
+		"Default",				header .. "Idle.anim",				"",									-- 1
+		"ShoveLeftAnimation",	header .. "ShoveLeft.anim",			"",									-- 2
+		"ShoveRightAnimation",	header .. "ShoveRight.anim",		"",									-- 3
+		"SteerLeftAnim",		header .. "Turn_Left_GOTO.anim",	header .. "Turn_Left_LOOP.anim",	-- 4
+		"SteerRightAnim",		header .. "Turn_Right_GOTO.anim",	header .. "Turn_Right_LOOP.anim",	-- 5
+		"Reverse",				header .. "Reverse_GOTO.anim",		header .. "Reverse_LOOP.anim",		-- 6
+		"BoostAnimation",		header .. "Boost.anim",				"",									-- 7
+		"SlipEffect",			header .. "Spin.anim",				"",									-- 8
+		"CartCollision",		header .. "Collision.anim",			"",									-- 9
+		"SlowAnimation",		header .. "Trudge_GOTO.anim",		header .. "Trudge_LOOP.anim",		-- 10
+		"TigerBlood",			"StoryTime_Cart_Win_Goto.anim",	"StoryTime_Cart_Win_Loop.anim",		-- 11
+		"GoodDaySir",			header .. "Clap.anim",				header .. "Clap.anim",			   12);
+	-- 45 is for RC_ANIM_EUGENE and 4 is for RF_ANIM
+	CreateRenderComp(AnimObj2, MeshPtr2, 94, 4);
+	CreateInvulnerableVFXComponent(AnimObj2, MeshPtr2);
+	
+	-- Bind the Animated object to the player cart
+	BindObjects(PlayerObj, AnimObj2);
+	
+	-- Donut
+	CreateDonutObj(PlayerObj, PlayerNumber);
+	
+	-- Skid Marks
+	CreateSkidMarksComponent(AnimObj2, 3);
+	CreatePBVFXComp(AnimObj2, 3);
+	
+	-- tell movement what weight it is (L=1, M=2, H=3)
+	SetCartWeight(PlayerNumber, 1)
+	-- tell HUD which player you are (number relating to index of picture in portraits image)
+	SetCharacterPicked(PlayerNumber, 6)
+	
+	-- Shadow Time!
+	--CreateShadowComponent(PlayerObj, 3);
+	
+	-- Scrolling UVs
+	CreateScrollingUVComponent(AnimObj2, MeshPtr2, 5); 
+	
+	if PlayerNumber == 0 and Player1 ~= nil then
+		-- Create the AI
+		CreateBikersObj(Player1, 1);
+	elseif PlayerNumber == 1 and Player2 ~= nil then
+		-- Create Another AI
+		CreateBikersObj(Player2, 2);
+	elseif PlayerNumber == 2 and Player3 ~= nil then
+		-- Create Another AI
+		CreateBikersObj(Player3, 3);
+	else
+		-- Start the Game
+		LuaStateChange(stateEventGameplay);
+	end
 
 end
 
@@ -1416,7 +1615,7 @@ function CreateDonutObj(PlayerObj, PlayerNumber)
 			"UseDonut", "Donut_GOTO.anim", "Donut_LOOP.anim", 2);
 			
 	-- 81 is for RC_ANIM_DONUT and 4 is for RF_ANIM
-	CreateRenderComp(AnimObj, MeshPtr, 88, 4);
+	CreateRenderComp(AnimObj, MeshPtr, 95, 4);
 	CreateAnimatedDonutComp(AnimObj);
 	
 	-- Bind the Animated object to the player cart
@@ -1433,8 +1632,16 @@ end
 
 function LuaStateChange(gameState)
 
-	StateChange(gameState);
-	
+	if(gameState == stateEventCharacterSelect6 or gameState == stateEventCharacterSelect7) then
+		if(unlocked) then
+			print("Characters unlocked" .. gameState)			
+			StateChange(gameState);
+		end
+	else
+		print(gameState);
+		StateChange(gameState);
+	end
+
 end
 
 function LuaBack()
@@ -1442,6 +1649,22 @@ function LuaBack()
 	Back();
 	
 end
+
+
+function LuaCancelBackPause()
+
+	LuaSendEvent("CancelOptionsPause");
+	Back();
+	
+end
+
+function LuaCancelBackMain()
+
+	LuaSendEvent("CancelOptionsMain");
+	Back();
+	
+end
+
 
 function LuaSendEvent(szEvent)
 	
@@ -1463,7 +1686,7 @@ function ResetDefaultOptions(slider1, slider2, slider3)
 	-- Matches up with the default starting values of volue and music
 	SetSliderValue(slider1, 25)
 	SetSliderValue(slider2, 50)
-	SetSliderValue(slider3, 75)
+	SetSliderValue(slider3, 50)
 
 end
 
@@ -1501,4 +1724,25 @@ function AISetGoalTri(PlayerNumber, TriNumber)
 
 	SetGoalTri("Player"..PlayerNumber, TriNumber);
 
+end
+
+
+function FromLevelSelectToCharSelect()
+
+	-- tell stuff to unload so we can repick them
+	LuaSendEvent("ShutdownObjects2");
+	StateChange(stateEventCharacterSelect)
+
+end
+
+function EndGameFromPause()
+
+	-- tell stuff to unload so we can repick them
+	LuaSendEvent("ShutdownObjects4"); -- 4 is the Win_State
+	LuaStateChange(stateEventMainMenu);
+
+end
+
+function SetUnlocked()
+	unlocked = true
 end

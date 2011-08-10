@@ -303,7 +303,8 @@ void Direct3DManager::SetGamma(LPDIRECT3DDEVICE9 _lpD3D, float gamma)
 	D3DGAMMARAMP ramp; 
 	_lpD3D->GetGammaRamp(0, &ramp);
 
-	m_fGamma = gamma;
+	//m_fGamma = gamma; // got rid of by smith since this value is used for the sliders
+						///and nowhere else and storing it here gives a bad value
 	for (unsigned int i = 0; i < 256; ++i)
 	{
 		m_usRed[i] = ramp.red[i];
@@ -348,7 +349,8 @@ void Direct3DManager::ChangeGamma(IEvent* pevent, IComponent*)
 	TFloatEvent* tEvent = (TFloatEvent*)pevent->GetData();
 	float casfloat = tEvent->m_fValue;
 
+	GetInstance()->m_fGamma = casfloat; // store the 0-100 float value instead of the calculated value
+
 	casfloat = (((tEvent->m_fValue - 0) * (1.0f - -1.0f)) / (100 - 0)) + -1.0f;
-	GetInstance()->m_fGamma = casfloat;
 	GetInstance()->SetGamma(GetInstance()->GetDirect3DDevice(),casfloat);
 }

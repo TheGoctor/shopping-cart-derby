@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Filename:  		CAIManager.cpp
  * Date:      		04/04/2011
- * Mod. Date: 		06/04/2011
+ * Mod. Date: 		07/26/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This is the manager for the
@@ -9,25 +9,14 @@
 				to each of the CAIComponent objects and
 				any static information they need.
  ******************************************************************************/
-#include <iostream>
 #include <fstream>
-#include <string>
-#include <map>
-using std::multimap;
 
 #include "CAIManager.h"
-#include "..\..\CObject.h"
 #include "..\..\Components\AI\CAIComponent.h"
 #include "..\Global Managers\Rendering Managers\ModelManager.h"
-#include "..\Global Managers\Rendering Managers\Direct3DManager.h"
-#include "..\Global Managers\Object Manager\CObjectManager.h"
-#include "..\Global Managers\Rendering Managers\Renderer.h"
-#include "..\Global Managers\Memory Manager\CMemoryManager.h"
 #include "..\Global Managers\Event Manager\CEventManager.h"
 #include "..\Global Managers\Event Manager\EventStructs.h"
 #include "..\Global Managers\Console Manager\CConsoleManager.h"
-#include "CCollisionManager.h"
-#include "CLevelManager.h"
 using namespace EventStructs;
 
 int CAIManager::SetGoalTri(lua_State* pLua)
@@ -44,7 +33,6 @@ int CAIManager::SetGoalTri(lua_State* pLua)
 
 	if(pIter == GetInstance()->m_cAIComponents.end())
 	{
-		cout << "Bad Iter" << endl;
 		Debug.Print("Bad Iter");
 		return 0;
 	}
@@ -59,7 +47,6 @@ int CAIManager::SetGoalTri(lua_State* pLua)
 
 		if(pTriIter == GetInstance()->m_cTris.end())
 		{
-			cout << "Bad triangle" << endl;
 			Debug.Print("Bad triangle");
 			return 0;
 		}
@@ -72,7 +59,7 @@ int CAIManager::SetGoalTri(lua_State* pLua)
 		pIter->second->bLogical = true;
 	}
 
-	sprintf(szDebug, "Name: %s  Triangle: %d  ID: %d", szName.c_str(), nTri, nID);
+	sprintf_s(szDebug, "Name: %s  Triangle: %d  ID: %d", szName.c_str(), nTri, nID);
 	Debug.Print(szDebug);
 
 	return 0;
@@ -107,8 +94,6 @@ void CAIManager::Init()
 	pEM->RegisterEvent("ToggleInfo", (IComponent*)GetInstance(), ToggleInfo);
 	pEM->RegisterEvent("LoadLevel", (IComponent*)GetInstance(), LoadLevel);
 	pEM->RegisterEvent("Shutdown", (IComponent*)GetInstance(), Shutdown);
-
-	// TODO : Register for events to remove/delete AIComponents
 }
 
 void CAIManager::LoadLevel(IEvent* pEvent, IComponent*)
@@ -120,56 +105,13 @@ void CAIManager::LoadLevel(IEvent* pEvent, IComponent*)
 	CAIManager::GetInstance()->CreateLookUpTable(pStringEvent->m_szString);
 }
 
-void CAIManager::RemoveAIComponent(IEvent* pEvent, IComponent*)
-{
-	TObjectEvent* pObjectEvent = (TObjectEvent*)pEvent->GetData();
-	CObject* pObject = pObjectEvent->m_pcObj;
-
-	CAIManager* pAIManager = GetInstance();
-
-	map<unsigned int, CAIComponent*, less<unsigned int>,
-		CAllocator<pair<unsigned int, CAIComponent*>>>::iterator pIter =
-		pAIManager->m_cAIComponents.begin();
-
-	while(pIter != pAIManager->m_cAIComponents.end())
-	{
-		if(pIter->second->m_pObject->GetID() == pObject->GetID())
-		{
-			pObject->RemoveComponent(pIter->second);
-			pAIManager->m_cAwaitingDeletion.push_back(
-				pIter->second);
-			break;
-		}
-		++pIter;
-	}
-}
-
-void CAIManager::DeleteAIComponent(IEvent*, IComponent*)
-{
-	CAIManager* pAIManager = GetInstance();
-
-	list<CAIComponent*, CAllocator<CAIComponent*>>::iterator pIter =
-		pAIManager->m_cAwaitingDeletion.begin();
-
-	while(pIter != pAIManager->m_cAwaitingDeletion.end())
-	{
-		MMDEL(*pIter);
-		++pIter;
-	}
-}
-
-void CAIManager::SetupOpponents(IEvent* piEvent, IComponent* /*piComponent*/)
+void CAIManager::SetupOpponents(IEvent* piEvent, IComponent*)
 {
 	// NOTE: This must be done AFTER the CAIComponent is created
 	CAIManager* pcAIManager = GetInstance();
 	TObjectEvent* pcObject = (TObjectEvent*)piEvent->GetData();
 
-	pcAIManager->m_cPlayers.push_back(pcObject->m_pcObj);
-
-	//if(pcAIManager->m_cPlayers.size() != 3)
-	//{
-	//	return;
-	//}
+	pcAIManager->m_cPlayers.insert(make_pair(pcObject->m_pcObj->GetID(), pcObject->m_pcObj));
 
 	std::map<unsigned int, CAIComponent*, less<unsigned int>,
 		CAllocator<pair<unsigned int, CAIComponent*>>>::iterator pCompAIIter;
@@ -180,34 +122,6 @@ void CAIManager::SetupOpponents(IEvent* piEvent, IComponent* /*piComponent*/)
 		pCompAIIter->second->SetupOpponents(pcObject->m_pcObj);
 		++pCompAIIter;
 	}
-
-	// Previously in Manager
-	//std::list<CObject*,	CAllocator<CObject*>>::iterator pcPlayerIter = 
-	//	CAIManager::GetInstance()->m_cPlayers.begin();
-	//bool bAlreadyAdded = false;
-
-	//while(pcPlayerIter != CAIManager::GetInstance()->m_cPlayers.end())
-	//{
-	//	if(*pcPlayerIter == pcObject->m_pcObj)
-	//	{
-	//		bAlreadyAdded = true;
-	//		break;
-	//	}
-	//	pcPlayerIter++;
-	//}
-
-	//if(bAlreadyAdded == false)
-	//{
-	//	CAIManager::GetInstance()->m_cPlayers.push_back(pcObject->m_pcObj);
-	//}
-
-	//// Component part
-	//if(pcAI->m_pObject->GetID() != pcObject->m_pcObj->GetID())
-	//{
-	//	pcAI->m_tKnowledge.m_cOpponents[pcAI->m_tKnowledge.m_nOpponentID].m_nPlayer =
-	//		pcObject->m_pcObj->GetID();
-	//	++pcAI->m_tKnowledge.m_nOpponentID;
-	//}
 }
 
 void CAIManager::GoalItemInit(IEvent* piEvent, IComponent*)
@@ -219,8 +133,6 @@ void CAIManager::GoalItemInit(IEvent* piEvent, IComponent*)
 
 void CAIManager::Update(IEvent*, IComponent*)
 {
-#if _DEBUG
-#endif
 }
 
 void CAIManager::LoadNavMesh(string szFileName)
@@ -493,20 +405,22 @@ void CAIManager::CreateLookUpTable(string szFileName)
 
 int CAIManager::CreateAIComponent(lua_State* pLua)
 {
-	CObject* pObj = (CObject*)lua_topointer(pLua, -1);
-	lua_pop(pLua, 1);
-	CreateAIComponent(pObj);
+	CObject* pObj = (CObject*)lua_topointer(pLua, -2);
+	bool bRandomItems = (lua_toboolean(pLua, -1) != 0);
+	lua_pop(pLua, 2);
+	CreateAIComponent(pObj, bRandomItems);
 	
 	return 0;
 }
 
-CAIComponent* CAIManager::CreateAIComponent(CObject* pObj)
+CAIComponent* CAIManager::CreateAIComponent(CObject* pObj, bool bRandomItems)
 {
 	CAIComponent* comp = MMNEW(CAIComponent(pObj));
 
 	static int nNumCreated = 1;
 
 	comp->Init();
+	comp->SetUseRandomItems(bRandomItems);
 	comp->m_tKnowledge.m_nOpponentID = 0;
 	comp->SetControllerNumber(nNumCreated); // starts at 0, but that's player
 	pObj->AddComponent(comp);
@@ -529,15 +443,6 @@ void CAIManager::Shutdown(IEvent*, IComponent*)
 
 		pAIManager->m_cOpen.erase(
 			pAIManager->m_cOpen.begin());
-	}
-
-	while(pAIManager->m_cAwaitingDeletion.empty() == false)
-	{
-		MyDelete<CAIComponent>(*pAIManager->m_cAwaitingDeletion.begin(),
-			HEAPID_GENERAL);
-
-		pAIManager->m_cAwaitingDeletion.erase(
-			pAIManager->m_cAwaitingDeletion.begin());
 	}
 
 	while(pAIManager->m_cCreated.empty() == false)
@@ -566,7 +471,7 @@ void CAIManager::Shutdown(IEvent*, IComponent*)
 
 	while(pAIManager->m_cPlayers.empty() == false)
 	{
-		MMDEL(*(pAIManager->m_cPlayers.begin()));
+		MMDEL(pAIManager->m_cPlayers.begin()->second);
 
 		pAIManager->m_cPlayers.erase(
 			pAIManager->m_cPlayers.begin());
@@ -763,59 +668,6 @@ int CAIManager::Pathplan(const int nStart, const int nEnd)
 	m_cCreated.clear();
 
 	return nEdge;
-}
-
-D3DXVECTOR3 CAIManager::ClosestPtPointTriangle(D3DXVECTOR3 p, D3DXVECTOR3 a, D3DXVECTOR3 b, D3DXVECTOR3 c)
-{
-	// Check if P in vertex region outside A
-	D3DXVECTOR3 ab = b - a;
-	D3DXVECTOR3 ac = c - a;
-	D3DXVECTOR3 ap = p - a;
-	float d1 = D3DXVec3Dot(&ab, &ap);
-	float d2 = D3DXVec3Dot(&ac, &ap);
-	if (d1 <= 0.0f && d2 <= 0.0f) return b; // barycentric coordinates (1,0,0)
-
-	// Check if P in vertex region outside B
-	D3DXVECTOR3 bp = p - b;
-	float d3 = D3DXVec3Dot(&ab, &bp);
-	float d4 = D3DXVec3Dot(&ac, &bp);
-	if(d3 >= 0.0f && d4 <= d3) return b; // barycentric coordinates (0,1,0)
-
-	// Check if P in edge region of AB, if so return projection of P onto AB
-	float vc = d1*d4 - d3*d2;
-	if(vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
-	{
-		float v = d1 / (d1 - d3);
-		return a + v * ab; // barycentric coordinates (1-v, v, 0)
-	}
-
-	// Check if P in vertex region outside C
-	D3DXVECTOR3 cp = p - c;
-	float d5 = D3DXVec3Dot(&ab, &cp);
-	float d6 = D3DXVec3Dot(&ac, &cp);
-	if(d6 >= 0.0f && d5 <= d6) return c; // barycentric coordinates (0,0,1)
-
-	// Check if P in edge region of AC, if so return projection of P onto AC
-	float vb = d5*d2 - d1*d6;
-	if(vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
-	{
-		float w = d2 / (d2 - d6);
-		return a + w * ac; // barycentric coordinates (1-w,0,w)
-	}
-
-	// Check if P in edge region of BC, if so return projection of P onto BC
-	float va = d3*d6 - d5*d4;
-	if(va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
-	{
-		float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-		return b + w * (c - b); // barycentric coordinates (0,1-w,w)
-	}
-
-	// P inside face region. Compute Q through its barycentric coordinates (u,v,w)
-	float denom = 1.0f / (va + vb + vc);
-	float v = vb * denom;
-	float w = vc * denom;
-	return a + ab * v + ac * w; // = u*a + v*b + w*c, u = va * denom = 1.0f - v - w
 }
 
 bool CAIManager::LinesEqual(const TLine& lhs, TLine& rhs)

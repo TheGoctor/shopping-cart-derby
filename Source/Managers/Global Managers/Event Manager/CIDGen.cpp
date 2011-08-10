@@ -40,5 +40,8 @@ unsigned int CIDGen::GetID(string szName)
 	int nID = (unsigned int)(*m_cRegister.find(szName)).first.c_str();
 	m_cRegister[szName] = nID;
 
+	// Return address of string in map as ID
+	// (so that you may cast the ID as a char* to
+	// see the string!)
 	return nID;
 }

@@ -25,6 +25,7 @@ private:
 	CSpriteComponent* m_pCreamSpriteComp;
 	CSpriteComponent* m_pSplatSpriteComp;
 	CSpriteComponent* m_pPinkStarsSpriteComp;
+	CSpriteComponent* m_pSplaterSpriteComp;
 	float			  m_fCounter;
 	float			  m_fCreamAlpha;
 	float			  m_fSplatAlpha;
@@ -39,6 +40,7 @@ private:
 	TSpriteData GetCreamInitData(void);
 	TSpriteData GetSplatInitData(void);
 	TSpriteData GetPinkStarsInitData(void);
+	TSpriteData GetSplaterInitData(void);
 
 	// Updates
 	void UpdateStage0(float fDT);
@@ -57,7 +59,15 @@ public:
 	void ResetSprites(void);
 
 	// Set On/Off
-	void SetOn(bool bOn) { m_bActive = bOn; }
+	void SetOn(bool bOn) 
+	{ 
+		m_bActive = bOn;
+		m_fCounter = 0.0f;
+		m_nEffectStage = 0;
+		m_fCreamAlpha = 1.0f;
+		m_fSplatAlpha = 1.0f;
+		m_fStarsAlpha = 1.0f;
+	}
 	void SetSpritesActive(bool bActive);
 
 	// Update

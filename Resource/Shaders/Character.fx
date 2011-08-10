@@ -87,22 +87,38 @@ OutputVS OutlineVS(float3 position:POSITION0, float3 normal:NORMAL0, float2 uv0:
 	// output structure
 	OutputVS outVS;
 	
+	//float3 newPos = position * 1.1f;
+	
 	outVS.posH = mul(float4(position, 1.0f), gWVP);	
+	outVS.posH *= 1.01f;
 	
-	//outVS.normal = float4(normal, 1.0);
+	//outVS.normal = normal;
 	
-	outVS.color.a = dot(normal, gViewPosition);
-	outVS.color.r = 0.0;
-	outVS.color.g = 0.0;
-	outVS.color.b = 0.0;
+	outVS.color = float4(1,1,1,1);
 	
 	outVS.texCoord0 = uv0;
-	outVS.texCoord1.x = dot(normal, gViewPosition);
-	outVS.texCoord1.y = 0.0;
-	if(outVS.texCoord1.x < 0.0f)
-		outVS.texCoord1 *= -1.0f;
+	outVS.texCoord1 = position.xy;
 	
     return outVS;
+	//// output structure
+	//OutputVS outVS;
+	//
+	//outVS.posH = mul(float4(position, 1.1f), gWVP);	
+	//
+	////outVS.normal = float4(normal, 1.0);
+	//
+	//outVS.color.a = dot(normal, gViewPosition);
+	//outVS.color.r = 0.0;
+	//outVS.color.g = 0.0;
+	//outVS.color.b = 0.0;
+	//
+	//outVS.texCoord0 = uv0;
+	//outVS.texCoord1.x = dot(normal, gViewPosition);
+	//outVS.texCoord1.y = 0.0;
+	//if(outVS.texCoord1.x < 0.0f)
+		//outVS.texCoord1 *= -1.0f;
+	//
+    //return outVS;
 }
 
 OutputVS DiffuseVS(float3 posLocal : POSITION0, float3 normalL : NORMAL0, float2 uv0:TEXCOORD0)
@@ -197,7 +213,7 @@ float4 BlackPS(float4 color : COLOR0, float2 uv0:TEXCOORD0, float2 uv1:TEXCOORD1
 	
 	float4 outCol = texCol;
 	
-	if(uv1.x <= 0.1)
+	//if(uv1.x <= 0.1)
 		outCol = float4(0.0, 0.0, 0.0, 1.0);
 		
 	return outCol;
@@ -225,6 +241,64 @@ technique Animated
         ZWriteEnable = true;
         ZEnable = true;
     }
+    //pass P1
+    //{
+		//vertexShader = compile vs_2_0 OutlineVS();
+        //pixelShader  = compile ps_2_0 BlackPS();
+        //
+        ////AlphaTestEnable = true;
+        ////AlphaRef = 1.0f;
+        ////AlphaFunc = Greater;
+        //
+        //SrcBlend = 2;
+		//DestBlend = 1;
+      //
+		//ShadeMode = Flat;
+        //FillMode = Solid;
+        //CullMode = CCW;
+        //
+        //ZWriteEnable = true;
+        //ZEnable = true;
+    //}
+}
+
+technique AnimatedAlphaCart
+{
+	pass P0
+    {
+        vertexShader = compile vs_2_0 TransformVS();
+        pixelShader  = compile ps_2_0 AlphaPS();
+        
+        //AlphaTestEnable = true;
+        //AlphaRef = 1.0f;
+        //AlphaFunc = Greater;
+        
+        SrcBlend = 12;
+		DestBlend = 1;
+      
+		ShadeMode = Flat;
+        FillMode = Solid;
+        CullMode = NONE;
+        
+        ZWriteEnable = true;
+        ZEnable = true;
+    }
+    //pass P1
+    //{
+        //vertexShader = compile vs_2_0 TransformVS();
+        //pixelShader  = compile ps_2_0 AlphaPS();
+        //
+        ////AlphaBlendEnable = true;
+		//SrcBlend = 12;
+		//DestBlend = 1;
+		//
+        //ZWriteEnable = true;
+        //ZEnable = true;
+      //
+		//ShadeMode = Flat;
+        //FillMode = Solid;
+        //CullMode = CCW;
+    //}
 }
 
 technique Outline

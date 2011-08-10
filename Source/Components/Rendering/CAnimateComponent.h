@@ -14,8 +14,9 @@
 // Includes
 #include <map>
 using std::map;
-#include "..\\..\\IComponent.h"
-#include "..\\..\\Managers\\Global Managers\\Rendering Managers\\CAnimation.h"
+#include "..\..\IComponent.h"
+#include "..\..\Managers\Global Managers\Rendering Managers\CAnimation.h"
+#include "..\..\Managers\Global Managers\Memory Manager\CDynArray.h"
 
 // Foward Declares
 class CObject;
@@ -31,6 +32,7 @@ class CAnimateComponent : public IComponent
 {
 private:
 
+	friend class CAnimState;
 	// Parent Object
 	CObject* m_pcParent;
 
@@ -45,6 +47,7 @@ private:
 
 	// Interpolator
 	Interpolator m_cInterpolator;
+	Interpolator m_cSteerInterp;
 
 	// Callback Handlers
 	void Update(float fDT);
@@ -59,10 +62,20 @@ private:
 	// On
 	bool m_bOn;
 
+	// Blended Frames
+	CDynArray<CFrame> m_cBlendedFrames;
+	CDynArray<VERTEX_POS3_NORM3_TEX2> m_cSkinVerts;
+
+	bool m_bSlowed;
+	bool m_bSteering;
+	bool m_bPrevSteer;
+
+
 public:
 
 	// Constructor
-	CAnimateComponent(CObject* pParent, DXMesh* pMesh, Interpolator cInterpolator);
+	CAnimateComponent(CObject* pParent, DXMesh* pMesh);
+	~CAnimateComponent();
 
 	CObject* GetParent() { return m_pcParent; }
 

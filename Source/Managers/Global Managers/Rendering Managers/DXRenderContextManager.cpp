@@ -393,6 +393,26 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_WALLSUPPORT].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
 	m_cContexts[RC_WALLSUPPORT].CreateRenderSet();
 
+	m_cContexts[RC_BREAKUP_SIGN0].AddTexture("Tex", "Resource/Textures/T_BreakUpSign0_D.png");
+	m_cContexts[RC_BREAKUP_SIGN0].m_pShaderEffect = LoadShader("Resource/Shaders/Texture2D.fx");
+	m_cContexts[RC_BREAKUP_SIGN0].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
+	m_cContexts[RC_BREAKUP_SIGN0].CreateRenderSet();
+
+	m_cContexts[RC_BREAKUP_SIGN1].AddTexture("Tex", "Resource/Textures/T_BreakUpSign1_D.png");
+	m_cContexts[RC_BREAKUP_SIGN1].m_pShaderEffect = LoadShader("Resource/Shaders/Texture2D.fx");
+	m_cContexts[RC_BREAKUP_SIGN1].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
+	m_cContexts[RC_BREAKUP_SIGN1].CreateRenderSet();
+
+	m_cContexts[RC_ALIEN].AddTexture("Tex", "Resource/Textures/T_Alien_D.png");
+	m_cContexts[RC_ALIEN].m_pShaderEffect = LoadShader("Resource/Shaders/Texture2D.fx");
+	m_cContexts[RC_ALIEN].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
+	m_cContexts[RC_ALIEN].CreateRenderSet();
+
+	m_cContexts[RC_LITTLE_EVELYN].AddTexture("Tex", "Resource/Textures/T_LittleEvelyns_D.png");
+	m_cContexts[RC_LITTLE_EVELYN].m_pShaderEffect = LoadShader("Resource/Shaders/Texture2D.fx");
+	m_cContexts[RC_LITTLE_EVELYN].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
+	m_cContexts[RC_LITTLE_EVELYN].CreateRenderSet();
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Goal Items //////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -459,12 +479,12 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_ANIM_SCICART].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
 	m_cContexts[RC_ANIM_SCICART].CreateRenderSet();
 	
-	m_cContexts[RC_ANIM_BULLDOG].AddTexture("Tex", "Resource/Textures/T_BulldogRed.png");
+	m_cContexts[RC_ANIM_BULLDOG].AddTexture("Tex", "Resource/Textures/T_BulldogBlue.png");
 	m_cContexts[RC_ANIM_BULLDOG].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
 	m_cContexts[RC_ANIM_BULLDOG].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
 	m_cContexts[RC_ANIM_BULLDOG].CreateRenderSet();
 
-	m_cContexts[RC_ANIM_MA].AddTexture("Tex", "Resource/Textures/T_MaRed_D.png");
+	m_cContexts[RC_ANIM_MA].AddTexture("Tex", "Resource/Textures/T_MaBlue_D.png");
 	m_cContexts[RC_ANIM_MA].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
 	m_cContexts[RC_ANIM_MA].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
 	m_cContexts[RC_ANIM_MA].CreateRenderSet();
@@ -514,15 +534,30 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_ANIM_FITZ].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
 	m_cContexts[RC_ANIM_FITZ].CreateRenderSet();
 
-	m_cContexts[RC_ANIM_PHAROH].AddTexture("Tex", "Resource/Textures/T_ Pharaoh_D.png");
+	m_cContexts[RC_ANIM_PHAROH].AddTexture("Tex", "Resource/Textures/T_Pharaoh_D.png");
 	m_cContexts[RC_ANIM_PHAROH].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
 	m_cContexts[RC_ANIM_PHAROH].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
 	m_cContexts[RC_ANIM_PHAROH].CreateRenderSet();
 
 	m_cContexts[RC_ANIM_ALIENCART].AddTexture("Tex", "Resource/Textures/T_AlienCart_D.png");
 	m_cContexts[RC_ANIM_ALIENCART].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
-	m_cContexts[RC_ANIM_ALIENCART].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
+	m_cContexts[RC_ANIM_ALIENCART].RenderFunc = DXRenderContext::AnimationAlphaRenderContextFunc;
 	m_cContexts[RC_ANIM_ALIENCART].CreateRenderSet();
+
+	m_cContexts[RC_ANIM_EVELYN].AddTexture("Tex", "Resource/Textures/T_Evelyn_D.png");
+	m_cContexts[RC_ANIM_EVELYN].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
+	m_cContexts[RC_ANIM_EVELYN].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
+	m_cContexts[RC_ANIM_EVELYN].CreateRenderSet();
+
+	m_cContexts[RC_ANIM_SHADE].AddTexture("Tex", "Resource/Textures/T_Shade_D.png");
+	m_cContexts[RC_ANIM_SHADE].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
+	m_cContexts[RC_ANIM_SHADE].RenderFunc = DXRenderContext::AnimationRenderContextFunc;
+	m_cContexts[RC_ANIM_SHADE].CreateRenderSet();
+
+	m_cContexts[RC_ANIM_NLCART].AddTexture("Tex", "Resource/Textures/T_CombinedNightlightCart_D.png");
+	m_cContexts[RC_ANIM_NLCART].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
+	m_cContexts[RC_ANIM_NLCART].RenderFunc = DXRenderContext::AnimationAlphaRenderContextFunc;
+	m_cContexts[RC_ANIM_NLCART].CreateRenderSet();
 
 	m_cContexts[RC_ANIM_DONUT].AddTexture("Tex", "Resource/Textures/FFP_2D_Donut_PH.png");
 	m_cContexts[RC_ANIM_DONUT].m_pShaderEffect = LoadShader("Resource/Shaders/Character.fx");
@@ -574,8 +609,8 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_TURKEY].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
 	m_cContexts[RC_TURKEY].CreateRenderSet();
 
-	m_cContexts[RC_BLUE_LIGHT_SPECIAL].AddTexture("Tex", "Resource/Textures/FFP_2D_BlueLight2_FIN.png");
-	m_cContexts[RC_BLUE_LIGHT_SPECIAL].AddTexture("Tex2", "Resource/Textures/FFP_2D_BlueLight_FIN.png");
+	m_cContexts[RC_BLUE_LIGHT_SPECIAL].AddTexture("Tex", "Resource/Textures/FFP_2D_BlueLamp_FIN.png");
+	//m_cContexts[RC_BLUE_LIGHT_SPECIAL].AddTexture("Tex2", "Resource/Textures/FFP_2D_BlueLight_FIN.png");
 	m_cContexts[RC_BLUE_LIGHT_SPECIAL].m_pShaderEffect = LoadShader("Resource/Shaders/MultiTexture.fx");
 	m_cContexts[RC_BLUE_LIGHT_SPECIAL].RenderFunc = DXRenderContext::BlueLightContextFunc;
 	m_cContexts[RC_BLUE_LIGHT_SPECIAL].CreateRenderSet();
@@ -584,16 +619,6 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_PEANUTPILE].m_pShaderEffect = LoadShader("Resource/Shaders/Texture2D.fx");
 	m_cContexts[RC_PEANUTPILE].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
 	m_cContexts[RC_PEANUTPILE].CreateRenderSet();
-
-	m_cContexts[RC_CS_BUB1].AddTexture("Tex", "Resource/Textures/FFP_2D_BubbleV2_FIN.png");
-	m_cContexts[RC_CS_BUB1].m_pShaderEffect = LoadShader("Resource/Shaders/ChickenNoodle.fx");
-	m_cContexts[RC_CS_BUB1].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
-	m_cContexts[RC_CS_BUB1].CreateRenderSet();
-
-	m_cContexts[RC_CS_BUB2].AddTexture("Tex", "Resource/Textures/FFP_2D_BubbleV3_FIN.png");
-	m_cContexts[RC_CS_BUB2].m_pShaderEffect = LoadShader("Resource/Shaders/ChickenNoodle.fx");
-	m_cContexts[RC_CS_BUB2].RenderFunc = DXRenderContext::TexturedRenderContextFunc;
-	m_cContexts[RC_CS_BUB2].CreateRenderSet();
 
 ///// GOAL EFFECT
 
@@ -609,53 +634,13 @@ void DXRenderContextManager::BuildRenderContexts()
 
 	m_cContexts[RC_ITEM_EFFECT_SHINE].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_Shine_FIN.png");
 	m_cContexts[RC_ITEM_EFFECT_SHINE].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_SHINE].RenderFunc = DXRenderContext::ParticleContextFunc;
+	m_cContexts[RC_ITEM_EFFECT_SHINE].RenderFunc = DXRenderContext::ParticleZWriteContextFunc;
 	m_cContexts[RC_ITEM_EFFECT_SHINE].CreateRenderSet();
 
-	m_cContexts[RC_ITEM_EFFECT_AGENT_ORANGE].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_AgentOrange_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_AGENT_ORANGE].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_AGENT_ORANGE].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_AGENT_ORANGE].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_GORILLA_MILK].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_GorillaMilk_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_GORILLA_MILK].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_GORILLA_MILK].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_GORILLA_MILK].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_CAPTAIN_FLAKEY].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_CaptnFlakey_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_CAPTAIN_FLAKEY].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_CAPTAIN_FLAKEY].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_CAPTAIN_FLAKEY].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_PIZZA].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_Pizza_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_PIZZA].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_PIZZA].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_PIZZA].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_CAKE].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_Cake_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_CAKE].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_CAKE].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_CAKE].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_CANNED_BEARS].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_CannedBears_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_CANNED_BEARS].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_CANNED_BEARS].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_CANNED_BEARS].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_CARROTS].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_Carrots_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_CARROTS].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_CARROTS].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_CARROTS].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_SAMMY_SANDWICH].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_SammySandwich_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_SAMMY_SANDWICH].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_SAMMY_SANDWICH].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_SAMMY_SANDWICH].CreateRenderSet();
-
-	m_cContexts[RC_ITEM_EFFECT_SQUID].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_Squid_FIN.png");
-	m_cContexts[RC_ITEM_EFFECT_SQUID].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_ITEM_EFFECT_SQUID].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_ITEM_EFFECT_SQUID].CreateRenderSet();
+	m_cContexts[RC_GOAL_ICON_EFFECT_SHEET].AddTexture("Tex", "Resource/Textures/Particle Images/Goal Item Icons/FFP_2D_GoalItemSheet_FIN.png");
+	m_cContexts[RC_GOAL_ICON_EFFECT_SHEET].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_GOAL_ICON_EFFECT_SHEET].RenderFunc = DXRenderContext::ParticleZWriteContextFunc;
+	m_cContexts[RC_GOAL_ICON_EFFECT_SHEET].CreateRenderSet();
 
 	m_cContexts[RC_CART_SMOKE_EFFECT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_TireSmoke_FIN.png");
 	m_cContexts[RC_CART_SMOKE_EFFECT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
@@ -677,6 +662,11 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_PB_MARKS].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_PB_MARKS].CreateRenderSet();
 
+	m_cContexts[RC_CART_MUD].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_PeanutTrail_FIN.png");
+	m_cContexts[RC_CART_MUD].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_CART_MUD].RenderFunc = DXRenderContext::ParticleContextFunc;
+	m_cContexts[RC_CART_MUD].CreateRenderSet();
+
 	m_cContexts[RC_BOOST_GLOW_BLUE].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2DLightningSheet_FIN.png");
 	m_cContexts[RC_BOOST_GLOW_BLUE].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_BOOST_GLOW_BLUE].RenderFunc = DXRenderContext::ParticleContextFunc;
@@ -691,11 +681,6 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_CLOUD_GRAY].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_CLOUD_GRAY].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_CLOUD_GRAY].CreateRenderSet();
-
-	m_cContexts[RC_HELD_ITEM_COLLECTION_EFFECT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_HeldItemEffect_FIN.png");
-	m_cContexts[RC_HELD_ITEM_COLLECTION_EFFECT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_HELD_ITEM_COLLECTION_EFFECT].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_HELD_ITEM_COLLECTION_EFFECT].CreateRenderSet();
 
 	m_cContexts[RC_TURKEY_KRACK].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_KrackSheet_FIN.png");
 	m_cContexts[RC_TURKEY_KRACK].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
@@ -722,25 +707,15 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_TURKEY_KRACK_BIG].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
 	m_cContexts[RC_TURKEY_KRACK_BIG].CreateRenderSet();
 
-	m_cContexts[RC_CARROT_EFFECT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_Carrots_FIN.png");
-	m_cContexts[RC_CARROT_EFFECT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_CARROT_EFFECT].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_CARROT_EFFECT].CreateRenderSet();
-
-	m_cContexts[RC_NOODLE_EFFECT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_Noodle2_FIN.png");
-	m_cContexts[RC_NOODLE_EFFECT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_NOODLE_EFFECT].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_NOODLE_EFFECT].CreateRenderSet();
-
-	m_cContexts[RC_CHICKEN].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_RubberChicken_FIN.png");
-	m_cContexts[RC_CHICKEN].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_CHICKEN].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_CHICKEN].CreateRenderSet();
-
 	m_cContexts[RC_BROTH].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_BubblePopSheet_FIN.png");
 	m_cContexts[RC_BROTH].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_BROTH].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
 	m_cContexts[RC_BROTH].CreateRenderSet();
+
+	m_cContexts[RC_SOUP_SPARKLE].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_GlitterYellow_FIN.png");
+	m_cContexts[RC_SOUP_SPARKLE].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_SOUP_SPARKLE].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
+	m_cContexts[RC_SOUP_SPARKLE].CreateRenderSet();
 
 	m_cContexts[RC_FLOOR_SPLAT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_BananaSmush2_FIN.png");
 	m_cContexts[RC_FLOOR_SPLAT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
@@ -762,10 +737,15 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_DRIP_RIGHT].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
 	m_cContexts[RC_DRIP_RIGHT].CreateRenderSet();
 
-	m_cContexts[RC_PEANUT_EFFECT_SPLASH].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_PeanutSmashSheet2_FIN.png");
-	m_cContexts[RC_PEANUT_EFFECT_SPLASH].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_PEANUT_EFFECT_SPLASH].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
-	m_cContexts[RC_PEANUT_EFFECT_SPLASH].CreateRenderSet();
+	m_cContexts[RC_PB_DRIP_LEFT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_PeanutBitsLft_FIN.png");
+	m_cContexts[RC_PB_DRIP_LEFT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_PB_DRIP_LEFT].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
+	m_cContexts[RC_PB_DRIP_LEFT].CreateRenderSet();
+
+	m_cContexts[RC_PB_DRIP_RIGHT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_PeanutBitsRht_FIN.png");
+	m_cContexts[RC_PB_DRIP_RIGHT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_PB_DRIP_RIGHT].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
+	m_cContexts[RC_PB_DRIP_RIGHT].CreateRenderSet();
 
 	m_cContexts[RC_SQUISH_POPUP].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_PeanutSquishSheet_FIN.png");
 	m_cContexts[RC_SQUISH_POPUP].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
@@ -853,12 +833,7 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_COLLISION_EFFECT_CRUNCH_POPUP].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_COLLISION_EFFECT_CRUNCH_POPUP].CreateRenderSet();
 
-	m_cContexts[RC_JAM_USE_EFFECT_ROCKET].AddTexture("Tex", "Resource/Textures/Jam Sprites/FFP_2D_BlastSheet2_FIN.png");
-	m_cContexts[RC_JAM_USE_EFFECT_ROCKET].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_JAM_USE_EFFECT_ROCKET].RenderFunc = DXRenderContext::ParticleContextFunc;
-	m_cContexts[RC_JAM_USE_EFFECT_ROCKET].CreateRenderSet();
-
-	m_cContexts[RC_JAM_USE_EFFECT_JAR].AddTexture("Tex", "Resource/Textures/Jam Sprites/FFP_2D_JamJar_FIN.png");
+	m_cContexts[RC_JAM_USE_EFFECT_JAR].AddTexture("Tex", "Resource/Textures/Particle Images/JamFallSheet.png");
 	m_cContexts[RC_JAM_USE_EFFECT_JAR].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_JAM_USE_EFFECT_JAR].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_JAM_USE_EFFECT_JAR].CreateRenderSet();
@@ -873,12 +848,22 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_JAM_HIT_EFFECT_SPLURCH_POPUP].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_JAM_HIT_EFFECT_SPLURCH_POPUP].CreateRenderSet();
 
-	m_cContexts[RC_DONUT_EFFECT_PUFF].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_BurstSheetWhit_FIN.png");
+	m_cContexts[RC_DONUT_EFFECT_PUFF].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_BurstSheetWhite_FIN.png");
 	m_cContexts[RC_DONUT_EFFECT_PUFF].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_DONUT_EFFECT_PUFF].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_DONUT_EFFECT_PUFF].CreateRenderSet();
 
-	m_cContexts[RC_SPLAT_POPUP].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_Splat_FIN.png");
+	m_cContexts[RC_BLUE_PUFF].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_BurstSheetBlue_FIN.png");
+	m_cContexts[RC_BLUE_PUFF].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_BLUE_PUFF].RenderFunc = DXRenderContext::ParticleContextFunc;
+	m_cContexts[RC_BLUE_PUFF].CreateRenderSet();
+
+	m_cContexts[RC_SPLAT_BURST].AddTexture("Tex", "Resource/Textures/Pie Sprites/FFP_2D_Splat_FIN.png");
+	m_cContexts[RC_SPLAT_BURST].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_SPLAT_BURST].RenderFunc = DXRenderContext::ParticleContextFunc;
+	m_cContexts[RC_SPLAT_BURST].CreateRenderSet();
+
+	m_cContexts[RC_SPLAT_POPUP].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_Splat_Combo_FIN.png");
 	m_cContexts[RC_SPLAT_POPUP].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_SPLAT_POPUP].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_SPLAT_POPUP].CreateRenderSet();
@@ -903,6 +888,12 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_FIREWORK_ORANGE].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_FIREWORK_ORANGE].CreateRenderSet();
 
+	m_cContexts[RC_BOLT].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_Bolt_FIN.png");
+	m_cContexts[RC_BOLT].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
+	m_cContexts[RC_BOLT].RenderFunc = DXRenderContext::ParticleContextFunc;
+	m_cContexts[RC_BOLT].CreateRenderSet();
+
+
 	m_cContexts[RC_CONFETTI_STRIP].AddTexture("Tex", "Resource/Textures/Particle Images/Victory/FFP_2D_ConfettiStrip_FIN.png");
 	m_cContexts[RC_CONFETTI_STRIP].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_CONFETTI_STRIP].RenderFunc = DXRenderContext::ParticleContextFunc;
@@ -917,11 +908,6 @@ void DXRenderContextManager::BuildRenderContexts()
 	m_cContexts[RC_CAUTION].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
 	m_cContexts[RC_CAUTION].RenderFunc = DXRenderContext::ParticleContextFunc;
 	m_cContexts[RC_CAUTION].CreateRenderSet();
-
-	m_cContexts[RC_SCI_GLOW].AddTexture("Tex", "Resource/Textures/Particle Images/FFP_2D_ScientistGlowSheet_FIN.png");
-	m_cContexts[RC_SCI_GLOW].m_pShaderEffect = LoadShader("Resource/Shaders/Particle.fx");
-	m_cContexts[RC_SCI_GLOW].RenderFunc = DXRenderContext::ParticleAlphaContextFunc;
-	m_cContexts[RC_SCI_GLOW].CreateRenderSet();
 
 	// Shadows
 	m_cContexts[RC_CHARACTER_SHADOW_BLOB].AddTexture("Tex", "Resource/Textures/T_Shadows_D.png");

@@ -5,7 +5,7 @@
 //
 //  Date Created	:	04/12/11
 //
-//	Last Changed	:	05/09/11
+//	Last Changed	:	07/26/11
 //
 //	Changed By		:	HN
 //
@@ -35,6 +35,7 @@ void CCameraManager::Init(int nScreenWidth, int nScreenHeight)
 	pEM->RegisterEvent("AttachToCamera", (IComponent*)GetInstance(), AttachToCamCallback);
 	pEM->RegisterEvent("UpdateState", (IComponent*)GetInstance(), UpdateCallback);
 	pEM->RegisterEvent("AttachToCameraWin", (IComponent*)GetInstance(), AttachToWinStateCallback);
+	pEM->RegisterEvent("AttachToCameraLose",  (IComponent*)GetInstance(), AttachToLoseStateCallback);
 }
 
 // Attach To Camera
@@ -52,8 +53,8 @@ int CCameraManager::AttachCamToPlayer(lua_State* pLua)
 		return 0;
 	}
 
-	GetInstance()->m_pCam->m_Target.SetParent(pObj->GetTransform());
-	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->m_Target);
+	GetInstance()->m_pCam->GetTarget1().SetParent(pObj->GetTransform());
+	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
 	GetInstance()->m_pCam->SetFrameParent(pObj->GetTransform());
 
 	return 0;
@@ -66,10 +67,10 @@ void CCameraManager::AttachToCamCallback(IEvent* e, IComponent*)
 	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
 	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
 
-	GetInstance()->m_pCam->m_Target.SetParent(eObj->m_pcObj->GetTransform());
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->m_Target.GetLocalMatrix());
+	GetInstance()->m_pCam->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetTarget1().GetLocalMatrix());
 
-	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->m_Target);
+	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
 	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
 	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 4.5f, -4.0f));
 	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, 5.0f));
@@ -84,6 +85,7 @@ void CCameraManager::UpdateCallback(IEvent* e, IComponent*)
 	//// Update Camera
 	GetInstance()->m_pCam->Update(fDt);
 }
+
 void CCameraManager::AttachToWinStateCallback(IEvent* e, IComponent* comp)
 {
 	TObjectEvent* eObj = static_cast<TObjectEvent*>(e->GetData());
@@ -91,11 +93,28 @@ void CCameraManager::AttachToWinStateCallback(IEvent* e, IComponent* comp)
 	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
 	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
 
-	GetInstance()->m_pCam->m_Target.SetParent(eObj->m_pcObj->GetTransform());
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->m_Target.GetLocalMatrix());
+	GetInstance()->m_pCam->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetTarget1().GetLocalMatrix());
 	
-	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->m_Target);
+	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
 	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
-	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 6.0f));
+	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 4.0f));
+	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, -2.0f));
+}
+
+void CCameraManager::AttachToLoseStateCallback(IEvent* e, IComponent* comp)
+{
+	
+	TObjectEvent* eObj = static_cast<TObjectEvent*>(e->GetData());
+
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
+	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
+
+	GetInstance()->m_pCam->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
+	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetTarget1().GetLocalMatrix());
+
+	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
+	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
+	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 4.0f));
 	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, -2.0f));
 }

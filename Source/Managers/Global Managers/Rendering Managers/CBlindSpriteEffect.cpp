@@ -19,6 +19,7 @@
 CBlindSpriteEffect::CBlindSpriteEffect(void) : m_pCreamSpriteComp(NULL),
 											   m_pSplatSpriteComp(NULL),
 											   m_pPinkStarsSpriteComp(NULL),
+											   m_pSplaterSpriteComp(NULL),
 											   m_fCounter(0.0f),
 											   m_fCreamAlpha(1.0f),
 											   m_fSplatAlpha(1.0f),
@@ -48,7 +49,7 @@ TSpriteData CBlindSpriteEffect::GetCreamInitData(void)
 	tData.m_nTexture = texID;
 	tData.m_nX = 100;
 	tData.m_nY = 0;
-	tData.m_nZ = 11;
+	tData.m_nZ = 101;
 	tData.m_fScaleX = 1.5f;
 	tData.m_fScaleY = 1.5f;
 	tData.m_fRot = 0.0f;
@@ -71,7 +72,7 @@ TSpriteData CBlindSpriteEffect::GetSplatInitData(void)
 	tData.m_nTexture = texID;
 	tData.m_nX = 100;
 	tData.m_nY = 0;
-	tData.m_nZ = 12;
+	tData.m_nZ = 102;
 	tData.m_fScaleX = 1.5f;
 	tData.m_fScaleY = 1.5f;
 	tData.m_fRot = 0.0f;
@@ -94,7 +95,7 @@ TSpriteData CBlindSpriteEffect::GetPinkStarsInitData(void)
 	tData.m_nTexture = texID;
 	tData.m_nX = 100;
 	tData.m_nY = 0;
-	tData.m_nZ = 13;
+	tData.m_nZ = 103;
 	tData.m_fScaleX = 1.5f;
 	tData.m_fScaleY = 1.5f;
 	tData.m_fRot = 0.0f;
@@ -107,6 +108,30 @@ TSpriteData CBlindSpriteEffect::GetPinkStarsInitData(void)
 	tData.m_tRect.bottom = 512;
 	return tData;
 }
+
+// Splater
+TSpriteData CBlindSpriteEffect::GetSplaterInitData(void)
+{
+	CTextureManager* pTM = CTextureManager::GetInstance();
+	int texID = pTM->LoadTexture("Resource\\Textures\\Pie Sprites\\FFP_2D_Splater_FIN.png");
+	TSpriteData tData;
+	tData.m_nTexture = texID;
+	tData.m_nX = 100;
+	tData.m_nY = 0;
+	tData.m_nZ = 100;
+	tData.m_fScaleX = 1.5f;
+	tData.m_fScaleY = 1.5f;
+	tData.m_fRot = 0.0f;
+	tData.m_fRotCenterX = 0.0f;
+	tData.m_fRotCenterY = 0.0f;
+	tData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	tData.m_tRect.top  = 0;
+	tData.m_tRect.left = 0;
+	tData.m_tRect.right = 512;
+	tData.m_tRect.bottom = 512;
+	return tData;
+}
+
 
 // Create SpriteComps
 void CBlindSpriteEffect::CreateSpriteComps(void)
@@ -124,6 +149,11 @@ void CBlindSpriteEffect::CreateSpriteComps(void)
 	szObjName += (char)nCount;
 	CObject* pSplatObj = CObjectManager::GetInstance()->CreateObject(szObjName);
 	m_pSplatSpriteComp = CTextureManager::GetInstance()->CreateSpriteComp(pSplatObj, GetSplatInitData(), false);
+
+	szObjName = "BlindSplater";
+	szObjName += (char)nCount;
+	CObject* pSplaterObj = CObjectManager::GetInstance()->CreateObject(szObjName);
+	m_pSplaterSpriteComp = CTextureManager::GetInstance()->CreateSpriteComp(pSplaterObj, GetSplaterInitData(), false);
 
 	szObjName = "BlindPinkStarsSprite";
 	szObjName += (char)nCount;
@@ -152,6 +182,7 @@ void CBlindSpriteEffect::ResetSprites(void)
 	m_pCreamSpriteComp->SetSpriteData(GetCreamInitData());
 	m_pSplatSpriteComp->SetSpriteData(GetSplatInitData());
 	m_pPinkStarsSpriteComp->SetSpriteData(GetPinkStarsInitData());
+	m_pSplaterSpriteComp->SetSpriteData(GetSplaterInitData());
 
 	// Set Actives Off
 	SetSpritesActive(false);
@@ -169,6 +200,8 @@ void CBlindSpriteEffect::SetSpritesActive(bool bActive)
 			m_pSplatSpriteComp->SetActive(bActive);
 		if(m_pPinkStarsSpriteComp)
 			m_pPinkStarsSpriteComp->SetActive(bActive);
+		if(m_pSplaterSpriteComp)
+			m_pSplaterSpriteComp->SetActive(bActive);
 	//}
 	//else // Turn On Sprites for Current Stage
 	//{
@@ -274,6 +307,7 @@ void CBlindSpriteEffect::UpdateStage1(float fDT)
 	m_pCreamSpriteComp->SetActive(true);
 	m_pSplatSpriteComp->SetActive(true);
 	m_pPinkStarsSpriteComp->SetActive(true);
+	m_pSplaterSpriteComp->SetActive(true);
 }
 
 // Stage 2
@@ -311,6 +345,7 @@ void CBlindSpriteEffect::UpdateStage2(float fDT)
 	m_pCreamSpriteComp->SetActive(true);
 	m_pSplatSpriteComp->SetActive(true);
 	m_pPinkStarsSpriteComp->SetActive(true);
+	m_pSplaterSpriteComp->SetActive(true);
 }
 
 // Cream
@@ -321,6 +356,11 @@ void CBlindSpriteEffect::UpdateCream(float fDT)
 	tData.m_nY += (int)(BLIND_DROP_RATE * fDT);
 	tData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, m_fCreamAlpha);
 	m_pCreamSpriteComp->SetSpriteData(tData);
+
+	tData = m_pSplaterSpriteComp->GetSpriteData();
+	tData.m_nY += (int)(BLIND_DROP_RATE * fDT);
+	tData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, m_fCreamAlpha);
+	m_pSplaterSpriteComp->SetSpriteData(tData);
 }
 
 // Splat

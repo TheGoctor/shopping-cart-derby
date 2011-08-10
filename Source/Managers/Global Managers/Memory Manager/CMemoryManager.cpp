@@ -9,10 +9,8 @@
 
 #include "CMemoryManager.h"
 
-#if MM_LEAK_DETECTION
-// This version of the functions use Leak Detection
 
-CMemoryManager::CMemoryManager() : m_cGeneralHeap(), m_cEventHeap(), m_cRenderHeap()
+CMemoryManager::CMemoryManager() : m_cGeneralHeap(), m_cEventHeap(), m_cRenderHeap(), m_cDynArrayHeap()
 {
 }
 
@@ -27,43 +25,12 @@ CMemoryManager* CMemoryManager::GetInstance()
 }
 
 void CMemoryManager::Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize, 
-	unsigned int nRenderHeapSize)
+	unsigned int nRenderHeapSize, unsigned int nDynArrayHeapSize)
 {
 	m_cGeneralHeap.Init(nGeneralHeapSize);
 	m_cEventHeap.Init(nEventHeapSize);
 	m_cRenderHeap.Init(nRenderHeapSize);
-}
-
-void CMemoryManager::Shutdown()
-{
-}
-
-char* CMemoryManager::Allocate(unsigned int nAllocSize, EHeapID eHeapIndx, char* szFile, int nLine)
-{
-	switch(eHeapIndx)
-	{
-	case HEAPID_GENERAL:
-		{
-			return m_cGeneralHeap.Allocate(nAllocSize, szFile, nLine);
-		}
-		break;
-	case HEAPID_EVENT:
-		{
-			return m_cEventHeap.Allocate(nAllocSize, szFile, nLine);
-		}
-		break;
-	case HEAPID_RENDER:
-		{
-			return m_cRenderHeap.Allocate(nAllocSize, szFile, nLine);
-		}
-		break;
-	default:
-		{
-			// There was an error
-			return NULL;
-		}
-		break;
-	};
+	m_cDynArrayHeap.Init(nDynArrayHeapSize);
 }
 
 void CMemoryManager::Deallocate(char *pchData, EHeapID eHeapIndx)
@@ -88,6 +55,11 @@ void CMemoryManager::Deallocate(char *pchData, EHeapID eHeapIndx)
 			m_cRenderHeap.DeAllocate(pchData);
 		}
 		break;
+	case HEAPID_DYNARRAY:
+		{
+			m_cDynArrayHeap.DeAllocate(pchData);
+		}
+		break;
 	default:
 		{
 			// There was an error
@@ -96,34 +68,42 @@ void CMemoryManager::Deallocate(char *pchData, EHeapID eHeapIndx)
 	};
 }
 
+#if MM_LEAK_DETECTION
+// This version of the functions use Leak Detection
+char* CMemoryManager::Allocate(unsigned int nAllocSize, EHeapID eHeapIndx, char* szFile, int nLine)
+{
+	switch(eHeapIndx)
+	{
+	case HEAPID_GENERAL:
+		{
+			return m_cGeneralHeap.Allocate(nAllocSize, szFile, nLine);
+		}
+		break;
+	case HEAPID_EVENT:
+		{
+			return m_cEventHeap.Allocate(nAllocSize, szFile, nLine);
+		}
+		break;
+	case HEAPID_RENDER:
+		{
+			return m_cRenderHeap.Allocate(nAllocSize, szFile, nLine);
+		}
+		break;
+	case HEAPID_DYNARRAY:
+		{
+			return m_cDynArrayHeap.Allocate(nAllocSize, szFile, nLine);
+		}
+		break;
+	default:
+		{
+			// There was an error
+			return NULL;
+		}
+		break;
+	};
+}
 #else
 // This version of the functions do not use leak detection
-
-CMemoryManager::CMemoryManager() : m_cGeneralHeap(), m_cEventHeap(), m_cRenderHeap()
-{
-}
-
-CMemoryManager::~CMemoryManager()
-{
-}
-
-CMemoryManager* CMemoryManager::GetInstance()
-{
-	static CMemoryManager cMemoryManager;
-	return &cMemoryManager;
-}
-
-void CMemoryManager::Initialize(unsigned int nGeneralHeapSize, unsigned int nEventHeapSize,
-	unsigned int nRenderHeapSize)
-{
-	m_cGeneralHeap.Init(nGeneralHeapSize);
-	m_cEventHeap.Init(nEventHeapSize);
-	m_cRenderHeap.Init(nRenderHeapSize);
-}
-
-void CMemoryManager::Shutdown()
-{
-}
 
 char* CMemoryManager::Allocate(unsigned int nAllocSize, EHeapID eHeapIndx)
 {
@@ -144,6 +124,11 @@ char* CMemoryManager::Allocate(unsigned int nAllocSize, EHeapID eHeapIndx)
 			return m_cRenderHeap.Allocate(nAllocSize);
 		}
 		break;
+	case HEAPID_DYNARRAY:
+		{
+			return m_cDynArrayHeap.Allocate(nAllocSize);
+		}
+		break;
 	default:
 		{
 			// There was an error
@@ -153,33 +138,4 @@ char* CMemoryManager::Allocate(unsigned int nAllocSize, EHeapID eHeapIndx)
 	};
 }
 
-void CMemoryManager::Deallocate(char *pchData, EHeapID eHeapIndx)
-{
-	if(pchData == NULL)
-		return;
-
-	switch(eHeapIndx)
-	{
-	case HEAPID_GENERAL:
-		{
-			m_cGeneralHeap.DeAllocate(pchData);
-		}
-		break;
-	case HEAPID_EVENT:
-		{
-			m_cEventHeap.DeAllocate(pchData);
-		}
-		break;
-	case HEAPID_RENDER:
-		{
-			m_cRenderHeap.DeAllocate(pchData);
-		}
-		break;
-	default:
-		{
-			// There was an error
-		}
-		break;
-	};
-}
 #endif

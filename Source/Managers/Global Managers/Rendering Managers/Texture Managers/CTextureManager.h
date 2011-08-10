@@ -5,7 +5,9 @@
 //
 //  Date Created	:	04/05/11
 //
-//	Last Changed	:	04/11/11
+//	Last Changed	:	07/24/11
+//
+//	Changed By		:	HN			
 //
 //  Purpose			:	Wrapper class for manageing Textures for Direct3D
 ////////////////////////////////////////////////////////
@@ -60,8 +62,11 @@ private:
 		}
 	} TEXTURE, *LPTEXTURE;
 
+	//Constructor
 	CTextureManager(void);
+	//Copy constructor
 	CTextureManager(CTextureManager &ref);
+	//Assignment operator
 	CTextureManager &operator=(CTextureManager &ref);
 
 
@@ -93,38 +98,84 @@ private:
 
 public:
 	
+	//Destructor
 	~CTextureManager(void);
-
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "GetInstance"
+	//
+	// Return: static CTextureManger* - returns an instance of the manager
+	//
+	// Parameters: void
+	//
 	//	Purpose:	Gets an instance to this class.
 	///////////////////////////////////////////////////////////////////
 	static CTextureManager *GetInstance(void);
-
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "InitTextureManager"
+	//
+	// Return: bool - true if everything was successful
+	//				flase if something didn't initialize correctly
+	//
+	// Parameters: LPDIRECT3DDEVICE9 - the handle to the d3d device
+	//			LPD3DXSPRITE - the handle to the sprite device		
+	//
 	//	Purpose:	Initializes the texture manager.
 	///////////////////////////////////////////////////////////////////
 	bool InitTextureManager(LPDIRECT3DDEVICE9 _lpDevice, LPD3DXSPRITE _lpSprite);
-
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "ShutdownTextureManager"
+	//
+	// Return: void
+	//
+	// Parameters: void
+	//
 	//	Purpose:	Unloads all the loaded textures and 
 	//				releases references to sprite and d3d devices.
 	///////////////////////////////////////////////////////////////////
 	void ShutdownTextureManager(void);
-
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "LoadTexture"
+	//
+	// Return: int - the id to the texture
+	//
+	// Parameters: - const char* - the string to the file
+	//				DWORD - color key of the texture file
+	//
 	//	Purpose:	To load a texture from a file. 
 	//  NOTE:		Image dimensions must be a power of 2 (i.e. 256x64).
 	//				Supports .bmp, .dds, .dib, .hdr, .jpg, .pfm, .png, 
 	//				.ppm, and .tga files. 
 	///////////////////////////////////////////////////////////////////
 	int LoadTexture(const char* _szFilename, DWORD _dwColorkey = 0);
-
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "UnloadTexture"
+	//
+	// Return: void
+	//
+	// Parameters: int - the texture id to unload
+	//
 	//	Purpose:	Releases a reference to a given texture. When the
 	//				reference to the texture is zero, the texture is
 	//				released from memory.
 	///////////////////////////////////////////////////////////////////
 	void UnloadTexture(int _nID);
-
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "GetTextureWidth"
+	//
+	// Return: int - the width of the texture
+	//
+	// Parameters: int - the texture id to get width
+	//
 	//	Purpose:	Gets the width of a specified texture.
 	///////////////////////////////////////////////////////////////////
 	int GetTextureWidth(int _nID);
-
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "GetTextureHeight"
+	//
+	// Return: int - the height of the texture
+	//
+	// Parameters: int - the texture id
+	//
 	//	Purpose:	Gets the height of a specified texture.
 	///////////////////////////////////////////////////////////////////
 	int GetTextureHeight(int _nID);
@@ -148,6 +199,8 @@ public:
 		float fScale, DWORD dwColor, bool bActive);
 
 	void RenderSprites(void);
+
+	//Event callback functions
 	static void RenderSpritesCallback(IEvent* e, IComponent* comp);
 	static void ShutdownCallback(IEvent* e, IComponent* comp);
 };

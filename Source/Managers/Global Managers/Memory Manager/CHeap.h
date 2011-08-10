@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	Heap.h
 //	Date			:	3/29/11
-//	Mod. Date		:	3/29/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	MR
 //	Author			:	Mac Reichelt
 //	Purpose			:	Chunks of memory that can be allocated and used as 
@@ -58,24 +58,31 @@ private:
 	// Allocation Behaviors
 	THeader * FirstAvailable(unsigned int nAllocSize);
 
+	// For Debugging Purposes
 	int m_nMemoryAvailable;
 	int m_nNumPtrs;
 
+	// Struct used in the detection of memory leaks within the manager
 	struct TLeakDetector
 	{
-		char* szFile;
-		unsigned int nLine;
-		unsigned int nSize;
+		char* szFile;			// File where the memory was allocated
+		unsigned int nLine;		// Line the memory was allocated on
+		unsigned int nSize;		// The memory of allocated
 	};
 
+	// List of all the Memory currently allocated
 	map<unsigned int, TLeakDetector> m_cLeakList;
 	
 public:
+	// Constructor
 	CHeap();
+
+	// Trilogy of Evil
 	~CHeap();
 	CHeap(const CHeap &);
 	CHeap & operator=(const CHeap &);
 
+	// Accessors
 	unsigned int GetMemUsed() { return m_nTotalPoolSize - m_nMemoryAvailable; }
 	unsigned int GetPoolSize() { return m_nTotalPoolSize; }
 
@@ -108,14 +115,14 @@ public:
 	char * Allocate(unsigned int nAllocSize, char* szFile, unsigned int nLine);
 	
 ////////////////////////////////////////////////////////////////////////////////
-// FirstAvailable()	:	Finds the first available chunk of memory large enough
-//						to hold the size passed in
+// DeAllocate()		:	Adds the memory allocated at the passed in pointer back to
+//						to the pool of free memory
 //
-// Ins				:	nAllocSize	-	The amount of memory to allocate
+// Ins				:	char* pchData	-	The data to be deallocated
 //
 // Outs				:	void
 //
-// Returns			:	char*	-	A pointer to the memory allocated
+// Returns			:	void
 //
 // Mod. Date		:	3/29/11
 // Mod. Initials	:	MR
@@ -161,15 +168,20 @@ private:
 	// Allocation Behaviors
 	THeader * FirstAvailable(unsigned int nAllocSize);
 
+	// For Debugging Purposes
 	int m_nMemoryAvailable;
 	int m_nNumPtrs;
 	
 public:
+	// Constructor
 	CHeap();
+
+	// Trilogy of Evil
 	~CHeap();
 	CHeap(const CHeap &);
 	CHeap & operator=(const CHeap &);
 	
+	// Accessors
 	unsigned int GetMemUsed() { return m_nTotalPoolSize - m_nMemoryAvailable; }
 	unsigned int GetPoolSize() { return m_nTotalPoolSize; }
 
@@ -202,14 +214,14 @@ public:
 	char * Allocate(unsigned int nAllocSize);
 	
 ////////////////////////////////////////////////////////////////////////////////
-// FirstAvailable()	:	Finds the first available chunk of memory large enough
-//						to hold the size passed in
+// DeAllocate()		:	Adds the memory allocated at the passed in pointer back to
+//						to the pool of free memory
 //
-// Ins				:	nAllocSize	-	The amount of memory to allocate
+// Ins				:	char* pchData	-	The data to be deallocated
 //
 // Outs				:	void
 //
-// Returns			:	char*	-	A pointer to the memory allocated
+// Returns			:	void
 //
 // Mod. Date		:	3/29/11
 // Mod. Initials	:	MR

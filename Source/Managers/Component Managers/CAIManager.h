@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Filename:  		CAIManager.h
  * Date:      		04/04/2011
- * Mod. Date: 		06/04/2011
+ * Mod. Date: 		07/26/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This is the manager for the
@@ -155,28 +155,114 @@ class CAIManager
 	CObject*										m_pNavMesh;
 
 	bool m_bShowInfo;
+	string m_szInfo;
 
+	/*****************************************************************
+	* LoadNavMesh()	Loads a nav mesh
+	*	
+	* Ins:				string szFileName
+	*
+	* Outs:			
+	*
+	* Returns:			
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	void LoadNavMesh(string szFileName);
+
+	/*****************************************************************
+	* IsConnected()	Checks to see if two TTri's are connected
+	*	
+	* Ins:				const TTri& rhs
+	*
+	* Outs:			
+	*
+	* Returns:			True - Connected
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	bool IsConnected(const TTri& lhs, const TTri& rhs) const;
+
+	/*****************************************************************
+	* CreateConnections()	Preforms logic to either read in connections
+	*						or create the connections file
+	*	
+	* Ins:				string szFileName
+	*
+	* Outs:			
+	*
+	* Returns:			
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	void CreateConnections(string szFileName);
+
+	/*****************************************************************
+	* CreateLookUpTable()	Preforms logic to either read in a look up
+	*						table or create the file
+	*	
+	* Ins:				const TTri& rhs
+	*
+	* Outs:				string szFileName
+	*
+	* Returns:			
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	void CreateLookUpTable(string szFileName);
+
+	/*****************************************************************
+	* Pathplan()	Preforms A* pathfinding from triangle 1 to 
+	*				triangle 2
+	*	
+	* Ins:				const int Tri1, const int Tri2
+	*
+	* Outs:			
+	*
+	* Returns:			int - Edge to go through from tri 1
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	int Pathplan(const int, const int);
+
+	/*****************************************************************
+	* LinesEqual()	Checks to see if two lines are the same line
+	*	
+	* Ins:			const TLine&, const TLine&
+	*
+	* Outs:			
+	*
+	* Returns:		True - Same Line
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	bool LinesEqual(const TLine& lhs, TLine& rhs);
 
-	// x = Current, y = Target
-	inline unsigned int LookUpCellAlgorithm(int x, int y)
+	/*****************************************************************
+	* LookUpCellAlgorithm()	Takes in two ints for a 2D array and
+	*						returns the next triangle to go to.
+	*	
+	* Ins:			const int, const int
+	*
+	* Outs:			
+	*
+	* Returns:		unsigned int - index of next triangle
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	inline unsigned int LookUpCellAlgorithm(const int x, const int y)
 	{
+		// x = Current, y = Target
 		return y * m_cTris.size() + x;
 	}
-
-	D3DXVECTOR3 ClosestPtPointTriangle(D3DXVECTOR3 p, D3DXVECTOR3 a, D3DXVECTOR3 b, D3DXVECTOR3 c);
-	D3DXVECTOR3 ClosestPtPointTriangle(D3DXVECTOR3 pt, TTriangle tTri)
-	{
-		return ClosestPtPointTriangle(pt, tTri.tVert0, tTri.tVert1, tTri.tVert2);
-	}
 	// /Pathfinding stuffs
-
-	list<CAIComponent*, CAllocator<CAIComponent*>> m_cAwaitingDeletion;
 
 protected:
 	D3DXVECTOR3 cDepartmentPos[9];
@@ -191,8 +277,21 @@ protected:
 	map<unsigned int, CObject*, less<unsigned int>,
 		CAllocator<pair<unsigned int, CObject*>>> m_cSpawnableGoalItems;
 
-	list<CObject*, CAllocator<CObject*>> m_cPlayers;
+	map<unsigned int, CObject*, less<unsigned int>, 
+		CAllocator<pair<unsigned int, CObject*>>> m_cPlayers;
 
+	/*****************************************************************
+	* GetDistance()	Returns SQUARED distance between two points
+	*	
+	* Ins:			const D3DXVECTOR3&, const D3DXVECTOR3&
+	*
+	* Outs:			
+	*
+	* Returns:		float - distance
+	*
+	* Mod. Date:		      06/07/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	inline float GetDistance(const D3DXVECTOR3 &cPos1, const D3DXVECTOR3 &cPos2) const
 	{
 		float x = cPos2.x - cPos1.x;
@@ -201,107 +300,122 @@ protected:
 	}
 
 public:
+	/*****************************************************************
+	* Init()	Registers for events and loads any needed file
+	*	
+	* Ins:			
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      04/04/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	void Init();
 
-	static int CreateAIComponent(lua_State* pLua);
-	static CAIComponent* CreateAIComponent(CObject* pObj);
+	/*****************************************************************
+	* GetAIInfo()	Recieves each agent and their state
+	*	
+	* Ins:			
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      07/13/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	string& GetAIInfo();
 
+	/*****************************************************************
+	* CreateAIComponent()	Creates an AI component
+	*	
+	* Ins:					CObject* - Parent, bool UseRandomItems
+	*
+	* Outs:			
+	*
+	* Returns:				CAIComponent*
+	*
+	* Mod. Date:		      04/04/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	static CAIComponent* CreateAIComponent(CObject* pObj, bool);
+	static int CreateAIComponent(lua_State* pLua);
+
+	/*****************************************************************
+	* GoalItemInit()	Saves the inited goal item into a list
+	*	
+	* Ins:				IEvent* -
+	*					IComponent* - TGoalItemEvent*
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      06/27/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	static void GoalItemInit(IEvent*, IComponent*);
-	static void RemoveAIComponent(IEvent*, IComponent*);
-	static void DeleteAIComponent(IEvent*, IComponent*);
+
+	/*****************************************************************
+	* ToggleInfo()	Toggles if the szInfo string returns actual
+	*				info or a null string
+	*	
+	* Ins:			IEvent* -
+	*				IComponent* - 
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      07/12/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	static void ToggleInfo(IEvent*, IComponent*);
+
+	/*****************************************************************
+	* LoadLevel()	Loads the NavMesh, creates connections between
+	*				triangles, and then generates the look
+	*				up table
+	*	
+	* Ins:			IEvent* -
+	*				IComponent* - TStringEvent
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      04/04/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	static void LoadLevel(IEvent*, IComponent*);
 
-	string m_szInfo;
-	string& GetAIInfo();
+	/*****************************************************************
+	* SetGoalTri()	Sets the traingle the specified agent is
+	*				to go to
+	*	
+	* Ins:			pLua - string: SetAIGoalTri(#agent, #tri)
+	*
+	* Outs:			
+	*
+	* Returns:		int - random int because this is a lua function
+	*
+	* Mod. Date:		      06/14/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	static int SetGoalTri(lua_State* pLua);
-
-	/***************
-	*  Accessors
-	***************/
-	static CAIManager* GetInstance();
-
-	/***************
-	* Mutators
-	***************/
-	static void SetupOpponents(IEvent* piEvent, IComponent* piComponent);
-
-	/*****************************************************************
-	***************************** Events *****************************
-	*****************************************************************/
-
-	/*****************************************************************
-	* GoalItemCollected()	An event that tells the agent that a
-	*						Goal Item has been collected
-	*
-	* Ins:					cPlayer - Player who collected the item
-	*						cGoalItem - The Goal Item collected
-	*
-	* Outs:			
-	*
-	* Returns:		
-	*
-	* Mod. Date:		      04/08/2011
-	* Mod. Initials:	      JS
-	*****************************************************************/
-	//static void GoalItemCollected(IEvent*, IComponent*);
-
-	/*****************************************************************
-	* PlayerAttacked()	An event that tells the agent that a
-	*					player is being aggressive
-	*
-	* Ins:					cAggressor - Player who was aggressive
-	*						cVictim - Play who was attacked
-	*
-	* Outs:			
-	*
-	* Returns:		
-	*
-	* Mod. Date:		      04/08/2011
-	* Mod. Initials:	      JS
-	*****************************************************************/
-	//static void PlayerAttacked(IEvent*, IComponent*);
-
-	/*****************************************************************
-	* GoalItemSpawned()	An event that tells the agent that a
-	*					Goal Item has spawned
-	*
-	* Ins:					cGoalItem - The item that spawned
-	*
-	* Outs:			
-	*
-	* Returns:		
-	*
-	* Mod. Date:		      04/08/2011
-	* Mod. Initials:	      JS
-	*****************************************************************/
-	//static void GoalItemSpawned(IEvent*, IComponent*);
-
-	/*****************************************************************
-	* GoalItemSpawned()	An event that tells the agent that a
-	*					Goal Item has spawned
-	*
-	* Ins:					cGoalItem - The item that despawned
-	*
-	* Outs:			
-	*
-	* Returns:		
-	*
-	* Mod. Date:		      04/08/2011
-	* Mod. Initials:	      JS
-	*****************************************************************/
-	//static void GoalItemDespawned(IEvent*, IComponent*);
 
 	/*****************************************************************
 	* Update()	Update calls any function that needs calling
 	*
-	* Ins:		fDT - delta time
+	* Ins:		
 	*
 	* Outs:			
 	*
 	* Returns:		
 	*
-	* Mod. Date:		      04/04/2011
+	* Mod. Date:		      04/04/11
 	* Mod. Initials:	      JS
 	*****************************************************************/
 	static void Update(IEvent*, IComponent*);
@@ -315,10 +429,31 @@ public:
 	*
 	* Returns:		
 	*
-	* Mod. Date:		      04/04/2011
+	* Mod. Date:		      04/04/11
 	* Mod. Initials:	      JS
 	*****************************************************************/
 	static void Shutdown(IEvent*, IComponent*);
+
+	/*****************************************************************
+	* SetupOpponents()	Calls SetupOpponents() on each agent
+	*					so they know who their opponents are (ID wise)
+	*
+	* Ins:		
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      05/01/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	static void SetupOpponents(IEvent* piEvent, IComponent* piComponent);
+
+	/***************
+	*  Accessors
+	***************/
+	static CAIManager* GetInstance();
+	
 };
 
 #endif	// _CAIMANAGER_H_

@@ -51,7 +51,17 @@ public:
 		return &cCameraManager; 
 	}
 
-	// Initalize
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "Init"
+	//
+	// Return: void
+	//
+	// Parameters: int - the screen width
+	//			int - the screen height
+	//
+	// Purpose:  Initializes the Camera and builds the prospective and registers
+	//    for events
+	////////////////////////////////////////////////////////////////////////////////
 	void Init(int nScreenWidth, int nScreenHeight);
 
 	// Accessors
@@ -60,13 +70,12 @@ public:
 		return m_pCam;
 	}
 
-	// Callbacks
-	//static void ShutdownCallback(IEvent* e, IComponent* comp);
+	// Function Callbacks
 	static void AttachToCamCallback(IEvent* e, IComponent* comp);
 	static void MoveCameraCallback(IEvent* e, IComponent* comp);
 	static void UpdateCallback(IEvent* e, IComponent* comp);
 	static void AttachToWinStateCallback(IEvent* e, IComponent* comp);
-	
+	static void AttachToLoseStateCallback(IEvent* e, IComponent* comp);
 	static int CCameraManager::AttachCamToPlayer(lua_State* pLua);
 };
 

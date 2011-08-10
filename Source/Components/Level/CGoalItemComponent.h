@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Filename:  		CGoalItemComponent.h
  * Date:      		05/01/2011
- * Mod. Date: 		05/09/2011
+ * Mod. Date: 		07/26/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This will represent the Goal Item in the world.
@@ -10,53 +10,167 @@
 					event and will despawn after a set period of time. This
 					time is set in the init function.
  ******************************************************************************/
-
 #ifndef _CGOALITEMS_H_
 #define _CGOALITEMS_H_
 
 #include "..\..\IComponent.h"
-#include "..\..\Enums.h"
-#include "..\..\Managers\Global Managers\Event Manager\CEventManager.h"
 
-#define NULL 0
 class CObject;
+class IEvent;
+class IComponent;
+enum EGoalItemType;
 
 class CGoalItems : public IComponent
 {
-public:
-	// HACK: make private with mutators
 	EGoalItemType m_eType;
 	CObject* m_pObject;
 	bool m_bSpawned;
 	bool m_bDespawning;
 	bool m_bCollidable;
 	float m_fDespawnTimer;
-	EventID m_eEventID;
-
 	bool m_bBlink;
 
-	// Constructor
+public:
+	/*****************************************************************
+	* CGoalItems()	Creates an instance of a Goal Item component
+	*
+	* Ins:			CObject* - Parent of this component
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      05/01/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	CGoalItems(CObject* pObj);
 	CGoalItems(){}
 
-	// Destructor
+	/*****************************************************************
+	* ~CGoalItems()	Destroys an instance of a Goal Item component
+	*
+	* Ins:			
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      05/01/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	~CGoalItems();
 
-	void Init(EGoalItemType);
+	/*****************************************************************
+	* Init()	Resets all the information for the Goal Item and
+	*			sets it to the specified type
+	*
+	* Ins:		EGoalItemType
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      05/01/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	void Init(const EGoalItemType);
 
-	static void Update(IEvent*, IComponent*);
-	static void ShutdownGoalItem(IEvent*, IComponent*);
+	/*****************************************************************
+	* Spawn()	Sends our the Spawned event for Goal Items and makes
+	*			the Goal Item collidable
+	*
+	* Ins:		
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      05/01/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
 	void Spawn();
-	void Despawn();
-	void SetDespawnTimer(const float fDT);
 
-	inline CObject* GetParent(void)
+	/*****************************************************************
+	* Despawn()		Sets the collidable bool to false
+	*
+	* Ins:		
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      05/01/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	void Despawn();
+
+	/*****************************************************************
+	* Update()	The update call
+	*	
+	* Ins:				IEvent*		-	TUpdateStateEvent*
+	*					IComponent*	-	CGoalItems*
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      04/11/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	static void Update(IEvent*, IComponent*);
+
+	/*****************************************************************
+	* IteShutdownGoalItemmDropped()	Game is shutting down. Delete all
+	*								memory and set things to NULL
+	*	
+	* Ins:				IEvent*		-	
+	*					IComponent*	-	CGoalItems*
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      04/11/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	static void ShutdownGoalItem(IEvent*, IComponent*);
+
+	/*****************************************************************
+	* PauseUpdateCallback()	Allows us to render during the pause state
+	*	
+	* Ins:				IEvent*		-	
+	*					IComponent*	-	CGoalItems*
+	*
+	* Outs:			
+	*
+	* Returns:		
+	*
+	* Mod. Date:		      04/11/11
+	* Mod. Initials:	      JS
+	*****************************************************************/
+	static void PauseUpdateCallback(IEvent*, IComponent* pComp);
+
+	/****************************************************************
+	* Accessors
+	****************************************************************/
+	inline EGoalItemType GetType() const
+	{
+		return m_eType;
+	}
+
+	inline CObject* GetParent() const
 	{
 		return m_pObject;
 	}
 
-	static void PauseUpdateCallback(IEvent*, IComponent* pComp);
+	inline bool GetIsCollidable() const
+	{
+		return m_bCollidable;
+	}
 
+	inline bool GetIsSpawned() const
+	{
+		return m_bSpawned;
+	}
 };
-
 #endif

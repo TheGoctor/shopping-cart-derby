@@ -23,9 +23,7 @@ class CJamSpriteEffect
 {
 private:
 	CSpriteComponent* pJamScreenSprite;
-	CSpriteComponent* pJamExplodingSprite;
-	CSpriteComponent* pJamSplatSprite;
-	CSpriteComponent* pJamRocketSprite;
+
 	float fJamCounter;
 	float fJamCounter2;
 	float fAlpha;
@@ -53,7 +51,7 @@ public:
 	void ResetSprites(void);
 
 	// Set On/Off
-	void SetOn(bool bOn) { bActive = bOn; }
+	void SetOn(bool bOn) { bActive = bOn; fJamCounter = 0.0f; fAlpha = 1.0f; nEffectStage = 0; }
 	void SetSpritesActive(bool active);
 
 	// Update

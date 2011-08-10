@@ -4,7 +4,7 @@
 //	Mod. Date		:	3/29/11
 //	Mod. Initials	:	MR
 //	Author			:	Mac Reichelt
-//	Purpose			:	Allocates memory into CHeaps for STL containers
+//	Purpose			:	Allocates memory into the Event Heap for STL containers
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef _CEVENTALLOCATOR_H_

@@ -33,8 +33,14 @@ private:
 	CEffectComponent* m_pLeftEffect;
 	CEffectComponent* m_pRightEffect;
 
+	// Cooldowns
+	float m_fSlowCooldown;
+
 	// Handlers
 	void Slip(TStatusEffectEvent* pcEvent);
+	void Slow(TStatusEffectEvent* pcEvent);
+	void Update(float fDT);
+
 
 	// Helper Funcs
 	void CreateLeftDrip(void);
@@ -60,7 +66,7 @@ public:
 	// Constructor
 	CSlipVFXComp(CObject* pParent) : m_pParentObj(pParent), m_pLeftEmitter(NULL),
 									 m_pRightEmitter(NULL), m_pLeftEffect(NULL),
-									 m_pRightEffect(NULL)
+									 m_pRightEffect(NULL), m_fSlowCooldown(0.0f)
 	{
 		// Add to Auto Manager
 		GetManager()->Add(this);
@@ -75,7 +81,7 @@ public:
 	// Destructor
 	~CSlipVFXComp(void)
 	{
-		Shutdown();
+		//Shutdown();
 		GetManager()->Remove(this);
 	}
 
@@ -87,6 +93,8 @@ public:
 
 	// Callbacks
 	static void SlipCallback(IEvent* pEvent, IComponent* pComp);
+	static void SlowCallback(IEvent* pEvent, IComponent* pComp);
+	static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
 	static void DestroyObjectCallback(IEvent* pEvent, IComponent* pComp);
 
 	// Accessors

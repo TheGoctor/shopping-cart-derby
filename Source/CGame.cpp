@@ -52,6 +52,7 @@ extern "C"
 #include "Managers\Global Managers\Rendering Managers\Texture Managers\CIntroManager.h"
 #include "Managers\Global Managers\Rendering Managers\Texture Managers\CCreditManager.h"
 #include "Managers\Global Managers\Endgame Manager\CEndgameManager.h"
+#include "Managers\Global Managers\Unlockable Manager\CUnlockableManager.h"
 
 //#include "Managers\\Global Managers\\\Rendering Managers\\Texture Managers\\CCharacterSelectManager.h";
 #include "Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
@@ -137,7 +138,7 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 	srand(timeGetTime()); //GetTickCount());
 
 	// Init Managers
-	CMemoryManager::GetInstance()->Initialize(50 MB, 512 KB, 10 MB);
+	CMemoryManager::GetInstance()->Initialize(50 MB, 5 MB, 20 MB, 75 MB);
 	CInputManager::GetInstance()->Initialize(hWnd, hInstance);
 	CStateManager::GetInstance()->Init();
 	
@@ -173,7 +174,7 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 
 	// HUD
 	CIntroManager::GetInstance()->Init();
-	//CCreditManager::GetInstance()->Init();
+	CCreditManager::GetInstance()->Init();
 	//CCharacterSelectManager::GetInstance()->Init();
 	CHUDManager::GetInstance()->Init();
 	CLevelManager::GetInstance()->Init();
@@ -188,6 +189,7 @@ void CGame::Initialize(HWND hWnd, HINSTANCE hInstance, int nScreenWidth,
 
 	CAnimateManager::GetInstance()->Init();
 
+	CUnlockableManager::GetInstance()->Init();
 	CEndgameManager::GetInstance()->Init();
 
 	// set the screen parameters

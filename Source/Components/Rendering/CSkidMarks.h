@@ -164,11 +164,9 @@ private:
 	// Propulsion Effects
 	CEffectComponent* m_pLDustEffect;
 	CEffectComponent* m_pRDustEffect;
-	CEffectComponent* m_pGlowEffect;
 
 	CObject* m_pLDustEmitter;
 	CObject* m_pRDustEmitter;
-	CObject* m_pGlowEmitter;
 
 	// Timer
 	float m_fDropTimer;
@@ -218,10 +216,8 @@ public:
 														m_pCurrentSkidMeshPair(NULL),
 														m_pLDustEffect(NULL),
 														m_pRDustEffect(NULL),
-														m_pGlowEffect(NULL),
 														m_pLDustEmitter(NULL),
 														m_pRDustEmitter(NULL),
-														m_pGlowEmitter(NULL),
 														m_eRenderContext(RC_CART_SKID_MARKS)
 								   
 	{

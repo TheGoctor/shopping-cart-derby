@@ -41,6 +41,7 @@ public:
 	static void Update(IEvent* cEvent, IComponent* cCenter);
 	static void PlayerCollision(IEvent* cEvent, IComponent* cCenter);
 	static void EnvironmentCollision(IEvent* cEvent, IComponent* cCenter);
+	static void ItemCollision(IEvent* cEvent, IComponent* cCenter);
 	void ReInit();
 	void Despawn();
 	
@@ -80,7 +81,7 @@ public:
 	void SetPosition(D3DXVECTOR3 vPos)
 	{
 		m_pParent->GetTransform()->GetLocalMatrix()._41 = vPos.x;
-		m_pParent->GetTransform()->GetLocalMatrix()._42 = 1;
+		m_pParent->GetTransform()->GetLocalMatrix()._42 = 0.5;
 		m_pParent->GetTransform()->GetLocalMatrix()._43 = vPos.z;
 	}
 	void SetDirection(D3DXVECTOR3 vDir)

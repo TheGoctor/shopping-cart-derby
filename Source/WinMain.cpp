@@ -100,7 +100,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else // losing focus
 			{
 				// pause game code here
-				SendIEvent("FocusLost", NULL, NULL, PRIORITY_NORMAL);
+				// Sender cannot be NULL
+				SendIEvent("FocusLost", (IComponent*)1, NULL, PRIORITY_NORMAL);
 			}
 		}
 		break;
@@ -243,7 +244,7 @@ HWND MakeWindow(HINSTANCE hInstance)
 //		WinMain			//
 //////////////////////////
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR /*lpCmdLine*/, int nCmdShow)
 {
 	MSG		msg;	//	Generic message.
 	HWND	hWnd;	//	Main Window Handle.

@@ -114,7 +114,7 @@ void CScrollerComponent::Update(IEvent* cEvent, IComponent* cCenter)
 			comp->m_xPos = comp->m_xStartPos;
 		}
 		// check reset value for y axis
-		if(tSpriteData.m_nY < -1024)
+		if(tSpriteData.m_nY < -2048)
 		{	
 			tSpriteData.m_nY = 1024;
 			comp->m_yPos = 1024;

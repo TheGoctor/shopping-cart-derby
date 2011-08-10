@@ -10,6 +10,7 @@ using namespace EventStructs;
 CDonut* CDonut::CreateDonutComponent(CObject* pObj)
 {
 	CDonut* pComp = MMNEW(CDonut(pObj));
+	pComp->DONUT_ID = -1;
 	pComp->FirstInit();
 	pObj->AddComponent(pComp);
 	return pComp;
@@ -18,7 +19,7 @@ void CDonut::FirstInit(void)
 {
 	m_fDuration = DONUTTIME;
 	m_fTimeRemaining = m_fDuration;
-	DONUT_ID = 0;
+	DONUT_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 	string szEventName = "Update";
 	szEventName += GAMEPLAY_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
@@ -28,14 +29,14 @@ void CDonut::ReInit()
 {
 	SetIsSpawned(true);
 	DONUT_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
-	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_DOUGHNUT_USE, DONUT_ID);
-	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_DOUGHNUT_AURA, DONUT_ID);
 	SetTimeRemaining(GetDuration());
 
 	// m_pAttachedObject is already filled out before this reinit is called inside HeldItemMgr
 	SendStatusEffectEvent("DonutEffect", this, m_pAttachedObject, m_fDuration);
 	// goober 2
 	//SendStatusEffectEvent("DonutDespawn", this, m_pAttachedObject, 0.0f);
+	CWwiseSoundManager::GetInstance()->SetObjectPosition(DONUT_ID, m_pAttachedObject->GetTransform()->GetWorldPosition(), 0.3f);
+	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_DOUGHNUT_USE, DONUT_ID);
 }
 
 void CDonut::Despawn()
@@ -64,7 +65,6 @@ void CDonut::Update(IEvent* cEvent, IComponent* cCenter)
 		return;
 	}
 	
-	
 	pComp->SetTimeRemaining(pComp->GetTimeRemaining()-fDt);
 	if(pComp->GetTimeRemaining()<=0.0f)
 	{
@@ -78,7 +78,7 @@ void CDonut::Update(IEvent* cEvent, IComponent* cCenter)
 	//SendRenderEvent("AddToSet", pComp, pComp->m_pParent, PRIORITY_IMMEDIATE);
 	
 	pComp->SetPosition(pComp->GetParent()->GetTransform()->GetWorldPosition());
-	CWwiseSoundManager::GetInstance()->SetObjectPosition(pComp->DONUT_ID, pComp->GetParent()->GetTransform()->GetWorldPosition(), 0.3f);
+	
 }
 void CDonut::PlayerCollision(IEvent* cEvent, IComponent* cCenter)
 {
@@ -89,7 +89,7 @@ void CDonut::PlayerCollision(IEvent* cEvent, IComponent* cCenter)
 	{
 		// send the collider as the one who gets the item
 		CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_DOUGHNUT_IMPACT, pComp->DONUT_ID);
-		SendImpactEvent("StealItem", pComp, tEvent->m_pcCollider, tEvent->m_pCollidedWith, D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		SendImpactEvent("Steal", pComp, tEvent->m_pcCollider, tEvent->m_pCollidedWith, D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 		SendStatusEffectEvent("DonutDespawn", pComp, pComp->m_pAttachedObject, 0.0f);
 		pComp->Despawn();
 	}

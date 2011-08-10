@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	EventManager.h
 //	Date			:	3/29/11
-//	Mod. Date		:	3/31/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	MR
 //	Author			:	Mac Reichelt
 //	Purpose			:	Handles events sent between components for the entire
@@ -27,12 +27,15 @@ typedef unsigned int EventID;
 
 class CEventManager
 {
+	// Struct needed to correctly insert new events into the event set
 	struct cmp
 	{
 		bool operator()(const IEvent* lhs, const IEvent* rhs)
 		{
 			if(lhs->m_nPriority == rhs->m_nPriority)
 			{
+				// If two priorities are the same, sort based on
+				// address
 				return lhs < rhs;
 			}
 			return lhs->m_nPriority < rhs->m_nPriority;

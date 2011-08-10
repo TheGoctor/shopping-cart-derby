@@ -60,6 +60,14 @@ public:
 		m_vMoveDirection = vDir;
 	}
 	
+	CObject* GetParent()
+	{
+		return m_pObject;
+	}
+	float GetStunDuration(void)
+	{
+		return m_fStunDuration;
+	}
 	bool Spawned()
 	{
 		return m_bSpawned;
@@ -91,6 +99,7 @@ public:
 	static void Update(IEvent* cEvent, IComponent* cCenter);
 	static void PlayerCollision(IEvent* cEvent, IComponent* cCenter);
 	static void EnvironmentCollision(IEvent* cEvent, IComponent* cCenter);
+	static void ItemCollision(IEvent* cEvent, IComponent* cCenter);
 	static void PauseUpdateCallback(IEvent*, IComponent* pComp);
 };
 

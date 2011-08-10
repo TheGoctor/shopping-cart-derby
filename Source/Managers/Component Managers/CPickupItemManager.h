@@ -72,6 +72,7 @@ public:
 	CPickupItemComponent* GetPickupComp(EGoalItemType eType);
 
 	static void SpawnPickupItem(IEvent* cEvent, IComponent* cCenter);
+	static void Shutdown(IEvent*, IComponent*);
 
 	void DespawnPickupItem(CPickupItemComponent* pComp);
 };

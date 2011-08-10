@@ -1,3 +1,6 @@
+#include <iostream>
+using std::cout;
+
 #include "CPickupItemManager.h"
 #include "../../CObject.h"
 #include "../Global Managers/Rendering Managers/Renderer.h"
@@ -50,8 +53,25 @@ void CPickupItemManager::Init(void)
 		pCol->SetSphere(tsphere);
 	}/**/
 
+	string szEvent = "ShutdownObjects";
+	szEvent += GAMEPLAY_STATE;
 
+	CEventManager::GetInstance()->RegisterEvent(szEvent.c_str(), (IComponent*)this, Shutdown);
 	CEventManager::GetInstance()->RegisterEvent("SpawnPickupItem", (IComponent*)this, SpawnPickupItem);
+}
+
+void CPickupItemManager::Shutdown(IEvent*, IComponent*)
+{
+	list<CPickupItemComponent*, 
+		CAllocator<CPickupItemComponent*>>::iterator pIter = GetInstance()->m_cPickupItemComps.begin();
+
+	cout << "Number of Pickup Items: " << GetInstance()->m_cPickupItemComps.size() << endl;
+
+	while(pIter != GetInstance()->m_cPickupItemComps.end())
+	{
+		GetInstance()->DespawnPickupItem(*pIter);
+		++pIter;
+	}
 }
 
 void CPickupItemManager::AddComponent(CPickupItemComponent* pComp)
@@ -178,7 +198,7 @@ CPickupItemComponent* CPickupItemManager::GetAPickupItem(EGoalItemType eType)
 
 	// get the mesh and context information for the itemID we were given
 	DXRenderContext* pContext = DXRenderContextManager::GetInstance()->
-		GetContext((ERenderContext)CSpawningManager::GetInstance()->m_nGoalItemRenderContexts[eType]);
+		GetContext((ERenderContext)CSpawningManager::GetInstance()->GetGoalItemRenderContext(eType));
 	int nMeshId = GetInstance()->GetModelNumber(eType);
 
 	// if the iter isn't the end (aka we broke before the while would have) that means we have an item not in use already made
@@ -200,14 +220,14 @@ CPickupItemComponent* CPickupItemManager::GetAPickupItem(EGoalItemType eType)
 	nNumCreated++;
 	CObject* pPickupItem = CObjectManager::GetInstance()->CreateObject(szObjName);
 	
-	// Let us know it has been created
-	SendPickupItemEvent("PickupItemSpawned", (IComponent*)GetInstance(), pPickupItem, eType); 
+	// Let us know it has been created (Note: This is immediate so that the PickupITemDropped message is always received second)
+	SendPickupItemEvent("PickupItemSpawned", (IComponent*)GetInstance(), pPickupItem, eType, PRIORITY_IMMEDIATE); 
 
 	CPickupItemComponent* pComp = CPickupItemComponent::CreatePickupItemComponent(pPickupItem, D3DXVECTOR3(0,0,0));
 	pComp->EventInit();
 
 	pComp->m_pRenderComp = Renderer::GetInstance()->CreateRenderComp(
-		pPickupItem, nMeshId, CSpawningManager::GetInstance()->m_nGoalItemRenderContexts[eType], 2);
+		pPickupItem, nMeshId, CSpawningManager::GetInstance()->GetGoalItemRenderContext(eType), 2);
 	pComp->m_pRenderComp->SetMesh(nMeshId, pContext);
 
 	// Add a collision component to pick it up
@@ -226,5 +246,5 @@ CPickupItemComponent* CPickupItemManager::GetAPickupItem(EGoalItemType eType)
 int CPickupItemManager::GetModelNumber(EGoalItemType eType)
 {
 	return ModelManager::GetInstance()->GetMeshIndexByName(
-		CSpawningManager::GetInstance()->m_szGoalItemNames[eType].c_str());
+		CSpawningManager::GetInstance()->GetGoalItemName(eType).c_str());
 }

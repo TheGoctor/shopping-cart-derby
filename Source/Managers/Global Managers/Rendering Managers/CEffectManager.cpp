@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	CEffectManager.cpp
 //	Date			:	5/19/11
-//	Mod. Date		:	5/19/11
-//	Mod. Initials	:	JL
+//	Mod. Date		:	07/26/11
+//	Mod. Initials	:	HN
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Encapsulates the Loading and Spawning of Effects
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,8 +10,6 @@
 // Includes
 #include <fstream>
 #include "CEffectManager.h"
-#include "Renderer.h"
-#include "..\\Object Manager\\CObjectManager.h"
 #include "..\\..\\..\\Components\\Level\\CGoalItemComponent.h"
 #include "..\\..\\..\\Components\\Level\\CHeldItemComponent.h"
 #include "Texture Managers\CTextureManager.h"
@@ -19,20 +17,33 @@
 #include "..\Event Manager\CIDGen.h"
 #include "..\Sound Manager\CWwiseSoundManager.h"
 #include "..\\..\\..\\Components\\Rendering\\CSlipVFXComp.h"
+#include "..\\..\\..\\Components\\Rendering\\CJamUseEffectComp.h"
+#include "..\\..\\..\\Components\\Rendering\\CJamHitEffectComp.h"
+#include "Texture Managers\CHUDManager.h"
 #include "dxutil.h"
 
 // Defines
 #define POPUP_COOLDOWN (1.0f)
 #define SKID_LIFESPAN  (0.3f)
-#define JAM_HIT_POPUP_TIMER (1.0f)
+//#define JAM_HIT_POPUP_TIMER (1.0f)
 
 // Don't use for arrays and only use when fin is your fstream
 #define READ(var) (fin.read((char*)&var, sizeof(var)))
 
 // Singleton Functions
-CEffectManager::CEffectManager() : m_bFirstInit(true), m_pDustLeft(NULL), m_pDustRight(NULL), m_pSciGlowS(NULL), m_pSciGlowG(NULL) {}
-CEffectManager::CEffectManager(CEffectManager& /*ref*/) {}
-CEffectManager& CEffectManager::operator=(CEffectManager& /*ref*/) { return *this; }
+CEffectManager::CEffectManager() : m_bFirstInit(true) 
+{
+	pOM = CObjectManager::GetInstance();
+	pRenMan = Renderer::GetInstance();
+}
+CEffectManager::CEffectManager(CEffectManager& /*ref*/) 
+{
+
+}
+CEffectManager& CEffectManager::operator=(CEffectManager& /*ref*/) 
+{
+	return *this; 
+}
 
 // Get Instance
 CEffectManager* CEffectManager::GetInstance(void) 
@@ -47,8 +58,6 @@ void CEffectManager::LoadEmitters(void)
 	CEffectManager* pPEM = GetInstance();
 	pPEM->LoadEmitter("Icon_Front.bin");
 	pPEM->LoadEmitter("Icon_Front_End.bin");
-	pPEM->LoadEmitter("Blue_Coin.bin");
-	pPEM->LoadEmitter("Blue_Coin_End.bin");
 	pPEM->LoadEmitter("Glow_Grow.bin");
 	pPEM->LoadEmitter("Glow_Grow_End.bin");
 	pPEM->LoadEmitter("Glow_Shrink.bin");
@@ -60,21 +69,19 @@ void CEffectManager::LoadEmitters(void)
 
 	// Movement
 	pPEM->LoadEmitter("Smoke_Puff.bin");
-	pPEM->LoadEmitter("Skid_Marks.bin");
 
 	// Boost
 	pPEM->LoadEmitter("Cloud_Gray.bin");
 	pPEM->LoadEmitter("Glow_Blue.bin");
 	pPEM->LoadEmitter("Lighting_Big.bin");
 
-	// Held Items
-	pPEM->LoadEmitter("Held_Item.bin");
-
 	// Turkey
+	pPEM->LoadEmitter("Blue_Puff.bin");
 	pPEM->LoadEmitter("Snowflake_Trail.bin");
 	pPEM->LoadEmitter("Snowflake_Trail_2.bin");
 	pPEM->LoadEmitter("Snowflake_Burst.bin");
 	pPEM->LoadEmitter("Snowflake_Burst2.bin");
+	pPEM->LoadEmitter("Snowflake_Burst3.bin");
 	pPEM->LoadEmitter("Krack_Small.bin");
 	pPEM->LoadEmitter("Krack_Mid.bin");
 	pPEM->LoadEmitter("Krack_Big.bin");
@@ -82,6 +89,7 @@ void CEffectManager::LoadEmitters(void)
 
 	// Chicken Soup
 	pPEM->LoadEmitter("Bubble_Trail.bin");
+	pPEM->LoadEmitter("Sparkle_Soup_Trail.bin");
 
 	// Banana
 	pPEM->LoadEmitter("Banana_Splat.bin");
@@ -90,28 +98,33 @@ void CEffectManager::LoadEmitters(void)
 	pPEM->LoadEmitter("Shloop_Popup.bin");
 
 	// Peanut Butter
-	//pPEM->LoadEmitter("Peanut_Splash.bin");
 	pPEM->LoadEmitter("Squish_Popup.bin");
+	pPEM->LoadEmitter("Peanut_Mud.bin");
 
 	// Crash
 	pPEM->LoadEmitter("Crash_Popup.bin");
-	pPEM->LoadEmitter("Green_Star_Small.bin");
-	pPEM->LoadEmitter("Green_Star_Mid.bin");
-	pPEM->LoadEmitter("Green_Star_Big.bin");
+	pPEM->LoadEmitter("Crash_Star_Small.bin");
+	pPEM->LoadEmitter("Crash_Star_Mid.bin");
+	pPEM->LoadEmitter("Crash_Star_Big.bin");
+	pPEM->LoadEmitter("Bolt_Burst.bin");
+	pPEM->LoadEmitter("Spark_Burst.bin");
 
 	// Jam
-	pPEM->LoadEmitter("Jam_Rocket.bin");
-	pPEM->LoadEmitter("Jam_Jar.bin");
-	pPEM->LoadEmitter("Jam_Rocket_Down.bin");
-	pPEM->LoadEmitter("Jam_Jar_Down.bin");
+	pPEM->LoadEmitter("Jam_Trail.bin");
+	pPEM->LoadEmitter("Jam_Use_Trail.bin");
+	pPEM->LoadEmitter("Jam_Hit_Meteor_Down.bin");
 	pPEM->LoadEmitter("Jam_Hit_Splat.bin");
 	pPEM->LoadEmitter("Splurch_Popup.bin");
+	pPEM->LoadEmitter("Jam_Hit_Burst.bin");
 
 	// Donut
 	pPEM->LoadEmitter("Donut_Puff.bin");
 
 	// Pie
 	pPEM->LoadEmitter("Splat_Popup.bin");
+	pPEM->LoadEmitter("Splat_Burst.bin");
+	pPEM->LoadEmitter("Pie_Trail.bin");
+	pPEM->LoadEmitter("Pie_Trail2.bin");
 
 	// Victory
 	pPEM->LoadEmitter("Firework_Trail.bin");
@@ -121,10 +134,6 @@ void CEffectManager::LoadEmitters(void)
 
 	// Caution
 	pPEM->LoadEmitter("Lose_Haz.bin");
-
-	// Scientists
-	pPEM->LoadEmitter("Blue_SGlow_Shrink.bin");
-	pPEM->LoadEmitter("Blue_SGlow_Grow.bin");
 }
 
 // Init
@@ -144,15 +153,15 @@ void CEffectManager::Init(void)
 	InitObjects();
 
 	// Goal Item Icons
-	m_nGoalItemIconRenderContexts[0] = RC_ITEM_EFFECT_GORILLA_MILK;
-	m_nGoalItemIconRenderContexts[1] = RC_ITEM_EFFECT_CAPTAIN_FLAKEY;
-	m_nGoalItemIconRenderContexts[2] = RC_ITEM_EFFECT_PIZZA;
-	m_nGoalItemIconRenderContexts[3] = RC_ITEM_EFFECT_CAKE;
-	m_nGoalItemIconRenderContexts[4] = RC_ITEM_EFFECT_CANNED_BEARS;
-	m_nGoalItemIconRenderContexts[5] = RC_ITEM_EFFECT_CARROTS;
-	m_nGoalItemIconRenderContexts[6] = RC_ITEM_EFFECT_SAMMY_SANDWICH;
-	m_nGoalItemIconRenderContexts[7] = RC_ITEM_EFFECT_SQUID;
-	m_nGoalItemIconRenderContexts[8] = RC_ITEM_EFFECT_AGENT_ORANGE;
+	m_nGoalItemIconFrames[0] = 0;//RC_ITEM_EFFECT_GORILLA_MILK;
+	m_nGoalItemIconFrames[1] = 5;//RC_ITEM_EFFECT_CAPTAIN_FLAKEY;
+	m_nGoalItemIconFrames[2] = 3;//RC_ITEM_EFFECT_PIZZA;
+	m_nGoalItemIconFrames[3] = 7;//RC_ITEM_EFFECT_CAKE;
+	m_nGoalItemIconFrames[4] = 6;//RC_ITEM_EFFECT_CANNED_BEARS;
+	m_nGoalItemIconFrames[5] = 4;//RC_ITEM_EFFECT_CARROTS;
+	m_nGoalItemIconFrames[6] = 2;//RC_ITEM_EFFECT_SAMMY_SANDWICH;
+	m_nGoalItemIconFrames[7] = 1;//RC_ITEM_EFFECT_SQUID;
+	m_nGoalItemIconFrames[8] = 8;//RC_ITEM_EFFECT_AGENT_ORANGE;
 
 	// Goal Item Init
 	pEM->RegisterEvent("GoalItemInit", pInstance, GoalItemInitCallback);
@@ -165,12 +174,6 @@ void CEffectManager::Init(void)
 
 	// Goal Item Collected
 	pEM->RegisterEvent("GoalItemCollected",	pInstance, GoalItemCollectedCallback);
-
-	// Helpd Item Spawned
-	//pEM->RegisterEvent("HeldItemSpawned", pInstance, HeldItemSpawnedCallback);
-
-	// Helpd Item Collected
-	//pEM->RegisterEvent("HeldItemCollected", pInstance, HeldItemCollectedCallback);
 
 	// Pickup Item Spawned
 	pEM->RegisterEvent("PickupItemSpawned", pInstance, PickupItemSpawnedCallback);
@@ -185,7 +188,7 @@ void CEffectManager::Init(void)
 	pEM->RegisterEvent("PickupItemCollected", pInstance, PickupItemCollectedCallback);
 
 	// Cart Collision
-	pEM->RegisterEvent("CartCollisionEffect", pInstance, CartCollisionCallback);
+	pEM->RegisterEvent("CartCollision", pInstance, CartCollisionCallback);
 
 	// Boost
 	pEM->RegisterEvent("UseBoost", pInstance, BoostCallback);
@@ -203,6 +206,11 @@ void CEffectManager::Init(void)
 	pEM->RegisterEvent("TurkeyCreated", pInstance, TurkeySpawnCallback);
 	pEM->RegisterEvent("TurkeyEffect", pInstance, TurkeyFireCallback);
 	pEM->RegisterEvent("TurkeyDespawned", pInstance, TurkeyDespawnCallback);
+
+	// Pie
+	pEM->RegisterEvent("PieCreated", pInstance, PieSpawnCallback);
+	pEM->RegisterEvent("PieEffect", pInstance, PieFireCallback);
+	pEM->RegisterEvent("PieDespawned", pInstance, PieDespawnCallback);
 
 	// Slip
 	pEM->RegisterEvent("SlipEffect", pInstance, SlipCallback);
@@ -236,9 +244,9 @@ void CEffectManager::Init(void)
 	pEM->RegisterEvent(szEventName, pInstance, InitObjectsCallback);
 
 	// Shutdown Objects
-	//szEventName = "ShutdownObjects";
-	//szEventName += GAMEPLAY_STATE;
-	//pEM->RegisterEvent(szEventName, pInstance, ShutdownObjectsCallback);
+	szEventName = "ShutdownObjects";
+	szEventName += GAMEPLAY_STATE;
+	pEM->RegisterEvent(szEventName, pInstance, ShutdownObjectsCallback);
 
 	// Destroy Obj
 	pEM->RegisterEvent("DestroyObject", pInstance, DestroyObjCallback);
@@ -268,10 +276,6 @@ void CEffectManager::InitObjects(void)
 		SetupPlayerEmitters();
 		m_bFirstInit = false;
 	}
-	//SetupStunEmitters();
-	//SetupInvulnerableEmitters();
-	//SetupSlipEmitters();
-	//SetupSlowEmitters();
 	m_cJamEffect.SetOn(false);
 	m_cBlindEffect.SetOn(false);
 	m_cStealEffect.SetOn(false);
@@ -290,6 +294,7 @@ void CEffectManager::InitObjects(void)
 	while(compIter != m_cEmitterComps.end())
 	{
 		compIter->second->SwitchOnOffEmitters(EC_TYPE_CAUTION, false);
+		//compIter->second->SetDeadTimer(EC_TYPE_CART_COLLISION_CRASH, 0.0f);
 		compIter++;
 	}
 }
@@ -312,16 +317,23 @@ void CEffectManager::ShutdownObjects(void)
 	//}
 	//m_cEmitterComps.clear();
 
-	CObjectManager* pOM = CObjectManager::GetInstance();
-	pOM->DestroyObject(m_pDustLeft);
-	pOM->DestroyObject(m_pDustRight);
-	pOM->DestroyObject(m_pSciGlowS);
-	pOM->DestroyObject(m_pSciGlowG);
+	//CObjectManager* pOM = CObjectManager::GetInstance();
 
-	m_pDustLeft  = NULL;
-	m_pDustRight = NULL;
-	m_pSciGlowS  = NULL;
-	m_pSciGlowG  = NULL;
+	EffectCompMap::iterator compIter;
+	compIter = m_cEmitterComps.begin();
+	while(compIter != m_cEmitterComps.end())
+	{
+		compIter->second->SetDeadTimer(EC_TYPE_BOOST, 3.0f);
+		compIter->second->SetDeadTimer(EC_TYPE_CART_COLLISION_CRASH, 2.0f);
+		compIter->second->SetDeadTimer(EC_TYPE_GOAL_ITEM_COLLECTION, 3.0f);
+		compIter->second->SetDeadTimer(EC_TYPE_TURKEY_STUN, 4.0f);
+		compIter->second->SetDeadTimer(EC_TYPE_BANANA_SLIP, 3.0f);
+		compIter->second->SetDeadTimer(EC_TYPE_PEANUT_SQUISH, 4.0f);
+		compIter->second->SetDeadTimer(EC_TYPE_PIE_HIT, 4.0f);
+		compIter->second->SetDeadTimer(EC_TYPE_COL_BURST, 3.0f);
+
+		compIter++;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -344,31 +356,11 @@ void CEffectManager::CreateCartCollisionComponent(CObject* pPlayerObj)
 	szEffectObjName += (char*)uID;
 	CObject* pColEffect3 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
-	// Pow
-	/*szEffectObjName = "CartCollisionRedSmall";
-	szEffectObjName += (char*)uID;
-	CObject* pColPowEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-	szEffectObjName = "CartCollisionRedMid";
-	szEffectObjName += (char*)uID;
-	CObject* pColPowEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-	szEffectObjName = "CartCollisionRedBig";
-	szEffectObjName += (char*)uID;
-	CObject* pColPowEffect2 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-	szEffectObjName = "CartCollisionPowPopup";
-	szEffectObjName += (char*)uID;
-	CObject* pColPowEffect3 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);*/
-
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Green_Star_Small.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Green_Star_Mid.bin");
-	CParticleEmitter* pPE2 = GetCloneEmitter("Green_Star_Big.bin");
-	CParticleEmitter* pPE3 = GetCloneEmitter("Crash_Popup.bin");
-
-	// Pow
-	/*CParticleEmitter* pPERed0 = GetCloneEmitter("Pow_Small.bin");
-	CParticleEmitter* pPERed1 = GetCloneEmitter("Pow_Mid.bin");
-	CParticleEmitter* pPERed2 = GetCloneEmitter("Pow_Big.bin");
-	CParticleEmitter* pPERed3 = GetCloneEmitter("Pow_Popup.bin");*/
+	CParticleEmitter* pPE0 = GetCloneEmitter("Crash_Star_Small.bin", pColEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Crash_Star_Mid.bin", pColEffect1);
+	CParticleEmitter* pPE2 = GetCloneEmitter("Crash_Star_Big.bin", pColEffect2);
+	CParticleEmitter* pPE3 = GetCloneEmitter("Crash_Popup.bin", pColEffect3);
 
 	// Create Render Comp
 	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pColEffect0,
@@ -380,16 +372,6 @@ void CEffectManager::CreateCartCollisionComponent(CObject* pPlayerObj)
 	CRenderComponent* pRenComp3 = Renderer::GetInstance()->CreateRenderComp(pColEffect3,
 		(DXMesh*)pPE3, RC_COLLISION_EFFECT_CRASH_POPUP, RF_PARTICLE);
 
-	// Pow
-	/*CRenderComponent* pRenCompRed0 = Renderer::GetInstance()->CreateRenderComp(pColPowEffect0,
-		(DXMesh*)pPERed0, RC_COLLISION_EFFECT_RED_SMALL, RF_PARTICLE);
-	CRenderComponent* pRenCompRed1 = Renderer::GetInstance()->CreateRenderComp(pColPowEffect1,
-		(DXMesh*)pPERed1, RC_COLLISION_EFFECT_RED_MID, RF_PARTICLE);
-	CRenderComponent* pRenCompRed2 = Renderer::GetInstance()->CreateRenderComp(pColPowEffect2,
-		(DXMesh*)pPERed2, RC_COLLISION_EFFECT_RED_BIG, RF_PARTICLE);
-	CRenderComponent* pRenCompRed3 = Renderer::GetInstance()->CreateRenderComp(pColPowEffect3,
-		(DXMesh*)pPERed3, RC_COLLISION_EFFECT_POW_POPUP, RF_PARTICLE);*/
-
 	// Create Effect Comps
 	CEffectComponent* pEC0 = CreateEffectComp(pPlayerObj, pPE0, pRenComp0,
 		EC_TYPE_CART_COLLISION_CRASH, PE_TYPE_CRASH_SMALL);
@@ -400,17 +382,6 @@ void CEffectManager::CreateCartCollisionComponent(CObject* pPlayerObj)
 	pEC0->AddEmitter(EC_TYPE_CART_COLLISION_CRASH, pPE3, pRenComp3,
 		pPlayerObj->GetTransform(), PE_TYPE_CRASH_POPUP);
 	pEC0->SetOnTarget(EC_TYPE_CART_COLLISION_CRASH, true);
-
-	// Pow
-	/*CEffectComponent* pEC1 = CreateEffectComp(pPlayerObj, pPERed0, pRenCompRed0,
-		EC_TYPE_CART_COLLISION_POW, PE_TYPE_POW_RED_SMALL);
-	pEC1->AddEmitter(EC_TYPE_CART_COLLISION_POW, pPERed1, pRenCompRed1,
-		pPlayerObj->GetTransform(), PE_TYPE_POW_RED_MID);
-	pEC1->AddEmitter(EC_TYPE_CART_COLLISION_POW, pPERed2, pRenCompRed2,
-		pPlayerObj->GetTransform(), PE_TYPE_POW_RED_BIG);
-	pEC1->AddEmitter(EC_TYPE_CART_COLLISION_POW, pPERed3, pRenCompRed3,
-		pPlayerObj->GetTransform(), PE_TYPE_POW_POPUP);
-	pEC1->SetOnTarget(EC_TYPE_CART_COLLISION_POW, true);*/
 }
 
 void CEffectManager::CreateBoostComponent(CObject* pPlayerObj)
@@ -428,9 +399,9 @@ void CEffectManager::CreateBoostComponent(CObject* pPlayerObj)
 	CObject* pBoost2 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 	
 	// Get Emitter
-	CParticleEmitter* pPEB0 = GetCloneEmitter("Cloud_Gray.bin");
-	CParticleEmitter* pPEB1 = GetCloneEmitter("Glow_Blue.bin");
-	CParticleEmitter* pPEB2 = GetCloneEmitter("Lighting_Big.bin");
+	CParticleEmitter* pPEB0 = GetCloneEmitter("Cloud_Gray.bin", pBoost0);
+	CParticleEmitter* pPEB1 = GetCloneEmitter("Glow_Blue.bin", pBoost1);
+	CParticleEmitter* pPEB2 = GetCloneEmitter("Lighting_Big.bin", pBoost2);
 		
 	// Create Render Comp
 	CRenderComponent* pRenCompB0 = Renderer::GetInstance()->CreateRenderComp(pBoost0,
@@ -449,7 +420,7 @@ void CEffectManager::CreateBoostComponent(CObject* pPlayerObj)
 		PE_TYPE_BOOST_LIGHTNING);
 	pEC->SetOnTarget(EC_TYPE_BOOST, true);
 }
-void CEffectManager::CreateStunComponent(CObject* pPlayerObj)
+CEffectComponent* CEffectManager::CreateStunComponent(CObject* pPlayerObj)
 {
 	// Setup Effect Object
 	unsigned int uID = pPlayerObj->GetID();
@@ -473,14 +444,23 @@ void CEffectManager::CreateStunComponent(CObject* pPlayerObj)
 	szEffectObjName = "TurkeyBurst2";
 	szEffectObjName += (char*)uID;
 	CObject* pStunEffect5 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+	szEffectObjName = "TurkeyPuff";
+	szEffectObjName += (char*)uID;
+	CObject* pStunEffect6 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+	szEffectObjName = "TurkeyBurst3";
+	szEffectObjName += (char*)uID;
+	CObject* pStunEffect7 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+
 
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Krack_Small.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Krack_Mid.bin");
-	CParticleEmitter* pPE2 = GetCloneEmitter("Krack_Big.bin");
-	CParticleEmitter* pPE3 = GetCloneEmitter("Krack_Popup.bin");
-	CParticleEmitter* pPE4 = GetCloneEmitter("Snowflake_Burst.bin");
-	CParticleEmitter* pPE5 = GetCloneEmitter("Snowflake_Burst2.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Krack_Small.bin", pStunEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Krack_Mid.bin", pStunEffect1);
+	CParticleEmitter* pPE2 = GetCloneEmitter("Krack_Big.bin", pStunEffect2);
+	CParticleEmitter* pPE3 = GetCloneEmitter("Krack_Popup.bin", pStunEffect3);
+	CParticleEmitter* pPE4 = GetCloneEmitter("Snowflake_Burst.bin", pStunEffect4);
+	CParticleEmitter* pPE5 = GetCloneEmitter("Snowflake_Burst2.bin", pStunEffect5);
+	CParticleEmitter* pPE6 = GetCloneEmitter("Blue_Puff.bin", pStunEffect6);
+	CParticleEmitter* pPE7 = GetCloneEmitter("Snowflake_Burst3.bin", pStunEffect7);
 
 	// Create Render Comp
 	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pStunEffect0,
@@ -496,6 +476,11 @@ void CEffectManager::CreateStunComponent(CObject* pPlayerObj)
 		(DXMesh*)pPE4, RC_SNOWFLAKE_EFFECT, RF_PARTICLE);
 	CRenderComponent* pRenComp5 = Renderer::GetInstance()->CreateRenderComp(pStunEffect5,
 		(DXMesh*)pPE5, RC_SNOWFLAKE_B_EFFECT, RF_PARTICLE);
+	CRenderComponent* pRenComp6 = Renderer::GetInstance()->CreateRenderComp(pStunEffect6,
+		(DXMesh*)pPE6, RC_BLUE_PUFF, RF_PARTICLE);
+	CRenderComponent* pRenComp7 = Renderer::GetInstance()->CreateRenderComp(pStunEffect7,
+		(DXMesh*)pPE7, RC_SNOWFLAKE_B_EFFECT, RF_PARTICLE);
+
 
 	// Create Effect Comps
 	CEffectComponent* pEC = CreateEffectComp(pPlayerObj, pPE0, pRenComp0,
@@ -511,11 +496,87 @@ void CEffectManager::CreateStunComponent(CObject* pPlayerObj)
 		PE_TYPE_TURKEY_SNOWFLAKE_BURST_A);
 	pEC->AddEmitter(EC_TYPE_TURKEY_STUN, pPE5, pRenComp5, pPlayerObj->GetTransform(),
 		PE_TYPE_TURKEY_SNOWFLAKE_BURST_B);
+	pEC->AddEmitter(EC_TYPE_TURKEY_STUN, pPE6, pRenComp6, pPlayerObj->GetTransform(),
+		PE_TYPE_TURKEY_PUFF);
+	pEC->AddEmitter(EC_TYPE_TURKEY_STUN, pPE7, pRenComp7, pPlayerObj->GetTransform(),
+		PE_TYPE_TURKEY_SNOWFLAKE_BURST_C);
 
 	pEC->SetOnTarget(EC_TYPE_TURKEY_STUN, true);
+	return pEC;
 }
 
-void CEffectManager::CreateSlipComponent(CObject* pPlayerObj)
+CEffectComponent* CEffectManager::CreateBoltsAndSparksEffect(D3DXVECTOR3 vColPt)
+{
+	static int snCount = 0;
+
+	// Check for an inactive comp
+	CEffectComponent* pComp = NULL;
+	ObjEffectCompMap::iterator compIter = m_cBoltsAndSparks.begin();
+	while(compIter != m_cBoltsAndSparks.end())
+	{
+		CEffectComponent* pCurrComp = compIter->second;
+		if(pCurrComp->GetIsActiveEmitter(EC_TYPE_COL_BURST) == false)
+		{
+			pComp = pCurrComp;
+
+			// We found one
+			D3DXMATRIX& mWorldMat = compIter->first->GetTransform()->GetLocalMatrix();
+
+			mWorldMat._41 = vColPt.x;
+			mWorldMat._42 = 1.0f;
+			mWorldMat._43 = vColPt.z;
+
+			pCurrComp->SetDeadTimer(EC_TYPE_COL_BURST, 0.0f);
+			pCurrComp->SwitchOnOffEmitters(EC_TYPE_COL_BURST, true);
+
+			return pComp;
+
+			//compIter = m_cBoltsAndSparks.erase(compIter);
+		}
+		//else
+			compIter++;
+	}
+
+	// Create a New one
+	//CObjectManager* pOM = CObjectManager::GetInstance();
+	//Renderer* pRenMan = Renderer::GetInstance();
+
+	// Create Effect Objs
+	string szEffectObjName = "BoltBurstEffect";
+	szEffectObjName += (char)snCount;
+	CObject* pBNSEffect0 = pOM->CreateObject(szEffectObjName,
+		vColPt.x, 1.0f, vColPt.z);
+	szEffectObjName = "ColSparkEffect";
+	szEffectObjName += (char)snCount;
+	CObject* pBNSEffect1 = pOM->CreateObject(szEffectObjName, 0.0f, 0.0f, 0.0f,
+		0.0f, pBNSEffect0);
+
+	// Get Emitter
+	CParticleEmitter* pPE0 = GetCloneEmitter("Bolt_Burst.bin", pBNSEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Spark_Burst.bin", pBNSEffect1);
+
+	// Create Render Comps
+	CRenderComponent* pRenComp0 = pRenMan->CreateRenderComp(pBNSEffect0,
+		(DXMesh*)pPE0, RC_BOLT, RF_PARTICLE);
+	CRenderComponent* pRenComp1 = pRenMan->CreateRenderComp(pBNSEffect1,
+		(DXMesh*)pPE1, RC_FIREWORK_ORANGE, RF_PARTICLE);
+
+	// Create Effect Comps
+	CEffectComponent* pEC = CreateEffectComp(pBNSEffect0, pPE0, pRenComp0,
+		EC_TYPE_COL_BURST, PE_TYPE_BOLT_BURST);
+	pEC->AddEmitter(EC_TYPE_COL_BURST, pPE1, pRenComp1,
+		pBNSEffect0->GetTransform(), PE_TYPE_SPARK_BURST);
+
+	pEC->SetOnTarget(EC_TYPE_COL_BURST, true);
+
+	m_cBoltsAndSparks.insert(make_pair(pBNSEffect0, pEC));
+
+	++snCount;
+
+	return pEC;
+}
+
+CEffectComponent* CEffectManager::CreateSlipComponent(CObject* pPlayerObj)
 {
 	// Setup Effect Object
 	unsigned int uID = pPlayerObj->GetID();
@@ -526,43 +587,23 @@ void CEffectManager::CreateSlipComponent(CObject* pPlayerObj)
 	szEffectObjName += (char*)uID;
 	CObject* pSlipEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
-//	szEffectObjName = "DripLeft";
-//	szEffectObjName += (char*)uID;
-//	CObject* pSlipEffect2 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-////	CObjectManager::GetInstance()->BindObjects(pPlayerObj, pSlipEffect2);
-//
-//	szEffectObjName = "DripRight";
-//	szEffectObjName += (char*)uID;
-//	CObject* pSlipEffect3 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-//	CObjectManager::GetInstance()->BindObjects(pPlayerObj, pSlipEffect2);
-
-
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Banana_Splat.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Shloop_Popup.bin");
-	//CParticleEmitter* pPE2 = GetCloneEmitter("Drip_Left.bin");
-	//CParticleEmitter* pPE3 = GetCloneEmitter("Drip_Right.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Banana_Splat.bin", pSlipEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Shloop_Popup.bin", pSlipEffect1);
 
 	// Create Render Comp
 	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pSlipEffect0,
 		(DXMesh*)pPE0, RC_FLOOR_SPLAT, RF_PARTICLE);
 	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pSlipEffect1,
 		(DXMesh*)pPE1, RC_SHLOOP_POPUP, RF_PARTICLE);
-	//CRenderComponent* pRenComp2 = Renderer::GetInstance()->CreateRenderComp(pSlipEffect2,
-	//	(DXMesh*)pPE2, RC_DRIP_LEFT, RF_PARTICLE);
-	//CRenderComponent* pRenComp3 = Renderer::GetInstance()->CreateRenderComp(pSlipEffect3,
-	//	(DXMesh*)pPE3, RC_DRIP_RIGHT, RF_PARTICLE);
 
 	// Create Effect Comps
 	CEffectComponent* pEC = CreateEffectComp(pPlayerObj, pPE0, pRenComp0,
 		EC_TYPE_BANANA_SLIP, PE_TYPE_BANANA_FLOOR_SPLAT);
 	pEC->AddEmitter(EC_TYPE_BANANA_SLIP, pPE1, pRenComp1,
 		pPlayerObj->GetTransform(), PE_TYPE_BANANA_SHLOOP_POPUP);
-	/*pEC->AddEmitter(EC_TYPE_BANANA_SLIP, pPE2, pRenComp2,
-		pPlayerObj->GetTransform(), PE_TYPE_BANANA_DRIP_LEFT);
-	pEC->AddEmitter(EC_TYPE_BANANA_SLIP, pPE3, pRenComp3,
-		pPlayerObj->GetTransform(), PE_TYPE_BANANA_DRIP_RIGHT);*/
 	pEC->SetOnTarget(EC_TYPE_BANANA_SLIP, true);
+	return pEC;
 }
 
 CEffectComponent* CEffectManager::CreateSlipDripComp(CObject* pParentObj, bool bLeft)
@@ -593,7 +634,7 @@ CEffectComponent* CEffectManager::CreateSlipDripComp(CObject* pParentObj, bool b
 	CObject* pDripEffect = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitters
-	CParticleEmitter* pPE = GetCloneEmitter(szFileName);
+	CParticleEmitter* pPE = GetCloneEmitter(szFileName, pDripEffect);
 
 	// Render Comps
 	CRenderComponent* pRenComp = Renderer::GetInstance()->CreateRenderComp(pDripEffect,
@@ -601,9 +642,35 @@ CEffectComponent* CEffectManager::CreateSlipDripComp(CObject* pParentObj, bool b
 
 	// Effect Comp
 	CEffectComponent* pEC = CreateEffectComp(pParentObj, pPE, pRenComp,
-		EC_TYPE_BANANA_SLIP, PE_TYPE_BANANA_DRIP_LEFT);
+		EC_TYPE_BANANA_SLIP, PE_TYPE_BANANA_DRIP);
 	pEC->SetOnTarget(EC_TYPE_BANANA_SLIP, true);
 
+	return pEC;
+}
+
+// Mud
+CEffectComponent* CEffectManager::CreateSlowMudComp(CObject* pParentObj)
+{
+	// Get Singletons
+	//CObjectManager* pOM = CObjectManager::GetInstance();
+	//Renderer* pRenMan = Renderer::GetInstance();
+
+	// Setup Effects
+	string szEffectObjName = "PBMud";
+	szEffectObjName += (char*)pParentObj->GetID();
+	CObject* pMudEffect = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+
+	// Get Emitters
+	CParticleEmitter* pPE1 = GetCloneEmitter("Peanut_Mud.bin", pMudEffect);
+
+	// Create Render Comp
+	CRenderComponent* pRenComp1 = pRenMan->CreateRenderComp(pMudEffect,
+		(DXMesh*)pPE1, RC_CART_MUD, RF_PARTICLE);
+
+	CEffectComponent* pEC = CreateEffectComp(pParentObj, pPE1, pRenComp1, EC_TYPE_CART_MUD,
+		PE_TYPE_CART_MUD);
+
+	// Create Effect Comps
 	return pEC;
 }
 
@@ -611,108 +678,21 @@ void CEffectManager::CreateSlowComponent(CObject* pPlayerObj)
 {
 	// Setup Effect Object
 	unsigned int uID = pPlayerObj->GetID();
-	//string szEffectObjName = "PeanutSplashEffect";
-	//szEffectObjName += (char*)uID;
-	//CObject* pSlowEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 	string szEffectObjName = "SquishPopup";
 	szEffectObjName += (char*)uID;
 	CObject* pSlowEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitter
-	//CParticleEmitter* pPE0 = GetCloneEmitter("Peanut_Splash.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Squish_Popup.bin");
+	CParticleEmitter* pPE1 = GetCloneEmitter("Squish_Popup.bin", pSlowEffect1);
 
 	// Create Render Comp
-	/*CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pSlowEffect0,
-		(DXMesh*)pPE0, RC_PEANUT_EFFECT_SPLASH, RF_PARTICLE);*/
 	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pSlowEffect1,
 		(DXMesh*)pPE1, RC_SQUISH_POPUP, RF_PARTICLE);
 
 	// Create Effect Comps
 	CEffectComponent* pEC = CreateEffectComp(pPlayerObj, pPE1, pRenComp1,
 		EC_TYPE_PEANUT_SQUISH, PE_TYPE_PEANUT_SQUISH_POPUP);
-	
-	/*CEffectComponent* pEC = CreateEffectComp(pPlayerObj, pPE0, pRenComp0,
-		EC_TYPE_PEANUT_SQUISH, PE_TYPE_PEANUT_SPLASH);*/
-	/*pEC->AddEmitter(EC_TYPE_PEANUT_SQUISH, pPE1, pRenComp1, pPlayerObj->GetTransform(),
-		PE_TYPE_PEANUT_SQUISH_POPUP);*/
 	pEC->SetOnTarget(EC_TYPE_PEANUT_SQUISH, true);
-}
-
-void CEffectManager::CreateJamUseComponent(CObject* pPlayerObj)
-{
-	// Setup Effect Object
-	unsigned int uID = pPlayerObj->GetID();
-	string szEffectObjName = "JamRocket";
-	szEffectObjName += (char*)uID;
-	CObject* pJamEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-	szEffectObjName = "JamJar";
-	szEffectObjName += (char*)uID;
-	CObject* pJamEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-
-	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Jam_Rocket.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Jam_Jar.bin");
-
-	// Create Render Comp
-	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pJamEffect0,
-		(DXMesh*)pPE0, RC_JAM_USE_EFFECT_ROCKET, RF_PARTICLE);
-	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pJamEffect1,
-		(DXMesh*)pPE1, RC_JAM_USE_EFFECT_JAR, RF_PARTICLE);
-
-	// Create Effect Comps
-	CEffectComponent* pEC = CreateEffectComp(pPlayerObj, pPE0, pRenComp0,
-		EC_TYPE_JAM_USE, PE_TYPE_JAM_ROCKET);
-	pEC->AddEmitter(EC_TYPE_JAM_USE, pPE1, pRenComp1, pPlayerObj->GetTransform(),
-		PE_TYPE_JAM_JAR);
-	pEC->SetOnTarget(EC_TYPE_JAM_USE, true);
-}
-
-void CEffectManager::CreateJamHitComponent(CObject* pPlayerObj)
-{
-	// Setup Effect Object
-	unsigned int uID = pPlayerObj->GetID();
-	string szEffectObjName = "JamRocketDown";
-	szEffectObjName += (char*)uID;
-	CObject* pJamEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-	szEffectObjName = "JamJarDown";
-	szEffectObjName += (char*)uID;
-	CObject* pJamEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-	szEffectObjName = "JamHitBlob";
-	szEffectObjName += (char*)uID;
-	CObject* pJamEffect2 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-	szEffectObjName = "JamSplurchPopup";
-	szEffectObjName += (char*)uID;
-	CObject* pJamEffect3 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-
-	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Jam_Rocket_Down.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Jam_Jar_Down.bin");
-	CParticleEmitter* pPE2 = GetCloneEmitter("Jam_Hit_Splat.bin");
-	CParticleEmitter* pPE3 = GetCloneEmitter("Splurch_Popup.bin");
-
-	// Create Render Comp
-	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pJamEffect0,
-		(DXMesh*)pPE0, RC_JAM_USE_EFFECT_ROCKET, RF_PARTICLE);
-	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pJamEffect1,
-		(DXMesh*)pPE1, RC_JAM_USE_EFFECT_JAR, RF_PARTICLE);
-	CRenderComponent* pRenComp2 = Renderer::GetInstance()->CreateRenderComp(pJamEffect2,
-		(DXMesh*)pPE2, RC_JAM_HIT_EFFECT_BLOB, RF_PARTICLE);
-	CRenderComponent* pRenComp3 = Renderer::GetInstance()->CreateRenderComp(pJamEffect3,
-		(DXMesh*)pPE3, RC_JAM_HIT_EFFECT_SPLURCH_POPUP, RF_PARTICLE);
-
-	// Create Effect Comps
-	CEffectComponent* pEC0 = CreateEffectComp(pPlayerObj, pPE0, pRenComp0,
-		EC_TYPE_JAM_HIT_FALL, PE_TYPE_JAM_ROCKET_DOWN);
-	pEC0->AddEmitter(EC_TYPE_JAM_HIT_FALL, pPE1, pRenComp1, pPlayerObj->GetTransform(),
-		PE_TYPE_JAM_JAR_DOWN);
-	pEC0->SetOnTarget(EC_TYPE_JAM_HIT_FALL, true);
-
-	CEffectComponent* pEC1 = CreateEffectComp(pPlayerObj, pPE2, pRenComp2, EC_TYPE_JAM_HIT_POPUP,
-		PE_TYPE_JAM_HIT_BLOB);
-	pEC1->AddEmitter(EC_TYPE_JAM_HIT_POPUP, pPE3, pRenComp3, pPlayerObj->GetTransform(),
-		PE_TYPE_JAM_HIT_POPUP);
-	pEC1->SetOnTarget(EC_TYPE_JAM_HIT_POPUP, true);
 }
 
 CEffectComponent* CEffectManager::CreateDonutUseComponent(CObject* pPlayerObj)
@@ -724,7 +704,7 @@ CEffectComponent* CEffectManager::CreateDonutUseComponent(CObject* pPlayerObj)
 	CObject* pDonutEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Donut_Puff.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Donut_Puff.bin", pDonutEffect0);
 
 	// Create Render Comp
 	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pDonutEffect0,
@@ -739,25 +719,34 @@ CEffectComponent* CEffectManager::CreateDonutUseComponent(CObject* pPlayerObj)
 }
 
 // Pie Hit
-void CEffectManager::CreatePieHitComponent(CObject* pPlayerObj)
+CEffectComponent* CEffectManager::CreatePieHitComponent(CObject* pPlayerObj)
 {
 	// Setup Effect Object
 	unsigned int uID = pPlayerObj->GetID();
-	string szEffectObjName = "PieHit";
+	string szEffectObjName = "PieSplat";
 	szEffectObjName += (char*)uID;
 	CObject* pPieEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+	szEffectObjName = "PieBurst";
+	szEffectObjName += (char*)uID;
+	CObject* pPieEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Splat_Popup.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Splat_Popup.bin", pPieEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Splat_Burst.bin", pPieEffect1);
 
 	// Create Render Comp
 	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pPieEffect0,
 		(DXMesh*)pPE0, RC_SPLAT_POPUP, RF_PARTICLE);
+	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pPieEffect1,
+		(DXMesh*)pPE1, RC_SPLAT_BURST, RF_PARTICLE);
 
 	// Create Effect Comps
 	CEffectComponent* pEC = CreateEffectComp(pPlayerObj, pPE0, pRenComp0,
 		EC_TYPE_PIE_HIT, PE_TYPE_PIE_SPLAT_POPUP);
+	pEC->AddEmitter(EC_TYPE_PIE_HIT, pPE1, pRenComp1, pPlayerObj->GetTransform(),
+		PE_TYPE_PIE_SPLAT_POPUP);
 	pEC->SetOnTarget(EC_TYPE_PIE_HIT, true);
+	return pEC;
 }
 
 // Caution
@@ -767,41 +756,40 @@ void CEffectManager::CreateCautionEffectComponent(CObject* pParentObj)
 	unsigned int uID = pParentObj->GetID();
 	string szEffectObjName = "Caution";
 	szEffectObjName += (char*)uID;
-	CObject* pEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+	CObject* pCautionEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Lose_Haz.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Lose_Haz.bin", pCautionEffect0);
 
 	// Create Render Comp
-	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pEffect0,
+	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pCautionEffect0,
 		(DXMesh*)pPE0, RC_CAUTION, RF_PARTICLE);
 
 	// Create Effect Comps
 	CEffectComponent* pEC = CreateEffectComp(pParentObj, pPE0, pRenComp0,
 		EC_TYPE_CAUTION, PE_TYPE_CAUTION_SIGN);
 	pEC->SetOnTarget(EC_TYPE_CAUTION, true);
-	//pEC->SwitchOnOffEmitters(EC_TYPE_CAUTION, true);
 }
 
 // Firework
 CEffectComponent* CEffectManager::CreateFireworkEffectComponent(CObject* pParentObj)
 {
 	// Get Singletons
-	CObjectManager* pOM = CObjectManager::GetInstance();
+	//CObjectManager* pOM = CObjectManager::GetInstance();
 	CEventManager*  pEM = CEventManager::GetInstance();
 
 	// Setup Effect Object
 	unsigned int uID = pParentObj->GetID();
 	string szEffectObjName = "FireworkTrail";
 	szEffectObjName += (char*)uID;
-	CObject* pEffect0 = pOM->CreateObject(szEffectObjName);
+	CObject* pFWEffect0 = pOM->CreateObject(szEffectObjName);
 	szEffectObjName = "ForeworkBurst";
 	szEffectObjName += (char*)uID;
-	CObject* pEffect1 = pOM->CreateObject(szEffectObjName);
+	CObject* pFWEffect1 = pOM->CreateObject(szEffectObjName);
 
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Firework_Trail.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Firework_Burst.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Firework_Trail.bin", pFWEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Firework_Burst.bin", pFWEffect1);
 
 	// Create Render Comp
 	ERenderContext eRenderConxtext;
@@ -824,15 +812,14 @@ CEffectComponent* CEffectManager::CreateFireworkEffectComponent(CObject* pParent
 		break;
 	}
 
-	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pEffect0,
+	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pFWEffect0,
 		(DXMesh*)pPE0, eRenderConxtext, RF_PARTICLE);
-	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pEffect1,
+	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pFWEffect1,
 		(DXMesh*)pPE1, eRenderConxtext, RF_PARTICLE);
 
 	// Create Effect Comps
 	CEffectComponent* pEC0 = CreateEffectComp(pParentObj, pPE0, pRenComp0,
 		EC_TYPE_FIREWORK_TRAIL, PE_TYPE_FIRE_WORK_TRAIL);
-	//pEC0->SetOnTarget(EC_TYPE_FIREWORK_TRAIL, true);
 
 	CEffectComponent* pEC1 = CreateEffectComp(pParentObj, pPE1, pRenComp1,
 		EC_TYPE_FIREWORK_BURST,	PE_TYPE_FIRE_WORK_BURST);
@@ -851,26 +838,26 @@ CEffectComponent* CEffectManager::CreateFireworkEffectComponent(CObject* pParent
 CEffectComponent* CEffectManager::CreateConfettiEffectComponent(CObject* pParentObj)
 {
 	// Get Singeltons
-	CObjectManager* pOM = CObjectManager::GetInstance();
+	//CObjectManager* pOM = CObjectManager::GetInstance();
 	CEventManager*  pEM = CEventManager::GetInstance();
 
 	// Setup Effect Object
 	unsigned int uID = pParentObj->GetID();
 	string szEffectObjName = "ConfettiStrips";
 	szEffectObjName += (char*)uID;
-	CObject* pEffect0 = pOM->CreateObject(szEffectObjName);
+	CObject* pConEffect0 = pOM->CreateObject(szEffectObjName);
 	szEffectObjName = "ConfettiStars";
 	szEffectObjName += (char*)uID;
-	CObject* pEffect1 = pOM->CreateObject(szEffectObjName);
+	CObject* pConEffect1 = pOM->CreateObject(szEffectObjName);
 
 	// Get Emitters
-	CParticleEmitter* pPE0 = GetCloneEmitter("Con_Strip.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Con_Star.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Con_Strip.bin", pConEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Con_Star.bin", pConEffect1);
 
 	// Create Ren Comps
-	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pEffect0,
+	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pConEffect0,
 		(DXMesh*)pPE0, RC_CONFETTI_STRIP, RF_PARTICLE);
-	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pEffect1,
+	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pConEffect1,
 		(DXMesh*)pPE1, RC_CONFETTI_STAR, RF_PARTICLE);
 
 	// Create Effect Comps
@@ -878,7 +865,6 @@ CEffectComponent* CEffectManager::CreateConfettiEffectComponent(CObject* pParent
 		EC_TYPE_CONFETTI, PE_TYPE_CONFETTI_STRIP);
 	pEC0->AddEmitter(EC_TYPE_CONFETTI, pPE1, pRenComp1, pParentObj->GetTransform(),
 		PE_TYPE_CONFETTI_STAR);
-	//pEC1->SetOnTarget(EC_TYPE_CONFETTI, true);
 
 	// Register for Win Update
 	string szEventName = "Update";
@@ -894,35 +880,34 @@ CEffectComponent* CEffectManager::CreateInvulnerableEffectComponent(CObject* pPa
 	// Setup Effect Object
 	unsigned int uID = pParent->GetID();
 
-	// Check the InvMap
-	ObjMap::iterator objIter = m_cInvObjs.find(uID);
-	if(objIter != m_cInvObjs.end())
-	{
-		return m_cEmitterComps.find(uID)->second;
-	}
-	else
-	{
-		string szEffectObjName = "BubbleTrail";
-		szEffectObjName += (char*)uID;
+	// Get Singeltons
+	//CObjectManager* pOM = CObjectManager::GetInstance();
 
-		CObject* pChikenEffect3 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+	// Create Objects
+	string szEffectObjName = "BubbleTrail";
+	szEffectObjName += (char*)uID;
+	CObject* pChikenEffect0 = pOM->CreateObject(szEffectObjName);
+	szEffectObjName = "BubbleSparkle";
+	szEffectObjName += (char*)uID;
+	CObject* pChikenEffect1 = pOM->CreateObject(szEffectObjName);
 
-		// Get Emitter
-		CParticleEmitter* pPE3 = GetCloneEmitter("Bubble_Trail.bin");
+	// Get Emitter
+	CParticleEmitter* pPE0 = GetCloneEmitter("Bubble_Trail.bin", pChikenEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Sparkle_Soup_Trail.bin", pChikenEffect1);
 
-		// Create Render Comp
-		CRenderComponent* pRenComp3 = Renderer::GetInstance()->CreateRenderComp(pChikenEffect3,
-			(DXMesh*)pPE3, RC_BROTH, RF_PARTICLE);
+	// Create Render Comp
+	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pChikenEffect0,
+		(DXMesh*)pPE0, RC_BROTH, RF_PARTICLE);
+	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pChikenEffect1,
+		(DXMesh*)pPE1, RC_SOUP_SPARKLE, RF_PARTICLE);
 
-		// Create Effect Comps
-		CEffectComponent* pEC = CreateEffectComp(pParent, pPE3, pRenComp3,
-			EC_TYPE_CHICKEN_INV, PE_TYPE_BUBBLE_TRAIL);
+	// Create Effect Comps
+	CEffectComponent* pEC = CreateEffectComp(pParent, pPE0, pRenComp0,
+		EC_TYPE_CHICKEN_INV, PE_TYPE_BUBBLE_TRAIL);
+	pEC->AddEmitter(EC_TYPE_CHICKEN_INV, pPE1, pRenComp1, pParent->GetTransform(),
+		PE_TYPE_SOUP_SPARKLE);
 
-		// Add the Effect Obj to the InvMap
-		m_cInvObjs.insert(make_pair(uID, pChikenEffect3));
-
-		return pEC;
-	}
+	return pEC;
 }
 
 void CEffectManager::SetupPlayerEmitters(void)
@@ -936,62 +921,52 @@ void CEffectManager::SetupPlayerEmitters(void)
 	if(pPlayer0)
 	{
 		CreateCartCollisionComponent(pPlayer0);
-		//CreateCartSkidsComponent(pPlayer0);
 		CreateBoostComponent(pPlayer0);
 		CreateStunComponent(pPlayer0);
 		CreateSlipComponent(pPlayer0);
 		CreateSlowComponent(pPlayer0);
-		CreateJamUseComponent(pPlayer0);
-		CreateJamHitComponent(pPlayer0);
-		//CreateDonutUseComponent(pPlayer0);
 		CreatePieHitComponent(pPlayer0);
-
-		pPlayer0->AddComponent(CVictoryVFXComp::CreateVictoryVFXComponent(pPlayer0));
+		CJamUseEffectComp::CreateJamUseVFXComponent(pPlayer0);
+		CJamHitEffectComp::CreateJamHitVFXComponent(pPlayer0);
 		CSlipVFXComp::CreateSlipVFXComponent(pPlayer0);
+
+		CHUDEffectsComp::CreateHUDEffectsComp(pPlayer0);
+		CVictoryVFXComp::CreateVictoryVFXComponent(pPlayer0);
 	}
 	if(pPlayer1)
 	{
-		//CreateCartCollisionComponent(pPlayer1);
-		//CreateCartSkidsComponent(pPlayer1);
 		CreateBoostComponent(pPlayer1);
 		CreateStunComponent(pPlayer1);
 		CreateSlipComponent(pPlayer1);
 		CreateSlowComponent(pPlayer1);
-		CreateJamUseComponent(pPlayer1);
-		CreateJamHitComponent(pPlayer1);
-		//CreateDonutUseComponent(pPlayer1);
 		CreatePieHitComponent(pPlayer1);
 		CreateCautionEffectComponent(pPlayer1);
+		CJamUseEffectComp::CreateJamUseVFXComponent(pPlayer1);
+		CJamHitEffectComp::CreateJamHitVFXComponent(pPlayer1);
 		CSlipVFXComp::CreateSlipVFXComponent(pPlayer1);
 	}
 	if(pPlayer2)
 	{
-		//CreateCartCollisionComponent(pPlayer2);
-		//CreateCartSkidsComponent(pPlayer2);
 		CreateBoostComponent(pPlayer2);
 		CreateStunComponent(pPlayer2);
 		CreateSlipComponent(pPlayer2);
 		CreateSlowComponent(pPlayer2);
-		CreateJamUseComponent(pPlayer2);
-		CreateJamHitComponent(pPlayer2);
-		//CreateDonutUseComponent(pPlayer2);
 		CreatePieHitComponent(pPlayer2);
 		CreateCautionEffectComponent(pPlayer2);
+		CJamUseEffectComp::CreateJamUseVFXComponent(pPlayer2);
+		CJamHitEffectComp::CreateJamHitVFXComponent(pPlayer2);
 		CSlipVFXComp::CreateSlipVFXComponent(pPlayer2);
 	}
 	if(pPlayer3)
 	{
-		//CreateCartCollisionComponent(pPlayer3);
-		//CreateCartSkidsComponent(pPlayer3);
 		CreateBoostComponent(pPlayer3);
 		CreateStunComponent(pPlayer3);
 		CreateSlipComponent(pPlayer3);
 		CreateSlowComponent(pPlayer3);
-		CreateJamUseComponent(pPlayer3);
-		CreateJamHitComponent(pPlayer3);
-		//CreateDonutUseComponent(pPlayer3);
 		CreatePieHitComponent(pPlayer3);
 		CreateCautionEffectComponent(pPlayer3);
+		CJamUseEffectComp::CreateJamUseVFXComponent(pPlayer3);
+		CJamHitEffectComp::CreateJamHitVFXComponent(pPlayer3);
 		CSlipVFXComp::CreateSlipVFXComponent(pPlayer3);
 	}
 }
@@ -999,64 +974,25 @@ void CEffectManager::SetupPlayerEmitters(void)
 CEffectComponent* CEffectManager::CreateDustEffectComponent(CObject* pParentObj)
 {
 	// Get Singletons
-	CObjectManager* pOM = CObjectManager::GetInstance();
-	Renderer* pRenMan = Renderer::GetInstance();
+	//CObjectManager* pOM = CObjectManager::GetInstance();
+	//Renderer* pRenMan = Renderer::GetInstance();
 
 	// Setup Effects
+	string szEffectObjName = "CartDust";
+	szEffectObjName += (char*)pParentObj->GetID();
+
+	CObject* pDustEffect = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitters
-	CParticleEmitter* pPE1 = GetCloneEmitter("Smoke_Puff.bin");
+	CParticleEmitter* pPE1 = GetCloneEmitter("Smoke_Puff.bin", pDustEffect);
 
 	// Create Render Comp
-	CRenderComponent* pRenComp1 = pRenMan->CreateRenderComp(pParentObj,
+	CRenderComponent* pRenComp1 = pRenMan->CreateRenderComp(pDustEffect,
 		(DXMesh*)pPE1, RC_CART_SMOKE_EFFECT, RF_PARTICLE);
 
 	// Create Effect Comps
 	return CreateEffectComp(pParentObj, pPE1, pRenComp1, EC_TYPE_CART_SMOKE,
 		PE_TYPE_CART_DUST);
-}
-
-// Scientist
-CEffectComponent* CEffectManager::CreateScientistEffectComponent(CObject* pParentObj)
-{
-	// Get Singletons
-	CObjectManager* pOM = CObjectManager::GetInstance();
-	Renderer* pRenMan = Renderer::GetInstance();
-
-	// Setup Effects
-
-	// Scientists Effect
-	string szEffectObjName = "CartGlowShrink";
-	szEffectObjName += (char*)pParentObj->GetID();
-	CObject* pEffect0 = pOM->CreateObject(szEffectObjName);
-	szEffectObjName = "CartGlowGrow";
-	szEffectObjName += (char*)pParentObj->GetID();
-	CObject* pEffect1 = pOM->CreateObject(szEffectObjName);
-
-	//m_pSciGlowS = pEffect0;
-	//m_pSciGlowG = pEffect1;
-
-	// Get Emitters
-	CParticleEmitter* pPE0 = GetCloneEmitter("Blue_SGlow_Shrink.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Blue_SGlow_Grow.bin");
-
-	//pPE1->SetSpawnPosition(pPE1->GetSpawnPosition() + D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-	pPE0->SetOn(true);
-	pPE1->SetOn(true);
-
-	// Create Render Comp
-	CRenderComponent* pRenComp0 = pRenMan->CreateRenderComp(pEffect0,
-		(DXMesh*)pPE0, RC_SCI_GLOW, RF_PARTICLE);
-	CRenderComponent* pRenComp1 = pRenMan->CreateRenderComp(pEffect1,
-		(DXMesh*)pPE1, RC_SCI_GLOW, RF_PARTICLE);
-
-	// Create Effect Comps
-	CEffectComponent* pEC0 = CreateEffectComp(pParentObj, pPE0, pRenComp0,
-		EC_TYPE_SCIENTIST_GLOW, PE_TYPE_SCI_GLOW_SHRINK);
-	pEC0->AddEmitter(EC_TYPE_SCIENTIST_GLOW, pPE1, pRenComp1, pParentObj->GetTransform(), PE_TYPE_SCI_GLOW_GROW);
-	pEC0->SetOnTarget(EC_TYPE_SCIENTIST_GLOW, true);
-
-	return pEC0;
 }
 
 // Setup Radar Jam
@@ -1125,18 +1061,18 @@ void CEffectManager::CreateGoalItemEffectComponent(CObject* pItemObj,
 		CObject* pEffectEnd4 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Glow_Grow.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Glow_Shrink.bin");
-	CParticleEmitter* pPE2 = GetCloneEmitter("Star_Spread.bin");
-	CParticleEmitter* pPE3 = GetCloneEmitter("Shine_Backdrop.bin");
-	CParticleEmitter* pPE4 = GetCloneEmitter("Icon_Front.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Glow_Grow.bin", pEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Glow_Shrink.bin", pEffect1);
+	CParticleEmitter* pPE2 = GetCloneEmitter("Star_Spread.bin", pEffect2);
+	CParticleEmitter* pPE3 = GetCloneEmitter("Shine_Backdrop.bin", pEffect3);
+	CParticleEmitter* pPE4 = GetCloneEmitter("Icon_Front.bin", pEffect4);
 
 	// End
-	CParticleEmitter* pPEEnd0 = GetCloneEmitter("Glow_Grow_End.bin");
-	CParticleEmitter* pPEEnd1 = GetCloneEmitter("Glow_Shrink_End.bin");
-	CParticleEmitter* pPEEnd2 = GetCloneEmitter("Star_Spread_End.bin");
-	CParticleEmitter* pPEEnd3 = GetCloneEmitter("Shine_Backdrop_End.bin");
-	CParticleEmitter* pPEEnd4 = GetCloneEmitter("Icon_Front_End.bin");
+	CParticleEmitter* pPEEnd0 = GetCloneEmitter("Glow_Grow_End.bin", pEffectEnd0);
+	CParticleEmitter* pPEEnd1 = GetCloneEmitter("Glow_Shrink_End.bin", pEffectEnd1);
+	CParticleEmitter* pPEEnd2 = GetCloneEmitter("Star_Spread_End.bin", pEffectEnd2);
+	CParticleEmitter* pPEEnd3 = GetCloneEmitter("Shine_Backdrop_End.bin", pEffectEnd3);
+	CParticleEmitter* pPEEnd4 = GetCloneEmitter("Icon_Front_End.bin", pEffectEnd4);
 
 	// Create Render Comp
 	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pEffect0,
@@ -1159,11 +1095,11 @@ void CEffectManager::CreateGoalItemEffectComponent(CObject* pItemObj,
 		(DXMesh*)pPEEnd3, RC_ITEM_EFFECT_SHINE, RF_PARTICLE);
 
 	// Find Icon
-	ERenderContext eIconContext = (ERenderContext)m_nGoalItemIconRenderContexts[eType];
+	int nIconFrame = m_nGoalItemIconFrames[eType];
 	CRenderComponent* pRenComp4 = Renderer::GetInstance()->CreateRenderComp(pEffect4,
-		(DXMesh*)pPE4, eIconContext, RF_PARTICLE);
+		(DXMesh*)pPE4, RC_GOAL_ICON_EFFECT_SHEET, RF_PARTICLE);
 	CRenderComponent* pRenCompEnd4 = Renderer::GetInstance()->CreateRenderComp(pEffectEnd4,
-		(DXMesh*)pPEEnd4, eIconContext, RF_PARTICLE);
+		(DXMesh*)pPEEnd4, RC_GOAL_ICON_EFFECT_SHEET, RF_PARTICLE);
 
 	// Create Effect Comps
 	CEffectComponent* pEC = CreateEffectComp(pItemObj, pPE0, pRenComp0,
@@ -1174,8 +1110,10 @@ void CEffectManager::CreateGoalItemEffectComponent(CObject* pItemObj,
 		pItemObj->GetTransform(), PE_TYPE_GOAL_ITEM_STARS);
 	pEC->AddEmitter(EC_TYPE_GOAL_ITEM, pPE3, pRenComp3,
 		pItemObj->GetTransform(), PE_TYPE_GOAL_ITEM_SHINE);
+	
 	pEC->AddEmitter(EC_TYPE_GOAL_ITEM, pPE4, pRenComp4,
 		pItemObj->GetTransform(), PE_TYPE_GOAL_ITEM_ICON);
+	pEC->SetFrame(EC_TYPE_GOAL_ITEM, PE_TYPE_GOAL_ITEM_ICON, nIconFrame);
 	pEC->SetOnTarget(EC_TYPE_GOAL_ITEM, true);
 
 	// End
@@ -1187,8 +1125,10 @@ void CEffectManager::CreateGoalItemEffectComponent(CObject* pItemObj,
 		pItemObj->GetTransform(), PE_TYPE_GOAL_ITEM_STARS);
 	pECEnd->AddEmitter(EC_TYPE_GOAL_ITEM_COLLECTION, pPEEnd3, pRenCompEnd3,
 		pItemObj->GetTransform(), PE_TYPE_GOAL_ITEM_SHINE);
+
 	pECEnd->AddEmitter(EC_TYPE_GOAL_ITEM_COLLECTION, pPEEnd4, pRenCompEnd4,
 		pItemObj->GetTransform(), PE_TYPE_GOAL_ITEM_ICON);
+	pECEnd->SetFrame(EC_TYPE_GOAL_ITEM_COLLECTION, PE_TYPE_GOAL_ITEM_ICON, nIconFrame);
 	pECEnd->SetOnTarget(EC_TYPE_GOAL_ITEM_COLLECTION, true);
 }
 
@@ -1205,8 +1145,8 @@ void CEffectManager::CreateTurkeyEffectComponent(CObject* pTurkeyObj)
 	CObject* pTurkeyEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
 
 	// Get Emitter
-	CParticleEmitter* pPE0 = GetCloneEmitter("Snowflake_Trail.bin");
-	CParticleEmitter* pPE1 = GetCloneEmitter("Snowflake_Trail_2.bin");
+	CParticleEmitter* pPE0 = GetCloneEmitter("Snowflake_Trail.bin", pTurkeyEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Snowflake_Trail_2.bin", pTurkeyEffect1);
 
 	// Create Render Comp
 	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pTurkeyEffect0,
@@ -1219,7 +1159,35 @@ void CEffectManager::CreateTurkeyEffectComponent(CObject* pTurkeyObj)
 		EC_TYPE_TURKEY_TRAIL, PE_TYPE_TURKEY_SNOWFLAKE_TRAIL_A);
 	pEC->AddEmitter(EC_TYPE_TURKEY_TRAIL, pPE1, pRenComp1, pTurkeyObj->GetTransform(),
 		PE_TYPE_TURKEY_SNOWFLAKE_TRAIL_B);
-	//pEC->SetOnTarget(EC_TYPE_TURKEY_TRAIL, true);
+}
+
+// Pie Trail
+void CEffectManager::CreatePieTrailEffectComponent(CObject* pPieObj)
+{
+	// Setup Effect Object
+	unsigned int uID = pPieObj->GetID();
+	string szEffectObjName = "PieTrail";
+	szEffectObjName += (char*)uID;
+	CObject* pPieEffect0 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+	szEffectObjName = "PieTrail2";
+	szEffectObjName += (char*)uID;
+	CObject* pPieEffect1 = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
+
+	// Get Emitter
+	CParticleEmitter* pPE0 = GetCloneEmitter("Pie_Trail.bin", pPieEffect0);
+	CParticleEmitter* pPE1 = GetCloneEmitter("Pie_Trail2.bin", pPieEffect1);
+
+	// Create Render Comp
+	CRenderComponent* pRenComp0 = Renderer::GetInstance()->CreateRenderComp(pPieEffect0,
+		(DXMesh*)pPE0, RC_SPLAT_BURST, RF_PARTICLE);
+	CRenderComponent* pRenComp1 = Renderer::GetInstance()->CreateRenderComp(pPieEffect1,
+		(DXMesh*)pPE1, RC_SPLAT_BURST, RF_PARTICLE);
+
+	// Create Effect Comps
+	CEffectComponent* pEC = CreateEffectComp(pPieObj, pPE0, pRenComp0,
+		EC_TYPE_PIE_TRAIL, PE_TYPE_PIE_TRAIL_A);
+	pEC->AddEmitter(EC_TYPE_PIE_TRAIL, pPE1, pRenComp1, pPieObj->GetTransform(),
+		PE_TYPE_PIE_TRAIL_B);
 }
 
 // Load Emitter
@@ -1246,11 +1214,8 @@ void CEffectManager::LoadEmitter(char* szFileName)
 		fin.read(szTextureName, nTexNameLen);
 
 		// Get Textue Name
-		//CTextureManager* pTM = CTextureManager::GetInstance();
 		szTextureName[nTexNameLen] = '\0';
-		string szTexFilePath = szTextureName;//"Resource\\Textures\\Particle Images\\";
-		//szTexFilePath += szTextureName;
-		//int  pTM->LoadTexture(szTexFilePath.c_str());
+		string szTexFilePath = szTextureName;
 		pNewEmitter->SetTextureName(szTexFilePath);
 
 		// Get Max Particles
@@ -1485,7 +1450,7 @@ void CEffectManager::LoadEmitter(char* szFileName)
 }
 
 // Get Emitter
-CParticleEmitter* CEffectManager::GetCloneEmitter(string szEmitterName)
+CParticleEmitter* CEffectManager::GetCloneEmitter(string szEmitterName, CObject* pParentObj)
 {
 	// Find the Original
 	unsigned int uID = CIDGen::GetInstance()->GetID(szEmitterName);
@@ -1496,7 +1461,7 @@ CParticleEmitter* CEffectManager::GetCloneEmitter(string szEmitterName)
 	*pCloneEmitter = *pOriginalEmitter;
 	
 	// Store Clone
-	m_cClonedEffect.push_back(pCloneEmitter);
+	m_cClonedEffect.insert(make_pair(pParentObj->GetID(), pCloneEmitter));
 
 	// Return Clone
 	return pCloneEmitter;
@@ -1602,57 +1567,9 @@ void CEffectManager::GoalItemCollected(TGoalItemCollectedEvent* pcObjEvent)
 		CEffectComponent* pEC = compIter->second;
 		pEC->SwitchOnOffEmitters(EC_TYPE_GOAL_ITEM, false);
 		pEC->SetParentFrame(EC_TYPE_GOAL_ITEM_COLLECTION, pcObjEvent->m_pcCollector->GetTransform());
+		pEC->SetDeadTimer(EC_TYPE_GOAL_ITEM_COLLECTION, 0.0f);
 		pEC->SwitchOnOffEmitters(EC_TYPE_GOAL_ITEM_COLLECTION, true);
 	}
-}
-
-// Held Item Spawned
-void CEffectManager::HeldItemSpawnedCallback(IEvent* pEvent, IComponent* /*pComp*/)
-{
-	// Get the Values from the Event
-	GetInstance()->HeldItemSpawned((THeldItemSpawned*)pEvent->GetData());
-}
-void CEffectManager::HeldItemSpawned(THeldItemSpawned* pEvent)
-{
-	CObject* pcObj = pEvent->m_pHeldItem->GetParent();
-
-	// Get ID
-	unsigned int uID = pcObj->GetID();
-
-	// Look for a match
-	EffectCompMap::iterator compIter = m_cEmitterComps.find(uID);
-
-	if(compIter == m_cEmitterComps.end())
-	{
-		// Collection
-		string szEffectObjName = "HeldItem";
-		szEffectObjName += (char*)uID;
-		CObject* pEffect = CObjectManager::GetInstance()->CreateObject(szEffectObjName);
-
-		// Emitter
-		CParticleEmitter* pPE = GetCloneEmitter("Held_Item.bin");
-		pPE->SetOn(true);
-
-		// Create Render Comp
-		CRenderComponent* pRenComp = Renderer::GetInstance()->CreateRenderComp(pEffect,
-			(DXMesh*)pPE, RC_HELD_ITEM_COLLECTION_EFFECT, RF_PARTICLE);
-
-		// Create Effect Comps
-		/*CEffectComponent* pEC  =*/ CreateEffectComp(pcObj, pPE,
-			pRenComp, EC_TYPE_HELD_ITEM, PE_TYPE_SALE_POPUP);
-		//pEC->SetOnTarget(true);
-	}
-}
-
-// Held Item Collected
-void CEffectManager::HeldItemCollectedCallback(IEvent* pEvent, IComponent* /*pComp*/)
-{
-	// Get the Values from the Event
-	GetInstance()->HeldItemCollected((THeldItemCollected*)pEvent->GetData());
-}
-void CEffectManager::HeldItemCollected(THeldItemCollected* /*pcObjEvent*/)
-{
-	
 }
 
 // Pickup Item Spawned
@@ -1685,13 +1602,13 @@ void CEffectManager::PickupItemDropped(TPickupItemEvent* pcObjEvent)
 	if(compIter != m_cEmitterComps.end())
 	{
 		CEffectComponent* pEC = compIter->second;
-		pEC->ChangeContext(EC_TYPE_GOAL_ITEM, PE_TYPE_GOAL_ITEM_ICON, m_nGoalItemIconRenderContexts[eType]);
+		pEC->SetFrame(EC_TYPE_GOAL_ITEM, PE_TYPE_GOAL_ITEM_ICON, m_nGoalItemIconFrames[eType]);
 		pEC->SwitchOnOffEmitters(EC_TYPE_GOAL_ITEM, true);
 	}
 }
 
 // Pickup Item Despawn
-void CEffectManager::PickupItemDespawnCallback(IEvent* pEvent, IComponent* pComp)
+void CEffectManager::PickupItemDespawnCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
 	GetInstance()->PickupItemDespawn((TObjectEvent*)pEvent->GetData());
@@ -1711,7 +1628,7 @@ void CEffectManager::PickupItemDespawn(TObjectEvent* pcObjEvent)
 }
 
 // Pickup Item Collected
-void CEffectManager::PickupItemCollectedCallback(IEvent* pEvent, IComponent* pComp)
+void CEffectManager::PickupItemCollectedCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
 	GetInstance()->PickupItemCollected((TPickupItemCollectedEvent*)pEvent->GetData());
@@ -1730,14 +1647,15 @@ void CEffectManager::PickupItemCollected(TPickupItemCollectedEvent* pcEvent)
 		// Colletion Effect
 		EGoalItemType eType = pcEvent->m_eItemType;
 		pEC->SetParentFrame(EC_TYPE_GOAL_ITEM_COLLECTION, pcEvent->m_pcCollector->GetTransform());
-		pEC->ChangeContext(EC_TYPE_GOAL_ITEM_COLLECTION, PE_TYPE_GOAL_ITEM_ICON, m_nGoalItemIconRenderContexts[eType]);
-		
+		pEC->SetFrame(EC_TYPE_GOAL_ITEM_COLLECTION, PE_TYPE_GOAL_ITEM_ICON, m_nGoalItemIconFrames[eType]);
+
+		pEC->SetDeadTimer(EC_TYPE_GOAL_ITEM_COLLECTION, 0.0f);
 		pEC->SwitchOnOffEmitters(EC_TYPE_GOAL_ITEM_COLLECTION, true);
 	}
 }
 
 // Has 8
-void CEffectManager::HaveEightCallback(IEvent* pEvent, IComponent* pComp)
+void CEffectManager::HaveEightCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
 	GetInstance()->HaveEight((TObjectEvent*)pEvent->GetData());
@@ -1757,7 +1675,7 @@ void CEffectManager::HaveEight(TObjectEvent* pcObjEvent)
 }
 
 // Lost Item
-void CEffectManager::LostItemCallback(IEvent* pEvent, IComponent* pComp)
+void CEffectManager::LostItemCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
 	GetInstance()->LostItem((TGoalItemCollectedEvent*)pEvent->GetData());
@@ -1777,7 +1695,7 @@ void CEffectManager::LostItem(TGoalItemCollectedEvent* pcEvent)
 }
 
 // Inv
-void CEffectManager::InvulnerableCallback(IEvent* pEvent, IComponent* pComp)
+void CEffectManager::InvulnerableCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
 	GetInstance()->Invulnerable((TStatusEffectEvent*)pEvent->GetData());
@@ -1809,6 +1727,7 @@ void CEffectManager::Invulnerable(TStatusEffectEvent* pcEvent)
 	if(compIter != m_cEmitterComps.end())
 	{
 		CEffectComponent* pEC = compIter->second;
+
 		pEC->SwitchOnOffEmitters(EC_TYPE_PEANUT_SQUISH, false);
 	}
 }
@@ -1866,36 +1785,18 @@ void CEffectManager::CartCollision(TImpactEvent* pcObjEvent)
 			}
 
 			pEC->SwitchOnOffEmitters(EC_TYPE_CART_COLLISION_CRASH, true);
+			pEC->SetDeadTimer(EC_TYPE_CART_COLLISION_CRASH, 0.0f);
 			pEC->SetCooldown(EC_TYPE_CART_COLLISION_CRASH, POPUP_COOLDOWN);
 		}
 
 		compIter++;
 	}
+	
+	//Bolts and Sparks
+	CEffectComponent* pECB = CreateBoltsAndSparksEffect(pcObjEvent->m_vColPt);
+	pECB->SetDeadTimer(EC_TYPE_COL_BURST, 0.0f);
+	pECB->SwitchOnOffEmitters(EC_TYPE_COL_BURST, true);
 }
-
-// Donut
-//void CEffectManager::DonutCallback(IEvent* pEvent, IComponent* /*pComp*/)
-//{
-//	// Get the Values from the Event
-//	GetInstance()->Donut((TStatusEffectEvent*)pEvent->GetData());
-//}
-
-//void CEffectManager::Donut(TStatusEffectEvent* pcObjEvent)
-//{
-//	// Comps
-//	//EffectCompMap::iterator compIter;
-//	//compIter = m_cEmitterComps.begin();
-//	//while(compIter != m_cEmitterComps.end())
-//	//{
-//	//	CEffectComponent* pEC = compIter->second;
-//	//	if(pcObjEvent->m_pObject == pEC->GetParent())
-//	//	{
-//	//		pEC->SwitchOnOffEmitters(EC_TYPE_DONUT_USE, true);
-//	//		pEC->SetLifespan(EC_TYPE_DONUT_USE, DONUT_PUFF_LIFESPAN);
-//	//	}
-//	//	compIter++;
-//	//}
-//}
 
 // Steal
 void CEffectManager::StealCallback(IEvent* pEvent, IComponent* /*pComp*/)
@@ -1905,13 +1806,6 @@ void CEffectManager::StealCallback(IEvent* pEvent, IComponent* /*pComp*/)
 }
 void CEffectManager::Steal(IEvent* pEvent)
 {
-	// If its the player
-	//unsigned int nPlayerID = CObjectManager::GetInstance()->GetObjectByName("Player0")->GetID();
-	//if(pcObjEvent->m_pObject->GetID() == nPlayerID)
-	//{
-	//	m_cBoostEffect.SetOn(true);
-	//}
-
 	// Set the Item Sprite Appropriatlly
 	m_cStealEffect.SetItemSpriteComp((CSpriteComponent*)pEvent->GetSender());
 	m_cStealEffect.SetOn(true);
@@ -1941,13 +1835,11 @@ void CEffectManager::Boost(TStatusEffectEvent* pcObjEvent)
 		CEffectComponent* pEC = compIter->second;
 		if(pcObjEvent->m_pObject == pEC->GetParent())
 		{
+			pEC->SetDeadTimer(EC_TYPE_BOOST, 0.0f);
 			pEC->SwitchOnOffEmitters(EC_TYPE_BOOST, true);
 		}
 		compIter++;
 	}
-
-	// OLD WAY
-	//pBoostEmitter->SwitchOnOffEmitters(EC_TYPE_BOOST, true);
 }
 
 // Stun
@@ -1966,6 +1858,7 @@ void CEffectManager::Stun(TStatusEffectEvent* pcObjEvent)
 		CEffectComponent* pEC = compIter->second;
 		if(pcObjEvent->m_pObject == pEC->GetParent())
 		{
+			pEC->SetDeadTimer(EC_TYPE_TURKEY_STUN, 0.0f);
 			pEC->SwitchOnOffEmitters(EC_TYPE_TURKEY_STUN, true);
 			pEC->SetCooldown(EC_TYPE_TURKEY_STUN, POPUP_COOLDOWN);
 		}
@@ -1973,7 +1866,7 @@ void CEffectManager::Stun(TStatusEffectEvent* pcObjEvent)
 	}
 }
 
-// Turkey
+// Turkey Spawn
 void CEffectManager::TurkeySpawnCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
@@ -1986,6 +1879,20 @@ void CEffectManager::TurkeySpawn(TObjectEvent* pcObjEvent)
 	CreateTurkeyEffectComponent(pObj);	
 }
 
+// Pie Spawn
+void CEffectManager::PieSpawnCallback(IEvent* pEvent, IComponent* /*pComp*/)
+{
+	// Get the Values from the Event
+	GetInstance()->PieSpawn((TObjectEvent*)pEvent->GetData());
+}
+void CEffectManager::PieSpawn(TObjectEvent* pcObjEvent)
+{
+	// Get the Object 
+	CObject* pObj = pcObjEvent->m_pcObj;
+	CreatePieTrailEffectComponent(pObj);	
+}
+
+// Turkey Fire
 void CEffectManager::TurkeyFireCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
@@ -2001,12 +1908,34 @@ void CEffectManager::TurkeyFire(TObjectEvent* pcObjEvent)
 	if(compIter != m_cEmitterComps.end())
 	{
 		CEffectComponent* pEC = compIter->second;
-		pEC->SwitchOnOffEmitters(EC_TYPE_TURKEY_TRAIL, true);
+		pEC->SetEffectTimer(EC_TYPE_TURKEY_TRAIL, 0.1f);
+		//pEC->SwitchOnOffEmitters(EC_TYPE_TURKEY_TRAIL, true);
+	}
+}
+
+// Pie Fire
+void CEffectManager::PieFireCallback(IEvent* pEvent, IComponent* /*pComp*/)
+{
+	// Get the Values from the Event
+	GetInstance()->PieFire((TObjectEvent*)pEvent->GetData());
+}
+void CEffectManager::PieFire(TObjectEvent* pcObjEvent)
+{
+	// Get ID
+	unsigned int uID = pcObjEvent->m_pcObj->GetID();
+
+	// Look for a match
+	EffectCompMap::iterator compIter = m_cEmitterComps.find(uID);
+	if(compIter != m_cEmitterComps.end())
+	{
+		CEffectComponent* pEC = compIter->second;
+		pEC->SetEffectTimer(EC_TYPE_PIE_TRAIL, 0.1f);
+		//pEC->SwitchOnOffEmitters(EC_TYPE_PIE_TRAIL, true);
 	}
 }
 
 // Turkey Despawn
-void CEffectManager::TurkeyDespawnCallback(IEvent* pEvent, IComponent* pComp)
+void CEffectManager::TurkeyDespawnCallback(IEvent* pEvent, IComponent* /*pComp*/)
 {
 	// Get the Values from the Event
 	GetInstance()->TurkeyDespawn((TObjectEvent*)pEvent->GetData());
@@ -2022,6 +1951,26 @@ void CEffectManager::TurkeyDespawn(TObjectEvent* pcObjEvent)
 	{
 		CEffectComponent* pEC = compIter->second;
 		pEC->SwitchOnOffEmitters(EC_TYPE_TURKEY_TRAIL, false);
+	}
+}
+
+// PIe Despawn
+void CEffectManager::PieDespawnCallback(IEvent* pEvent, IComponent* /*pComp*/)
+{
+	// Get the Values from the Event
+	GetInstance()->PieDespawn((TObjectEvent*)pEvent->GetData());
+}
+void CEffectManager::PieDespawn(TObjectEvent* pcObjEvent)
+{
+	// Get ID
+	unsigned int uID = pcObjEvent->m_pcObj->GetID();
+
+	// Look for a match
+	EffectCompMap::iterator compIter = m_cEmitterComps.find(uID);
+	if(compIter != m_cEmitterComps.end())
+	{
+		CEffectComponent* pEC = compIter->second;
+		pEC->SwitchOnOffEmitters(EC_TYPE_PIE_TRAIL, false);
 	}
 }
 
@@ -2042,6 +1991,7 @@ void CEffectManager::Slip(TStatusEffectEvent* pcObjEvent)
 		CEffectComponent* pEC = compIter->second;
 		if(pcObjEvent->m_pObject == pEC->GetParent())
 		{
+			pEC->SetDeadTimer(EC_TYPE_BANANA_SLIP, 0.0f);
 			pEC->SwitchOnOffEmitters(EC_TYPE_BANANA_SLIP, true);
 		}
 		compIter++;
@@ -2064,7 +2014,12 @@ void CEffectManager::Slow(TStatusEffectEvent* pcObjEvent)
 		CEffectComponent* pEC = compIter->second;
 		if(pcObjEvent->m_pObject == pEC->GetParent())
 		{
+			if(pEC->GetCooldown(EC_TYPE_PEANUT_SQUISH) > 0.0f)
+				return;
+
+			pEC->SetDeadTimer(EC_TYPE_PEANUT_SQUISH, 0.0f);
 			pEC->SwitchOnOffEmitters(EC_TYPE_PEANUT_SQUISH, true);
+			pEC->SetCooldown(EC_TYPE_PEANUT_SQUISH, 3.0f);
 		}
 		compIter++;
 	}
@@ -2077,15 +2032,9 @@ void CEffectManager::JamCallback(IEvent* pEvent, IComponent* /*pComp*/)
 	GetInstance()->Jam((TStatusEffectEvent*)pEvent->GetData());
 }
 void CEffectManager::Jam(TStatusEffectEvent* pcObjEvent)
-{
-	//CTextureManager* pTM = CTextureManager::GetInstance();
-	//CSpriteComponent* pJamSprite = pTM->
-	
+{	
 	// Get Player Obj
 	unsigned int nPlayerID = CIDGen::GetInstance()->GetID("Player0");
-	unsigned int nPlayer1 = CIDGen::GetInstance()->GetID("Player1");
-	unsigned int nPlayer2 = CIDGen::GetInstance()->GetID("Player2");
-	unsigned int nPlayer3 = CIDGen::GetInstance()->GetID("Player3");
 	if(pcObjEvent->m_pObject->GetID() != nPlayerID)
 	{
 		// Put jam effect on screen for player
@@ -2093,37 +2042,7 @@ void CEffectManager::Jam(TStatusEffectEvent* pcObjEvent)
 			CObjectManager::GetInstance()->GetObjectByName("Player0")) == false)
 		{
 			m_cJamEffect.SetOn(true);
-			CWwiseSoundManager::GetInstance()->PlayTheSound(STATUS_RADARJAM, BIKER_ID);
 		}
-	}
-
-	// Find the Component Associated with that Obj
-	EffectCompMap::iterator compIter;
-	unsigned iterID;
-	compIter = m_cEmitterComps.begin();
-	while(compIter != m_cEmitterComps.end())
-	{
-		CEffectComponent* pEC = compIter->second;
-		if(pcObjEvent->m_pObject == pEC->GetParent())
-		{
-			// Show jam firing from user
-			pEC->SwitchOnOffEmitters(EC_TYPE_JAM_USE, true);
-		}
-		else if( pEC->GetParent()->GetID() != nPlayerID)
-		{
-			// Show jam flying down towards opponents
-			iterID = pEC->GetParent()->GetID();
-			if( (iterID == nPlayer1) || (iterID == nPlayer2) || (iterID == nPlayer3) )
-			{
-				if(CMovementManager::GetInstance()->PlayerIsInvincible(pEC->GetParent()) == false)
-				{
-					pEC->SwitchOnOffEmitters(EC_TYPE_JAM_HIT_FALL, true);
-					pEC->SetEffectTimer(EC_TYPE_JAM_HIT_POPUP, JAM_HIT_POPUP_TIMER);
-				}
-			}
-		}
-
-		compIter++;
 	}
 }
 
@@ -2151,6 +2070,7 @@ void CEffectManager::Blind(TStatusEffectEvent* pcObjEvent)
 		CEffectComponent* pEC = compIter->second;
 		if(pcObjEvent->m_pObject == pEC->GetParent())
 		{
+			pEC->SetDeadTimer(EC_TYPE_PIE_HIT, 0.0f);
 			pEC->SwitchOnOffEmitters(EC_TYPE_PIE_HIT, true);
 		}
 		compIter++;
@@ -2167,32 +2087,9 @@ void CEffectManager::UpdateCallback(IEvent* pEvent, IComponent* /*pComp*/)
 }
 void CEffectManager::Update(float fDT)
 {
-	/*if(fSkidTimer > 0.0f)
-	{
-		fSkidTimer -= fDT;
-
-		if(fSkidTimer <= 0.0f)
-		{
-			pSkidEmitter->SwitchOnOffEmitters(false);
-			pDustEmitter->SwitchOnOffEmitters(true);
-		}
-	}*/
-
 	// Jam
-	//m_cJamEffect.bActive = true;
-	//m_cJamEffect.SetOn(true);
 	if(m_cJamEffect.IsActive())
 		m_cJamEffect.Update(fDT);
-
-	/*if(m_cJamEffect.fJamCounter > 0.0f)
-	{
-		m_cJamEffect.fJamCounter -= fDT;
-
-		if(m_cJamEffect.fJamCounter <= 0.0f)
-		{
-			m_cJamEffect.pJamScreenSprite->SetActive(false);
-		}
-	}*/
 
 	if(m_cBlindEffect.IsActive())
 		m_cBlindEffect.Update(fDT);
@@ -2202,22 +2099,6 @@ void CEffectManager::Update(float fDT)
 
 	if(m_cBoostEffect.IsActive())
 		m_cBoostEffect.Update(fDT);
-
-	/*if(fBlindCounter > 0.0f)
-	{
-		fBlindCounter -= fDT;
-
-		TSpriteData tData = pBlindSprite->GetSpriteData();
-		tData.m_nY += 4.0f;
-		pBlindSprite->SetSpriteData(tData);
-
-		if(fBlindCounter <= 0.0f)
-		{
-			pBlindSprite->SetActive(false);
-			tData.m_nY = 0;
-			pBlindSprite->SetSpriteData(tData);
-		}
-	}*/
 }
 
 // Shutdown
@@ -2236,30 +2117,28 @@ void CEffectManager::Shutdown(void)
 		emitterIter++;
 	}
 
-	// Clones
-	list<CParticleEmitter*, CAllocator<CParticleEmitter*>>::iterator cloneIter;
-	cloneIter = m_cClonedEffect.begin();
-	while(cloneIter != m_cClonedEffect.end())
-	{
-		MMDEL(*cloneIter);
-		cloneIter++;
-	}
-
 	// Comps
 	EffectCompMap::iterator compIter;
 	compIter = m_cEmitterComps.begin();
 	while(compIter != m_cEmitterComps.end())
 	{
+		//compIter->second->Shutdown();
 		MMDEL(compIter->second);
 		compIter++;
+	}
+
+	// Clones
+	emitterIter = m_cClonedEffect.begin();
+	while(emitterIter != m_cClonedEffect.end())
+	{
+		MMDEL(emitterIter->second);
+		emitterIter++;
 	}
 }
 
 // Reset
 void CEffectManager::DisableCallback(IEvent*, IComponent*)
 {
-	//GetInstance()->Shutdown();
-	//GetInstance()->InitObjects();
 	GetInstance()->m_cJamEffect.SetSpritesActive(false);
 	GetInstance()->m_cBlindEffect.SetSpritesActive(false);
 	GetInstance()->m_cStealEffect.SetSpritesActive(false);
@@ -2267,8 +2146,6 @@ void CEffectManager::DisableCallback(IEvent*, IComponent*)
 }
 void CEffectManager::EnableCallback(IEvent*, IComponent*)
 {
-	//GetInstance()->Shutdown();
-	//GetInstance()->InitObjects();
 	GetInstance()->Enable();
 }
 void CEffectManager::Enable(void)
@@ -2305,14 +2182,22 @@ void CEffectManager::DestroyObjCallback(IEvent* pEvent, IComponent*)
 	EffectCompMap::iterator compIter = pEM->m_cEmitterComps.find(pData->m_pcObj->GetID());
 	if(compIter != pEM->m_cEmitterComps.end())
 	{
-		ObjMap::iterator pIter = pEM->m_cInvObjs.find(compIter->first);
+		/*ObjMap::iterator pIter = pEM->m_cInvObjs.find(compIter->first);
 		if(pIter != pEM->m_cInvObjs.end())
 		{
 			CObjectManager::GetInstance()->DestroyObject(pIter->second);
 			CEventManager::GetInstance()->UnregisterEventAll(compIter->second);
 			pEM->m_cInvObjs.erase(pIter);
-		}
+		}*/
 		pEM->m_cEmitterComps.erase(compIter);
+	}
+
+	// Look for Clone
+	EmitterMap::iterator emitterIter = pEM->m_cClonedEffect.find(pData->m_pcObj->GetID());
+	if(emitterIter != pEM->m_cClonedEffect.end())
+	{
+		MMDEL(emitterIter->second);
+		pEM->m_cClonedEffect.erase(emitterIter);
 	}
 
 }

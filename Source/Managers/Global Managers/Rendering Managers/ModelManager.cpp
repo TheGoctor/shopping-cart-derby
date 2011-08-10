@@ -206,7 +206,10 @@ int ModelManager::LoadModel(char* szFileName)
 		fin.clear();
 	}
 	else
+	{
+		MessageBoxA(NULL, szFileName, "Failed to load static mesh", MB_OK);
 		return -1;
+	}
 
 	currIndex++;
 	return currIndex-1;
@@ -472,7 +475,10 @@ int ModelManager::LoadModelWithBones(char* szFileName)
 		//MMDEL(DXMesh, pMesh);
 	}
 	else
+	{
+		MessageBoxA(NULL, szFileName, "Failed to load animated mesh", MB_OK);
 		return -1;
+	}
 
 
 	currIndex++;
@@ -550,7 +556,10 @@ int ModelManager::LoadAABB(char* szMeshName)
 		delete [] pos_buffer;
 	}
 	else
+	{
+		MessageBoxA(NULL, szMeshName, "Failed to load AABB", MB_OK);
 		return -1;
+	}
 
 	currAABBIndex++;
 	return currAABBIndex - 1;
@@ -806,7 +815,7 @@ int ModelManager::LoadAnimFile(char* szFileName)
 		}
 
 		// Calc Tween Times
-		pAnimData->SetupTweenTimes();
+		//pAnimData->SetupTweenTimes();
 
 		// Add to Map
 		m_cAnimationTemplates.insert(make_pair(pIDGen->GetID(szAnimName),
@@ -820,6 +829,8 @@ int ModelManager::LoadAnimFile(char* szFileName)
 		return 1; // SUCCESS!
 	}
 
+	if(szFileName[20] != 0)
+		MessageBoxA(NULL, szFileName, "Failed to load animation file", MB_OK);
 	return 0; // Error
 }
 
@@ -950,7 +961,7 @@ DXMesh* ModelManager::GetCloneMesh(string szMeshName)
 	}
 
 	// Clone
-	m_cClonedBonedMeshs.push_back(pCloneMesh);
+	//m_cClonedBonedMeshs.push_back(pCloneMesh);
 	//*pCloneMesh = *pOriginalMesh;
 
 	// Return the Clone

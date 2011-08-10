@@ -258,7 +258,7 @@ CParticleEmitter::CParticleEmitter(void) : DXMesh(), m_nMaxParticles(0),
 	m_cAlphaInitial(0), m_cRedInitial(0), m_cGreenInitial(0), m_cBlueInitial(0),
 	m_fAlphaRate(0.0f), m_fRedRate(0.0f), m_fGreenRate(0.0f), m_fBlueRate(0.0f),
 	m_nNumFrames(1), m_nNumRows(1), m_nNumCols(1), m_fAnimSwitchTime(0.0f), m_cParentFrame(NULL),
-	m_bOnTarget(false)
+	m_bOnTarget(false), m_bSetFrame(false), m_nCurrFrame(0)
 {
 	//m_tColorInitial = D3DCOLOR_ARGB(0, 0, 0, 0);
 }
@@ -312,10 +312,15 @@ void CParticleEmitter::UpdateEmitter(float fDT)
 		}
 
 		// Animation
-		if(pPart->m_fAge >= (m_fAnimSwitchTime * (float)(pPart->m_nCurrentFrame + 1)))
+		if(pPart->m_fAge >= (m_fAnimSwitchTime * (float)(pPart->m_nCurrentFrame + 1)) 
+			&& m_bSetFrame == false)
 		{
 			if(pPart->m_nCurrentFrame < m_nNumFrames-1)
 				++pPart->m_nCurrentFrame;
+		}
+		else if(m_bSetFrame == true)
+		{
+			pPart->m_nCurrentFrame = m_nCurrFrame;
 		}
 
 		// Apply Gravity

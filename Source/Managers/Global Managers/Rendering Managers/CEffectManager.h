@@ -25,6 +25,10 @@ using namespace std;
 #include "..\\..\\..\\Components\\Rendering\\CSkidMarks.h"
 #include "..\\..\\..\\Components\\Rendering\\CVictoryVFXComp.h"
 #include "..\\..\\..\\Components\\Rendering\\CWindSpriteEffect.h"
+#include "..\\..\\..\\Components\\Rendering\\CHUDEffectsComp.h"
+#include "Renderer.h"
+#include "..\\Object Manager\\CObjectManager.h"
+
 using namespace EventStructs;
 
 // Foward Declares
@@ -42,6 +46,9 @@ typedef map<unsigned int, CParticleEmitter*, less<unsigned int>,
 typedef map<unsigned int, CEffectComponent*, less<unsigned int>,
 		CAllocator<pair<unsigned int, CEffectComponent*>>> EffectCompMap;
 
+typedef map<CObject*, CEffectComponent*, less<CObject*>,
+		CAllocator<pair<CObject*, CEffectComponent*>>> ObjEffectCompMap;
+
 typedef map<unsigned int, CObject*, less<unsigned int>,
 		CAllocator<pair<unsigned int, CObject*>>> ObjMap;
 
@@ -53,20 +60,11 @@ private:
 	// Map of Emitters (Key = ID of Emitter Name, Data = Emitter)
 	EmitterMap m_cEmitterTemplates;
 
-	// List of Clone Effects (Data = Clone Effects)
-	list<CParticleEmitter*, CAllocator<CParticleEmitter*>> m_cClonedEffect;
+	// Map of Clone Effects (Key = ID of Emitter Obj, Data = Clone Effects)
+	EmitterMap m_cClonedEffect;
 
 	// Map of Emmiter Comps (Key = ID of Object Name, Data = Emitter Comp)
 	EffectCompMap m_cEmitterComps;
-
-	// Map of Inv Objs (Key = ID of Parent's Name, Data = Inv Obj)
-	ObjMap m_cInvObjs;
-
-	// Special
-	CObject* m_pDustLeft;
-	CObject* m_pDustRight;
-	CObject* m_pSciGlowS;
-	CObject* m_pSciGlowG;
 
 	// Singleton Functions
 	CEffectManager();
@@ -81,8 +79,8 @@ private:
 	CEffectComponent* pDustEmitter;
 	CEffectComponent* pBoostEmitter;
 
-	// Invulnerable
-	CEffectComponent* pInvEffect;
+	// Bolts and Sparks
+	ObjEffectCompMap m_cBoltsAndSparks; 
 
 	// Jam
 	CJamSpriteEffect m_cJamEffect;
@@ -97,24 +95,26 @@ private:
 	CWindSpriteEffect m_cBoostEffect;
 
 	// Goal Items
-	unsigned int m_nGoalItemIconRenderContexts[MAX_GOAL_ITEMS];
+	int m_nGoalItemIconFrames[MAX_GOAL_ITEMS];
+
+	CObjectManager* pOM; 
+	Renderer* pRenMan;
 
 	// Helper Funcs
 	void CreateCartCollisionComponent(CObject* pPlayerObj);
 	void CreateBoostComponent(CObject* pPlayerObj);
-	void CreateStunComponent(CObject* pPlayerObj);
-	void CreateSlipComponent(CObject* pPlayerObj);
 	void CreateSlowComponent(CObject* pPlayerObj);
-	void CreateJamUseComponent(CObject* pPlayerObj);
-	void CreateJamHitComponent(CObject* pPlayerObj);
-	void CreatePieHitComponent(CObject* pParentObj);
 	void CreateCautionEffectComponent(CObject* pParentObj);
 	void CreateGoalItemEffectComponent(CObject* pItemObj, EGoalItemType eType);
 	void CreateTurkeyEffectComponent(CObject* pTurkeyObj);
+	void CreatePieTrailEffectComponent(CObject* pPieObj);
 	void SetupPlayerEmitters(void);
 	void SetupJamSprite(void);
 	void SetupBlindSprite(void);
 	void SetupStealSprite(void);
+	
+	CEffectComponent* CreateBoltsAndSparksEffect(D3DXVECTOR3 vColPt);
+
 
 public:
 
@@ -131,16 +131,19 @@ public:
 	void LoadEmitter(char* szFileName);
 
 	// Get Emitter
-	CParticleEmitter* GetCloneEmitter(string szEmitterName);
+	CParticleEmitter* GetCloneEmitter(string szEmitterName, CObject* pParentObj);
 
 	// Factory
 	CEffectComponent* CreateInvulnerableEffectComponent(CObject* pParent);
 	CEffectComponent* CreateFireworkEffectComponent(CObject* pPlayerObj);
 	CEffectComponent* CreateConfettiEffectComponent(CObject* pParentObj);
 	CEffectComponent* CreateDustEffectComponent(CObject* pParentObj);
-	CEffectComponent* CreateScientistEffectComponent(CObject* pParentObj);
 	CEffectComponent* CreateDonutUseComponent(CObject* pPlayerObj);
 	CEffectComponent* CreateSlipDripComp(CObject* pParentObj, bool bLeft);
+	CEffectComponent* CreateSlowMudComp(CObject* pParentObj);
+	CEffectComponent* CreateStunComponent(CObject* pPlayerObj);
+	CEffectComponent* CreatePieHitComponent(CObject* pParentObj);
+	CEffectComponent* CreateSlipComponent(CObject* pPlayerObj);
 
 
 	// Factory
@@ -162,14 +165,6 @@ public:
 	// Goal Item Collected
 	void GoalItemCollected(TGoalItemCollectedEvent* pcObjEvent);
 	static void GoalItemCollectedCallback(IEvent* pEvent, IComponent* pComp);
-
-	// Held Item Spawned
-	void HeldItemSpawned(THeldItemSpawned*);
-	static void HeldItemSpawnedCallback(IEvent* pEvent, IComponent* pComp);
-
-	// Held Item Collected
-	void HeldItemCollected(THeldItemCollected* pcObjEvent);
-	static void HeldItemCollectedCallback(IEvent* pEvent, IComponent* pComp);
 
 	// Pickup Item Spawned
 	void PickupItemSpawned(TPickupItemEvent* pcObjEvent);
@@ -219,6 +214,13 @@ public:
 	void TurkeyDespawn(TObjectEvent* pcObjEvent);
 	static void TurkeyDespawnCallback(IEvent* pEvent, IComponent* pComp);
 
+	// Pie
+	void PieSpawn(TObjectEvent* pcObjEvent);
+	static void PieSpawnCallback(IEvent* pEvent, IComponent* pComp);
+	void PieFire(TObjectEvent* pcObjEvent);
+	static void PieFireCallback(IEvent* pEvent, IComponent* pComp);
+	void PieDespawn(TObjectEvent* pcObjEvent);
+	static void PieDespawnCallback(IEvent* pEvent, IComponent* pComp);
 
 	// Slip
 	void Slip(TStatusEffectEvent* pcObjEvent);
@@ -235,10 +237,6 @@ public:
 	// Slow
 	void Slow(TStatusEffectEvent* pcObjEvent);
 	static void SlowCallback(IEvent* pEvent, IComponent* pComp);
-
-	// Donut
-	//void Donut(TStatusEffectEvent* pcObjEvent);
-	//static void DonutCallback(IEvent* pEvent, IComponent* pComp);
 
 	// Steal
 	void Steal(IEvent* pEvent);

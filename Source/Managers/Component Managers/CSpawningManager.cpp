@@ -9,26 +9,19 @@
  *					cycle through them.
  ******************************************************************************/
 #include <fstream>
-#include <iostream>
 #include "CSpawningManager.h"
 #include "CCollisionManager.h"
 #include "CLevelManager.h"
 #include "..\..\Components\Level\CDepartment.h"
-#include "..\..\Components\rendering\CRenderComponent.h"
-#include "..\..\Components\Collision\CCollideable.h"
 #include "..\Global Managers\Event Manager\EventStructs.h"
 #include "..\Global Managers\Rendering Managers\Renderer.h"
 #include "..\Global Managers\Rendering Managers\ModelManager.h"
 #include "..\Global Managers\Object Manager\CObjectManager.h"
-#include "..\Global Managers\Sound Manager\CWwiseSoundManager.h"
-#include "..\Global Managers\Console Manager\CConsoleManager.h"
-#include "..\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
+#include "..\..\Components\Level\CHeldItemComponent.h"
+#include "..\..\Components\Level\CGoalItemComponent.h"
 using namespace EventStructs;
-using std::cout;
-CWwiseSoundManager*	m_pWise = CWwiseSoundManager::GetInstance();
 
-CSpawningManager::CSpawningManager() : m_fGoalItemWaveTime(15.0f), 
-								m_fHeldItemWaveTime(100000.0f),
+CSpawningManager::CSpawningManager() : m_fGoalItemWaveTime(3.0f),
 								m_nMaxHeldItems(15)
 {
 }
@@ -41,7 +34,6 @@ void CSpawningManager::Init()
 {
 	CEventManager* pEM = CEventManager::GetInstance();
 
-	
 	string szEvent = "Update";
 	szEvent += GAMEPLAY_STATE;
 
@@ -54,22 +46,14 @@ void CSpawningManager::Init()
 		DestroyObject);
 	pEM->RegisterEvent("GoalItemCollision", (IComponent*)GetInstance(), 
 		GoalItemCollision);
-
-
-	szEvent = "EnableObjects";
-	szEvent += GAMEPLAY_STATE;
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), HandleEnableObjects);
-
-	szEvent = "DisableObjects";
-	szEvent += GAMEPLAY_STATE;
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), HandleDisableObjects);
+	pEM->RegisterEvent("OverlayUnshow", (IComponent*)GetInstance(), 
+		HandleStartUpdate);
 	
 	szEvent = "InitObjects";
 	szEvent += GAMEPLAY_STATE;
 	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), HandleInitObjects);
 
 	// Load models
-	//int nModelsGood = -1;
 	// GOAL ITEM MESHES AND RENDER COMPS
 
 	m_szGoalItemNames[GORILLA_MILK] = "FFP_3D_GorillaMilk_FIN";
@@ -121,22 +105,15 @@ void CSpawningManager::Init()
 	m_nGoalItemRenderContexts[AGENT_ORANGE] = RC_AGENT_ORANGE;
 
 	/// HELD ITEM MESH AND RENDER CONTEXTS
-	m_nHeldItemMeshIDs[BANANA] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/Banana_MShape.mesh");
-	m_nHeldItemMeshIDs[SOUP] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/Chicken_NoodleSoup_MShape.mesh");
-	m_nHeldItemMeshIDs[DONUT] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/Donut.mesh");
-	m_nHeldItemMeshIDs[TURKEY] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/FFP_3D_IceTurkeyBox_FIN.mesh");
-	m_nHeldItemMeshIDs[JAM] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/Jam_MShape.mesh");
-	m_nHeldItemMeshIDs[PEANUT_BUTTER] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/Peanut_butter_MShape.mesh");
-	m_nHeldItemMeshIDs[PIE] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/Pie_MShape.mesh");
-	m_nHeldItemMeshIDs[ENERGY_DRINK] = ModelManager::GetInstance()->LoadModel(
-	"Resource/PowerUps/Thors_Thunder_MShape.mesh");
+	ModelManager* pMM = ModelManager::GetInstance();
+	m_nHeldItemMeshIDs[BANANA] 		  = pMM->GetMeshIndexByName("Banana_MShape");
+	m_nHeldItemMeshIDs[SOUP]   		  = pMM->GetMeshIndexByName("Chicken_NoodleSoup_MShape");
+	m_nHeldItemMeshIDs[DONUT]  		  = pMM->GetMeshIndexByName("Donut");
+	m_nHeldItemMeshIDs[TURKEY] 		  = pMM->GetMeshIndexByName("FFP_3D_IceTurkeyBox_FIN");
+	m_nHeldItemMeshIDs[JAM]	   		  = pMM->GetMeshIndexByName("Jam_MShape");
+	m_nHeldItemMeshIDs[PEANUT_BUTTER] = pMM->GetMeshIndexByName("Peanut_butter_MShape");
+	m_nHeldItemMeshIDs[PIE]			  = pMM->GetMeshIndexByName("Pie_MShape");
+	m_nHeldItemMeshIDs[ENERGY_DRINK]  = pMM->GetMeshIndexByName("Thors_Thunder_MShape");
 
 	m_nHeldItemRenderCompIDs[BANANA] = RC_BANANA;
 	m_nHeldItemRenderCompIDs[SOUP] = RC_CHICKENSOUP;
@@ -148,10 +125,11 @@ void CSpawningManager::Init()
 	m_nHeldItemRenderCompIDs[ENERGY_DRINK] = RC_THOR;
 
 	m_fGoalItemSpawnTimer = 4.0f;
-	m_fHeldItemSpawnTimer = m_fHeldItemWaveTime;
 
 	InitGoalItems();
 	InitHeldItems();
+
+	LoadGoalItemLocations();
 
 	// Pick a location (Department) to disable for this game
 	int nLocation = rand() % MAX_DEPARTMENTS;
@@ -174,25 +152,13 @@ void CSpawningManager::Init()
 
 		++pIter;
 	}
-
-	LoadGoalItemLocations();
 }
 
 void CSpawningManager::Shutdown(IEvent*, IComponent*)
 {
-	//map<unsigned int, CHeldItemComponent*, less<unsigned int>,
-	//CAllocator<pair<unsigned int, CHeldItemComponent*>>>::iterator pcDelete;
+	// Clear all memory
 	CSpawningManager* pSM = GetInstance();
-	//pcDelete = pSM->m_cSpawnedHeldItems.begin();
 
-	//while(pSM->m_cSpawnedHeldItems.empty() == false) //pcDelete != GetInstance()->m_cSpawnedHeldItems.end())
-	//{
-	//	if(pSM->m_cSpawnedHeldItems.begin()->second)
-	//	{
-	//		MMDEL(pSM->m_cSpawnedHeldItems.begin()->second);
-	//	}
-	//	//++pcDelete;
-	//	pSM->m_cSpawnedHeldItems.erase(pSM->m_cSpawnedHeldItems.begin());
 	map<EDepartment, CDepartment*, less<unsigned int>, CAllocator
 		<pair<EDepartment, CDepartment*>>>::iterator pDeptIter;
 	pDeptIter = pSM->m_cDepartments.begin();
@@ -213,13 +179,6 @@ void CSpawningManager::Shutdown(IEvent*, IComponent*)
 	}
 	pSM->m_cGoalItems.clear();
 
-	//list<TSpawnLocation, CAllocator<TSpawnLocation>>::iterator pSpawnIter;
-	//pSpawnIter = pSM->m_cHeldItemLocations.begin();
-	//while(pSpawnIter != pSM->m_cHeldItemLocations.end())
-	//{
-	//	MMDEL(*pSpawnIter);
-	//	++pSpawnIter;
-	//}
 	pSM->m_cHeldItemLocations.clear();
 
 	map<unsigned int, CHeldItemComponent*, less<unsigned int>, CAllocator
@@ -231,9 +190,6 @@ void CSpawningManager::Shutdown(IEvent*, IComponent*)
 		++pHeldIter;
 	}
 	pSM->m_cHeldItems.clear();
-
-	//CEventManager::GetInstance()->UnregisterEvent(CIDGen::GetInstance()->
-	//	GetID("Despawned"), (IComponent*)GetInstance());
 }
 
 void CSpawningManager::InitGoalItems()
@@ -251,10 +207,7 @@ void CSpawningManager::InitGoalItems()
 
 void CSpawningManager::InitHeldItems()
 {
-	m_fHeldItemSpawnTimer = m_fHeldItemWaveTime;
 	m_nTotalSpawnedHeldItems = 0;
-
-	LoadHeldItemLocations();
 
 	string szID;
 	char chCounter[32];
@@ -316,25 +269,23 @@ void CSpawningManager::LoadGoalItemLocations()
 	}
 	else
 	{
-		cout << "Can't open GoalItems.nm" << endl;
 		Debug.Print("Can't open GoalItems.nm");
 		return;
 	}
 
 	// Create strings of wanted GoalItems
 	string* pGoalItems = MMNEWARRAYEX(string, objectcount, HEAPID_GENERAL);
-	pGoalItems[GORILLA_MILK]	= "GorillaMilk";
-	pGoalItems[CAPTAIN_FLAKEY]	= "CaptainFlakey";
-	pGoalItems[PIZZA]			= "Pizza";
-	pGoalItems[CAKE]			= "Cake";
-	pGoalItems[CANNED_BEARS]	= "CannedBears";
-	pGoalItems[CARROTS]			= "Carrots";
-	pGoalItems[SAMMY_SANDWICH]	= "SammySandwich";
-	pGoalItems[SQUID]			= "Squid";
-	pGoalItems[AGENT_ORANGE]	= "AgentOrange";
+	pGoalItems[DAIRY]			= "Dairy";
+	pGoalItems[DRY_GOODS]		= "DryGoods";
+	pGoalItems[FREEZER]			= "Freezer";
+	pGoalItems[BAKERY]			= "Bakery";
+	pGoalItems[CANNED_GOODS]	= "CannedGoods";
+	pGoalItems[PRODUCE]			= "Produce";
+	pGoalItems[DELI]			= "Deli";
+	pGoalItems[MEATS]			= "Meats";
+	pGoalItems[SNACKS]			= "Snacks";
 
 	// Search for nodes
-	//ModelManager* pMM = ModelManager::GetInstance();
 	char chBuffer[64];
 	char chTempBuffer[64];
 	int nNameLength;
@@ -351,35 +302,39 @@ void CSpawningManager::LoadGoalItemLocations()
 		// copy the current node's name into our buffer
 		memcpy(chBuffer, levelNodes[nIndex].szName, nNameLength);
 
-		// init the strtok to deliminate based on underscores
-		char* szTokenizer = strtok(chBuffer, "_");
+		// init the strtok to deliminate based on _
+		char* nextToken = NULL;
+		char* szTokenizer = strtok_s(chBuffer, "_", &nextToken);
 
 		// while strtoke doesn't return null (aka it's not at the end of the tokenizing string)
-		while(szTokenizer != NULL)
+		if(szTokenizer != NULL)
 		{	
-			// if a non case sensative compare matches what we're looking for
-			if(_stricmp(szTokenizer, pGoalItems[nIndex].c_str()) == 0)
+			for(unsigned nDepartment = 0; nDepartment < MAX_DEPARTMENTS; ++nDepartment)
 			{
-				map<EDepartment, CDepartment*, less<unsigned int>,
-					CAllocator<pair<EDepartment, CDepartment*>>>::iterator DepartmentIter =
-					m_cDepartments.find(static_cast<EDepartment>(nIndex));
-
-				map<int, TGoalItemSpawnLocation, less<unsigned int>,
-					CAllocator<pair<int, TGoalItemSpawnLocation>>>::iterator GoalSpawnIter = 
-					DepartmentIter->second->m_cGoalItemSpawnLocations.find(nGoalItem);
-
-				if(GoalSpawnIter == DepartmentIter->second->m_cGoalItemSpawnLocations.end())
+				// if a non case sensative compare matches what we're looking for
+				if(_stricmp(szTokenizer, pGoalItems[nDepartment].c_str()) == 0)
 				{
+					map<EDepartment, CDepartment*, less<unsigned int>,
+						CAllocator<pair<EDepartment, CDepartment*>>>::iterator DepartmentIter =
+						m_cDepartments.find(static_cast<EDepartment>(nDepartment));
+
+					if(DepartmentIter == m_cDepartments.end())
+					{
+						Debug.Print("Error in SpawningManager.cpp 'LoadGoalItemLocations'");
+						return;
+					}
+
+					TGoalItemSpawnLocation tSpawnLocation;
+					tSpawnLocation.m_cPos.x = levelNodes[nIndex].tWorldMatrix._41;
+					tSpawnLocation.m_cPos.y = levelNodes[nIndex].tWorldMatrix._42;
+					tSpawnLocation.m_cPos.z = levelNodes[nIndex].tWorldMatrix._43;
+
+					DepartmentIter->second->m_cGoalItemSpawnLocations.insert(make_pair(
+						DepartmentIter->second->m_cGoalItemSpawnLocations.size(), tSpawnLocation));
+
 					break;
 				}
-
-				GoalSpawnIter->second.m_cPos.x = levelNodes[nIndex].tWorldMatrix._41;
-				GoalSpawnIter->second.m_cPos.y = levelNodes[nIndex].tWorldMatrix._42;
-				GoalSpawnIter->second.m_cPos.z = levelNodes[nIndex].tWorldMatrix._43;
 			}
-
-			// assign chTempBuffer to the next token in the string (not a new one because we passed null)
-			szTokenizer = strtok(NULL, "_");
 		}
 	}
 
@@ -389,13 +344,9 @@ void CSpawningManager::LoadGoalItemLocations()
 void CSpawningManager::LoadHeldItemLocations()
 {
 	// Search for endcap nodes
-	//ModelManager* pMM = ModelManager::GetInstance();
-	//int nMeshIndex;
 	char chBuffer[64];
 	char chTempBuffer[64];
-	//char chCounter[32];
 	int nNameLength;
-	//int nNodeNumber = -1;
 	std::string szID;
 	D3DXVECTOR3 cPos;
 	CLevelManager::CNode* tNode = CLevelManager::GetInstance()->GetLevelNodes();
@@ -412,7 +363,8 @@ void CSpawningManager::LoadHeldItemLocations()
 		memcpy(chBuffer, tNode[nIndex].szName, nNameLength);
 
 		// init the strtok to deliminate based on underscores
-		char* szTokenizer = strtok(chBuffer, "_");
+		char* nextToken = NULL;
+		char* szTokenizer = strtok_s(chBuffer, "_", &nextToken);
 
 		// while strtoke doesn't return null (aka it's not at the end of the tokenizing string)
 		while(szTokenizer != NULL)
@@ -420,33 +372,20 @@ void CSpawningManager::LoadHeldItemLocations()
 			// if a non case sensative compare matches what we're looking for
 			if(_stricmp(szTokenizer, "Endcap") == 0)
 			{
-				// Create an object for the node with the data
-				TSpawnLocation tSpawnLocation;
-				tSpawnLocation.m_bUsed = false;
-				tSpawnLocation.m_tPosition.x = tNode[nIndex].tWorldMatrix._41;
-				tSpawnLocation.m_tPosition.y = tNode[nIndex].tWorldMatrix._42;
-				tSpawnLocation.m_tPosition.z = tNode[nIndex].tWorldMatrix._43;
-				tSpawnLocation.m_tRotation = tNode[nIndex].tWorldMatrix;				
-
-				// Yay!!!!!! Add it in and get out of our strtok loop to check the next tNode[]
-				m_cHeldItemLocations.push_back(tSpawnLocation);
 				break;
 			}
 
 			// assign chTempBuffer to the next token in the string (not a new one because we passed null)
-			szTokenizer = strtok(NULL, "_");
+			szTokenizer = strtok_s(NULL, "_", &nextToken);
 		}
 	}
-
-	// DONT DELTE THIS ITS USED MULTIPLE TIMES
-	//MMDELARRAYEX(tNode, HEAPID_GENERAL);
 }
 
 int CSpawningManager::CreateGoalItemComponent(lua_State* pLua)
 {
 	CObject* pObj = (CObject*)lua_topointer(pLua, -2);
 	EGoalItemType eGoalItemType = (EGoalItemType)((int)lua_tonumber(pLua, -1));
-	/*CGoalItems* pLM = */CreateGoalItemComponent(pObj, eGoalItemType);
+	CreateGoalItemComponent(pObj, eGoalItemType);
 
 	lua_pop(pLua, 2);
 
@@ -471,7 +410,7 @@ int CSpawningManager::CreateDepartmentComponent(lua_State* pLua)
 {
 	CObject* pObj = (CObject*)lua_topointer(pLua, -2);
 	EDepartment eDeptType = static_cast<EDepartment>(lua_tointeger(pLua, -1));
-	/*CDepartment* pLM = */CreateDepartmentComponent(pObj, eDeptType);
+	CreateDepartmentComponent(pObj, eDeptType);
 
 	lua_pop(pLua, 2);
 
@@ -495,8 +434,7 @@ CDepartment* CSpawningManager::CreateDepartmentComponent(CObject* pObj,
 int CSpawningManager::CreateHeldItemComponent(lua_State* pLua)
 {
 	CObject* pObj = (CObject*)lua_topointer(pLua, -1);
-	//EHeldItemType eHeldItemType = (EHeldItemType)((int)lua_tonumber(pLua, -1));
-	/*CHeldItemComponent* pLM = */CreateHeldItemComponent(pObj);
+	CreateHeldItemComponent(pObj);
 
 	lua_pop(pLua, 1);
 
@@ -540,7 +478,6 @@ void CSpawningManager::GoalItemCollected(IEvent* iEvent, IComponent*)
 		CAllocator<pair<unsigned int, CGoalItems*>>>::iterator pcGoalIter;
 	pcGoalIter = GetInstance()->m_cGoalItems.begin();
 
-	// TODO: Error checking if you don't want the game to crash
 	while(pcObj->GetID() != pcGoalIter->second->GetParent()->GetID())
 	{
 		++pcGoalIter;
@@ -551,7 +488,7 @@ void CSpawningManager::GoalItemCollected(IEvent* iEvent, IComponent*)
 
 	// Find Department where Goal Item has been collected
 	pcDeptIter = GetInstance()->m_cDepartments.find((EDepartment)pcGoalIter->
-		second->m_eType);
+		second->GetType());
 
 	// Despawn Department
 	pcDeptIter->second->Despawn();
@@ -565,20 +502,18 @@ void CSpawningManager::Update(IEvent* iEvent, IComponent*)
 
 void CSpawningManager::UpdateTimer(const float fDT)
 {
+	if(m_bGameHasntStartedYet)
+	{
+		return;
+	}
+
 	m_fGoalItemSpawnTimer -= fDT;
-	//m_fHeldItemSpawnTimer -= fDT;
 
 	// Spawn more if needed
 	if(m_fGoalItemSpawnTimer <= 0)
 	{
 		SpawnGoalItem();
 		m_fGoalItemSpawnTimer = m_fGoalItemWaveTime;
-	}
-	
-	if(m_fHeldItemSpawnTimer <= 0)
-	{
-		SpawnHeldItem();
-		m_fHeldItemSpawnTimer = m_fHeldItemWaveTime;
 	}
 }
 
@@ -590,7 +525,7 @@ void CSpawningManager::Despawned(IEvent* iEvent, IComponent*)
 	// Find the Department
 	map<EDepartment, CDepartment*, less<unsigned int>,
 		CAllocator<pair<EDepartment, CDepartment*>>>::iterator pcIter = 
-		GetInstance()->m_cDepartments.find((EDepartment)pcGoalItem->m_eType);
+		GetInstance()->m_cDepartments.find((EDepartment)pcGoalItem->GetType());
 
 	// Call Department's Despawn function
 	pcIter->second->Despawn();
@@ -598,47 +533,26 @@ void CSpawningManager::Despawned(IEvent* iEvent, IComponent*)
 
 void CSpawningManager::SpawnGoalItem()
 {
-	// Spawn X amount of Goal Items
-	for(unsigned nSpawnItem = 0; nSpawnItem < 4; ++nSpawnItem)
+	// Get a random Department
+	int nLocation = rand() % MAX_DEPARTMENTS;
+
+	// If that Department already has a spawned Goal Item...
+	int debugCounter = 0;
+	while((m_cDepartments[static_cast<EDepartment>(nLocation)]->IsSpawned()))
 	{
-		// Get a random Department
-		int nLocation = rand() % MAX_DEPARTMENTS;
+		// ... get a new Department
+		nLocation = rand() % MAX_DEPARTMENTS;
 
-		// If that Department already has a spawned Goal Item...
-		int debugCounter = 0;
-		while((m_cDepartments[static_cast<EDepartment>(nLocation)]->IsSpawned()))
+		// If this hits 1001 then there's a problem
+		++debugCounter;
+		if(debugCounter > 1000)
 		{
-			// ... get a new Department
-			nLocation = rand() % MAX_DEPARTMENTS;
-			
-			// If this hits 1001 then there's a problem
-			++debugCounter;
-			if(debugCounter > 1000)
-			{
-				// Error in CSpawningManager
-				// You should probably tell me
-				throw;
-			}
+			return;
 		}
-
-		// Call SpawnGoalItem on the picked Department
-		m_cDepartments[static_cast<EDepartment>(nLocation)]->SpawnGoalItem();
 	}
-	///Sound Hack
-	m_pWise->PlayTheSound(ITEM_SPAWN, GLOBAL_ID);
-}
 
-void CSpawningManager::SpawnHeldItem()
-{
-	//map<unsigned int, CHeldItemComponent*, less<unsigned int>, 
-	//	CAllocator<pair<unsigned int, CHeldItemComponent*>>>::iterator pIter =
-	//	m_cHeldItems.begin();
-
-	//while(pIter != m_cHeldItems.end())
-	//{
-	//	
-	//	++pIter;
-	//}
+	// Call SpawnGoalItem on the picked Department
+	m_cDepartments[static_cast<EDepartment>(nLocation)]->SpawnGoalItem();
 }
 
 EGoalItemType CSpawningManager::GetGoalItemType(CObject* pcObject)
@@ -650,14 +564,16 @@ EGoalItemType CSpawningManager::GetGoalItemType(CObject* pcObject)
 
 	while(ItemIter != m_cGoalItems.end())
 	{
-		if(ItemIter->second->m_pObject->GetID() == pcObject->GetID())
+		if(ItemIter->second->GetParent()->GetID() == pcObject->GetID())
 		{
-			return ItemIter->second->m_eType;
+			// Found associated goal item. Return its type
+			return ItemIter->second->GetType();
 		}
 
 		ItemIter++;
 	}
 
+	// didn't find anything
 	return NO_ITEM;
 }
 
@@ -672,26 +588,21 @@ EHeldItemType CSpawningManager::GetHeldItemType(CObject* pcObject)
 	{
 		if(ItemIter->second->GetParent()->GetID() == pcObject->GetID())
 		{
+			// Found associated held item. Return its type
 			return ItemIter->second->GetType();
 		}
 
 		ItemIter++;
 	}
 
+	// didn't find it
 	return NO_HELD_ITEM;
-}
-
-void CSpawningManager::HandleEnableObjects(IEvent*, IComponent*)
-{
-}
-
-void CSpawningManager::HandleDisableObjects(IEvent*, IComponent*)
-{
 }
 
 void CSpawningManager::HandleInitObjects(IEvent*, IComponent*)
 {
 	GetInstance()->m_fGoalItemSpawnTimer = 6.0f;	
+	GetInstance()->m_bGameHasntStartedYet = true;
 }
 
 void CSpawningManager::GoalItemCollision(IEvent* iEvent, IComponent*)
@@ -707,17 +618,11 @@ void CSpawningManager::GoalItemCollision(IEvent* iEvent, IComponent*)
 	pIter = GetInstance()->m_cGoalItems.find(eType);
 
 	if((pIter == GetInstance()->m_cGoalItems.end()) || 
-		(pIter->second->m_bCollidable == false))
+		(pIter->second->GetIsCollidable() == false))
 	{
 		// Either pIter is bad or the item isn't spawned
 		return;
 	}
-
-	// SOUND HACK
-	/*if (CHUDManager::GetInstance()->GetPlayerNum(pCollector) == 0)
-	{
-		m_pWise->PlayTheSound(ITEM_PICK_UP, BIKER_ID);
-	}*/
 
 	// Tell everyone else
 	SendGoalItemCollectedEvent("GoalItemCollected", (IComponent*)GetInstance(),
@@ -733,4 +638,23 @@ int CSpawningManager::GetGoalItemMeshID(int nItemID)
 	}
 
 	return -1;
+}
+
+bool CSpawningManager::IsSpawned(EGoalItemType eType)
+{
+	map<unsigned int, CGoalItems*, less<unsigned int>, 
+		CAllocator<pair<unsigned int, CGoalItems*>>>::iterator pIter = 
+		m_cGoalItems.find(eType);
+
+	if(pIter == m_cGoalItems.end())
+	{
+		return false;
+	}
+
+	return pIter->second->GetIsSpawned();
+}
+
+void CSpawningManager::HandleStartUpdate(IEvent*, IComponent*)
+{
+	GetInstance()->m_bGameHasntStartedYet = false;
 }

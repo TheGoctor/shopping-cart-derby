@@ -181,6 +181,10 @@ void Renderer::LoadModels(void)
 	pMM->LoadModel("Resource/Level Geo/FFP_3D_WallSet0_FIN.mesh");
 	pMM->LoadModel("Resource/Level Geo/FFP_3D_WallSet1_FIN.mesh");
 	pMM->LoadModel("Resource/Level Geo/FFP_3D_WallSupports_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BreakUpSign0_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_BreakUpSign1_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_Alien_FIN.mesh");
+	pMM->LoadModel("Resource/Level Geo/FFP_3D_LittleEvelyns_FIN.mesh");
 
 	// these meshes will be sharing a texture and render context, so they will be a special case when loading the level
 	/*pMM->LoadModel("Resource/Level Geo/FFP_3D_BasicCutoutA_FIN.mesh");
@@ -214,6 +218,7 @@ void Renderer::LoadModels(void)
 	//pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_LobsterTank_FIN_Collision.mesh");
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_OpenFreezerLeft_FIN_Collision.mesh");
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_OpenFreezerRight_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Pallet_FIN_Collision.mesh");
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Pirate_FIN_Collision.mesh");
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_ProduceLeft_FIN_Collision.mesh");
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_ProduceRight_FIN_Collision.mesh");
@@ -221,11 +226,12 @@ void Renderer::LoadModels(void)
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Shelf_FIN_Collision.mesh");
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Snowman_FIN_Collision.mesh");
 	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Umbra_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_Alien_FIN_Collision.mesh");
+	pMM->LoadAABB("Resource/Collision Volumes/FFP_3D_LittleEvelyns_FIN_Collision.mesh");
 
 	// PowerUps
 	pMM->LoadModel("Resource/PowerUps/Banana_MShape.mesh");
 	pMM->LoadModel("Resource/PowerUps/Chicken_NoodleSoup_MShape.mesh");
-	pMM->LoadModel("Resource/PowerUps/DonutShape.mesh");
 
 	pMM->LoadModelWithBones("Resource/PowerUps/FFP_3D_DONUTS_FINShape.mesh");
 
@@ -236,8 +242,7 @@ void Renderer::LoadModels(void)
 	pMM->LoadModel("Resource/PowerUps/Thors_Thunder_MShape.mesh");
 	pMM->LoadModel("Resource/PowerUps/TurkeyShape.mesh");
 	pMM->LoadModel("Resource/PowerUps/FFP_3D_PeanutPile_FINShape.mesh");
-	pMM->LoadModel("Resource/PowerUps/BubbleShape1.mesh");
-	pMM->LoadModel("Resource/PowerUps/BubbleShape2.mesh");
+	pMM->LoadModel("Resource/PowerUps/Donut.mesh");
 
 	// Shadows
 	pMM->LoadModel("Resource/Character Models/Shadows/FFP_3D_BikerShadow_FIN.mesh");
@@ -250,14 +255,13 @@ void Renderer::LoadModels(void)
 	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Circle_Small_M.mesh");
 	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Circle_Medium_M.mesh");
 	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Circle_Huge_M.mesh");
-	//pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Shelf_M.mesh");
 	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_FSD_Square_L.mesh");
 	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Special.mesh");
 	pMM->LoadModel("Resource/Level Geo/Shadows/Shadow_Cashier_M.mesh");
 
-	int nMoo = pMM->LoadModel("Resource/Collision Volumes/FFP_3D_CheckoutCollision_FIN.mesh");
+	pMM->LoadModel("Resource/Collision Volumes/FFP_3D_CheckoutCollision_FIN.mesh");
 
-	pMM->LoadModel("Resource/PowerUps/FFP_3D_BlueLight_FINShape.mesh"); // 86
+	pMM->LoadModel("Resource/PowerUps/FFP_3D_BlueLamp_FINShape.mesh"); // 86
 }
 
 void Renderer::DestroyObject(IEvent* pcEvent, IComponent*)
