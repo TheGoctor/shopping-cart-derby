@@ -86,6 +86,7 @@ public:
 	void Init();
 	static void Shutdown(IEvent*, IComponent*);
 	static void Update(IEvent*, IComponent*);
+	static void Level1SelectedCallback(IEvent*, IComponent*);
 	static int  ToggleCollisionVision(lua_State* ptr);
 	static int	 ToggleGeometryVision(lua_State* ptr);
 

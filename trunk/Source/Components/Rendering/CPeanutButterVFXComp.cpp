@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	CPeanutButterVFXComp.cpp
-//	Date			:	6/26/11
-//	Mod. Date		:	6/26/11
+//	Date			:	7/27/11
+//	Mod. Date		:	7/27/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Encapsulates the Peanut Butter Effect
@@ -10,6 +10,7 @@
 // Includes
 #include "CPeanutButterVFXComp.h"
 #include "..\\..\\Managers\\Global Managers\\Object Manager\\CObjectManager.h"
+#include "..\\..\\Managers\\Global Managers\\Rendering Managers\\CEffectManager.h"
 
 #include <iostream>
 
@@ -19,6 +20,7 @@ void CPeanutButterVFXComp::Init(void)
 	// Get Singletons
 	CObjectManager* pOM = CObjectManager::GetInstance();
 	CEventManager*  pEM = CEventManager::GetInstance();
+	CEffectManager* pEffMan = CEffectManager::GetInstance();
 
 	// Left
 	string szObjName = "LeftSkidMarkPBEmitter";
@@ -28,6 +30,8 @@ void CPeanutButterVFXComp::Init(void)
 	m_pLeftSkidEmitter->GetTransform()->TranslateFrame(
 		CSkidMarks::FindLeftEmitterPos(m_eCharacterSetType));
 
+	m_pLeftMud = pEffMan->CreateSlowMudComp(m_pLeftSkidEmitter);
+
 	// Right
 	szObjName = "RightSkidMarkPBEmitter";
 	szObjName += (char*)m_pParentObj->GetID();
@@ -36,27 +40,29 @@ void CPeanutButterVFXComp::Init(void)
 	m_pRightSkidEmitter->GetTransform()->TranslateFrame(
 		CSkidMarks::FindRightEmitterPos(m_eCharacterSetType));
 
+	m_pRightMud = pEffMan->CreateSlowMudComp(m_pRightSkidEmitter);
+
 	// Pair
 	m_pSkidMeshPair = MMNEW(CSkidMeshPair);
-	m_pSkidMeshPair->SetWidth(CSkidMarks::FindWidth(m_eCharacterSetType));
+	m_pSkidMeshPair->SetWidth(FindWidth(m_eCharacterSetType));
 	m_pSkidMeshPair->SetFrames(m_pLeftSkidEmitter->GetTransform(), m_pRightSkidEmitter->GetTransform());
 	m_pSkidMeshPair->CreateMeshs(RC_PB_MARKS);
 
 	// Register for Events
 
-	// Update
-	string szEventName = "Update";
-	szEventName += GAMEPLAY_STATE;
-	pEM->RegisterEvent(szEventName, this, UpdateCallback);
+		// Update
+		string szEventName = "Update";
+		szEventName += GAMEPLAY_STATE;
+		pEM->RegisterEvent(szEventName, this, UpdateCallback);
 
-	// Slow
-	pEM->RegisterEvent("SlowEffect", this, SlowCallback);
+		// Slow
+		pEM->RegisterEvent("SlowEffect", this, SlowCallback);
 
-	// Inv
-	pEM->RegisterEvent("Invulnerable", this, InvulnerableCallback);
+		// Inv
+		pEM->RegisterEvent("Invulnerable", this, InvulnerableCallback);
 
-	// Destroy Obj
-	pEM->RegisterEvent("DestroyObject", this, DestroyObjectCallback);
+		// Destroy Obj
+		pEM->RegisterEvent("DestroyObject", this, DestroyObjectCallback);
 }
 
 // Shutdown
@@ -119,6 +125,9 @@ void CPeanutButterVFXComp::Update(float fDT)
 		{
 			m_pSkidMeshPair->SetFading(true);
 			m_fDuration = 0.0f;
+
+			m_pLeftMud->SwitchOnOffEmitters(EC_TYPE_CART_MUD, false);
+			m_pRightMud->SwitchOnOffEmitters(EC_TYPE_CART_MUD, false);
 		}
 		else // Still Slowed
 		{
@@ -142,13 +151,15 @@ void CPeanutButterVFXComp::SlowCallback(IEvent* pEvent, IComponent* pComp)
 	CPeanutButterVFXComp* pPBVFXC = (CPeanutButterVFXComp*)pComp;
 	pPBVFXC->Slow((TStatusEffectEvent*)pEvent->GetData());
 }
-void CPeanutButterVFXComp::Slow(TStatusEffectEvent* pcObjEvent)
+void CPeanutButterVFXComp::Slow(TStatusEffectEvent* ptSEEvent)
 {
 	// Check if we are Slowing
-	if(CSkidMarks::CheckForPlayerMatch(m_pParentObj, pcObjEvent->m_pObject))
+	if(CSkidMarks::CheckForPlayerMatch(m_pParentObj, ptSEEvent->m_pObject))
 	{
-		m_fDuration = pcObjEvent->m_fDuration;
+		m_fDuration = ptSEEvent->m_fDuration;
 		m_pSkidMeshPair->ResetMeshes();
+		m_pLeftMud->SwitchOnOffEmitters(EC_TYPE_CART_MUD, true);
+		m_pRightMud->SwitchOnOffEmitters(EC_TYPE_CART_MUD, true);
 	}
 }
 
@@ -159,14 +170,17 @@ void CPeanutButterVFXComp::InvulnerableCallback(IEvent* pEvent, IComponent* pCom
 	CPeanutButterVFXComp* pPBVFXC = (CPeanutButterVFXComp*)pComp;
 	pPBVFXC->Invulnerable((TStatusEffectEvent*)pEvent->GetData());
 }
-void CPeanutButterVFXComp::Invulnerable(TStatusEffectEvent* pcObjEvent)
+void CPeanutButterVFXComp::Invulnerable(TStatusEffectEvent* ptSEEvent)
 {
 	// Check if we are Slowing
-	if(CSkidMarks::CheckForPlayerMatch(m_pParentObj, pcObjEvent->m_pObject) && 
+	if(CSkidMarks::CheckForPlayerMatch(m_pParentObj, ptSEEvent->m_pObject) && 
 		m_pSkidMeshPair->IsActive())
 	{
+		m_pSkidMeshPair->GrowSkids();
 		m_pSkidMeshPair->SetFading(true);
 		m_fDuration = 0.0f;
+		m_pLeftMud->SwitchOnOffEmitters(EC_TYPE_CART_MUD, false);
+		m_pRightMud->SwitchOnOffEmitters(EC_TYPE_CART_MUD, false);
 	}
 }
 
@@ -180,9 +194,37 @@ void CPeanutButterVFXComp::DestroyObjectCallback(IEvent* pEvent, IComponent* pCo
 	// If our Parent is being Destroyed
 	if(pPBVFXC->GetParent()->GetID() == pData->m_pcObj->GetID())
 	{
-		//cout << "Destroying PB VFX " << (char*)pPBVFXC->GetParent()->GetID() << '\n';
-
 		// Shutdown Component
 		pPBVFXC->Shutdown();
 	}
+}
+
+// Find Width
+float CPeanutButterVFXComp::FindWidth(ECharacterSet eType)
+{
+	float fWidth;
+
+	switch(eType)
+	{
+	case CS_BIKERS:
+		fWidth = 0.1f;
+		break;
+	case CS_SCIENTISTS:
+		fWidth = 0.2f;
+		break;
+	case CS_BANDITOS:
+		fWidth = 0.05f;
+		break;
+	case CS_LARPERS:
+		fWidth = 0.05f;
+		break;
+	case CS_SASHA:
+		fWidth = 0.075f;
+		break;
+	default:
+		fWidth = 0.1f;
+		break;
+	}
+
+	return fWidth;
 }

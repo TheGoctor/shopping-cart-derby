@@ -7,28 +7,32 @@
 #include "..\..\..\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
 #include "..\..\..\Managers\Component Managers\CHeldItemManager.h"
 #include "..\..\..\Managers\Component Managers\CCollisionManager.h"
+#include "..\..\..\Managers\Global Managers\Rendering Managers\CEffectManager.h"
 
 
  CPie* CPie::CreatePieComponent(CObject* pObj, D3DXVECTOR3 vDir)
  {
 	CPie* pComp = MMNEW(CPie(pObj));
 	pComp->m_vDirection = vDir;
+	pComp->CREAM_PIE_ID = -1;
 	D3DXVec3Normalize(&pComp->m_vDirection, &pComp->m_vDirection);
 	pComp->FirstInit();
 	pObj->AddComponent(pComp);
+	
 	return pComp;
  }
  void CPie::FirstInit(void)
  {
 	m_fDuration = 10.0f;
 	m_fTimeLeft = m_fDuration;
-	m_fSpeed = 20.0f;
-	CREAM_PIE_ID = 0;
+	m_fSpeed = 28.0f;
+	CREAM_PIE_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 	std::string szEvent = "Update";
 	szEvent += GAMEPLAY_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
 	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldCollision", this, EnvironmentCollision);
 	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldPlayerCollision", this, PlayerCollision);
+	CEventManager::GetInstance()->RegisterEvent("PieDestroyedByItem", this, ItemCollision);
 
 	
 	szEvent = "Update";
@@ -44,6 +48,20 @@
 	szEvent = "Update";
 	szEvent += PAUSE_KEYBINDS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEvent = "Update";
+	szEvent += QUIT_CONFIRMATION_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
+
+	SendObjectEvent("PieCreated", this, m_pParent, PRIORITY_IMMEDIATE);
+
  }
  //call backs
   void CPie::Update(IEvent* cEvent, IComponent* cCenter)
@@ -57,7 +75,7 @@
 		return;
 	}
 	D3DXVECTOR3 posit = pComp->m_pParent->GetTransform()->GetWorldPosition();
-	posit.y = 0.2f;
+	posit.y = 0.5f;
 	pComp->SetPosition(posit);
 	pComp->m_fTimeLeft-=fDt;
 
@@ -68,6 +86,8 @@
 	}
 	
 	pComp->m_pParent->GetTransform()->TranslateFrame(pComp->m_vDirection*fDt*pComp->m_fSpeed);
+
+	pComp->m_pParent->GetTransform()->RotateFrame(D3DXVECTOR3(0.0f, 1.0f, 0.0f), fDt*7.0f);
 	
 	CWwiseSoundManager::GetInstance()->SetObjectPosition(pComp->CREAM_PIE_ID, 
 		pComp->m_pParent->GetTransform()->GetWorldPosition(), 0.30f);
@@ -86,7 +106,6 @@
 	if(pComp->m_pParent == tEvent->m_pCollidedWith && pComp->m_bIsSpawned)
 	{
 		SendStatusEffectEvent("Blind", pComp, tEvent->m_pcCollider, BLIND_TIME);
-		CWwiseSoundManager::GetInstance()->PlayTheSound(STATUS_BLIND, pComp->CREAM_PIE_ID);
 		pComp->Despawn();
 	}
  }
@@ -110,11 +129,11 @@
 		ColNormal = tEvent->m_vNormal;
 		D3DXVec3Normalize(&ColNormal, &ColNormal);
 
-		if(D3DXVec3Length(&ColNormal) == 0.0f)
-		{
-			//crap crap crap, bad normal!
-			return;//aye, there be no bounce happening here i guess
-		}
+//		if(D3DXVec3Length(&ColNormal) == 0.0f)
+//		{
+//			//crap crap crap, bad normal!
+//			return;//aye, there be no bounce happening here i guess
+//		}
 		//now that that's out of the way, lets do fancy stuff
 //		ReflectDir = MoveDir - (D3DXVec3Dot(&MoveDir, &ColNormal) * ColNormal * 2.0f);
 //		ReflectDir.y = 0.0f;
@@ -144,7 +163,12 @@
 	 m_fTimeLeft = m_fDuration;
 	 m_bIsSpawned = true;
 	CREAM_PIE_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
+	CWwiseSoundManager::GetInstance()->SetObjectPosition(CREAM_PIE_ID, 
+		m_pParent->GetTransform()->GetWorldPosition(), 0.3f);
 	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_CREAMPIE_USE, CREAM_PIE_ID);
+
+	SendObjectEvent("PieEffect", this, m_pParent, PRIORITY_IMMEDIATE);
+
 }
  void CPie::Despawn()
  {
@@ -153,6 +177,9 @@
 	m_pParent->GetTransform()->GetLocalMatrix()._42 = 300.0f;
 	m_pParent->GetTransform()->GetLocalMatrix()._43 = 300.0f;
 	CWwiseSoundManager::GetInstance()->UnregisterObject(CREAM_PIE_ID);
+
+	SendObjectEvent("PieDespawned", this, m_pParent);
+
  }
 
 
@@ -170,4 +197,23 @@
 	}
 }
 
+ void CPie::ItemCollision(IEvent* cEvent, IComponent* cCenter)
+{
+	CPie* pComp = (CPie*)cCenter;
+	TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
+	if(pComp->m_pParent == tEvent->m_pcCollider && pComp->GetIsSpawned())
+	{	
+		//effect stuff
+		D3DXVECTOR3 p1, p2, trans;
+		p2 = pComp->GetParent()->GetTransform()->GetWorldPosition();
+		p1 = CCollisionManager::GetInstance()->GetPieDestroyObject()->GetTransform()->GetWorldPosition();
+		trans = p2 - p1;//vector to the turkeys position
+		CCollisionManager::GetInstance()->GetPieDestroyObject()->GetTransform()->TranslateFrame(trans);
+		CEffectComponent* pEC = CEffectManager::GetInstance()->CreatePieHitComponent(CCollisionManager::GetInstance()->GetPieDestroyObject());
+		pEC->SetDeadTimer(EC_TYPE_PIE_HIT, 0.0f);
+		pEC->SwitchOnOffEmitters(EC_TYPE_PIE_HIT, true);
+
+		pComp->Despawn();
+	}
+}
 

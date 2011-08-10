@@ -12,11 +12,12 @@
 #define _CANIMATION_H_
 
 // Includes
-#include <vector>
 #include <map>
-using namespace std;
-#include "..\\Memory Manager\\CRenderAllocator.h"
-#include "..\\..\\..\\CFrame.h"
+using std::map;
+
+#include "..\Memory Manager\CRenderAllocator.h"
+#include "..\..\..\CFrame.h"
+#include "..\Memory Manager\CDynArray.h"
 
 // Foward Declares
 class DXMesh;
@@ -33,7 +34,6 @@ typedef map<unsigned int, CFrame, less<unsigned int>,
 struct TKeyFrame
 {
 	float	m_fKeyTime;		// Time of Frame
-	float	m_fTweenTime;	// The Time between this Frame and the Next Frame
 	CFrame  m_cFrame;		// The Position of the Bone in the Frame
 
 	// Constructor
@@ -43,14 +43,16 @@ struct TKeyFrame
 // Bone
 struct TBone
 {
-	string				 m_szBoneName;		// The Name of the Bone
-	unsigned int		 m_nBoneIdx;		// The Index of the Bone
-	unsigned int		 m_nParentBoneIdx;	// The Parent's Index
-	int					 m_nNumKeyFrames;	// The Number of Frames that apply to the Bone
-	vector<TKeyFrame>	 m_cKeyFrames;		// The List of Key Frames that apply to the Bone
-	int					 m_nNumChildren;	// The Number of Children
-	vector<unsigned int> m_cChildrenIdxs;	// The Indices of the Children
+	string					m_szBoneName;		// The Name of the Bone
+	unsigned int			m_nBoneIdx;		// The Index of the Bone
+	unsigned int			m_nParentBoneIdx;	// The Parent's Index
+	unsigned int			m_nNumKeyFrames;	// The Number of Frames that apply to the Bone
+	CDynArray<TKeyFrame>	m_cKeyFrames;		// The List of Key Frames that apply to the Bone
+	unsigned int			m_nNumChildren;	// The Number of Children
+	CDynArray<unsigned int> m_cChildrenIdxs;	// The Indices of the Children
 
+	// Constructor
+	TBone() : m_nBoneIdx(0), m_nParentBoneIdx(0), m_nNumKeyFrames(0), m_nNumChildren(0) { }
 	// Destructor
 	~TBone(void);
 };
@@ -58,8 +60,11 @@ struct TBone
 // Bone Influence
 struct TBoneInfluence
 {
-	int	  m_nBoneIndex;		// The Index of the Bone
-	float m_fWeight;		// The Amount of Influence applied from the Bone
+	unsigned int	m_nBoneIndex;		// The Index of the Bone
+	float			m_fWeight;		// The Amount of Influence applied from the Bone
+
+	// Constructor
+	TBoneInfluence() : m_nBoneIndex(0), m_fWeight(0.0f) { }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,10 +79,11 @@ private:
 	// Let Interpolator Access Private Data
 	friend class Interpolator;
 
-	float		  m_fDuration;	// The Time it takes to go through the Animation
-	int			  m_nNumBones;	// The Number of Bones that this Animation has
-	vector<TBone> m_cBones;		// List of Bones
+	float				m_fDuration;	// The Time it takes to go through the Animation
+	unsigned int		m_nNumBones;	// The Number of Bones that this Animation has
+	CDynArray<TBone>	m_cBones;		// List of Bones
 
+	bool m_bLooping;
 public:
 
 	// Constructor
@@ -88,23 +94,23 @@ public:
 
 	// Add Bone
 	void AddBone(TBone tBone);
-
-	// Setup Tween Times
-	void SetupTweenTimes(void);
 	
 	// Accessors
-	vector<TBone>& GetBones(void)		{ return m_cBones;		}
-	int			   GetNumBones(void)	{ return m_nNumBones;	}
+	CDynArray<TBone>& GetBones(void)	{ return m_cBones;		}
+	unsigned int   GetNumBones(void)	{ return m_nNumBones;	}
 	float		   GetDuration(void)	{ return m_fDuration;	}
+	bool		   GetLooping()			{ return m_bLooping;    }
 
 	// Mutators
 	void SetDuration(float fDuration) { m_fDuration = fDuration; }
-	void SetNumBones(int nNumBones)   { m_nNumBones = nNumBones; }
+	void SetNumBones(unsigned int nNumBones)   { m_nNumBones = nNumBones; }
+	void SetLooping(bool bLoop) { m_bLooping = bLoop; }
 };
 
 // Interpolator
 class Interpolator
 {
+	friend class CAnimationBlender;
 	CAnimation *m_pAnimation;	// The Current Animation
 	DXMesh* m_pMesh;			// The Mesh to Apply Skinning To (Must be a Copy)
 	FrameMap m_cBoneFrames;		// List of Bone Frames

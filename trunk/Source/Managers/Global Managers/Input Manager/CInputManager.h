@@ -219,32 +219,6 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 	void ClearInput();
 
-////////////////////////////////////////////////////////////////////////////////
-// Function:	“GetAction”
-//
-// Return:		int	-	the enumerated value of the action at the front of the 
-//						input queue
-//
-// Parameters:	void
-//
-// Purpose:		This function is used to return the enumerated value of the 
-//				action at the front of the input queue and pop it from the queue
-////////////////////////////////////////////////////////////////////////////////
-	//int GetAction();
-
-////////////////////////////////////////////////////////////////////////////////
-// Function:	“PeekAction”
-//
-// Return:		int	-	the enumerated value of the action at the front of the 
-//						input queue
-//
-// Parameters:	void
-//
-// Purpose:		This function is used to return the enumerated value of the 
-//				action at the front	of the input queue.
-////////////////////////////////////////////////////////////////////////////////
-	//int PeekAction();
-
 	BYTE SetKeyboardCommand(int nCommandID, BYTE uchKey = 0);
 	int SetControllerCommand(int nCommandID, int nButton = 0);
 	string GetStringController(int nButton);

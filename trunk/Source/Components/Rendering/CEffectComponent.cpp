@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	CEffectComponent.cpp
-//	Date			:	5/19/11
-//	Mod. Date		:	5/19/11
+//	Date			:	7/26/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Lets an Object have a Effect
@@ -22,7 +22,8 @@
 // Constructors
 ////////////////////////////////////////////////////////////////////////////////
 TEffect::TEffect(void) : m_eType(EC_TYPE_MIN), m_bOn(true), m_fCooldown(0.0f),
-						 m_fLifespan(0.0f), m_fTimer(0.0f)
+						 m_fLifespan(0.0f), m_fTimer(0.0f), m_fDeadTimer(0.0f),
+						 m_nEmitterCount(0)
 {
 }
 CEffectComponent::CEffectComponent(CObject* pParent) : m_pcParent(pParent)
@@ -30,22 +31,18 @@ CEffectComponent::CEffectComponent(CObject* pParent) : m_pcParent(pParent)
 	// Register for Events
 	CEventManager* pEM = CEventManager::GetInstance();
 
-	// Update
-	string szEventName = "Update";
-	szEventName += GAMEPLAY_STATE;
-	pEM->RegisterEvent(szEventName, this, UpdateCallback);
+		// Update Gameplay
+		string szEventName = "Update";
+		szEventName += GAMEPLAY_STATE;
+		pEM->RegisterEvent(szEventName, this, UpdateCallback);
 
-	szEventName = "Update";
-	szEventName += WIN_STATE;
-	pEM->RegisterEvent(szEventName, this, WinStateCallback);
+		// Update Win State
+		szEventName = "Update";
+		szEventName += WIN_STATE;
+		pEM->RegisterEvent(szEventName, this, WinStateCallback);
 
-	// Exit Gameplay
-	/*szEventName = "ShutdownObjects";
-	szEventName += GAMEPLAY_STATE;
-	pEM->RegisterEvent(szEventName, this, ShutdownCallback);*/
-
-	// Destroy Obj
-	pEM->RegisterEvent("DestroyObject", this, DestroyObjectCallback);
+		// Destroy Obj
+		pEM->RegisterEvent("DestroyObject", this, DestroyObjectCallback);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,24 +57,84 @@ CEffectComponent::~CEffectComponent(void)
 	m_cEffectMap.clear();
 }
 
-// Destroy Onj
+// Add Emitter
+void CEffectComponent::AddEmitter(EEmitterCompType eType, CParticleEmitter* pEmitter,
+								  CRenderComponent* pRenderComp, CFrame* pParentFrame,
+								  EParticleEmitterType eEmitterType)
+{
+	// Parent Frame and Type
+	pEmitter->SetParentFrame(pParentFrame);
+	pEmitter->SetType(eEmitterType);
+
+	// Look for existing Effect
+	EffectMap::iterator effectIter = m_cEffectMap.find(eType);
+	if(effectIter != m_cEffectMap.end())
+	{
+		(*effectIter).second.m_cEmitterRenderComps.insert(make_pair(pEmitter, pRenderComp));
+	}
+	else
+	{
+		m_cEffectMap[eType].m_cEmitterRenderComps.insert(make_pair(pEmitter, pRenderComp));
+	}
+	m_cEffectMap[eType].m_nEmitterCount++;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Event Callbacks
+////////////////////////////////////////////////////////////////////////////////
+
+// Update Component
+void CEffectComponent::UpdateCallback(IEvent* pEvent, IComponent* pComp)
+{
+	// Get Listener and Data from Events
+	CEffectComponent* pEC = (CEffectComponent*)pComp;
+	TUpdateStateEvent* pUpdateEvent = (TUpdateStateEvent*)pEvent->GetData();
+	float fDT =	pUpdateEvent->m_fDeltaTime;
+
+	// Call Handler
+	pEC->Update(fDT);
+}
+
+// Win State Update Component
+void CEffectComponent::WinStateCallback(IEvent* /*pEvent*/, IComponent* pComp)
+{
+	CEffectComponent* pEC = (CEffectComponent*)pComp;
+	pEC->WinState();
+}
+
+// Destroy Obj
 void CEffectComponent::DestroyObjectCallback(IEvent* pEvent, IComponent* pComp)
 {
-	// Get Component from Event
+	// Get Listener and Data from Event
 	CEffectComponent* pEC = (CEffectComponent*)pComp;
 	TObjectEvent* pData = (TObjectEvent*)pEvent->GetData();
 	
+	// If its our Parent who is being Deleted
 	if(pEC->GetParent()->GetID() == pData->m_pcObj->GetID())
 	{
-		//pSMC->m_bActive = false;
-		//pIVFXComp->m_pEffect->SwitchOnOffEmitters(EC_TYPE_CHICKEN_INV, false);
+		// Shutdown Component Handler
 		pEC->Shutdown();
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Handlers
+// Event Handlers
 ////////////////////////////////////////////////////////////////////////////////
+
+// Update Component
+void CEffectComponent::Update(float fDT)
+{
+	EffectMap::iterator effectIter = m_cEffectMap.begin();
+	while(effectIter != m_cEffectMap.end())
+	{
+		TEffect* pEffect = &(*effectIter).second;
+		pEffect->Update(fDT);
+
+		effectIter++;
+	}
+}
+
+// Update Effect
 void TEffect::Update(float fDT)
 {
 	// Check for Timer
@@ -91,6 +148,12 @@ void TEffect::Update(float fDT)
 		}
 	}
 	
+	// Cooldown
+	if(m_fCooldown > 0.0f)
+	{
+		m_fCooldown -= fDT;
+	}
+
 	// Check if its off
 	if(m_bOn == false)
 	{
@@ -111,7 +174,8 @@ void TEffect::Update(float fDT)
 
 	// Update and Render all the Emitters
 	EmitterRenderCompMap::iterator emitterIter;
-	emitterIter = m_cEmitterRenderComps.begin();
+	emitterIter = m_cEmitterRenderComps.begin(); 
+	int nDeadCount = 0;
 	while(emitterIter != m_cEmitterRenderComps.end())
 	{
 		// Get a Pointer to the Emitter
@@ -123,12 +187,17 @@ void TEffect::Update(float fDT)
 		{
 			pPE->UpdateEmitter(fDT);
 
-			/*if(bFlash && m_eType == PE_TYPE_BOOST)
-			{*/
+			if(m_fDeadTimer > 0.0f)
+			{
+				m_fDeadTimer -= fDT;
+			}
+			else
+			{
 				pRC->AddToRenderSet();
-			//}
-			//bFlash = !bFlash;
+			}
 		}
+		else
+			nDeadCount++;
 
 		// Cutoff?
 		if(bCutoff)
@@ -140,64 +209,154 @@ void TEffect::Update(float fDT)
 		emitterIter++;
 	}
 
-	// Cooldown
-	if(m_fCooldown > 0.0f)
-	{
-		m_fCooldown -= fDT;
-	}
+	// Kill if all Dead
+	if(nDeadCount == m_nEmitterCount && nDeadCount != 0)
+		SwitchOnOffEmitters(false);
 }
-void CEffectComponent::Update(float fDT)
+
+// Win State Update
+void CEffectComponent::WinState(void)
 {
+	// Tell all emitter to turn off except victory ones
 	EffectMap::iterator effectIter = m_cEffectMap.begin();
 	while(effectIter != m_cEffectMap.end())
 	{
+		EEmitterCompType eType = (*effectIter).first;
 		TEffect* pEffect = &(*effectIter).second;
-		pEffect->Update(fDT);
+
+		if(eType != EC_TYPE_CONFETTI && eType != EC_TYPE_FIREWORK_TRAIL && eType != EC_TYPE_FIREWORK_BURST)
+		{
+			pEffect->SwitchOnOffEmitters(false);
+		}
 
 		effectIter++;
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Callbacks
-////////////////////////////////////////////////////////////////////////////////
-void CEffectComponent::UpdateCallback(IEvent* pEvent, IComponent* pComp)
+// Shutdown Component
+void CEffectComponent::Shutdown(void)
 {
-	// Get Component
-	CEffectComponent* pEC = (CEffectComponent*)pComp;
+	// Shutdown Each Effect
+	EffectMap::iterator effectIter;
+	while(!m_cEffectMap.empty())
+	{
+		effectIter = m_cEffectMap.begin();
+		TEffect* pEffect = &(effectIter->second);
+		pEffect->Shutdown();
 
-	// Get Data from Event
-	TUpdateStateEvent* pUpdateEvent = (TUpdateStateEvent*)pEvent->GetData();
-	float fDT =	pUpdateEvent->m_fDeltaTime;
+		m_cEffectMap.erase(effectIter);
+	}
 
-	// Call Handler
-	pEC->Update(fDT);
+	// Unregister for all Events
+	CEventManager::GetInstance()->UnregisterEventAll(this);
 }
 
-// Add Emitter
-void CEffectComponent::AddEmitter(EEmitterCompType eType, CParticleEmitter* pEmitter,
-								  CRenderComponent* pRenderComp, CFrame* pParentFrame,
-								  EParticleEmitterType eEmitterType)
+// Shutdown Effect
+void TEffect::Shutdown(void)
 {
-	//pEmitter->SetOn(true);
-	pEmitter->SetParentFrame(pParentFrame);
-	pEmitter->SetType(eEmitterType);
+	// Get Singletons
+	CObjectManager* pOM = CObjectManager::GetInstance();
 
-	// Look for existing Effect
-	EffectMap::iterator effectIter = m_cEffectMap.find(eType);
-	if(effectIter != m_cEffectMap.end())
+	// Tell all emitter to shutdown
+	while(!m_cEmitterRenderComps.empty())
 	{
-		(*effectIter).second.m_cEmitterRenderComps.insert(make_pair(pEmitter, pRenderComp));
-		//m_cEffectMap[eType].m_cEmitterRenderComps.insert(make_pair(pEmitter, pRenderComp));
+		// Get a Pointer to the Emitter
+		CRenderComponent* pRC = (*m_cEmitterRenderComps.begin()).second;
+
+		// If we have a valid Parent
+		if(pRC->GetParent() && pRC->GetParent()->GetID())
+		{
+			// Destroy Emitter Objs
+			pOM->DestroyObject(pRC->GetParent());
+		}
+
+		// Erase from Map
+		m_cEmitterRenderComps.erase(m_cEmitterRenderComps.begin());
 	}
-	else
-	{
-		m_cEffectMap[eType].m_cEmitterRenderComps.insert(make_pair(pEmitter, pRenderComp));
-	}
-	//m_cEmitterRenderComps.insert(make_pair(pEmitter, pRenderComp));
 }
 
-// Switch Emiiter On/Off
+///////////////////////////////////////////////////////////////////////////////
+// Component Mutators
+///////////////////////////////////////////////////////////////////////////////
+
+// Cooldown (Passed in Effect)
+void CEffectComponent::SetCooldown(EEmitterCompType eType, float fCooldown)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+		m_cEffectMap[eType].m_fCooldown = fCooldown;
+}
+
+// Lifespan (Passed in Effect)
+void CEffectComponent::SetLifespan(EEmitterCompType eType, float fLifespan)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+	{
+		m_cEffectMap[eType].SetContinuous(true);
+		m_cEffectMap[eType].m_fLifespan = fLifespan;
+	}
+}
+
+// Coninuous (Passed in Effect)
+void CEffectComponent::SetContinuous(EEmitterCompType eType, bool bContinuous)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+		m_cEffectMap[eType].SetContinuous(bContinuous);
+}
+
+// Parent Frame (Passed in Effect)
+void CEffectComponent::SetParentFrame(EEmitterCompType eType, CFrame* pFrame)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+		m_cEffectMap[eType].SetParentFrame(pFrame);
+}
+
+// On/Off (Passed in Effect)
+void CEffectComponent::SwitchOnOffEmitters(EEmitterCompType eType, bool bOn)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+		m_cEffectMap[eType].SwitchOnOffEmitters(bOn);
+}
+
+// On Target (Passed in Effect)
+void CEffectComponent::SetOnTarget(EEmitterCompType eType, bool bOnTarget)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+		m_cEffectMap[eType].SetOnTarget(bOnTarget);
+}
+
+// Effect Timer (Passed in Effect)
+void CEffectComponent::SetEffectTimer(EEmitterCompType eType, float fTimer)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+		m_cEffectMap[eType].SetETimer(fTimer);
+}
+
+// Dead Timer (Passed in Effect)
+void CEffectComponent::SetDeadTimer(EEmitterCompType eType, float fTimer)
+{
+	if(m_cEffectMap.find(eType) != m_cEffectMap.end())
+		m_cEffectMap[eType].SetDeadTimer(fTimer);
+}
+
+// Context (Passed in Effect, Passed in Emitter)
+void CEffectComponent::ChangeContext(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, unsigned int uRenderContextIdx)
+{
+	if(m_cEffectMap.find(eCompType) != m_cEffectMap.end())
+		m_cEffectMap[eCompType].ChangeContext(eEmitterType, uRenderContextIdx);
+}
+
+// Animation Frame (Passed in Effect, Passed in Emitter)
+void CEffectComponent::SetFrame(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, int nFrame)
+{
+	if(m_cEffectMap.find(eCompType) != m_cEffectMap.end())
+		m_cEffectMap[eCompType].SetFrame(eEmitterType, nFrame);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Effect Mutators
+///////////////////////////////////////////////////////////////////////////////
+
+// On/Off (All Emitters)
 void TEffect::SwitchOnOffEmitters(bool bOn)
 {
 	// Check for Cooldown
@@ -221,12 +380,8 @@ void TEffect::SwitchOnOffEmitters(bool bOn)
 		emitterIter++;
 	}
 }
-void CEffectComponent::SwitchOnOffEmitters(EEmitterCompType eType, bool bOn)
-{
-	m_cEffectMap[eType].SwitchOnOffEmitters(bOn);
-}
 
-// Set On Target
+// On Target (All Emitters)
 void TEffect::SetOnTarget(bool bOnTarget)
 {
 	// Attach all Emitters to their Parent Frame
@@ -242,22 +397,8 @@ void TEffect::SetOnTarget(bool bOnTarget)
 		emitterIter++;
 	}
 }
-void CEffectComponent::SetOnTarget(EEmitterCompType eType, bool bOnTarget)
-{
-	m_cEffectMap[eType].SetOnTarget(bOnTarget);
-}
 
-// Timer
-void TEffect::SetETimer(float fTimer)
-{
-	m_fTimer = fTimer;
-}
-void CEffectComponent::SetEffectTimer(EEmitterCompType eType, float fTimer)
-{
-	m_cEffectMap[eType].SetETimer(fTimer);
-}
-
-// Set Continuous
+// Continuous (All Emitters)
 void TEffect::SetContinuous(bool bContinuous)
 {
 	// Tell all emitter to change continuosity
@@ -273,12 +414,8 @@ void TEffect::SetContinuous(bool bContinuous)
 		emitterIter++;
 	}
 }
-void CEffectComponent::SetContinuous(EEmitterCompType eType, bool bContinuous)
-{
-	m_cEffectMap[eType].SetContinuous(bContinuous);
-}
 
-// Set Parent Frame
+// Parent Frame (All Emitters)
 void TEffect::SetParentFrame(CFrame* pFrame)
 {
 	// Tell all emitter to change parent frame
@@ -294,12 +431,8 @@ void TEffect::SetParentFrame(CFrame* pFrame)
 		emitterIter++;
 	}
 }
-void CEffectComponent::SetParentFrame(EEmitterCompType eType, CFrame* pFrame)
-{
-	m_cEffectMap[eType].SetParentFrame(pFrame);
-}
 
-// Change Context
+// Context (Passed in Emitter)
 void TEffect::ChangeContext(EParticleEmitterType eEmitterType, unsigned int uRenderContextIdx)
 {
 	// Get Context
@@ -323,92 +456,23 @@ void TEffect::ChangeContext(EParticleEmitterType eEmitterType, unsigned int uRen
 		emitterIter++;
 	}
 }
-void CEffectComponent::ChangeContext(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, unsigned int uRenderContextIdx)
-{
-	m_cEffectMap[eCompType].ChangeContext(eEmitterType, uRenderContextIdx);
-}
 
-// On/Off
-void CEffectComponent::ActivateCallback(IEvent* /*pEvent*/, IComponent* /*pComp*/)
+// Animation Frame (Passed in Emitter)
+void TEffect::SetFrame(EParticleEmitterType eEmitterType, int nFrame)
 {
-	// Get the Effect Comp
-	//CEffectComponent* pEC = (CEffectComponent*)pComp;
-	//pEC->m_bOn = true;
-}
-void CEffectComponent::DeactivateCallback(IEvent* /*pEvent*/, IComponent* /*pComp*/)
-{
-	// Get the Effect Comp
-	//CEffectComponent* pEC = (CEffectComponent*)pComp;
-	//pEC->m_bOn = false;
-}
-
-void CEffectComponent::ShutdownCallback(IEvent* pEvent, IComponent* pComp)
-{
-	CEffectComponent* pEC = (CEffectComponent*)pComp;
-	pEC->Shutdown();
-}
-void CEffectComponent::Shutdown(void)
-{
-	EffectMap::iterator effectIter = m_cEffectMap.begin();
-	while(effectIter != m_cEffectMap.end())
-	{
-		TEffect* pEffect = &(*effectIter).second;
-		pEffect->Shutdown();//SwitchOnOffEmitters(false);
-
-		effectIter++;
-	}
-
-	
-}
-
-// Effect
-void TEffect::Shutdown(void)
-{
-	CObjectManager* pOM = CObjectManager::GetInstance();
-
-	// Tell all emitter to shutdown
-	//EmitterRenderCompMap::iterator emitterIter;
-	//emitterIter = m_cEmitterRenderComps.begin();
-	while(!m_cEmitterRenderComps.empty())
+	// Tell all emitter to change frames
+	EmitterRenderCompMap::iterator emitterIter;
+	emitterIter = m_cEmitterRenderComps.begin();
+	while(emitterIter != m_cEmitterRenderComps.end())
 	{
 		// Get a Pointer to the Emitter
-		//CParticleEmitter* pPE = (*emitterIter).first;
-		CRenderComponent* pRC = (*m_cEmitterRenderComps.begin()).second;
+		CParticleEmitter* pPE = (*emitterIter).first;
 
-		if(pRC->GetParent() && pRC->GetParent()->GetID())
+		if(pPE->GetType() == eEmitterType)
 		{
-			pOM->DestroyObject(pRC->GetParent());
-			CEventManager::GetInstance()->UnregisterEventAll(pRC);
-			//pRC->GetParent()->RemoveComponent(pRC);
+			pPE->SetFrame(nFrame);
 		}
 
-		m_cEmitterRenderComps.erase(m_cEmitterRenderComps.begin());
-
-		//emitterIter++;
-	}
-}
-
-// Win State
-void CEffectComponent::WinStateCallback(IEvent* pEvent, IComponent* pComp)
-{
-	CEffectComponent* pEC = (CEffectComponent*)pComp;
-	pEC->WinState();
-}
-void CEffectComponent::WinState(void)
-{
-	// Tell all emitter to turn off except victory ones
-	EffectMap::iterator effectIter = m_cEffectMap.begin();
-	while(effectIter != m_cEffectMap.end())
-	{
-		EEmitterCompType eType = (*effectIter).first;
-		TEffect* pEffect = &(*effectIter).second;
-
-		if(eType != EC_TYPE_CONFETTI && eType != EC_TYPE_FIREWORK_TRAIL && eType != EC_TYPE_FIREWORK_BURST
-			&& eType != EC_TYPE_HELD_ITEM && eType != EC_TYPE_SCIENTIST_GLOW)
-		{
-			pEffect->SwitchOnOffEmitters(false);
-		}
-
-		effectIter++;
+		emitterIter++;
 	}
 }

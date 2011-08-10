@@ -241,9 +241,11 @@ int EventStructs::CreateImpactEvent(lua_State*)
 }
 void EventStructs::SendImpactEvent(string szEventName, IComponent* pSender,
 								   CObject* pCollider, CObject* pCollidedwith, 
-								   D3DXVECTOR3 vNormal, EEventPriority ePriority)
+								   D3DXVECTOR3 vNormal, 
+								   EEventPriority ePriority, 
+								   D3DXVECTOR3 vColPt)
 {
-	TImpactEvent* ptImpactData = MMNEWEVENT( TImpactEvent(pCollider, pCollidedwith, vNormal) );
+	TImpactEvent* ptImpactData = MMNEWEVENT( TImpactEvent(pCollider, pCollidedwith, vNormal, vColPt) );
 	SendIEvent(szEventName, pSender, ptImpactData, ePriority);
 }
 //void EventStructs::SendImpactEvent(string szEventName, IComponent* pSender, 

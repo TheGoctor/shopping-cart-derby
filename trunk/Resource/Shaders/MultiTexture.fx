@@ -192,8 +192,8 @@ float4 ChangePS(float2 uv0:TEXCOORD0):COLOR
 	if(nTexNum == 5)
 		texCol = tex2D(samp5, uv0);
     
-    if(texCol.a <= 0.3)
-		discard;
+    //if(texCol.a <= 0.3)
+		//discard;
     
     return texCol;
 }
@@ -340,19 +340,40 @@ technique BlueLight
         pixelShader  = compile ps_2_0 ChangePS();
         
         //AlphaTestEnable = true;
-        //AlphaRef = 1.0f;
+        //AlphaRef = 0.3f;
         //AlphaFunc = Greater;
         
-        SrcBlend = 3;
-		DestBlend = 6;
+        AlphaBlendEnable = true;
+		SrcBlend = 5;		// 3, 1, 4,  5, 5, 5,  8, 9, 9, 9,  12, 12
+		DestBlend = 6;		// 5, 3, 14, 3, 6, 13, 3, 1, 5, 12, 1,  4
+        
+        ZWriteEnable = false;
+        ZEnable = true;
       
 		ShadeMode = Flat;
         FillMode = Solid;
         CullMode = NONE;
-        
-        ZWriteEnable = true;
-        ZEnable = true;
     }
+    //pass P1
+    //{
+        //vertexShader = compile vs_2_0 TransformVS();
+        //pixelShader  = compile ps_2_0 ChangePS();
+        //
+        //AlphaTestEnable = true;
+        //AlphaRef = 0.3f;
+        //AlphaFunc = Greater;
+        //
+        //AlphaBlendEnable = true;
+		//SrcBlend = 3;
+		//DestBlend = 6;
+		//
+        ////ZWriteEnable = false;
+        ////ZEnable = true;
+      //
+		//ShadeMode = Flat;
+        //FillMode = Solid;
+        //CullMode = CW;
+    //}
 }
 
 technique Outline

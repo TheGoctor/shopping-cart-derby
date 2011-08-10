@@ -60,30 +60,6 @@ CInventoryManager* CInventoryManager::GetInstance(void)
 	return &cInventoryManager;
 }
 
-// Callbacks
-void CInventoryManager::GoalItemCollectedCallback(IEvent* /*e*/, IComponent*)
-{
-	// Get the Values from the Event
-	/*TGoalItemEvent* pcObjEvent = static_cast<TGoalItemEvent*>(e->GetData());
-	EGoalItemType eType = CSpawningManager::GetInstance()->GetGoalItemType(pcObjEvent->m_pcGoalItem);
-	CObject* pCollector = pcObjEvent->m_pcCollector;
-
-
-	// Components
-	list<CInventoryComponent*, CAllocator<CInventoryComponent*>>
-		::iterator cIter = GetInstance()->m_cInvComps.begin();
-
-	while(cIter != GetInstance()->m_cInvComps.end())
-	{
-		CInventoryComponent* pIC = *cIter;
-		if(pCollector == pIC->GetParent())
-		{
-			pIC->GoalItemCollected(eType);
-		}
-
-		cIter++;
-	}/**/
-}
 
 
 CInventoryComponent* CInventoryManager::GetInventoryComponent(CObject* pObj)

@@ -9,6 +9,8 @@ using namespace EventStructs;
 #include "..\Rendering Managers\Texture Managers\CTextureManager.h"
 #include "..\Object Manager\CObjectManager.h"
 
+#include "..\Sound Manager\CWwiseSoundManager.h"
+
 #include "..\..\..\CObject.h"
 
 #include <iostream>
@@ -99,8 +101,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[0].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[0].x = x;
-	m_vMainMenuLocation[0].y = y;
+	m_vMainMenuLocation[0].x = float(x);
+	m_vMainMenuLocation[0].y = float(y);
 
 //
 	y = 400;
@@ -113,8 +115,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[1].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[1].x = x;
-	m_vMainMenuLocation[1].y = y;
+	m_vMainMenuLocation[1].x = float(x);
+	m_vMainMenuLocation[1].y = float(y);
 
 //
 	y = 460;
@@ -127,8 +129,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[2].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[2].x = x;
-	m_vMainMenuLocation[2].y = y;
+	m_vMainMenuLocation[2].x = float(x);
+	m_vMainMenuLocation[2].y = float(y);
 
 
 
@@ -143,8 +145,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[3].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[3].x = x;
-	m_vMainMenuLocation[3].y = y;
+	m_vMainMenuLocation[3].x = float(x);
+	m_vMainMenuLocation[3].y = float(y);
 
 
 //
@@ -158,8 +160,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[4].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[4].x = x;
-	m_vMainMenuLocation[4].y = y;
+	m_vMainMenuLocation[4].x = float(x);
+	m_vMainMenuLocation[4].y = float(y);
 
 //
 	x = 845;
@@ -172,8 +174,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[5].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[5].x = x;
-	m_vMainMenuLocation[5].y = y;
+	m_vMainMenuLocation[5].x = float(x);
+	m_vMainMenuLocation[5].y = float(y);
 
 //
 	y = 360;
@@ -185,8 +187,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[6].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[6].x = x;
-	m_vMainMenuLocation[6].y = y;
+	m_vMainMenuLocation[6].x = float(x);
+	m_vMainMenuLocation[6].y = float(y);
 
 //
 	y = 400;
@@ -198,8 +200,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[7].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[7].x = x;
-	m_vMainMenuLocation[7].y = y;
+	m_vMainMenuLocation[7].x = float(x);
+	m_vMainMenuLocation[7].y = float(y);
 
 //
 	y = 450;
@@ -211,8 +213,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[8].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 
-	m_vMainMenuLocation[8].x = x;
-	m_vMainMenuLocation[8].y = y;
+	m_vMainMenuLocation[8].x = float(x);
+	m_vMainMenuLocation[8].y = float(y);
 
 
 	x -= 15;
@@ -225,8 +227,8 @@ void CKeybindsManager::Init()
 	m_tKeyInfo[9].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
 	
-	m_vMainMenuLocation[9].x = x;
-	m_vMainMenuLocation[9].y = y;
+	m_vMainMenuLocation[9].x = float(x);
+	m_vMainMenuLocation[9].y = float(y);
 
 
 	m_vPauseMenuLocation[0].x = 410;
@@ -487,8 +489,8 @@ void CKeybindsManager::HandleStateInit(IEvent* pEvent, IComponent*)
 	for(int i=0; i<NUM_REBINDABLE_KEYS; i++)
 	{
 		// set the position based on which menu we just entered. We're in main menu version because this is the callback for that
-		GetInstance()->m_tKeyInfo[i].pFont->SetX(GetInstance()->m_vMainMenuLocation[i].x);
-		GetInstance()->m_tKeyInfo[i].pFont->SetY(GetInstance()->m_vMainMenuLocation[i].y);
+		GetInstance()->m_tKeyInfo[i].pFont->SetX(int(GetInstance()->m_vMainMenuLocation[i].x));
+		GetInstance()->m_tKeyInfo[i].pFont->SetY(int(GetInstance()->m_vMainMenuLocation[i].y));
 
 		GetInstance()->m_tKeyInfo[i].pFont->SetActive(true);
 		// if we're controller input
@@ -524,8 +526,8 @@ void CKeybindsManager::HandleStateInitPause(IEvent* pEvent, IComponent*)
 	for(int i=0; i<NUM_REBINDABLE_KEYS; i++)
 	{
 		// set the position based on which menu we just entered. We're in pause version because this is the callback for that
-		GetInstance()->m_tKeyInfo[i].pFont->SetX(GetInstance()->m_vPauseMenuLocation[i].x);
-		GetInstance()->m_tKeyInfo[i].pFont->SetY(GetInstance()->m_vPauseMenuLocation[i].y);
+		GetInstance()->m_tKeyInfo[i].pFont->SetX(int(GetInstance()->m_vPauseMenuLocation[i].x));
+		GetInstance()->m_tKeyInfo[i].pFont->SetY(int(GetInstance()->m_vPauseMenuLocation[i].y));
 
 
 		GetInstance()->m_tKeyInfo[i].pFont->SetActive(true);
@@ -595,6 +597,18 @@ int CKeybindsManager::SetKeyCallback(lua_State* pLua)
 	// if we're not currently catching input and if it's a valid index
 	if(!pMgr->m_bCatchingInput && nIndexToChange >= 0 && nIndexToChange < NUM_REBINDABLE_KEYS)
 	{
+		// if there's a controller connected and they're trying to bind 0 -3 (accel or decel, turn)
+		if( (nIndexToChange == 0 || nIndexToChange == 1 || nIndexToChange == 2 || nIndexToChange == 3) && 
+			CInputManager::GetInstance()->IsControllerConnected())
+		{
+			// say BAD USER!
+			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_INVALID_SELECTION, GLOBAL_ID);
+			// then dont let them
+			lua_pop(pLua, 1);
+			return 0;
+		}/**/
+
+
 		// set this spot's color to a color showing we have it selected
 		pMgr->m_tKeyInfo[nIndexToChange].pFont->SetColor(D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 

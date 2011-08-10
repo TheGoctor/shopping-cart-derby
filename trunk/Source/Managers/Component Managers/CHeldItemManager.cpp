@@ -9,6 +9,7 @@
 #include"..\\Global Managers\\Rendering Managers\\DXRenderContextManager.h"
 #include"..\\Global Managers\\Rendering Managers\\DXRenderContext.h"
 #include"..\\Global Managers\\Console Manager\\CConsoleManager.h"
+#include"..\\Component Managers\\CCollisionManager.h"
 
 #include "..\Global Managers\Object Manager\CObjectManager.h"
 #include "..\Global Managers\Event Manager\EventStructs.h"
@@ -60,35 +61,82 @@ void CHeldItemManager::UseTurkeyCallback(IEvent* cEvent, IComponent* cCenter)
 	TStatusEffectEvent* tEvent = (TStatusEffectEvent*)cEvent->GetData();
 	CHeldItemManager* me = (CHeldItemManager*)cCenter;
 
-
-	CTurkeyComponent* comp = me->GetATurkey();
-
-	// reinit its values
-	comp->ReInit();
 	// set its pos to the user's pos
 	D3DXVECTOR3 vMove(tEvent->m_pObject->GetTransform()->GetWorldMatrix()._31,
 		tEvent->m_pObject->GetTransform()->GetWorldMatrix()._32,
 		tEvent->m_pObject->GetTransform()->GetWorldMatrix()._33);
 	D3DXVec3Normalize(&vMove, &vMove);
 
-	D3DXVECTOR3 vPosToSpawnAt = tEvent->m_pObject->GetTransform()->GetWorldPosition() + vMove * 3.0f;
+	D3DXVECTOR3 vPosToSpawnAt = tEvent->m_pObject->GetTransform()->GetWorldPosition() + vMove * 2.0f;
+
+	CTurkeyComponent* comp = me->GetATurkey(vPosToSpawnAt);
+
+	// reinit its values
+	comp->ReInit();
+	
 	comp->SetPosition(vPosToSpawnAt);
 	// set its direction to obj's heading
 	comp->SetDirection(vMove);	
+
+	CCollisionManager* pCM = CCollisionManager::GetInstance();
+	TSphere objsphere, parentsphere;
+	objsphere.fRadius = parentsphere.fRadius = pCM->GetNonStaticByID(comp->GetParent()->GetID())->GetSphere().fRadius;
+	objsphere.cPosition = pCM->GetNonStaticByID(comp->GetParent()->GetID())->GetSphere().cPosition;
+	
+	parentsphere.cPosition = objsphere.cPosition - vMove*1.5f;
+	D3DXVECTOR3 vectoitem = parentsphere.cPosition - objsphere.cPosition;
+	pCM->GetNonStaticByID(comp->GetParent()->GetID())->SetSphere(parentsphere);
+	if(pCM->TestIndividualCollisionsSphere(pCM->GetNonStaticByID(comp->GetParent()->GetID())))
+	{
+		pCM->GetNonStaticByID(comp->GetParent()->GetID())->SetSphere(objsphere);		
+		SendStatusEffectEvent("Stun", comp, tEvent->m_pObject, comp->GetStunDuration());
+		SendRamEvent("PlayerRammed", comp, comp->GetParent(), tEvent->m_pObject, PRIORITY_IMMEDIATE);
+//		SendStatusEffectEvent("Blind", comp, tEvent->m_pObject, BLIND_TIME);		
+		comp->Despawn();
+	}
+	else
+	{
+		pCM->GetNonStaticByID(comp->GetParent()->GetID())->SetSphere(objsphere);
+	}
 }
 void CHeldItemManager::UsePieCallback(IEvent* cEvent, IComponent* cCenter)
 {
 	TStatusEffectEvent* tEvent = (TStatusEffectEvent*)cEvent->GetData();
 	CHeldItemManager* pMe = (CHeldItemManager*)cCenter;
-	CPie* pComp = pMe->GetAPie();
-	pComp->ReInit();
+	
 	D3DXVECTOR3 vMove(tEvent->m_pObject->GetTransform()->GetWorldMatrix()._31,
 		tEvent->m_pObject->GetTransform()->GetWorldMatrix()._32,
 		tEvent->m_pObject->GetTransform()->GetWorldMatrix()._33);
 	D3DXVec3Normalize(&vMove, &vMove);
-	D3DXVECTOR3 vSpawnPos = tEvent->m_pObject->GetTransform()->GetWorldPosition() + vMove*3.0f;
+	D3DXVECTOR3 vSpawnPos = tEvent->m_pObject->GetTransform()->GetWorldPosition() + vMove * 2.0f;
+
+	
+	CPie* pComp = pMe->GetAPie(vSpawnPos);
+
+	pComp->ReInit();
+	//	tEvent->m_pObject->
 	pComp->SetPosition(vSpawnPos);
 	pComp->SetDirection(vMove);
+
+	CCollisionManager* pCM = CCollisionManager::GetInstance();
+	TSphere objsphere, parentsphere;
+	objsphere.fRadius = parentsphere.fRadius = pCM->GetNonStaticByID(pComp->GetParent()->GetID())->GetSphere().fRadius;
+	objsphere.cPosition = pCM->GetNonStaticByID(pComp->GetParent()->GetID())->GetSphere().cPosition;
+	
+	parentsphere.cPosition = objsphere.cPosition - vMove*1.6f;
+	D3DXVECTOR3 vectoitem = parentsphere.cPosition - objsphere.cPosition;
+	pCM->GetNonStaticByID(pComp->GetParent()->GetID())->SetSphere(parentsphere);
+	if(pCM->TestIndividualCollisionsSphere(pCM->GetNonStaticByID(pComp->GetParent()->GetID())))
+	{
+		pCM->GetNonStaticByID(pComp->GetParent()->GetID())->SetSphere(objsphere);
+		SendStatusEffectEvent("Blind", pComp, tEvent->m_pObject, BLIND_TIME);		
+		pComp->Despawn();
+	}
+	else
+	{
+		pCM->GetNonStaticByID(pComp->GetParent()->GetID())->SetSphere(objsphere);
+	}
+
 
 }
 void CHeldItemManager::UseBananaCallback(IEvent* cEvent, IComponent* cCenter)
@@ -104,6 +152,7 @@ void CHeldItemManager::UseBananaCallback(IEvent* cEvent, IComponent* cCenter)
 	D3DXVec3Normalize(&vMove, &vMove);
 	D3DXVECTOR3 vSpawnPos = tEvent->m_pObject->GetTransform()->GetWorldPosition() - vMove*1.7f;
 	pComp->SetPosition(vSpawnPos);
+	
 }
 
 void CHeldItemManager::UsePeanutButterCallback(IEvent* cEvent, IComponent* cCenter)
@@ -185,7 +234,7 @@ void CHeldItemManager::UseRayJamCallback(IEvent* cEvent, IComponent* cCenter)
 ///////////////////////////////////////////////////////////////////////////////
 
 
-CTurkeyComponent* CHeldItemManager::GetATurkey()
+CTurkeyComponent* CHeldItemManager::GetATurkey(D3DXVECTOR3 vPos)
 {
 	list<CTurkeyComponent*, CAllocator<CTurkeyComponent*>>::iterator iter;
 	iter = m_lTurkeyComps.begin();
@@ -212,7 +261,7 @@ CTurkeyComponent* CHeldItemManager::GetATurkey()
 	// got here because we didn't find an unused item in the list
 
 	// create a new turkey
-	D3DXVECTOR3 vObjPos(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 vObjPos(vPos.x, vPos.y, vPos.z);
 	string szObjName = "TurkeyComponent";
 	szObjName += (char)(nTurkeysCreated + '0');
 	nTurkeysCreated++;
@@ -231,7 +280,7 @@ CTurkeyComponent* CHeldItemManager::GetATurkey()
 	// Add a collision component
 	TSphere tsphere;
 	tsphere.cPosition = vObjPos;
-	tsphere.fRadius = .5f;				// TODO: Is this the radius we want?
+	tsphere.fRadius = 0.5f;				// TODO: Is this the radius we want?
 	CCollideable* pCol = CCollisionManager::GetInstance()->CreateCollideableComponent(pObj,false, true, OBJTURKEY);
 //		pObj, false, true, OBJTURKEY, false);
 	pCol->SetBVType(BSPHERE);
@@ -240,7 +289,7 @@ CTurkeyComponent* CHeldItemManager::GetATurkey()
 	// store the collidable component
 	pComponent->SetCollidableComponent(pCol);
 
-	pObj->GetTransform()->ScaleFrame(2.0f, 2.0f, 2.0f);
+	pObj->GetTransform()->ScaleFrame(2.8f,2.8f,2.8f);
 
 	
 	// add to the list
@@ -289,8 +338,8 @@ CBanana* CHeldItemManager::GetABanana()
 
 	// add Render component
 	/*CRenderComponent* pRenderComp = */Renderer::CreateRenderComp(pObj,
-		CSpawningManager::GetInstance()->m_nHeldItemMeshIDs[BANANA],
-		CSpawningManager::GetInstance()->m_nHeldItemRenderCompIDs[BANANA],
+		CSpawningManager::GetInstance()->GetHeldItemMeshID(BANANA),
+		CSpawningManager::GetInstance()->GetHeldItemRenderCompID(BANANA),
 		2); // 2 for textured\
 
 	// Add a collision component
@@ -302,7 +351,7 @@ CBanana* CHeldItemManager::GetABanana()
 	pCol->SetBVType(BSPHERE);
 	pCol->SetSphere(tsphere);
 
-	pObj->GetTransform()->ScaleFrame(4.0f, 4.0f, 4.0f);
+	pObj->GetTransform()->ScaleFrame(2.0f, 2.0f, 2.0f);
 	
 	// add to the list
 	m_lBananaComps.push_back(pComponent);
@@ -349,14 +398,14 @@ CChickenSoupComponent* CHeldItemManager::GetAChickenSoup()
 	CChickenSoupComponent* pComponent = CChickenSoupComponent::CreateChickenSoupComponent(pObj);
 	
 
-	int meshindex = 
-		ModelManager::GetInstance()->GetMeshIndexByName("BubbleShape1", false, false);
+	//int meshindex = 
+	//	ModelManager::GetInstance()->GetMeshIndexByName("BubbleShape1", false, false);
 
-	// add Render component
-	/*CRenderComponent* pRenderComp = */Renderer::CreateRenderComp(pObj,
-		meshindex,
-		RC_CS_BUB2,
-		RF_INDEXED_VERT_TEX2); // 2 for textured\
+	//// add Render component
+	///*CRenderComponent* pRenderComp = */Renderer::CreateRenderComp(pObj,
+	//	meshindex,
+	//	RC_CS_BUB2,
+	//	RF_INDEXED_VERT_TEX2); // 2 for textured\
 
 	// HACK MAKE A GIANT PIE FOR THIS MESH
 	//pObj->GetTransform()->ScaleFrame(4.0f, 4.0f, 4.0f);
@@ -412,7 +461,7 @@ CEnergyDrink* CHeldItemManager::GetAnEnergyDrink()
 	return pComponent;
 }
 
-CPie* CHeldItemManager::GetAPie()
+CPie* CHeldItemManager::GetAPie(D3DXVECTOR3 vPos)
 {
 	list<CPie*, CAllocator<CPie*>>::iterator iter;
 	iter = m_lPieComps.begin();
@@ -439,7 +488,7 @@ CPie* CHeldItemManager::GetAPie()
 	// got here because we didn't find an unused item in the list
 
 	// create a new soup
-	D3DXVECTOR3 vObjPos(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 vObjPos(vPos.x, vPos.y, vPos.z);
 	string szObjName = "PieComponent";
 	szObjName += (char)(nPiesCreated + '0');
 	nPiesCreated++;
@@ -452,7 +501,7 @@ CPie* CHeldItemManager::GetAPie()
 	// Add a collision component
 	TSphere tsphere;
 	tsphere.cPosition = vObjPos;
-	tsphere.fRadius = .5f;				// TODO: Is this the radius we want?
+	tsphere.fRadius = 0.5f;				// TODO: Is this the radius we want?
 	CCollideable* pCol = CCollisionManager::GetInstance()->CreateCollideableComponent(
 		pObj, false, true, OBJPIE);
 	pCol->SetBVType(BSPHERE);
@@ -460,8 +509,8 @@ CPie* CHeldItemManager::GetAPie()
 
 	// add Render component
 	/*CRenderComponent* pRenderComp =*/ Renderer::CreateRenderComp(pObj,
-		CSpawningManager::GetInstance()->m_nHeldItemMeshIDs[PIE],
-		CSpawningManager::GetInstance()->m_nHeldItemRenderCompIDs[PIE],
+		CSpawningManager::GetInstance()->GetHeldItemMeshID(PIE),
+		CSpawningManager::GetInstance()->GetHeldItemRenderCompID(PIE),
 		2); // 2 for textured
 	
 	pObj->GetTransform()->ScaleFrame(2.0f, 2.0f, 2.0f);

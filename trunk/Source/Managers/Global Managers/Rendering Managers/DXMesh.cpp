@@ -18,35 +18,11 @@ TMeshVertexInfo& TMeshVertexInfo::operator=(TMeshVertexInfo& rhs)
 	if(this == &rhs)
 		return *this;
 
-	// Clear our Vectors, if we have something already
-	this->m_vVertices.resize(rhs.m_vVertices.size());
-	this->m_vColors.resize(rhs.m_vColors.size());
-	this->m_vNormals.resize(rhs.m_vNormals.size());
-	this->m_vUV.resize(rhs.m_vUV.size());
-	this->m_vIndices.resize(rhs.m_vIndices.size());
-
-	// Copy over Vertex Values
-	unsigned int uNumVerts = rhs.m_vVertices.size();
-	for(unsigned int uVert = 0; uVert < uNumVerts; ++uVert)
-	{
-		this->m_vVertices.push_back(rhs.m_vVertices[uVert]);
-		this->m_vNormals.push_back(rhs.m_vNormals[uVert]);
-		this->m_vUV.push_back(rhs.m_vUV[uVert]);
-	}
-
-	// Copy over Color
-	unsigned int uNumColors = rhs.m_vColors.size();
-	for(unsigned int uVert = 0; uVert < uNumColors; ++uVert)
-	{
-		this->m_vColors.push_back(rhs.m_vColors[uVert]);
-	}
-
-	// Copy over Index Values
-	unsigned int uNumIdxs = rhs.m_vIndices.size();
-	for(unsigned int uIdx = 0; uIdx < uNumIdxs; ++uIdx)
-	{
-		this->m_vIndices.push_back(rhs.m_vIndices[uIdx]);
-	}
+	this->m_vVertices = rhs.m_vVertices;
+	this->m_vColors = rhs.m_vColors;
+	this->m_vNormals = rhs.m_vNormals;
+	this->m_vUV = rhs.m_vUV;
+	this->m_vIndices = rhs.m_vIndices;
 
 	// Return Self
 	return *this;
@@ -63,29 +39,31 @@ DXMesh& DXMesh::operator=(DXMesh& rhs)
 	this->SetIndexedTexturedVertexInfo(&rhs.m_tVertInfo);//, true);
 
 	// Set Weights
-	this->m_cWeights.resize(rhs.m_cWeights.size());
-	for(unsigned int weight = 0; weight < this->m_cWeights.size(); ++weight)
-	{
-		this->m_cWeights[weight].resize(rhs.m_cWeights[weight].size());
-		for(unsigned int inf = 0; inf < this->m_cWeights[weight].size(); ++inf)
-		{
-			this->m_cWeights[weight][inf] = rhs.m_cWeights[weight][inf];
-		}
-	}
+	this->m_cWeights = rhs.m_cWeights;
+	//this->m_cWeights.resize(rhs.m_cWeights.size());
+	//for(unsigned int weight = 0; weight < this->m_cWeights.size(); ++weight)
+	//{
+	//	this->m_cWeights[weight].resize(rhs.m_cWeights[weight].size());
+	//	for(unsigned int inf = 0; inf < this->m_cWeights[weight].size(); ++inf)
+	//	{
+	//		this->m_cWeights[weight][inf] = rhs.m_cWeights[weight][inf];
+	//	}
+	//}
 
-	// Set Bones
-	m_uNumBones = rhs.m_cJoints.size();
-	this->m_cJoints.resize(m_uNumBones);
-	for(unsigned int bone = 0; m_uNumBones; ++bone)
-	{
-		this->m_cJoints[bone] = rhs.m_cJoints[bone];
+	this->m_cJoints = rhs.m_cJoints;
+	//// Set Bones
+	//m_uNumBones = rhs.m_cJoints.size();
+	//this->m_cJoints.resize(m_uNumBones);
+	//for(unsigned int bone = 0; m_uNumBones; ++bone)
+	//{
+	//	this->m_cJoints[bone] = rhs.m_cJoints[bone];
 
-		this->m_cJoints[bone].m_cChildrenIdxs.resize(rhs.m_cJoints[bone].m_cChildrenIdxs.size());
-		for(unsigned int child = 0; child < this->m_cJoints[bone].m_cChildrenIdxs.size(); ++child)
-		{
-			this->m_cJoints[bone].m_cChildrenIdxs[child] = rhs.m_cJoints[bone].m_cChildrenIdxs[child];
-		}
-	}
+	//	this->m_cJoints[bone].m_cChildrenIdxs.resize(rhs.m_cJoints[bone].m_cChildrenIdxs.size());
+	//	for(unsigned int child = 0; child < this->m_cJoints[bone].m_cChildrenIdxs.size(); ++child)
+	//	{
+	//		this->m_cJoints[bone].m_cChildrenIdxs[child] = rhs.m_cJoints[bone].m_cChildrenIdxs[child];
+	//	}
+	//}
 
 	// Build Connections
 	BuildHiearchy();

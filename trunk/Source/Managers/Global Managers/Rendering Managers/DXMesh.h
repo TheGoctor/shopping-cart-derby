@@ -13,8 +13,11 @@
 #define _DXMESH_H_
 
 // Includes
+#include <vector>
+using std::vector;
 #include "Direct3DManager.h"
 #include "CAnimation.h"
+#include "..\Memory Manager\CDynArray.h"
 
 // BonedMesh Data
 struct TBindBone
@@ -24,23 +27,34 @@ struct TBindBone
 	unsigned int		 m_nParentBoneIdx;
 	CFrame				 m_cFrame;
 	int					 m_nNumChildren;
-	vector<unsigned int> m_cChildrenIdxs;
+	CDynArray<unsigned int> m_cChildrenIdxs;
+
+	TBindBone() : m_nBoneIdx(0), m_nParentBoneIdx(0), m_nNumChildren(0) {}
 };
 
 // Vertex Info
 struct TMeshVertexInfo
 {
-	vector<D3DXVECTOR3>					m_vVertices;
-	vector<D3DXVECTOR3>					m_vNormals;
-	vector<D3DCOLOR>					m_vColors;
-	vector<D3DXVECTOR2>					m_vUV;
-	vector<DWORD>						m_vIndices;
+	//vector<D3DXVECTOR3, CRenderAllocator<D3DXVECTOR3>>;
+	CDynArray<D3DXVECTOR3> m_vVertices;
+	//vector<D3DXVECTOR3, CRenderAllocator<D3DXVECTOR3>>;
+	CDynArray<D3DXVECTOR3> m_vNormals;
+	//vector<D3DCOLOR, CRenderAllocator<D3DCOLOR>>;
+	CDynArray<D3DCOLOR> m_vColors;
+	//vector<D3DXVECTOR2, CRenderAllocator<D3DXVECTOR2>>;
+	CDynArray<D3DXVECTOR2> m_vUV;
+	//vector<DWORD, CRenderAllocator<DWORD>>;
+	CDynArray<DWORD> m_vIndices;
 	//vector<std::vector<TBoneInfluence>> m_vWeights;
 	//vector<TBone>						m_vJoints;
 
 	// Assignment Operator
 	TMeshVertexInfo& operator=(TMeshVertexInfo& rhs);
 };	
+
+//typedef vector<vector<TBoneInfluence, CRenderAllocator<TBoneInfluence>>, 
+//	CRenderAllocator<vector<TBoneInfluence, CRenderAllocator<TBoneInfluence>>>>;
+typedef CDynArray<CDynArray<TBoneInfluence>> InfluCont;
 
 // Mesh
 class DXMesh
@@ -71,11 +85,12 @@ private:
 	// Animation Data
 	
 	// Bone Weights
-	vector<vector<TBoneInfluence>>		m_cWeights;
+	InfluCont		m_cWeights;
 
 	// Bone Hierarchy
 	unsigned int						m_uNumBones;
-	vector<TBindBone>					m_cJoints;
+	//vector<TBindBone, CRenderAllocator<TBindBone>>;
+	CDynArray<TBindBone> m_cJoints;
 
 public:
 
@@ -144,8 +159,9 @@ public:
 	const bool IsFlashingBlue(void) const  { return m_bFlashingB; }
 	const float GetFlashRate(void) const { return m_fFlashRate; }
 
-	vector<TBindBone>& GetBones(void)				 { return m_cJoints;  }
-	vector<vector<TBoneInfluence>>& GetWeights(void) { return m_cWeights; }
+	//vector<TBindBone, CRenderAllocator<TBindBone>>
+	CDynArray<TBindBone>& GetBones(void)				 { return m_cJoints;  }
+	InfluCont& GetWeights(void) { return m_cWeights; }
 
 	// Mutators
 	void SetMode(D3DPRIMITIVETYPE mode)			{ m_Mode = mode;				  }
@@ -164,7 +180,7 @@ public:
 		}
 	}
 
-	void AddBoneToHiearchy(TBindBone tBone)		{ m_cJoints.push_back(tBone);     }
+	void AddBoneToHiearchy(TBindBone& tBone)		{ m_cJoints.push_back(tBone);     }
 	void SetIndexedTexturedVertexInfo(TMeshVertexInfo* pMeshInfo);//,// bool createVB = false);
 	void SetIndexedColoredTexturedVertexInfo(TMeshVertexInfo* pMeshInfo);//,// bool createVB = false);
 	void SetColoredTexturedVertexInfo(TMeshVertexInfo* pMeshInfo);//,// bool createVB = false);

@@ -44,6 +44,7 @@ public:
 	static void Update(IEvent* cEvent, IComponent* cCenter);
 	static void PlayerCollision(IEvent* cEvent, IComponent* cCenter);
 	static void ItemCollision(IEvent* cEvent, IComponent* cCenter);
+
 	
 	void ReInit();
 	void Despawn();

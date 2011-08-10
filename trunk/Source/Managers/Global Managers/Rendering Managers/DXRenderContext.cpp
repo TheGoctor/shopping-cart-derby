@@ -131,6 +131,10 @@ void DXRenderContext::ParticleContextFunc(RenderNode &node)
 {
 	RenderContextFuncHelper(node, "Particle");
 }
+void DXRenderContext::ParticleZWriteContextFunc(RenderNode &node)
+{
+	RenderContextFuncHelper(node, "ParticleZWrite");
+}
 void DXRenderContext::ParticleAlphaContextFunc(RenderNode &node)
 {
 	RenderContextFuncHelper(node, "AlphaParticle");
@@ -142,6 +146,10 @@ void DXRenderContext::LitTexturedRenderContextFunc(RenderNode &node)
 void DXRenderContext::AnimationRenderContextFunc(RenderNode &node)
 {
 	RenderContextFuncHelper(node, "Animated");
+}
+void DXRenderContext::AnimationAlphaRenderContextFunc(RenderNode &node)
+{
+	RenderContextFuncHelper(node, "AnimatedAlphaCart");
 }
 void DXRenderContext::TextureChangeContextFunc(RenderNode &node)
 {

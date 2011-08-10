@@ -13,6 +13,7 @@ using namespace std;
 #include "..\Global Managers\Object Manager\CObjectManager.h"
 #include "..\..\Components\rendering\CRenderComponent.h"
 #include "..\..\Components\rendering\CBlueLightSpecialComp.h"
+#include "CSpawningManager.h"
 using namespace EventStructs;
 
 // Not used
@@ -31,31 +32,49 @@ CLevelManager::CLevelManager()
 void CLevelManager::Init()
 {
 	CEventManager* pEM = CEventManager::GetInstance();
+
+	// Get Singleton
+	IComponent* pInstance = (IComponent*)GetInstance();
 	
+	// Level Select
+	pEM->RegisterEvent("Level1Selected", pInstance, Level1SelectedCallback);
+
 	string szEvent = "Update";
 	szEvent += GAMEPLAY_STATE;
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), Update);
+	pEM->RegisterEvent(szEvent, pInstance, Update);
 
 	// render the world when paused and in console
 	szEvent = "Update";
 	szEvent += PAUSE_STATE;
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), Update);
+	pEM->RegisterEvent(szEvent, pInstance, Update);
 	szEvent = "Update";
 	szEvent += CONSOLE_STATE;
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), Update);
+	pEM->RegisterEvent(szEvent, pInstance, Update);
 	szEvent = "Update";
 	szEvent += PAUSE_OPTIONS_STATE;
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), Update);
+	pEM->RegisterEvent(szEvent, pInstance, Update);
 	szEvent = "Update";
 	szEvent += PAUSE_KEYBINDS_STATE;
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), Update);
+	pEM->RegisterEvent(szEvent, pInstance, Update);
+	szEvent = "Update";
+	szEvent += QUIT_CONFIRMATION_STATE;
+	pEM->RegisterEvent(szEvent, pInstance, Update);
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	pEM->RegisterEvent(szEvent, pInstance, Update);
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_STATE;
+	pEM->RegisterEvent(szEvent, pInstance, Update);
 
-	pEM->RegisterEvent("Shutdown", (IComponent*)GetInstance(), Shutdown);
+	// Exit Gameplay
+	//szEvent = "ShutdownObjects";
+	//szEvent += GAMEPLAY_STATE;
+	//pEM->RegisterEvent(szEvent, pInstance, Shutdown);
+	pEM->RegisterEvent("Shutdown", pInstance, Shutdown);
 
 	szEvent = "Update";
 	szEvent += WIN_STATE;
-
-	pEM->RegisterEvent(szEvent, (IComponent*)GetInstance(), Update);
+	pEM->RegisterEvent(szEvent, pInstance, Update);
 
 	BuildLevel("Resource/Node Map/SCD_NodeMap.nm");
 
@@ -64,10 +83,6 @@ void CLevelManager::Init()
 	m_bDrawGeometry = true;
 
 	BuildShadows("Resource/Level Geo/Shadows/Shadow_Node_Map.nm");
-
-	// load the checkout location
-	LoadLocations();
-
 
 	//// Boundaries on walls
 	//std::string szWallName1 = "MaxXWall";
@@ -108,6 +123,20 @@ void CLevelManager::Init()
 	//	CreateCollideableComponent(pMinZWall, true, true, OBJWALL);
 	//pzmin->SetBVType(BPLANE);
 	//pzmin->SetPlane(MinZ);
+}
+
+// Change State
+void CLevelManager::Level1SelectedCallback(IEvent*, IComponent*)
+{
+	static CLevelManager* pLM = CLevelManager::GetInstance();
+
+	// Build Level
+	//pLM->BuildLevel("Resource/Node Map/SCD_NodeMap.nm");
+	//pLM->BuildShadows("Resource/Level Geo/Shadows/Shadow_Node_Map.nm");
+
+	// Change States
+	SendStateEvent("StateChange", (IComponent*)pLM,
+		GAMEPLAY_STATE, PRIORITY_IMMEDIATE);
 }
 
 CLevelManager::~CLevelManager()
@@ -239,6 +268,17 @@ void CLevelManager::BuildLevel(char* szNodeMap)
 		if(rcidx == RC_ENDCAP)
 		{
 			rfunc = RF_TEXTURE_CHANGE_INST;
+
+			// since it's an endcap, we can fill out the info for it
+			TSpawnLocation tSpawnLocation;
+			tSpawnLocation.m_bUsed = false;
+			tSpawnLocation.m_cEndCap = pObj;
+			tSpawnLocation.m_tPosition.x = pObj->GetTransform()->GetWorldMatrix()._41;
+			tSpawnLocation.m_tPosition.y = pObj->GetTransform()->GetWorldMatrix()._42;
+			tSpawnLocation.m_tPosition.z = pObj->GetTransform()->GetWorldMatrix()._43;
+			tSpawnLocation.m_tRotation = pObj->GetTransform()->GetWorldMatrix();		
+
+			CSpawningManager::GetInstance()->AddHeldItemSpawnLocation(tSpawnLocation);
 		}
 
 		pRC = pRenMan->CreateRenderComp(pObj,
@@ -289,13 +329,13 @@ void CLevelManager::BuildLevel(char* szNodeMap)
 				CreateCollideableComponent(pColObj, true, true, OBJSHELF);
 			pCollideable->SetBVType(BAABB);
 			pCollideable->SetAABB(aabb);
-			CRenderComponent* pRender = Renderer::GetInstance()->CreateRenderComp(
-				pColObj, ModelManager::GetInstance()->CreateCubeFromAABB(localAABB), 0, RF_INDEXED_VERT);
-
-			AddRenderCollision(pRender);
+			//NOTE: stop adding renderable collision volumes on these, I'm doing it in CCollisionManager when I
+			//			put all the boxes together, so stop! -Raymoney
 		}
 	}
 
+	// load the checkout location
+	LoadLocations();
 }
 
 // Build Shadows for Level
@@ -365,7 +405,7 @@ void CLevelManager::BuildShadows(char* szNodeMap)
 		// Find the Context
 		ERenderContext eShadowRenderContext;
 
-		if(meshindex == 80 || meshindex == 81 || meshindex == 82)
+		if(meshindex == 82 || meshindex == 83 || meshindex == 84)
 		{
 			eShadowRenderContext = RC_CIRCLE_SHADOW;
 		}
@@ -373,15 +413,15 @@ void CLevelManager::BuildShadows(char* szNodeMap)
 		{
 			eShadowRenderContext = RC_SHELF_SHADOW;
 		}*/
-		if(meshindex == 83)
+		if(meshindex == 85)
 		{
 			eShadowRenderContext = RC_FSDS_L_SHADOW;
 		}
-		if(meshindex == 84)
+		if(meshindex == 86)
 		{
 			eShadowRenderContext = RC_SQUARE_SHADOW;
 		}
-		if(meshindex == 85)
+		if(meshindex == 87)
 		{
 			eShadowRenderContext = RC_CASHIER_SHADOW;
 		}
@@ -547,7 +587,8 @@ void CLevelManager::LoadLocations()
 		memcpy(chBuffer, tNode[nIndex].szName, nNameLength);
 
 		// init the strtok to deliminate based on underscores
-		char* szTokenizer = strtok(chBuffer, "_");
+		char* nextToken = NULL;
+		char* szTokenizer = strtok_s(chBuffer, "_", &nextToken);
 
 		// while strtoke doesn't return null (aka it's not at the end of the tokenizing string)
 		while(szTokenizer != NULL)
@@ -564,7 +605,7 @@ void CLevelManager::LoadLocations()
 			}
 
 			// assign chTempBuffer to the next token in the string (not a new one because we passed null)
-			szTokenizer = strtok(NULL, "_");
+			szTokenizer = strtok_s(NULL, "_", &nextToken);
 		}
 	}
 
@@ -585,7 +626,7 @@ void CLevelManager::LoadLocations()
 	TMeshVertexInfo* pOriginalVerts = ModelManager::GetInstance()->GetCloneVerts(colMesh->GetName());
 
 	
-	for(int i=0; i<pOriginalVerts->m_vVertices.size(); i++)
+	for(unsigned i=0; i<pOriginalVerts->m_vVertices.size(); i++)
 	{
 		D3DXVECTOR3 curVert = pOriginalVerts->m_vVertices[i];
 
@@ -638,4 +679,25 @@ void CLevelManager::LoadLocations()
 	pcheck->SetBVType(BAABB);
 	pcheck->SetAABB(pCHAABB);
 
+
+
+	CObject* pNonOrientedPallets = CObjectManager::GetInstance()->CreateObject("nonOrientPal");
+	TSphere sphur;
+	sphur.cPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	sphur.fRadius = 1.5f;
+	CCollideable* pNOPal = CCollisionManager::GetInstance()->
+		CreateCollideableComponent(pNonOrientedPallets, true, true, OBJFSD);
+	pNOPal->SetBVType(BSPHERE);
+	pNOPal->SetSphere(sphur);
+	pNOPal->GetParent()->GetTransform()->TranslateFrame(D3DXVECTOR3(-50.5, 0, 44));
+
+	CObject* pNonOrientedPallets2 = CObjectManager::GetInstance()->CreateObject("nonOrientPal2");
+	TSphere sphur2;
+	sphur2.cPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	sphur2.fRadius = 1.5f;
+	CCollideable* pNOPal2 = CCollisionManager::GetInstance()->
+		CreateCollideableComponent(pNonOrientedPallets2, true, true, OBJFSD);
+	pNOPal2->SetBVType(BSPHERE);
+	pNOPal2->SetSphere(sphur2);
+	pNOPal2->GetParent()->GetTransform()->TranslateFrame(D3DXVECTOR3(46, 0, 47));
 }

@@ -3,9 +3,6 @@
 void CCollideable::Init(void)
 {
 }
-
-
-	
 	
 //////////////////////////////////////////////////////////////////////////
 //	Accessors
@@ -13,10 +10,6 @@ void CCollideable::Init(void)
 bool CCollideable::GetStatic(void)
 {
 	return m_bIsStatic;
-}
-unsigned int CCollideable::GetFlags(void)
-{
-	return m_nFlags;
 }
 CObject* CCollideable::GetParent(void)
 {
@@ -54,15 +47,6 @@ TSphere CCollideable::GetSphere()
 	sphere.fRadius = m_fExtents[0];
 	return sphere;
 }
-TCapsule CCollideable::GetCapsule()
-{
-	TCapsule kapsool;
-	kapsool.cFront = m_cFrontPoint;
-	kapsool.cRear = m_cCenterPoint;
-	kapsool.fRadius = m_fExtents.x;
-	return kapsool;
-	
-}
 TLine CCollideable::GetLine()
 {
 	TLine line;
@@ -90,10 +74,6 @@ bool CCollideable::GetReactor()
 void CCollideable::SetStatic(bool bstatic)
 {
 	m_bIsStatic = bstatic;
-}
-void CCollideable::SetFlags(unsigned int nflag)
-{
-	m_nFlags = nflag;
 }
 void CCollideable::SetParent(CObject* cParent)
 {
@@ -137,12 +117,6 @@ void CCollideable::SetSphere(TSphere tsphere)
 	m_cCenterPoint = tsphere.cPosition;
 	m_fExtents.x = m_fExtents.y = m_fExtents.z = tsphere.fRadius;
 	//set local axes in test collision
-}
-void CCollideable::SetCapsule(TCapsule capsool)
-{
-	m_cCenterPoint = capsool.cRear;
-	m_cFrontPoint = capsool.cFront;
-	m_fExtents.x = m_fExtents.y = m_fExtents.z = capsool.fRadius;
 }
 void CCollideable::SetObjType(unsigned int ntype)
 {

@@ -12,6 +12,7 @@ extern "C"
 }
 
 #include "..\Global Managers\Memory Manager\CAllocator.h"
+#include "..\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h"
 
 class CStartOfRaceComponent;
 class CObject;
@@ -19,6 +20,7 @@ class IEvent;
 class IComponent;
 class CSpriteComponent;
 class DXRenderContext;
+class CWwiseSoundManager;
 
 class CStartOfRaceManager
 {
@@ -27,21 +29,18 @@ class CStartOfRaceManager
 	bool		m_bEnableInput;
 	bool		m_bHasPlayedSound;
 	bool		m_bBikeStarted;
+	bool		m_bWelcomeSound;
+	CWwiseSoundManager* pSound;
 
-	//CObject*			m_pDisplay0;
-	//CObject*			m_pDisplay1;
-	//CObject*			m_pDisplay2;
-	//CObject*			m_pDisplay3;
-	//CSpriteComponent*	m_pDisplayComponent0;
-	//CSpriteComponent*	m_pDisplayComponent1;
-	//CSpriteComponent*	m_pDisplayComponent2;
-	//CSpriteComponent*	m_pDisplayComponent3;
+	CSpriteComponent*	m_pDirectionsComp;
+	bool				m_bWaitingForInput;
 
 	DXRenderContext*	m_pStartingLightContex;
 
 public:
 	CStartOfRaceManager();
 
+	void StartBikeSounds();
 	static CStartOfRaceManager* GetInstance()
 	{
 		static CStartOfRaceManager cStartOfRaceManager;
@@ -52,6 +51,7 @@ public:
 	static void HandleStateEnter(IEvent* cEvent, IComponent* cCenter);
 	static void HandleStateExit(IEvent* cEvent, IComponent* cCenter);
 	static void HandleStateInit(IEvent* cEvent, IComponent* cCenter);
+	static void EnterPressed(IEvent* cEvent, IComponent* cCenter);
 };
 
 

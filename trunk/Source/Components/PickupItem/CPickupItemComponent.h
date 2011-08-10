@@ -27,6 +27,7 @@ private:
 	float				m_fLifetime;
 	float				m_fFlyOutSpeed;
 	float				m_fTimeToFly;
+	float				m_fMaxArcHeight;
 
 	//int					m_nItemType;
 	EGoalItemType		m_nItemType;
@@ -57,6 +58,11 @@ public:
 	inline bool IsReadyToCollide()
 	{
 		return (m_fTimeLeft < m_fLifetime - m_fTimeToFly) && (m_fTimeLeft > 0.0f);
+	}
+
+	inline float GetArcYValue()
+	{
+		return 1.0f + sin( ((m_fLifetime-m_fTimeLeft)/m_fTimeToFly) * 3.1415f) * m_fMaxArcHeight;
 	}
 
 	inline CObject* GetObject()

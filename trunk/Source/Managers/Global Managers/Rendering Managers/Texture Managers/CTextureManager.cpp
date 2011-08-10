@@ -5,7 +5,9 @@
 //
 //  Date Created	:	04/05/11
 //
-//	Last Changed	:	04/07/11
+//	Last Changed	:	07/24/11
+//
+//	Changed By		:	HN			
 //
 //  Purpose			:	Wrapper class for manageing Textures for Direct3D
 ////////////////////////////////////////////////////////

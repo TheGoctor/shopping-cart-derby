@@ -1,17 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	CInvulnerableVFX.h
-//	Date			:	6/10/11
-//	Mod. Date		:	6/10/11
+//	Date			:	7/26/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Encapsulates the Chiken Soup VFX
 ////////////////////////////////////////////////////////////////////////////////
 
-// Header Protexction
+///////////////////////////////////////////////////////////////////////////////
+// Header Protection
+///////////////////////////////////////////////////////////////////////////////
 #ifndef _CINVULNERABLEVFX_H_
 #define _CINVULNERABLEVFX_H_
 
+///////////////////////////////////////////////////////////////////////////////
 // Includes
+///////////////////////////////////////////////////////////////////////////////
 #include "CEffectComponent.h"
 #include "..\\..\\Managers\\Component Managers\\CComponentManager.h"
 #include "..\\..\\IComponent.h"
@@ -19,64 +23,118 @@
 #include "..\\..\\Managers\\Global Managers\\Event Manager\\EventStructs.h"
 using namespace EventStructs;
 
-//#include "..\\..\\Managers\\Global Managers\\Rendering Managers\\DXMesh.h"
-
+///////////////////////////////////////////////////////////////////////////////
 // Foward Declares
+///////////////////////////////////////////////////////////////////////////////
 class DXMesh;
 
-// Invulnerable Effect
+///////////////////////////////////////////////////////////////////////////////
+// Invulnerable VFX Component Class
+///////////////////////////////////////////////////////////////////////////////
 class CInvulnerableVFX : public IComponent
 {
 private:
 
-	// Parent Object
-	CObject* m_pParentObj;
+	///////////////////////////////////////////////////////////////////////////
+	// Data Members
+	///////////////////////////////////////////////////////////////////////////
 
-	// Mesh
-	DXMesh* m_pMesh;
+	CObject* m_pParentObj;			// Parent Object
+	DXMesh* m_pMesh;				// Mesh
+	CEffectComponent* m_pEffect;	// Effect
+	float m_fDir;					// Direction
+	float m_fInvDuration;			// InvulnerableDuration
+	float m_fBoostDuration;			// Boost Duration
+	float m_fBoostAnimTimer;		// Boost Animation Timer
+	bool m_bActive;					// Active Flag
 
-	// Effect
-	CEffectComponent* m_pEffect;
+	///////////////////////////////////////////////////////////////////////////
+	// Event Handlers
+	///////////////////////////////////////////////////////////////////////////
+	
+		///////////////////////////////////////////////////////////////////////
+		// Function: “Update”
+		//
+		// Return: void
+		//
+		// Parameters: float fDT - The time since the last Frame
+		//
+		// Purpose: This Functions is used to Handle Updating Invulnerable and
+		//			Boost Effects and Check for end of Duration to Switch
+		//			Effects Off.
+		///////////////////////////////////////////////////////////////////////
+		void Update(float fDT);
+		
+		///////////////////////////////////////////////////////////////////////
+		// Function: “Invulnerable”
+		//
+		// Return: void
+		//
+		// Parameters: TStatusEffectEvent* pcObjEvent - Event Data with Duration
+		//
+		// Purpose: This Functions is used to Handle Activating Invulnerable
+		//			Effects.
+		///////////////////////////////////////////////////////////////////////
+		void Invulnerable(TStatusEffectEvent* pcObjEvent);
+	
+		///////////////////////////////////////////////////////////////////////
+		// Function: “Boost”
+		//
+		// Return: void
+		//
+		// Parameters: TStatusEffectEvent* pcObjEvent - Event Data with Duration
+		//
+		// Purpose: This Functions is used to Handle Activating Boost
+		//			Effects.
+		///////////////////////////////////////////////////////////////////////
+		void Boost(TStatusEffectEvent* pcObjEvent);
+	
+		///////////////////////////////////////////////////////////////////////
+		// Function: “TurnOff”
+		//
+		// Return: void
+		//
+		// Parameters: void
+		//
+		// Purpose: This Functions is used to Handle Deactivating Invulnerable
+		//			and Boost Effects.
+		///////////////////////////////////////////////////////////////////////
+		void TurnOff(void);
 
-	// Active
-	bool m_bActive;
-
-	// Direction
-	float m_fDir;
-
-	// Timer
-	float m_fInvDuration;
-	float m_fBoostDuration;
-	float m_fBoostAnimTimer;
-
-	// Handlers
-	void Invulnerable(TStatusEffectEvent* pcObjEvent);
-	void Boost(TStatusEffectEvent* pcObjEvent);
-	void InvulnerableEnd(TObjectEvent* pcObjEvent);
-	void Update(float fDT);
-	void TurnOff(void);
-
+	///////////////////////////////////////////////////////////////////////////
 	// Helper Funcs
-	bool CheckForPlayerMatch(CObject* pOtherObj);
+	///////////////////////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+		// Function: “CheckForPlayerMatch”
+		//
+		// Return: bool - Whether the Parent Animation Object is associated
+		//				  with the Passed in Object
+		//
+		// Parameters: CObject* pOtherObj - The Object to Check against
+		//
+		// Purpose: This Functions is used to Check Whether the Parent
+		//			Animation Object is Associated with the Passed in Object.
+		///////////////////////////////////////////////////////////////////////
+		bool CheckForPlayerMatch(CObject* pOtherObj);
 
 public:
 
-	// Get Auto-Manager
-	static CComponentManager<CInvulnerableVFX>* GetManager(void)
-	{
-		// Auto-Manager
-		static CComponentManager<CInvulnerableVFX> m_cManager;
-
-		return &m_cManager;
-	}
-
-	// Initalize
+	///////////////////////////////////////////////////////////////////////////
+	// Function: “Init”
+	//
+	// Return: void
+	//
+	// Parameters: void
+	//
+	// Purpose: This Function is used to Initalize the Component by
+	//			Registering for Events and Creating a Bubble Effect.
+	///////////////////////////////////////////////////////////////////////////
 	void Init(void);
 
-	// Shutdown
-	void Shutdown(void);
-
+	///////////////////////////////////////////////////////////////////////////
 	// Constructor
+	///////////////////////////////////////////////////////////////////////////
 	CInvulnerableVFX(CObject* pParent, DXMesh* pMesh) : m_pParentObj(pParent),
 														m_pMesh(pMesh),
 														m_bActive(false),
@@ -95,47 +153,145 @@ public:
 		Init();
 	}
 
-	// Component
+	///////////////////////////////////////////////////////////////////////////
+	// Destructor
+	///////////////////////////////////////////////////////////////////////////
 	~CInvulnerableVFX(void)
 	{
-		Shutdown();
+		// Remove from Manager
 		GetManager()->Remove(this);
 	}
 
-	// Factory
-	static int CreateInvulnerableVFXComponent(lua_State* pLUA);
-	static CInvulnerableVFX* CreateInvulnerableVFXComponent(CObject* pParent, DXMesh* pMesh)
-	{
-		return MMNEW(CInvulnerableVFX(pParent, pMesh));
-	}
+	///////////////////////////////////////////////////////////////////////////
+	// Factory Funcs
+	///////////////////////////////////////////////////////////////////////////
 
+		///////////////////////////////////////////////////////////////////////
+		// Function: “CreateInvulnerableVFXComponent”
+		//
+		// Return: int - 0 to LUA
+		//
+		// Parameters: lua_State* ptLUA - LUA State of the Call
+		//
+		// Purpose: This Functions is used to Create an Invulnerable VFX
+		//			Component and Attach it to an Object through LUA.
+		///////////////////////////////////////////////////////////////////////
+		static int CreateInvulnerableVFXComponent(lua_State* pLUA);
 
-	// Callbacks
-	static void ShutdownCallBack(IEvent*, IComponent*);
+		///////////////////////////////////////////////////////////////////////
+		// Function: “CreateInvulnerableVFXComponent”
+		//
+		// Return: CInvulnerableVFX* - A New Invulnerable VFX Component 
+		//							   connected to the Passed in Object
+		//
+		// Parameters: CObject* pParent - The Parent Animation Object
+		//			   DXMesh* pMesh	- The Parent Mesh
+		//
+		// Purpose: This Functions is used to Create an Invulnerable VFX
+		//			Component and Attach it to an Object through C++.
+		///////////////////////////////////////////////////////////////////////
+		static CInvulnerableVFX* CreateInvulnerableVFXComponent(
+			CObject* pParent, DXMesh* pMesh)
+		{
+			return MMNEW(CInvulnerableVFX(pParent, pMesh));
+		}
 
-		// Invulnerable
+	///////////////////////////////////////////////////////////////////////////////
+	// Event Callbacks
+	///////////////////////////////////////////////////////////////////////////////
+
+		///////////////////////////////////////////////////////////////////////
+		// Function: “InvulnerableCallback”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Functions is used to Handle Activating the Passed in
+		//			Component's Invulnerable Effects.
+		///////////////////////////////////////////////////////////////////////
 		static void InvulnerableCallback(IEvent* pEvent, IComponent* pComp);
-		static void InvulnerableEndCallback(IEvent* pEvent, IComponent* pComp);
 
-		// Boost
+		///////////////////////////////////////////////////////////////////////
+		// Function: “BoostCallback”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Functions is used to Handle Activating the Passed in
+		//			Component's Boost Effects.
+		///////////////////////////////////////////////////////////////////////
 		static void BoostCallback(IEvent* pEvent, IComponent* pComp);
 
-		// Update
+		///////////////////////////////////////////////////////////////////////
+		// Function: “Update”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Functions is used to Handle Updating the Passed in
+		//			Component's Invulnerable and Boost Effects and Check for
+		//			end of Duration to Switch Effects Off.
+		///////////////////////////////////////////////////////////////////////
 		static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
 
-		// Win State
+		///////////////////////////////////////////////////////////////////////
+		// Function: “WinStateInitCallback”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Functions is used to Handle Deactivating the Passed in
+		//			Component's Invulnerable and Boost Effects on Enter of Win
+		//			State.
+		///////////////////////////////////////////////////////////////////////
 		static void WinStateInitCallback(IEvent* pEvent, IComponent* pComp);
 
-		// Destroy Object
+		///////////////////////////////////////////////////////////////////////
+		// Function: “DestroyObjectCallback”
+		//
+		// Return: void
+		//
+		// Parameters: IEvent* pEvent	 - Event Data
+		//			   IComponent* pComp - The Listening Component
+		//
+		// Purpose: This Function is used to Handle Unregistering for Events
+		//			when the Parent Object is Destroyed.
+		///////////////////////////////////////////////////////////////////////
 		static void DestroyObjectCallback(IEvent* pEvent, IComponent* pComp);
 
+	///////////////////////////////////////////////////////////////////////////
 	// Accessors
-	CObject* GetParent(void) { return m_pParentObj; }
-	bool IsActive(void)		 { return m_bActive;    }
+	///////////////////////////////////////////////////////////////////////////
 
+		// Parent Object
+		CObject* GetParent(void) { return m_pParentObj; }
+		
+		// Active Flag
+		bool IsActive(void)		 { return m_bActive;    }
+
+		// Auto-Manager
+		static CComponentManager<CInvulnerableVFX>* GetManager(void)
+		{
+			// Auto-Manager
+			static CComponentManager<CInvulnerableVFX> m_cManager;
+
+			return &m_cManager;
+		}
+	
+	///////////////////////////////////////////////////////////////////////////
 	// Mutators
-	void SetActive(bool bActive) { m_bActive = bActive; }
-
+	///////////////////////////////////////////////////////////////////////////
+	
+		// Active Flag
+		void SetActive(bool bActive) { m_bActive = bActive; }
 };
 
 #endif // _CINVULNERABLEVFX_H_

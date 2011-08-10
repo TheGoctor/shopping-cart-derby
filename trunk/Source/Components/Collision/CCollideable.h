@@ -1,6 +1,6 @@
 /************************************************************************
 * Filename:			CCollideable.h
-* Mod. Date:		03/27/2011
+* Mod. Date:		07/25/2011
 * Mod. Initials:	RN
 * Author:			Raymond W. Nieves
 * Purpose:			Encapsulates all collision code within a Behavior Object
@@ -11,11 +11,10 @@
 #include <D3dx9math.h>
 #include "..\..\IComponent.h"
 #include "..\..\Enums.h"
-#include <vector>
 
 class CObject;
 class CBVHNode;
-
+//structures for various bounding volumes
 //triangle
 struct TTriangle
 {
@@ -43,11 +42,6 @@ struct TSphere
 	D3DXVECTOR3 cPosition;
 	float		fRadius;
 };
-struct TCapsule
-{
-	D3DXVECTOR3 cRear, cFront;
-	float fRadius;
-};
 //Plane (not so much a BV, but it will represent a collideable surface such as a wall)
 struct TPlane
 {
@@ -55,14 +49,11 @@ struct TPlane
 	D3DXVECTOR3 cPlanePoint;
 	float fOffset;
 };
+//Line
 struct TLine
 {
 	D3DXVECTOR3 cLineStart;
 	D3DXVECTOR3 cLineEnd;
-};
-struct TFrustum
-{
-	TPlane tNear, tFar, tTop, tBottom, tLeft, tRight;
 };
 struct TRay
 {
@@ -81,17 +72,15 @@ private:
 //	TFrustum m_BVFrustum;
 	/////////////////////////////////
 
-	int		m_nBVType;
-	bool	m_bWasChecked;
+	int		m_nBVType;			//type of bounding volume
+	bool	m_bWasChecked;		//if the object was checked on the current frame
 	bool	m_bIsStatic;			//true if the object's position is static
 	bool	m_bIsReactor;			//true if the object causes a collision reaction or if objects pass through it
-	unsigned int m_nFlags;			//flags to determine if the object is "dirty"
 	unsigned int m_nObjType;		//object type
 
 	CBVHNode *m_cBVHNode;			//bvh node where this object is located
 	CObject *m_cParent;				//pointer to the object holding this	
 	
-
 public:
 	//new collision volume, works for all shapes
 	//SPHERE - centerpoint - derp figure it out,  localaxes = local x/y/z axes, m_fextents = radius
@@ -100,31 +89,30 @@ public:
 	//TRIANGLE - centerpoint = can be the center of the tri, local axes would be the tri verts, extents would be the normal
 	//PLANE - just define the way a triangle would be defined with this
 	//Line/Ray - centerpoint = start, local axes[0] would be the line direction or end point of segment, extents[0] would be the ray distance
-
 	D3DXVECTOR3 m_cCenterPoint;
 	D3DXVECTOR3 m_tLocalAxes[3];
 	D3DXVECTOR3 m_fExtents;			//used as a radius for the 3 axes
-	//small sacrifice in the name of the capsules!
-	D3DXVECTOR3 m_cFrontPoint;
 
+	//tunneling members
+	bool					m_bNextFrameTunneling;			//true if the next frame may have tunneling
+	D3DXVECTOR3	m_vPrevPos, m_vPrevNorm;		//previous position, and the normal of the previous frame's collision
+	CObject*			m_cTunneledObject;				//object we may have tunneled through
 
-
-
-
+	//default constructor
 	CCollideable() 
 	{
 		m_bWasChecked = false;
 	}
-
+	//constructor
 	CCollideable(int type) : m_nBVType(type)
 	{
 	}
-
+	//destructor
 	~CCollideable() 
 	{
 	}
+	//initialize function
 	void Init(void);
-	void BuildFrustum(D3DXMATRIX mViewProj);
 
 	//Accessors
 	bool GetStatic(void);
@@ -135,16 +123,11 @@ public:
 	TAABB GetAABB();
 	TOBB GetOBB();
 	TSphere GetSphere();
-	TCapsule GetCapsule();
 	TPlane GetPlane();
-	TFrustum GetFrustum();
 	TLine GetLine();
 	bool GetWasChecked();
 	unsigned int GetObjType();
 	bool GetReactor();
-	
-
-
 	//Mutators
 	void SetStatic(bool bstatic);
 	void SetFlags(unsigned int nflag);
@@ -155,11 +138,8 @@ public:
 	void SetAABB(TAABB taabb);
 	void SetOBB(TOBB tobb);
 	void SetSphere(TSphere tsphere);
-	void SetCapsule(TCapsule capsool);
 	void SetPlane(TPlane tplane);
-	void SetFrustum(TFrustum tfrust);
 	void SetLine(TLine tLine);
-	void SetFrustumPlane(TPlane frustplane, TPlane &target);	//sets target to frustplane
 	void SetObjType(unsigned int ntype);
 	void SetIsReactor(bool breact);
 };

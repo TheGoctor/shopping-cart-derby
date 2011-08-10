@@ -18,7 +18,6 @@
 #include <windows.h>
 #include <mmsystem.h>               // Multimedia header file.
 #pragma comment(lib, "winmm.lib")   // Multimedia import library.
-#include <vector>
 using namespace std;
 
 //	Forward Declarations

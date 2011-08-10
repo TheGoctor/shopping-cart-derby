@@ -30,24 +30,23 @@ private:
 
 	CObject*	m_pParent;			// The parent object
 	int			m_nPlayerNumber;
-
 	EHeldItemType m_eHeldItem[2];
 
 	int			m_nGoalItemIndices[MAX_GOAL_ITEMS]; // indicies into the m_bGoalItemCollectionState so [itemID] in this will yeild the correct [] for that
 	bool		m_bGoalItemCollectionState[NUM_ITEMS_IN_LEVEL];	// A list of current goal items
-
 	int			m_nInitIndices;
-
 	float		m_fStunDuration;
-	
+	float		m_fSoundtimer;
+	bool		m_bSoundPlayed;
 public:
-
+	
 	// Constructor
 	CInventoryComponent(CObject* pParent, int nPlayer);
 	
 	// Collect Item
 	static void PickupItemCollectedCallback(IEvent* e, IComponent* comp);
 	static void GoalItemCollectedCallback(IEvent* e, IComponent* comp);
+	static void GoalItemSpawnedCallback(IEvent* e, IComponent* comp);
 	static void GoalItemInitCallback(IEvent* e, IComponent* comp);
 	static void HandleInit(IEvent* e, IComponent* comp);
 	static void Update(IEvent*, IComponent*);
@@ -58,7 +57,7 @@ public:
 	static void HeldItemSteal(IEvent*, IComponent*);
 
 	void UseHeldItem(CInventoryComponent* pComp, int nIndex, float fAmount);
-
+	
 	// Rammed
 	static void Rammed(IEvent* e, IComponent* comp);
 
@@ -70,6 +69,16 @@ public:
 	{
 		return m_pParent;
 	}
+
+	inline EHeldItemType GetHeldItem(int nIndex)
+	{
+		return m_eHeldItem[nIndex];
+	}
+	//Sound Functions
+	void PlayCollectionSound(CObject* player);
+	void PlayAllItemCollectionSound(CObject* player);
+	void PlayItemSpawnSound(int nitem);
+
 };
 
 #endif

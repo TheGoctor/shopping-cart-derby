@@ -1,3 +1,4 @@
+//CCollisionManager.h
 #include <fstream>
 
 #include "CCollisionManager.h"
@@ -19,47 +20,50 @@ using namespace EventStructs;
 
 CCollisionManager::CCollisionManager()
 {
-
 }
 CCollisionManager::~CCollisionManager()
 {
+	//iterator for the static objects
 	std::map<unsigned int, CCollideable*, less<unsigned int>, CAllocator
 		<pair<unsigned int, CCollideable*>>>::iterator pSIter;
 	while (!m_cStaticObjects.empty())
-	{
+	{//while there are still static objects
+		//delete the first one from the map after freeing the memory
 		pSIter = m_cStaticObjects.begin();
 		MMDEL((*pSIter).second);
 		m_cStaticObjects.erase(pSIter);
 	}
+	//clear the map
 	m_cStaticObjects.clear();
-
+	//iterator for the non static objects
 	std::map<unsigned int, CCollideable*, less<unsigned int>, CAllocator
 		<pair<unsigned int, CCollideable*>>>::iterator pNonSIter;
 	while (!m_cNonStaticObjects.empty())
-	{
+	{//while there are still non static objects
+		//delete the first one from the map after freeing the memory
 		pNonSIter = m_cNonStaticObjects.begin();
 		MMDEL((*pNonSIter).second);
 		m_cNonStaticObjects.erase(pNonSIter);
 	}
+	//clear the map
 	m_cNonStaticObjects.clear();
 }
 
 CCollisionManager* CCollisionManager::GetInstance()
 {
+	//name the instance of the manager CCollisionmanager for easy identification
 	static CCollisionManager cCollisionManager;
 	return &cCollisionManager;
 }
 
-void CCollisionManager::DestroyObject(IEvent* pcEvent, IComponent*)
-{
-	TObjectEvent* pcObj = (TObjectEvent*)pcEvent->GetData();
-
-	GetInstance()->m_cStaticObjects.erase(GetInstance()->
-		m_cStaticObjects.find(pcObj->m_pcObj->GetID()));
-}
-
 void CCollisionManager::Init()
 {
+	//create the effect objects for the item to item collisions
+	m_pTurkeyDestroy = CObjectManager::CreateObject("TurkeyDestroyObject");
+	m_pPieDestroy = CObjectManager::CreateObject("PieDestroyObject");
+	m_pBananaDestroy = CObjectManager::CreateObject("BananaDestroyObject");
+
+	//register for events
 	string szEventName = "Update";
 	szEventName += GAMEPLAY_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEventName,
@@ -77,11 +81,10 @@ void CCollisionManager::Init()
 	D3DXVECTOR2 *uv_buffer;
 	DWORD  *indicies;
 
+	//getting the triangles for the wall
 	std::fstream fin("Resource\\Collision Volumes\\FFP_3D_Wall_Collision.mesh", ios_base::in | ios_base::binary);
-
 	if(fin.is_open())
 	{
-
 		// strlen
 		fin.read((char*)&num, 4);
 		// name
@@ -148,7 +151,10 @@ void CCollisionManager::Init()
 		}
 
 		if(m_pWallTris)
-			int x = 0;
+		{
+			//int x = 0;
+		}
+			
 
 		delete [] pos_buffer;
 		delete [] norm_buffer;
@@ -165,13 +171,14 @@ void CCollisionManager::Init()
 CCollideable* CCollisionManager::CreateCollideableComponent(CObject* pParent, 
 															bool isStatic, bool isReactor, unsigned int objType)
 {
+	//create a collideable with the passed in data
 	CCollideable* pCollideComp = MMNEW(CCollideable);
 	pCollideComp->SetStatic(isStatic);
 	pCollideComp->SetIsReactor(isReactor);
 	pCollideComp->SetObjType(objType);
-
 	pCollideComp->SetParent(pParent);
 	pParent->AddComponent(pCollideComp);
+	//add it to the correct list
 	if(isStatic)
 	{
 		GetInstance()->AddStatic(pCollideComp, (unsigned)pParent->GetID());
@@ -180,16 +187,17 @@ CCollideable* CCollisionManager::CreateCollideableComponent(CObject* pParent,
 	{
 		GetInstance()->AddNonStatic(pCollideComp, (unsigned)pParent->GetID());
 	}
+	//and return it to its creator
 	return pCollideComp;
 }
 
-//component functions
 int CCollisionManager::CreateCollideableComponent(lua_State* pLua)
 {
+	//creates a collideable with data from lua
 	int type = (int)lua_tointeger(pLua, -1); // select the last parameter so we know how many to pop off
-
+	//switch for conditions based on object type
 	switch(type)
-	{
+	{//each BV takes different data from lua, but sets them into the same variables
 	case BSPHERE:
 		{
 			CObject* pObject = (CObject*)lua_topointer(pLua, -9);
@@ -266,8 +274,8 @@ int CCollisionManager::CreateCollideableComponent(lua_State* pLua)
 			TAABB testbox;	
 			testbox.cBoxMin = -1*D3DXVECTOR3(tBox.tE[0], tBox.tE[1], tBox.tE[2]);
 			testbox.cBoxMax = D3DXVECTOR3(tBox.tE[0], tBox.tE[1], tBox.tE[2]);
-//			testbox.cBoxMin.z += 0.2f;
-//			testbox.cBoxMax.z += 0.2f;
+			//			testbox.cBoxMin.z += 0.2f;
+			//			testbox.cBoxMax.z += 0.2f;
 			CRenderComponent* pRender = Renderer::GetInstance()->CreateRenderComp(
 				pColObj, ModelManager::GetInstance()->CreateCubeFromAABB(testbox), 0, RF_INDEXED_VERT);
 			pColObj->GetTransform()->ScaleFrame(tBox.tE[0] * 2.0f, 
@@ -302,86 +310,32 @@ int CCollisionManager::CreateCollideableComponent(lua_State* pLua)
 			lua_pop(pLua, 11);
 			break;
 		}
-	case BCAPSULE:
-		{
-			CObject* pObject = (CObject*)lua_topointer(pLua, -12);
-			bool bisStatic = (lua_toboolean(pLua, -11) !=0 );
-			bool bisReactor = (lua_toboolean(pLua, -10)!=0);
-			int objtype = (int)lua_tointeger(pLua, -9);
-
-			CCollideable* pCol = CreateCollideableComponent(pObject, bisStatic, bisReactor, objtype);
-
-			pCol->SetStatic(bisStatic);
-			pCol->SetBVType(type);
-			pCol->SetIsReactor(bisReactor);
-			pCol->SetObjType(objtype);
-
-			TCapsule tCap;
-
-			tCap.cFront.x = (float)lua_tonumber(pLua, -8);
-			tCap.cFront.y = (float)lua_tonumber(pLua, -7);
-			tCap.cFront.z = (float)lua_tonumber(pLua, -6);
-
-			tCap.cRear.x = (float)lua_tonumber(pLua, -5);
-			tCap.cRear.y = (float)lua_tonumber(pLua, -4);
-			tCap.cRear.z = (float)lua_tonumber(pLua, -3);
-
-			tCap.fRadius = (float)lua_tonumber(pLua, -2);
-			lua_pop(pLua, 12);
-
-			pCol->SetCapsule(tCap);
-
-
-			string szColObjID = "ColOBox";
-			szColObjID+=(char)pObject->GetID();
-			CObject *pColObj = CObjectManager::GetInstance()->CreateObject(
-				szColObjID, 0.0f, 0.0f, 0.0f, 0.0f, pObject);
-			TAABB testbox;	
-			testbox.cBoxMin = tCap.cRear - D3DXVECTOR3(0.5f, 0.0f, 0.0f);
-			testbox.cBoxMax = tCap.cFront + D3DXVECTOR3(0.5f, 1.5f, 0.0f);
-			CRenderComponent* pRender = Renderer::GetInstance()->CreateRenderComp(
-				pColObj, ModelManager::GetInstance()->CreateCubeFromAABB(testbox), 0, RF_INDEXED_VERT);
-//			pColObj->GetTransform()->ScaleFrame(tCap.fRadius, tCap.fRadius, tCap.fRadius);
-			CLevelManager::GetInstance()->AddRenderCollision(pRender);
-			lua_pop(pLua, 20);
-
-			break;
-		}
-//////////////////////////////////////////////////////////////////////////////////////////////
-/*	case BPLANE:
-		{
-			CObject* pObject = (CObject*)lua_topointer(pLua, -11);
-			bool bisStatic = (lua_toboolean(pLua, -10) !=0 );
-			bool bisReactor = (lua_toboolean(pLua, -9)!=0);
-			int objtype = (int)lua_tointeger(pLua, -8);
-
-			TAABB tAABB;
-			TSphere tsphere;
-			TPlane tplane;
-			CCollideable* pCollideable = CreateCollideableComponent(pObject, bisStatic, bisReactor, objtype);
-			pCollideable->SetStatic(bisStatic);
-			pCollideable->SetBVType(type);
-			pCollideable->SetIsReactor(bisReactor);
-			pCollideable->SetObjType(objtype);
-			tplane.cPlaneNormal.x = (float)lua_tonumber(pLua, -7);
-			tplane.cPlaneNormal.y = (float)lua_tonumber(pLua, -6);
-			tplane.cPlaneNormal.z = (float)lua_tonumber(pLua, -5);
-			tplane.cPlanePoint.x = (float)lua_tonumber(pLua, -4);
-			tplane.cPlanePoint.y = (float)lua_tonumber(pLua, -3);
-			tplane.cPlanePoint.z = (float)lua_tonumber(pLua, -2);
-			pCollideable->SetPlane(tplane);
-			lua_pop(pLua, 11);
-			break;
-		}*/
-//////////////////////////////////////////////////////////////////////////////////////////////
 	default:
 		break;
 
 	}
-	//temp stuff
-
 	return 0;
 }
+
+D3DXVECTOR3 CCollisionManager::GetCollisionPtSpheres(CCollideable* obj1, CCollideable* obj2)
+{
+	D3DXVECTOR3 ColPt, p1, p2;
+	ColPt = p1 = p2 = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	p1 = obj1->GetSphere().cPosition;
+	p2 = obj2->GetSphere().cPosition;
+	float fDist = 0.0f;
+	//get the vector between the two spheres
+	D3DXVECTOR3 vecbetween = p2 - p1;
+	//get half the distance between the two spheres
+	fDist = D3DXVec3Length(&vecbetween);
+	fDist/=2.0f;
+	//normalize the vector
+	D3DXVec3Normalize(&vecbetween, &vecbetween);
+	//set the collision point to the first sphere plus the normalized vecbetween scaled by the half-distance
+	ColPt = p1 + vecbetween*fDist;
+	return ColPt;
+}
+
 void CCollisionManager::CondenseCollisionBoxes(void)
 {
 	vector<TAABB> combinedboxes;//once boxes are combined, they are added to this
@@ -434,10 +388,12 @@ void CCollisionManager::CondenseCollisionBoxes(void)
 			}
 		}
 	}
+	//whatever is left in static boxes is not combinable, so they're ready to be in the new map
 	for (unsigned i =0; i < StaticBoxes.size(); ++i)
 	{
 		combinedboxes.push_back(StaticBoxes[i]);
 	}
+	//create the new combined boxes
 	for (unsigned i = 0; i < combinedboxes.size(); ++i)
 	{
 		string szName = "ComboBox";
@@ -446,19 +402,15 @@ void CCollisionManager::CondenseCollisionBoxes(void)
 		CCollideable* pCollideable = CreateCollideableComponent(pColObj, true, true, OBJSHELF);
 		pCollideable->SetBVType(BAABB);
 		pCollideable->SetAABB(combinedboxes[i]);
-		//dont render these, its probably a bad idea
-		//		CRenderComponent* pRender = Renderer::GetInstance()->CreateRenderComp(
-		//			pColObj, ModelManager::GetInstance()->CreateCubeFromAABB(combinedboxes[i]), 0, RF_INDEXED_VERT);
-		//
-		//		CLevelManager::GetInstance()->AddRenderCollision(pRender);
 	}
 
 }
 void CCollisionManager::CreateRenderedComboBoxes()
 {
+	//iterater for static objects
 	ColMap::iterator pSiter = m_cStaticObjects.begin();
 	while(pSiter != m_cStaticObjects.end())
-	{
+	{//create the renderable collision volumes for boxes only
 		if ((*pSiter).second->GetBVType() == BAABB)
 		{
 			CRenderComponent* pRender = Renderer::GetInstance()->CreateRenderComp(
@@ -476,6 +428,7 @@ void CCollisionManager::Shutdown(IEvent* /* pEvent*/, IComponent* /* pComponen*/
 	for(pDelNonStatIter = GetInstance()->m_cNonStaticObjects.begin();
 		pDelNonStatIter != GetInstance()->m_cNonStaticObjects.end(); ++pDelNonStatIter)
 	{
+		//delete non statics
 		MMDEL((*pDelNonStatIter).second);
 	}
 	GetInstance()->m_cNonStaticObjects.clear();
@@ -485,19 +438,27 @@ void CCollisionManager::Shutdown(IEvent* /* pEvent*/, IComponent* /* pComponen*/
 	for(pDelStatIter = GetInstance()->m_cStaticObjects.begin();
 		pDelStatIter != GetInstance()->m_cStaticObjects.end(); ++pDelStatIter)
 	{
+		//delete the statics
 		MMDEL((*pDelStatIter).second);
 	}
 	GetInstance()->m_cStaticObjects.clear();
-
+	//delete all allocated memory
 	MMDEL(GetInstance()->m_pReflect);
 	MMDEL(GetInstance()->m_pColpt);
+	//free up the objects for item to item collision
+	CObjectManager::GetInstance()->DestroyObject(GetInstance()->GetTurkeyDestroyObject());
+	CObjectManager::GetInstance()->DestroyObject(GetInstance()->GetPieDestroyObject());
+	CObjectManager::GetInstance()->DestroyObject(GetInstance()->GetBananaDestroyObject());
 }
 
 void CCollisionManager::Update(IEvent* pEvent, IComponent* pComponent)
 {
+	//get the data from the event
 	TUpdateStateEvent* pE = (TUpdateStateEvent*)pEvent->GetData();
 	pComponent;
+	//set the delta time
 	GetInstance()->SetTime(pE->m_fDeltaTime);
+	//search for collisions each update
 	GetInstance()->SearchForCollision(pE->m_fDeltaTime);
 }
 void CCollisionManager::AddSepBox(CCollideable* cStatic, unsigned int nObjID)
@@ -509,6 +470,7 @@ void CCollisionManager::AddSepBox(CCollideable* cStatic, unsigned int nObjID)
 }
 void CCollisionManager::RemoveSepBox(CCollideable* /*cStatic*/, unsigned int nObjID)
 {
+	//remove a separated box
 	//find it
 	std::map<unsigned int, CCollideable*, less<unsigned int>, CAllocator
 		<pair<unsigned int, CCollideable*>>>::iterator statiter = \
@@ -542,6 +504,7 @@ void CCollisionManager::AddNonStatic(CCollideable* cCollide, unsigned int nObjID
 
 void CCollisionManager::RemoveNonStatic(CCollideable*, unsigned int nObjID)
 {
+	//find it
 	std::map<unsigned int, CCollideable*, less<unsigned int>, CAllocator
 		<pair<unsigned int, CCollideable*>>>::iterator nonstatiter = \
 		m_cNonStaticObjects.find(nObjID);
@@ -566,61 +529,77 @@ bool CCollisionManager::SphereToSphereIntersection(CCollideable* obj1, CCollidea
 	float fDist = 0.0f;
 	D3DXVECTOR3 v1to2 = s2.cPosition-s1.cPosition;
 	fDist = D3DXVec3Length(&v1to2);
-	float fRadii = s1.fRadius+s2.fRadius;
+	float fRadii = s1.fRadius+s2.fRadius;//the combined radius of the two spheres
+	//if the distance is less than the radii
 	if(fDist <= fRadii)
 	{
+		//there was collision
 		if(!bReact)
-		{
+		{//it won't react, so just return true
 			return true;
 		}
+		//fPen is the penetration distance of the two spheres
 		float fPen = fRadii - fDist;
+		//get vectors pointing to and from each sphere to the other sphere
 		D3DXVECTOR3 v2to1 = s1.cPosition-s2.cPosition;
 		D3DXVec3Normalize(&v1to2, &v1to2);
 		D3DXVec3Normalize(&v2to1, &v2to1);
+		//normalize and scale by the penetration distance
 		v1to2*=fPen;
 		v2to1*=fPen;
+		//the FSDs are the only objects in the game that have spheres and don't move
 		if(obj1->GetObjType() != OBJFSD)
-		{
+		{//not an FSD, so translate
 			obj1->GetParent()->GetTransform()->TranslateFrame(v2to1);
 		}
 		if(obj2->GetObjType() != OBJFSD)
-		{
+		{//also not an FSD, so translate
 			obj2->GetParent()->GetTransform()->TranslateFrame(v1to2);
 		}
-		//		D3DXVec3Normalize(&v1to2, &v1to2);
+		//get the normal for the first objects later reactions
 		v1to2 *= -1.0f;
 		*vReflect = v1to2;	//for impact event
 		D3DXVec3Normalize(vReflect, vReflect);
-
+		//collision happened
 		return true;
 	}
 	else
 	{
+		//collision didn't happen
 		return false;
 	}
 }
 bool CCollisionManager::SphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2,
 												 D3DXVECTOR3* vReflect, bool bReact)
 {
+	//get the closest point to the AABB
 	D3DXVECTOR3 vclosest;
 	ClosestPointToAABB(obj2->GetAABB(), obj1->m_cCenterPoint, vclosest);
-
+	//Get the vector from the AABB to the sphere
 	D3DXVECTOR3 vfromAABB = obj1->GetSphere().cPosition - vclosest;
+	//and the distance of that vector
 	float fDist = D3DXVec3Length(&vfromAABB);
+	//if that distance is less than the sphere's radius
 	if(fDist <= obj1->GetSphere().fRadius) 
 	{
 		//egads!  collision!
 		if(!bReact)
-		{
+		{//but no reaction
 			return true;
 		}
+		//now the reaction
+		//get the AABB's normal from the collision point
 		D3DXVECTOR3 boxNorm = GetAABBNormal(vclosest, obj2->GetAABB());
+		//translate the sphere by the normal * the penetration
 		obj1->GetParent()->GetTransform()->TranslateFrame( (boxNorm * (obj1->GetSphere().fRadius+0.1f - fDist)) );
+		//set the reflect vector to the normal
 		*vReflect = boxNorm;	
+		//return collision
 		return true;
 	}
 	else
 	{
+		//no collision broseidon!
 		return false;
 	}
 }
@@ -628,6 +607,9 @@ bool CCollisionManager::SphereToAABBIntersection(CCollideable* obj1, CCollideabl
 bool CCollisionManager::OBBToAABBIntersection(CCollideable* obj1, CCollideable* obj2,
 											  D3DXVECTOR3* /*tPosition*/, bool bReact)
 {
+	//this function is pretty lengthy, it basically turns the AABB into an OBB, the way
+	//the bounding volumes are defined in each component, the AABB can be treated as an
+	//OBB without any error
 	float fRA, fRB, fTrans;
 	D3DXMATRIX R, AbsR;
 	TOBB bA, bB;	//the two boxes, bA is the obb, bB is the AABB made as an OBB
@@ -710,7 +692,8 @@ bool CCollisionManager::OBBToAABBIntersection(CCollideable* obj1, CCollideable* 
 	fTrans = (fRA+fRB) - D3DXVec3Dot(&vT, &vT); //maybe
 
 	if(!bReact)
-		return true;
+		return true;//no reaction
+	//translate teh objects by their penetration distance
 	D3DXVECTOR3 v1to2, v2to1;
 	v1to2 = obj2->GetOBB().cCenterPoint - obj1->GetOBB().cCenterPoint;
 	v2to1 = obj1->GetOBB().cCenterPoint - obj2->GetOBB().cCenterPoint;
@@ -724,9 +707,13 @@ bool CCollisionManager::OBBToAABBIntersection(CCollideable* obj1, CCollideable* 
 void CCollisionManager::ClosestPointToOBB(TOBB tBox, 
 										  D3DXVECTOR3 tTestPt, D3DXVECTOR3& tClosest)
 {
+	//returns the closest point to the OBb
+	//get a vector from the box
 	D3DXVECTOR3 vVec = tTestPt - tBox.cCenterPoint;
+	//the closest point defaults to the center point of the box
 	tClosest = tBox.cCenterPoint;
 	//for each OBB axis
+	//loop through the axes
 	for(unsigned iaxis = 0; iaxis < 3; ++iaxis)
 	{
 		//project vec onto the axis to get dist
@@ -742,40 +729,22 @@ void CCollisionManager::ClosestPointToOBB(TOBB tBox,
 
 bool CCollisionManager::AABBTOAABBIntersection(CCollideable* obj1, CCollideable* obj2)
 {
+	//get the two boxes' data
 	TAABB BV1, BV2;
 	BV1.cBoxMax = obj1->GetAABB().cBoxMax;
 	BV1.cBoxMin = obj1->GetAABB().cBoxMin;
 	BV2.cBoxMin = obj2->GetAABB().cBoxMin;
 	BV2.cBoxMax = obj2->GetAABB().cBoxMax;
+	//return true if the min/max of the two boxes overlap, minx>maxx/maxx<minx/etc.
 	return (BV1.cBoxMin.x > BV2.cBoxMax.x || BV1.cBoxMax.x < BV2.cBoxMin.x ||
 		BV1.cBoxMin.y > BV2.cBoxMax.y || BV1.cBoxMax.y < BV2.cBoxMin.y ||
 		BV1.cBoxMin.z > BV2.cBoxMax.z || BV1.cBoxMax.z < BV2.cBoxMin.z);
 }
-//////////////////////////////////////////////////////////////////////////
-//Frustum collision functions
-// these functions are used for frustum culling
-//////////////////////////////////////////////////////////////////////////
 
-void CCollisionManager::CheckFrustDist(float fDist, CCollideable* pCheck,
-									   bool &collide, bool &behind, bool &intersect)
-{
-
-	if(abs(fDist) <= pCheck->GetSphere().fRadius)
-	{
-		collide = true;
-	}
-	else if(fDist < -pCheck->GetSphere().fRadius)
-	{
-		behind = true;
-	}
-	else if(fDist <= pCheck->GetSphere().fRadius)
-	{
-		intersect = true;
-	}
-}
 bool CCollisionManager::SphereToOBBIntersection(CCollideable* obj1, CCollideable* obj2,
 												D3DXVECTOR3* /*tPosition*/, bool bReact)
 {
+
 	D3DXVECTOR3 tClosest;
 	ClosestPointToOBB(obj2->GetOBB(), obj1->GetSphere().cPosition, tClosest);
 	//they intersect if the squared distance from sphere center to tClosest is less than
@@ -783,15 +752,19 @@ bool CCollisionManager::SphereToOBBIntersection(CCollideable* obj1, CCollideable
 	D3DXVECTOR3 tV = tClosest - obj1->GetSphere().cPosition;
 	bool collision = (D3DXVec3Dot(&tV, &tV) <= obj1->GetSphere().fRadius*obj1->GetSphere().fRadius);
 	if(!bReact)
-		return collision;
+		return collision;//no reaction
 	if(collision)
-	{
+	{//collision reaction time
 		D3DXVECTOR3 vreflect, vclosest;
+		//get the closest point to the OBB
 		ClosestPointToOBB(obj2->GetOBB(), obj1->GetSphere().cPosition, vclosest);
+		//make a vector to it
 		vreflect = vclosest - obj1->GetSphere().cPosition;
+		//normalize it, scale it, and translate the sphere by it
 		D3DXVec3Normalize(&tV, &tV);
 		obj2->GetParent()->GetTransform()->TranslateFrame(vreflect*0.25f);//tV * D3DXVec3Length(&vreflect));
 	}
+	//return your collision status
 	return collision;	
 }
 bool CCollisionManager::OBBToOBBIntersection(CCollideable* obj1, CCollideable* obj2,
@@ -882,14 +855,17 @@ bool CCollisionManager::OBBToOBBIntersection(CCollideable* obj1, CCollideable* o
 	fRA = bA.tE[0] * AbsR.m[1][2] + bA.tE[1] * AbsR.m[0][2];
 	fRB = bB.tE[0] * AbsR.m[2][1] + bB.tE[1] * AbsR.m[2][0];
 	if(fabs(vT[1]	* R.m[0][2] - vT[0] * R.m[1][2]) > fRA + fRB) return false;
-	fTrans = (fRA+fRB) - D3DXVec3Dot(&vT, &vT); //maybe
+	fTrans = (fRA+fRB) - D3DXVec3Length(&vT); //maybe
 
 	if(!bReact)
-		return true;
+		return true;//no reaction
+	//make vectors inbetween the two boxes
 	D3DXVECTOR3 v1to2, v2to1;
 	v1to2 = obj2->GetOBB().cCenterPoint - obj1->GetOBB().cCenterPoint;
 	v2to1 = obj1->GetOBB().cCenterPoint - obj2->GetOBB().cCenterPoint;
+	//normalize them
 	D3DXVec3Normalize(&v1to2, &v1to2); D3DXVec3Normalize(&v2to1, &v2to1);
+	//translate the two objects by their respective vector scaled by the penetration distance
 	obj1->GetParent()->GetTransform()->TranslateFrame(v1to2 * fTrans/4.0f);
 	obj2->GetParent()->GetTransform()->TranslateFrame(v2to1 * fTrans/4.0f);
 
@@ -897,30 +873,32 @@ bool CCollisionManager::OBBToOBBIntersection(CCollideable* obj1, CCollideable* o
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//Collision Line Functions
-// these functions are used mostly by AI entities for pathfinding
-//////////////////////////////////////////////////////////////////////////
 bool CCollisionManager::LineToSphereIntersection(TLine tLine, TSphere tSphere, D3DXVECTOR3& tColPoint)
 {
+	//make a vector for the line, and for the linestart to the sphere center
 	D3DXVECTOR3 vL = tLine.cLineEnd - tLine.cLineStart;
+	//get the line direction normal
 	D3DXVECTOR3 vLN;
 	D3DXVec3Normalize(&vLN, &vL);
 	D3DXVECTOR3 vV = tSphere.cPosition - tLine.cLineStart;
+	//dot them together
 	float fD = D3DXVec3Dot(&vLN, &vV);
+	//scale the normal of the line
 	D3DXVECTOR3 vNScaled = vLN * fD;
-
+	//determine the closest point
 	D3DXVECTOR3 closestpt = tLine.cLineStart + vNScaled;	//closest point
-
 	D3DXVECTOR3 closesttocenter = tSphere.cPosition = closestpt;
 	float fDist = D3DXVec3Length(&closesttocenter);
+
 	if(fDist > tSphere.fRadius)
-	{
+	{//collision!
+		//tColPoint represents the surface normal of the collision
 		tColPoint = closesttocenter;
 		return true;
 	}
 	else
 	{
+		//no collision
 		return false;
 	}
 }
@@ -987,108 +965,6 @@ bool CCollisionManager::LineToTriangle(TLine tLine, TTriangle triangle, D3DXVECT
 	return hasCollided;
 
 }
-bool CCollisionManager::LineToAABBIntersection(TLine tLine, TAABB tAABB, D3DXVECTOR3& tColPoint)
-{
-	//R(t) = P +td, t>=0
-	//p = ray start
-	//d = ray direction
-	//t = some time on the ray
-	D3DXVECTOR3 tColPt, tPrevColPt;
-	tColPt = tPrevColPt = tLine.cLineEnd;
-	TRay tRay;
-	tRay.cRayStart = tLine.cLineStart;
-	tRay.cRayNormal = tLine.cLineEnd - tLine.cLineStart;
-	// 	D3DXVec3Normalize(&tRay.cRayNormal, &tRay.cRayNormal);
-	vector<TTriangle> BBTris = GetAABBTriangles(tAABB);
-	unsigned int intersects = 0;	//num intersects
-	for(unsigned itris = 0; itris < BBTris.size(); ++itris)
-	{
-		if(LineToTriangle( tLine, BBTris[itris], tColPt))
-		{
-			D3DXVECTOR3 linetocolpt = tColPt - tLine.cLineStart;
-			D3DXVECTOR3 linetolineend = tLine.cLineEnd - tLine.cLineStart;
-			float lentocolpt, lentolineend; lentolineend = lentocolpt = 0.0f;
-			lentocolpt = D3DXVec3Dot(&linetocolpt, &linetocolpt);
-			lentolineend = D3DXVec3Dot(&linetolineend, &linetolineend);
-			if(lentocolpt <= lentolineend)
-			{
-				tColPoint = GetCloserPt(tColPt, tPrevColPt, tLine.cLineStart);
-				tPrevColPt = tColPt;
-				++intersects;
-			}
-		}
-	}
-	BBTris.clear();
-	if (intersects >= 1)
-	{
-		return true;
-	}
-	return false;
-}
-bool CCollisionManager::LineToWayPoint(TLine tLine, D3DXVECTOR3 &tClosestPt)
-{
-	std::map<unsigned int, CCollideable*, less<unsigned int>, CAllocator
-		<pair<unsigned int, CCollideable*>>>::iterator pSIter;	
-	D3DXVECTOR3 tClosestPtCollision = tLine.cLineEnd;	//closest point of collision
-	D3DXVECTOR3 tClosestTemp = tLine.cLineEnd;			//temp closest for function returns
-	bool bCollision = false;											//collision function returns here
-	bool bWasInterrupted = false;									//set to true if the line ever intersected
-	D3DXVECTOR3 tEarlyOutpt = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 tEarlyOutVec;	//vector to the closest point on the shape
-	D3DXVECTOR3 tlinevec = tLine.cLineStart - tLine.cLineEnd;
-	float sRadius = 0.0f;
-	for(pSIter = m_cStaticObjects.begin(); pSIter != m_cStaticObjects.end(); ++pSIter)
-	{
-		switch( (*pSIter).second->GetBVType() )
-		{
-		case BSPHERE:
-			{
-				tEarlyOutVec = (*pSIter).second->GetSphere().cPosition - tLine.cLineStart;
-				sRadius = (*pSIter).second->GetSphere().fRadius;// * (*pSIter).second->GetSphere().fRadius;
-				if(D3DXVec3Length(&tEarlyOutVec)+sRadius < D3DXVec3Length(&tlinevec))
-				{
-					bCollision = LineToSphereIntersection(tLine, (*pSIter).second->GetSphere(), tClosestTemp);
-				}
-			}
-			break;
-		case BAABB:
-			{
-
-				ClosestPointToAABB((*pSIter).second->GetAABB(), tLine.cLineStart, tEarlyOutpt);
-				tEarlyOutVec = tEarlyOutpt - tLine.cLineStart;
-				if(D3DXVec3Dot(&tEarlyOutVec, &tEarlyOutVec) < D3DXVec3Dot(&tlinevec, &tlinevec))
-				{
-					bCollision = LineToAABBIntersection(tLine, (*pSIter).second->GetAABB(), tClosestTemp);
-				}
-			}
-			break;
-		default:
-			{
-				bCollision = false;
-			}
-			break;
-		}
-		if(bCollision)
-		{
-			D3DXVECTOR3 linetoColpt = tClosestTemp - tLine.cLineStart;
-			D3DXVECTOR3 linevector = tLine.cLineEnd - tLine.cLineStart;
-			float fLenToColpt = D3DXVec3Dot(&linetoColpt, &linetoColpt);
-			float fLenToLineEnd = D3DXVec3Dot(&linevector, &linevector);
-			if(fLenToColpt > fLenToLineEnd)
-			{//if the distance to the colpt is greater than the length of the line
-				bCollision = false;
-				continue;		//should go to next iteration of loop
-			}
-			else
-			{
-				bWasInterrupted = true;
-				tClosestPtCollision = GetCloserPt(tClosestPtCollision, tClosestTemp, tLine.cLineStart);
-				tClosestPt = tClosestPtCollision;		//make sure it's set
-			}
-		}
-	}
-	return bWasInterrupted;
-}
 
 bool CCollisionManager::PointInTriangle(TTriangle tTri, D3DXVECTOR3 tTestPt)
 {
@@ -1129,14 +1005,10 @@ int CCollisionManager::HalfSpaceTest(D3DXVECTOR3 tNorm,
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-
 float Clamp(float n, float min, float max)
 {
+	//clamps a value between the min and max values
+	//if less than min, =min, if more than max, =max
 	if(n < min) return min;
 	if(n > max) return max;
 	return n;
@@ -1259,112 +1131,60 @@ int Test2DSegmentSegment(D3DXVECTOR2 a, D3DXVECTOR2 b, D3DXVECTOR2 c, D3DXVECTOR
 	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
-
 D3DXVECTOR3 CCollisionManager::ClosestPointOnLine(TLine line, D3DXVECTOR3 testpt)
 {
 	D3DXVECTOR3 closest;
 	D3DXVECTOR3 linevec, tV;
 	float fDot = 0.0f;
+	//get the vector of the line
 	linevec = line.cLineEnd - line.cLineStart;
 	D3DXVec3Normalize(&linevec, &linevec);
+	//get a vector to the test point
 	tV = testpt - line.cLineStart;
+	//dot the two vectors we have so far
 	fDot = D3DXVec3Dot(&linevec, &tV);
+	//scale the line by the dot result
 	linevec *= fDot;
+	//the closest point is now the start plus the scaled vector
 	closest = line.cLineStart + linevec;
 	return closest;
 }
 bool CCollisionManager::RayToLineIntersection(TRay tRay, TLine tSegment)
 {
+	//time of intersection
 	float t = 0.0f;
 	D3DXVECTOR2 p;
-
+	//make the ray into a segment
 	D3DXVECTOR3 temp = tRay.cRayStart + (tRay.cRayNormal * 10.0f);
-
+	//test the two segments
 	return Test2DSegmentSegment(
 		D3DXVECTOR2(tSegment.cLineStart.x, tSegment.cLineStart.z),
 		D3DXVECTOR2(tSegment.cLineEnd.x, tSegment.cLineEnd.z),
 		D3DXVECTOR2(tRay.cRayStart.x, tRay.cRayStart.z),
 		D3DXVECTOR2(temp.x, temp.z),	t, p) == 1 ? true : false;
 
-
-	/*
-	// Our not-so-great collision test
-	float fM1, fM2, fB1, fB2;//__1 = segment, __2 = ray
-	fM2 = fM1 = fB2 = fB1 = 0.0f;
-	D3DXVECTOR2 tRayStart, tRayDir, tLineStart, tLineEnd, tRayVec, tLineVec, colpt;
-	tRayStart.x = tRay.cRayStart.x; 
-	tRayStart.y = tRay.cRayStart.z;
-	tRayDir.x = tRay.cRayNormal.x;
-	tRayDir.y = tRay.cRayNormal.z;
-	tLineStart.x = tSegment.cLineStart.x - tRayStart.x; 
-	tLineStart.y = tSegment.cLineStart.z - tRayStart.y;
-	tLineEnd.x = tSegment.cLineEnd.x - tRayStart.x;
-	tLineEnd.y = tSegment.cLineEnd.z - tRayStart.y;
-	tLineVec = tLineEnd - tLineStart;
-	fM2 = tRayDir.y/tRayDir.x;
-
-	fB2 = 0.0f;
-	float fX = 0.0f, fY = 0.0f;
-	if (tLineVec.x == 0.0f)
-	{
-	colpt.x = tLineStart.x;
-	colpt.y = fM2*tLineStart.x;  
-	return ((colpt.y >= tLineStart.y) == (colpt.y <= tLineEnd.y)) 
-	&& (D3DXVec2Dot(&colpt, &tRayDir) > 0.0f);
-	}
-	else
-	{
-	fM1 = tLineVec.y/tLineVec.x;
-	fB1 = tLineStart.y - tLineStart.x*fM1;
-	fX = (fB1 - fB2)/(fM2-fM1);
-	fY = fM1 * fX + fB1;
-	if(FloatEquals(fM1, fM2, FLT_EPSILON)) return false; //parallellofalse
-	if((fX >= tLineStart.x) == (fX <= tLineEnd.x))
-	{
-	colpt = D3DXVECTOR2(fX, fY);
-	D3DXVECTOR2 tempvec = colpt;
-	return (D3DXVec2Dot(&tRayDir, &tempvec) > 0);
-	}
-	}
-	*/
-
 }
-bool CCollisionManager::LineTestAvoidance(TLine /*tLine*/, float /*fRayDist*/, D3DXVECTOR3 &/*tSurfaceNorm*/)
-{
-	//NOTE: the mac and mac attack are back again wanting some shit done in here - raymoney
-	return false;
-}
-/////////////////////////////////////////////s/////////////////////////////
-//Collision Support Functions
-// these functions serve to assist the collision check functions
-// they will be only be called from within the collision manager
-//////////////////////////////////////////////////////////////////////////
-//bool CCollisionManager::PointInCone(D3DXVECTOR3 tPlayerMove, D3DXVECTOR3 tPlayerPos, 
-//									D3DXVECTOR3 tTargetPos, float fCone)
-//{
-//	return false;
-//}
+
 void CCollisionManager::ClosestPointToAABB(TAABB tBox, D3DXVECTOR3 tTestPt, D3DXVECTOR3& tClosest)
 {
+	//loop through the axes
 	for (unsigned iaxis = 0; iaxis < 3; ++iaxis)
 	{
+		//fVal is = the test point on that axis
 		float fVal = tTestPt[iaxis];
+		//if less than the min, its the min, if greater than the max, its the max
 		if(fVal < tBox.cBoxMin[iaxis]) fVal = tBox.cBoxMin[iaxis];	// val = max(val, min[i]
 		if(fVal > tBox.cBoxMax[iaxis]) fVal = tBox.cBoxMax[iaxis];// val = min(val, max[i]
+		//assign the closest at that axis to fVal
 		tClosest[iaxis] = fVal;
 	}
 }
 D3DXVECTOR3 CCollisionManager::GetAABBNormal(D3DXVECTOR3 colPt, TAABB colBox)
 {
+	//checks which axis of the collision point matches an axis on the AABB
 	D3DXVECTOR3 vNorm;
 	D3DXVECTOR3 vCenter = (colBox.cBoxMax + colBox.cBoxMin)/2.0f;
 	D3DXVECTOR3 vRelativeSide = D3DXVECTOR3(0.0f, vCenter.y, 0.0f);
-
 	if(FloatEquals(colPt.x, colBox.cBoxMax.x, 0.1f))
 	{
 		vRelativeSide.x = colBox.cBoxMax.x;
@@ -1386,6 +1206,7 @@ D3DXVECTOR3 CCollisionManager::GetAABBNormal(D3DXVECTOR3 colPt, TAABB colBox)
 		vRelativeSide.z = colBox.cBoxMin.z;
 		vRelativeSide.x = vCenter.x;
 	}
+	//we have the side its on, subtract the center for a vector pointing out of that side's normal
 	vNorm = vRelativeSide - vCenter;
 	D3DXVec3Normalize(&vNorm, &vNorm);
 
@@ -1393,8 +1214,10 @@ D3DXVECTOR3 CCollisionManager::GetAABBNormal(D3DXVECTOR3 colPt, TAABB colBox)
 }
 D3DXVECTOR3 CCollisionManager::GetSphereNormal(D3DXVECTOR3 colPt, TSphere colSphere)
 {
+	//make a vector to the collision point
 	D3DXVECTOR3 vNorm;
 	vNorm = colPt - colSphere.cPosition;
+	//normalize it, we now have a normal
 	D3DXVec3Normalize(&vNorm, &vNorm);
 	return vNorm;
 }
@@ -1402,78 +1225,12 @@ D3DXVECTOR3 CCollisionManager::GetSphereNormal(D3DXVECTOR3 colPt, TSphere colSph
 D3DXVECTOR3 CCollisionManager::GetReflectedVector(D3DXVECTOR3 vDir, D3DXVECTOR3 vNorm)
 {
 	D3DXVECTOR3 vReflection;
+	//reflect the vector off of the normal
 	//VNew = -2*(v Dot N)*N + v;
 	vReflection = -2 * ( D3DXVec3Dot(&vDir, &vNorm) )*vNorm + vDir;
 	return vReflection;
 }
-std::vector<TTriangle> CCollisionManager::GetAABBTriangles(TAABB aabb)
-{
-	std::vector<TTriangle> tBBTris;
-	D3DXVECTOR3 tmin, tmax;
-	tmin = aabb.cBoxMin;
-	tmax = aabb.cBoxMax;
-	D3DXVECTOR3 v0, v1, v2, v3;
-	D3DXVECTOR3 e1, e2, tnorm;
-	TTriangle newtri;
-	//front
-	v0 = D3DXVECTOR3( tmin.x, tmax.y, tmin.z );
-	v1 = D3DXVECTOR3( tmax.x, tmax.y, tmin.z );
-	v2 = D3DXVECTOR3( tmax.x, tmin.y, tmin.z );
-	v3 = D3DXVECTOR3( tmin.x, tmin.y, tmin.z );
-	e1 = v1 - v0;
-	e2 = v3 - v0;
-	D3DXVec3Cross(&tnorm, &e1, &e2);
-	D3DXVec3Normalize(&tnorm, &tnorm);
-	newtri.tNorm = tnorm;
-	newtri.tVert0 = v0;	newtri.tVert1 = v1;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	newtri.tVert0 = v1;	newtri.tVert1 = v2;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	//back
-	v0 = D3DXVECTOR3( tmax.x, tmax.y, tmax.z );
-	v1 = D3DXVECTOR3( tmin.x, tmax.y, tmax.z );
-	v2 = D3DXVECTOR3( tmin.x, tmin.y, tmax.z );
-	v3 = D3DXVECTOR3( tmax.x, tmin.y, tmax.z );
-	//	e1 = v1 - v0;
-	//	e2 = v3 - v0;
-	//	D3DXVec3Cross(&tnorm, &e1, &e2);
-	tnorm = -tnorm;
-	//	D3DXVec3Normalize(&tnorm, &tnorm);
-	newtri.tNorm = tnorm;
-	newtri.tVert0 = v0;	newtri.tVert1 = v1;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	newtri.tVert0 = v1;	newtri.tVert1 = v2;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	//left
-	v0 = D3DXVECTOR3( tmin.x, tmax.y, tmax.z );
-	v1 = D3DXVECTOR3( tmin.x, tmax.y, tmin.z );
-	v2 = D3DXVECTOR3( tmin.x, tmin.y, tmin.z );
-	v3 = D3DXVECTOR3( tmin.x, tmin.y, tmax.z );
-	e1 = v1 - v0;
-	e2 = v3 - v0;
-	D3DXVec3Cross(&tnorm, &e1, &e2);
-	D3DXVec3Normalize(&tnorm, &tnorm);
-	newtri.tNorm = tnorm;
-	newtri.tVert0 = v0;	newtri.tVert1 = v1;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	newtri.tVert0 = v1;	newtri.tVert1 = v2;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	//right
-	v0 = D3DXVECTOR3( tmax.x, tmax.y, tmin.z );
-	v1 = D3DXVECTOR3( tmax.x, tmax.y, tmax.z );
-	v2 = D3DXVECTOR3( tmax.x, tmin.y, tmax.z );
-	v3 = D3DXVECTOR3( tmax.x, tmin.y, tmin.z );
-	//	e1 = v1 - v0;
-	//	e2 = v3 - v0;
-	//	D3DXVec3Cross(&tnorm, &e1, &e2);
-	tnorm = -tnorm;
-	newtri.tNorm = tnorm;
-	newtri.tVert0 = v0;	newtri.tVert1 = v1;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	newtri.tVert0 = v1;	newtri.tVert1 = v2;	newtri.tVert2 = v3;
-	tBBTris.push_back(newtri);
-	return tBBTris;
-}
+
 D3DXVECTOR3 CCollisionManager::GetCloserPt(D3DXVECTOR3 tPt1, D3DXVECTOR3 tPt2, D3DXVECTOR3 tTestpt)
 {
 	float fDist1, fDist2;		//distances from tTestpt to tPt1 and tPt2 respectively
@@ -1488,30 +1245,29 @@ D3DXVECTOR3 CCollisionManager::GetCloserPt(D3DXVECTOR3 tPt1, D3DXVECTOR3 tPt2, D
 	return fDist1 <= fDist2 ? tPt1 : tPt2;	//bamf!
 }
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////collision functions ^
-//////////////////////////////////////////////////////////////////////////
-
-
-
-void CCollisionManager::CheckRam(CCollideable* obj1, CCollideable* obj2, D3DXVECTOR3 tvel1, D3DXVECTOR3 tvel2)
+bool CCollisionManager::TestIndividualCollisionsSphere(CCollideable* pCol)
 {
-	D3DXVECTOR3 t1to2 = obj2->GetSphere().cPosition - obj1->GetSphere().cPosition;
-	D3DXVECTOR3 t2to1 = obj1->GetSphere().cPosition - obj2->GetSphere().cPosition;
-	if(D3DXVec3Dot(&t1to2, &tvel1) > 0)
+	//this function takes a single collideable component and tests it against all the static objects
+	//the reactions still happen during TestCollision
+	ColMap::iterator pSiter = m_cStaticObjects.begin();
+	CCollideable* pSObj;
+	bool collision = false;
+	for( ; pSiter != m_cStaticObjects.end(); ++pSiter)
 	{
-		SendRamEvent("CRamEvent", obj1, obj1->GetParent(), obj2->GetParent());
+		pSObj = (*pSiter).second;
+		if(pSObj->GetObjType() != OBJPLAYER && pSObj->GetReactor())
+		{
+			collision = TestCollision(pCol, pSObj);
+			if(collision)
+				return collision;
+		}
 	}
-	if(D3DXVec3Dot(&t2to1, &tvel2) > 0)
-	{
-		SendRamEvent("CRamEvent", obj2, obj1->GetParent(), obj1->GetParent());
-	}
+	return collision;
 }
-
-
 void CCollisionManager::SearchForCollision(float /*fDeltaTime*/)
 {
-
+	//TestCollision() all non statics against each other, and all non statics against all statics
+	//doesn't test statics against each other
 	if(m_cNonStaticObjects.size() + m_cStaticObjects.size() < 2)//not enough collideables
 		return;
 	std::map<unsigned int, CCollideable*, less<unsigned int>, CAllocator
@@ -1523,6 +1279,7 @@ void CCollisionManager::SearchForCollision(float /*fDeltaTime*/)
 
 	for(pSobj1 = m_cNonStaticObjects.begin(); pSobj1 != m_cNonStaticObjects.end(); ++pSobj1)
 	{
+		//loop non statics with non statics
 		for(pNonSobj1 = m_cStaticObjects.begin(); pNonSobj1 != m_cStaticObjects.end(); ++pNonSobj1)
 		{
 			if( 	!(*pSobj1).second->GetWasChecked() && !(*pNonSobj1).second->GetWasChecked() )
@@ -1530,25 +1287,25 @@ void CCollisionManager::SearchForCollision(float /*fDeltaTime*/)
 				TestCollision( (*pSobj1).second, (*pNonSobj1).second );
 			}
 		}
+		//loop non statics with statics
 		for(pSobj2 = m_cNonStaticObjects.begin(); pSobj2 != m_cNonStaticObjects.end(); ++pSobj2)
 		{
-			if( (*pSobj1) != (*pSobj2)/* &&
-									  !(*pSobj1).second->GetWasChecked() && !(*pSobj2).second->GetWasChecked()*/ )
+			if( (*pSobj1) != (*pSobj2) )
 			{
 				TestCollision((*pSobj1).second, (*pSobj2).second);
 			}
 		}
-
-	TestObjAgainstWall(pSobj1->second);
+		//test the object against the wall
+		TestObjAgainstWall(pSobj1->second);
 		(*pSobj1).second->SetWasChecked(true);
 	}
+	//uncheck all the objects
 	SetAllNotChecked();
 }
 
 bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 {
-	D3DXVECTOR3 vObjNormal = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
-
+	//update the data for certain BVTypes, such as position, Extents, local axis, etc.
 	if(obj1->GetBVType() == BSPHERE)
 	{
 		TSphere update1;
@@ -1565,25 +1322,6 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 		update2.fRadius = obj2->GetSphere().fRadius;
 		obj2->SetSphere(update2);
 	}
-	if(obj1->GetBVType() == BCAPSULE)
-	{
-		obj1->m_tLocalAxes[0].x = obj1->GetParent()->GetTransform()->GetLocalMatrix()._11;
-		obj1->m_tLocalAxes[0].y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._12;
-		obj1->m_tLocalAxes[0].z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._13;
-								
-		obj1->m_tLocalAxes[1].x = obj1->GetParent()->GetTransform()->GetLocalMatrix()._21;
-		obj1->m_tLocalAxes[1].y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._22;
-		obj1->m_tLocalAxes[1].z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._23;
-								
-		obj1->m_tLocalAxes[2].x = obj1->GetParent()->GetTransform()->GetLocalMatrix()._31;
-		obj1->m_tLocalAxes[2].y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._32;
-		obj1->m_tLocalAxes[2].z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._33;
-		TCapsule updatecap;
-		updatecap.cRear = obj1->GetParent()->GetTransform()->GetWorldPosition();
-		updatecap.cFront = updatecap.cRear * obj1->GetParent()->GetTransform()->GetLocalMatrix()._33*1.0f;
-		updatecap.fRadius = obj1->GetSphere().fRadius;
-		obj1->SetCapsule(updatecap);
-	}
 	if(obj1->GetBVType() == BOBB)
 	{
 		TOBB tbox;
@@ -1592,11 +1330,11 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 		tbox.tU[0].x = obj1->GetParent()->GetTransform()->GetLocalMatrix()._11;
 		tbox.tU[0].y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._12;
 		tbox.tU[0].z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._13;
-		
+
 		tbox.tU[1].x = obj1->GetParent()->GetTransform()->GetLocalMatrix()._21;
 		tbox.tU[1].y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._22;
 		tbox.tU[1].z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._23;
-		
+
 		tbox.tU[2].x = obj1->GetParent()->GetTransform()->GetLocalMatrix()._31;
 		tbox.tU[2].y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._32;
 		tbox.tU[2].z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._33;
@@ -1610,18 +1348,32 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 		tbox.tU[0].x = obj2->GetParent()->GetTransform()->GetLocalMatrix()._11;
 		tbox.tU[0].y = obj2->GetParent()->GetTransform()->GetLocalMatrix()._12;
 		tbox.tU[0].z = obj2->GetParent()->GetTransform()->GetLocalMatrix()._13;
-		
+
 		tbox.tU[1].x = obj2->GetParent()->GetTransform()->GetLocalMatrix()._21;
 		tbox.tU[1].y = obj2->GetParent()->GetTransform()->GetLocalMatrix()._22;
 		tbox.tU[1].z = obj2->GetParent()->GetTransform()->GetLocalMatrix()._23;
-		
+
 		tbox.tU[2].x = obj2->GetParent()->GetTransform()->GetLocalMatrix()._31;
 		tbox.tU[2].y = obj2->GetParent()->GetTransform()->GetLocalMatrix()._32;
 		tbox.tU[2].z = obj2->GetParent()->GetTransform()->GetLocalMatrix()._33;
 		obj2->SetOBB(tbox);
 	}
+	//if the object might tunnel next frame
+	if(obj1->m_bNextFrameTunneling)
+	{
+		//set up a vector to their previous position and translate them to that position
+		D3DXVECTOR3 pos, vToprevpos;
+		pos = obj1->GetSphere().cPosition;
+		vToprevpos = obj1->m_vPrevPos - pos;
+		obj1->GetParent()->GetTransform()->TranslateFrame(vToprevpos);
+		//send the impact event for the object that may be tunneled through
+		SendImpactEvent("EnvironmentHit", (IComponent*)GetInstance(), obj1->GetParent(), 
+			obj1->m_cTunneledObject, obj1->m_vPrevNorm, PRIORITY_IMMEDIATE);
+		obj1->m_bNextFrameTunneling = false;
+		return true;
+	}
 
-
+	//object to object collision cases, each variation of the OBJType is handled differently
 	switch(obj1->GetObjType())
 	{
 	case OBJPLAYER:
@@ -1629,41 +1381,26 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 			switch(obj2->GetObjType())
 			{
 			case OBJPLAYER:
-				{
-//					if(SphereToSphereIntersection(obj1, obj2, m_pReflect, true))
+				{//player to player
 					if(OBBToOBBIntersection(obj1, obj2, m_pReflect, true))
 					{
-//						SphereToSphereIntersection(obj1, obj2, m_pReflect, true);//this will correctly set the reflect at least
-						//player to player
 						// Swapped the order of cart ram and cart collision so that
 						//   the speed reduction in cart collision doesn't affect cart ram
-
-
-						// DONT F'ING TOUCH THIS THIS IS WHY WE DROPPED MULTIPLE ITEMS LEAVE THIS ALONE!!!!! - Agent Smith
 						SendRamEvent("CartRam", (IComponent*)GetInstance(), obj1->GetParent(), obj2->GetParent());
 						SendRamEvent("CartRam", (IComponent*)GetInstance(), obj2->GetParent(), obj1->GetParent());
-						// end yell
-
-						//send out the collision response event once for each cart involved
 						// object 1 collided with object 2
-						//NOTE: the vReflect being passed through the event here is quite possibly wrong, but it is quite possibly right to	-Raymoney Cashdollar
+						D3DXVECTOR3 ColPoint = GetCollisionPtSpheres(obj1, obj2);
 						SendImpactEvent("CartCollision", (IComponent*)GetInstance(), obj1->GetParent(), 
-							obj2->GetParent(), *m_pReflect,PRIORITY_IMMEDIATE);		
+							obj2->GetParent(), *m_pReflect,PRIORITY_IMMEDIATE, ColPoint);		
 						//	object 2 collided with object 1
 						SendImpactEvent("CartCollision", (IComponent*)GetInstance(), obj2->GetParent(),
-							obj1->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
-						if (CHUDManager::GetInstance()->GetPlayerNum(obj1->GetParent()) == 0 || 
-							CHUDManager::GetInstance()->GetPlayerNum(obj2->GetParent()) == 0)
-						{
-							CWwiseSoundManager::GetInstance()->PlayTheSound(CART_PLAYER_COLLISION, BIKER_ID);
-						}
+							obj1->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE, ColPoint);
 						return true;
 					}
 				}
 				break;
 			case OBJGITEM:
 				{//player to goal item
-//					if(SphereToSphereIntersection(obj1, obj2, m_pReflect, false))
 					if(SphereToOBBIntersection(obj2, obj1, m_pReflect, false))
 					{
 						SendGoalItemCollectedEvent("GoalItemCollision", (IComponent*)GetInstance(), 
@@ -1674,7 +1411,6 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 				break;
 			case OBJHELDITEM:
 				{//player to held item
-//					if(SphereToSphereIntersection(obj1, obj2, m_pReflect, false))
 					if(SphereToOBBIntersection(obj2, obj1, m_pReflect, false))
 					{
 						SendHeldItemCollectedEvent("HeldItemCollision",
@@ -1685,7 +1421,6 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 				break;
 			case OBJPITEM:
 				{//player to pick up item
-//					if(SphereToSphereIntersection(obj1, obj2, m_pReflect, false))
 					if(SphereToOBBIntersection(obj2, obj1, m_pReflect, false))
 					{
 						SendGoalItemCollectedEvent("PickupItemCollision",
@@ -1694,38 +1429,14 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					}
 				}
 				break;
-			case OBJWALL:
-				{//player to wall
-//					if(SphereToPlaneIntersection(obj1, obj2, m_pReflect, true))
-//					{
-//						SendImpactEvent("EnvironmentHit", (IComponent*)GetInstance(),
-//							obj1->GetParent(), obj2->GetParent(), obj2->GetPlane().cPlaneNormal, PRIORITY_IMMEDIATE);
-//						////sound hack
-//
-//						if (CHUDManager::GetInstance()->GetPlayerNum(obj1->GetParent()) == 0 || 
-//							CHUDManager::GetInstance()->GetPlayerNum(obj2->GetParent()) == 0)
-//						{
-//							CWwiseSoundManager::GetInstance()->PlayTheSound(CART_WALL_COLLISION, BIKER_ID);
-//						}
-//
-//						return true;
-//					}
-					return false;//!!!! hack, needs to think the wall is a tree-ingle
-				}
-				break;
 			case OBJSHELF:
 				{//player to shelf
-//					if(SphereToAABBIntersection(obj1, obj2, m_pReflect, true))
-//					if(OBBToAABBIntersection(obj1, obj2, m_pReflect, true))
-//					if(MovingSphereToAABBIntersection(obj1, obj2, m_pReflect, true))
 					D3DXVECTOR3 velociraptor = obj1->m_tLocalAxes[2];
 					D3DXVec3Normalize(&velociraptor, &velociraptor);
 					float fsped = CMovementManager::GetInstance()->GetPlayerSpeed(obj1->GetParent());
 					velociraptor *= fsped;
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
 					{
-						//						SendObjectEvent("ShelfHit", obj1, obj2->GetParent());
-						//						vObjNormal = GetAABBNormal(m_pReflect, obj2->GetAABB());
 						SendImpactEvent("EnvironmentHit", (IComponent*)GetInstance(), obj1->GetParent(), 
 							obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
@@ -1735,7 +1446,6 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 			case OBJFSD:
 				{//player to free standing display(the circle things)
 					if(SphereToSphereIntersection(obj1, obj2, m_pReflect, true))
-//					if(OBBToAABBIntersection(obj1, obj2, m_pReflect, true))
 					{
 						// dont send so we just slide off
 						SendImpactEvent("EnvironmentHit", (IComponent*)GetInstance(), obj1->GetParent(), 
@@ -1751,10 +1461,9 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					float fsped = CMovementManager::GetInstance()->GetPlayerSpeed(obj1->GetParent());
 					velociraptor *= fsped;
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
-//					if(SphereToAABBIntersection(obj1, obj2, m_pReflect, true))
-//					if(OBBToAABBIntersection(obj1, obj2, m_pReflect, true))
 					{
-						SendObjectEvent("EndcapHit", (IComponent*)GetInstance(), obj2->GetParent());
+						SendImpactEvent("EnvironmentHit", (IComponent*)GetInstance(), obj1->GetParent(), 
+							obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
 					}
 				}
@@ -1762,7 +1471,6 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 			case OBJCHECKOUT:
 				{//player to checkout
 					if(SphereToAABBIntersection(obj1, obj2, m_pReflect, false))
-//					if(OBBToAABBIntersection(obj1, obj2, m_pReflect, false))//really don't need a complex test to see if you're there -raymoney
 					{
 						SendObjectEvent("CheckoutCollision", obj1, obj1->GetParent());
 						return true;
@@ -1775,7 +1483,6 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 			case OBJPIE:
 			case OBJTURKEY:
 				{//player to used held item
-//					if(SphereToSphereIntersection(obj1, obj2, m_pReflect, false))
 					if(SphereToOBBIntersection(obj2, obj1, m_pReflect, false))
 					{
 						SendImpactEvent("HeldItemInWorldPlayerCollision", obj1, 
@@ -1795,10 +1502,10 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 			{
 			case OBJWALL:
 				{//pickup item to wall
-//					if(SphereToPlaneIntersection(obj1, obj2, m_pReflect, true))
-//					{
-//						return true;
-//					}
+					//					if(SphereToPlaneIntersection(obj1, obj2, m_pReflect, true))
+					//					{
+					//						return true;
+					//					}
 					return false;//!!!! hack, needs to see wall as triangle
 				}
 				break;
@@ -1834,51 +1541,11 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 			}
 		}
 		break;
-	case OBJCAMERA:
-		{
-			switch(obj2->GetObjType())
-			{
-			case OBJWALL:
-				{//kamura to woll
-//					if(SphereToPlaneIntersection(obj1, obj2, m_pReflect, true))
-//					{
-//						return true;
-//					}
-					return false;	//!!! hack, needs wall triangles
-				}
-				break;
-			case OBJSHELF:
-				{//kamura to shelph
-					if(SphereToAABBIntersection(obj1, obj2, m_pReflect, true))
-					{
-						//something about camera with shelf collision
-						return true;
-					}
-				}
-				break;
-			case OBJENDCAP:
-				{//kamura to entkapp
-					if(SphereToAABBIntersection(obj1, obj2, m_pReflect, true))
-					{
-						//something about camera to endcap collision
-						return true;
-					}
-				}
-				break;
-			default:
-				return false;
-			}
-		}
-		break;
 	case OBJBANANA:
-	case OBJJAM:
 	case OBJPBUTTER:
 	case OBJPIE:
 	case OBJTURKEY:
 		{
-			//////////////////////////////////////////////////
-			//used held items collision with stuff!
-			//////////////////////////////////////////////////			
 			switch(obj2->GetObjType())
 			{
 			case OBJSHELF:
@@ -1887,20 +1554,18 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					velociraptor.x = obj1->GetParent()->GetTransform()->GetLocalMatrix()._31;
 					velociraptor.y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._32;
 					velociraptor.z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._33;
-					obj1->m_tLocalAxes[2] = velociraptor;
 					D3DXVec3Normalize(&velociraptor, &velociraptor);
-					float fsped = 20.0f;//CMovementManager::GetInstance()->GetPlayerSpeed(obj1->GetParent());
+					obj1->m_tLocalAxes[2] = velociraptor;
+
+					float fsped = 28.0f;//CMovementManager::GetInstance()->GetPlayerSpeed(obj1->GetParent());
 					velociraptor *= fsped;
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
-						//if(SphereToAABBIntersection(obj1, obj2, m_pReflect, true))
-						{
-							//						vObjNormal = GetAABBNormal(m_pReflect, obj2->GetAABB());
-							obj1->GetParent()->GetTransform()->TranslateFrame((*m_pReflect * 0.5f));
-							SendImpactEvent("HeldItemInWorldCollision", obj1, 
-								obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
-							return true;
-						}
-
+					{
+						obj1->GetParent()->GetTransform()->TranslateFrame((*m_pReflect * 0.5f));
+						SendImpactEvent("HeldItemInWorldCollision", obj1, 
+							obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
+						return true;
+					}
 				}
 				break;
 			case OBJENDCAP:
@@ -1910,12 +1575,10 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					velociraptor.y = obj1->GetParent()->GetTransform()->GetLocalMatrix()._32;
 					velociraptor.z = obj1->GetParent()->GetTransform()->GetLocalMatrix()._33;
 					D3DXVec3Normalize(&velociraptor, &velociraptor);
-					float fsped = 20.0f;//CMovementManager::GetInstance()->GetPlayerSpeed(obj1->GetParent());
+					float fsped = 28.0f;//CMovementManager::GetInstance()->GetPlayerSpeed(obj1->GetParent());
 					velociraptor *= fsped;
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
-//					if(SphereToAABBIntersection(obj1, obj2, m_pReflect, true))
 					{
-						//						vObjNormal = GetAABBNormal(m_pReflect, obj2->GetAABB());
 						obj1->GetParent()->GetTransform()->TranslateFrame((*m_pReflect * 0.5f));
 						SendImpactEvent("HeldItemInWorldCollision", obj1, 
 							obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
@@ -1942,6 +1605,83 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					}
 				}
 				break;
+			case OBJBANANA:
+			case OBJPIE:
+			case OBJTURKEY:
+				{//used held item to used held item
+					switch(obj1->GetObjType())
+					{
+					case OBJBANANA:
+						{
+							if(obj2->GetObjType() != OBJBANANA)
+							{
+								if(SphereToSphereIntersection(obj1, obj2, m_pReflect, true))
+								{
+									SendImpactEvent("BananaDestroyedByItem", obj1,
+										obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_NORMAL);
+								}
+							}
+							else
+								return false;
+						}
+						break;
+					case OBJPIE:
+						{
+							if(SphereToSphereIntersection(obj1, obj2, m_pReflect, true))
+							{
+								SendImpactEvent("PieDestroyedByItem", obj1,
+									obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_NORMAL);
+							}
+						}
+						break;
+					case OBJTURKEY:
+						{
+							if(SphereToSphereIntersection(obj1, obj2, m_pReflect, true))
+							{
+								SendImpactEvent("TurkeyDestroyedByItem", obj1,
+									obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_NORMAL);
+							}
+						}
+						break;
+					};
+					switch(obj2->GetObjType())
+					{
+					case OBJBANANA:
+						{
+							if(obj1->GetObjType() != OBJBANANA)
+							{
+								if(SphereToSphereIntersection(obj2, obj1, m_pReflect, true))
+								{
+									SendImpactEvent("BananaDestroyedByItem", obj2,
+										obj2->GetParent(), obj1->GetParent(), *m_pReflect, PRIORITY_NORMAL);
+								}
+							}
+							else
+								return false;
+						}
+						break;
+					case OBJPIE:
+						{
+							if(SphereToSphereIntersection(obj2, obj1, m_pReflect, true))
+							{
+								SendImpactEvent("PieDestroyedByItem", obj2,
+									obj2->GetParent(), obj1->GetParent(), *m_pReflect, PRIORITY_NORMAL);
+							}
+						}
+						break;
+					case OBJTURKEY:
+						{
+							if(SphereToSphereIntersection(obj2, obj1, m_pReflect, true))
+							{
+								SendImpactEvent("TurkeyDestroyedByItem", obj2,
+									obj2->GetParent(), obj1->GetParent(), *m_pReflect, PRIORITY_NORMAL);
+							}
+						}
+						break;
+					};
+				}
+			default:
+				return false;
 			};
 		}
 		break;
@@ -1950,94 +1690,81 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 	};
 	return false;
 }
-///-----------------------------------------------------------------------------
-///
-//Changes:----------------------------------------------------
-///
-///-----------------------------------------------------------------------------
 bool CCollisionManager::MovingSphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2, 
-									D3DXVECTOR3 tVelocity, D3DXVECTOR3* vReflect, bool bReact)
+													   D3DXVECTOR3 tVelocity, D3DXVECTOR3* /*vReflect*/, bool /*bReact*/)
 {
-	TSphere nextsphere, currsphere;
+	TSphere currsphere, intsphere, nextsphere;
 	TAABB box;
-	D3DXVECTOR3 currReflect, nextReflect;
-	bool currcol, nextcol;	currcol = nextcol = false;
+	D3DXVECTOR3 currReflect, intReflect, nextReflect;
+	bool currcol, intcol, nextcol;	currcol = intcol = nextcol = false;
 	box.cBoxMin = obj2->GetAABB().cBoxMin;
 	box.cBoxMax = obj2->GetAABB().cBoxMax;
 
-	//added security, scale the box by the sphere radius
-	for(unsigned i = 0; i < 3; ++i)
-	{//scale the aabb by the radius of the player
-		box.cBoxMin[i] -= obj1->m_fExtents[0];
-		box.cBoxMax[i] += obj1->m_fExtents[0];
-	}
-
-	nextsphere.fRadius = currsphere.fRadius = obj1->m_fExtents[0];
+	nextsphere.fRadius = intsphere.fRadius = currsphere.fRadius = obj1->m_fExtents[0];
 	currsphere.cPosition = obj1->m_cCenterPoint;
+	intsphere.cPosition = obj1->m_cCenterPoint+tVelocity/2.0f;
 	nextsphere.cPosition = obj1->m_cCenterPoint + tVelocity;
 
 	//test next position for collision
 	obj1->SetSphere(nextsphere);
 	nextcol = SphereToAABBIntersection(obj1, obj2, &nextReflect, false);
+	//test interval position for collision, I'll solve this tunneling with my dying will! - Raymoney McCashDollar III
+	obj1->SetSphere(intsphere);
+	intcol = SphereToAABBIntersection(obj1, obj2, &intReflect, false);
 	//test current position for collision
 	obj1->SetSphere(currsphere);
 	currcol = SphereToAABBIntersection(obj1, obj2, &currReflect, false);
-
-	if(!currcol && !nextcol)
+	if(!currcol && !intcol && !nextcol)
 	{
-		//no collision
 		return false;
 	}
-	else if(currcol && nextcol)
+	else if(currcol && !intcol && !nextcol)
 	{
-		//collides with prev curr and next locations
-		//dot < 0 bad
-		if(D3DXVec3Dot(&currReflect, &nextReflect) <= 0.0f)
-		{//the normal from the next frame is facing a different direction so it's colliding with a different side
-			obj1->SetSphere(currsphere);
-			SphereToAABBIntersection(obj1, obj2, &currReflect, true);
-			*vReflect = currReflect;
-			return true;
-		}
-		else
-		{//hmm, i seem to be doing the same thing here, but thats cool because this should mean no tunneling happens
-
-			obj1->SetSphere(currsphere);
-			SphereToAABBIntersection(obj1, obj2, &currReflect, true);
-			*vReflect = currReflect;
-			return true;
-		}
-	}
-	else if(currcol && !nextcol)
-	{
-		//collides with curr but not next location
 		obj1->SetSphere(currsphere);
-		SphereToAABBIntersection(obj1, obj2, &currReflect, true);
-		*vReflect = currReflect;
+		SphereToAABBIntersection(obj1, obj2, m_pReflect, true);
 		return true;
 	}
-	else if(!currcol && nextcol)
+	else if(currcol && intcol && !nextcol)
 	{
-		return false;
+		if(D3DXVec3Dot(&currReflect, &intReflect) <= 0.0f)
+		{
+			//normal of interval frame is different, pretty much means imminent tunneling
+			obj1->m_bNextFrameTunneling = true;
+			obj1->m_vPrevNorm = currReflect;
+			obj1->m_cTunneledObject = obj2->GetParent();
+		}
+		obj1->SetSphere(currsphere);
+		SphereToAABBIntersection(obj1, obj2, m_pReflect, true);
+		if(obj1->m_bNextFrameTunneling)
+		{
+			//set previous position to the adjusted position of the colliding sphere
+			obj1->m_vPrevPos = obj1->GetSphere().cPosition;
+		}
+		return true;
+	}
+	else if(currcol && intcol && nextcol
+		|| currcol && !intcol && nextcol)
+	{
+		if(D3DXVec3Dot(&currReflect, &nextReflect) <= 0.0f)
+		{
+			//normal of the next frame is different, tunneling is happening. . . soon!
+			obj1->m_bNextFrameTunneling = true;
+			obj1->m_vPrevNorm = currReflect;
+			obj1->m_cTunneledObject = obj2->GetParent();
+		}
+		obj1->SetSphere(currsphere);
+		SphereToAABBIntersection(obj1, obj2, m_pReflect, true);
+		if(obj1->m_bNextFrameTunneling)
+		{
+			//set previous position to the adjusted position of the colliding sphere
+			obj1->m_vPrevPos = obj1->GetSphere().cPosition;
+		}
+		return true;
 	}
 	else
 	{
 		return false;
 	}
-}
-
-bool CCollisionManager::RayToSphereIntersection(TRay ray, TSphere sphere, float & t, D3DXVECTOR3 &intersect)
-{
-	return false;
-}
-bool CCollisionManager::RayToTriangleIntersection(TTriangle tri, TRay ray, float &t)
-{
-	return false;
-}
-bool CCollisionManager::MovingSphereToTriangleIntersection(CCollideable* obj, TTriangle* tri,
-														   D3DXVECTOR3* vReflect, D3DXVECTOR3 * tCol, float &t, bool bReact)
-{
-	return false;
 }
 
 D3DXVECTOR3 CCollisionManager::ClosestPtPointTriangle(D3DXVECTOR3 p, D3DXVECTOR3 a, D3DXVECTOR3 b, D3DXVECTOR3 c)
@@ -2060,7 +1787,7 @@ D3DXVECTOR3 CCollisionManager::ClosestPtPointTriangle(D3DXVECTOR3 p, D3DXVECTOR3
 	float vc = d1*d4 - d3*d2;
 	if(vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
 	{
-		float v = d1 / (d1 - d3);
+		//float v = d1 / (d1 - d3);
 		return D3DXVECTOR3(0.0f, 0.0f, 0.0f); //a + v * ab; // barycentric coordinates (1-v, v, 0)
 	}
 
@@ -2074,7 +1801,7 @@ D3DXVECTOR3 CCollisionManager::ClosestPtPointTriangle(D3DXVECTOR3 p, D3DXVECTOR3
 	float vb = d5*d2 - d1*d6;
 	if(vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
 	{
-		float w = d2 / (d2 - d6);
+		//float w = d2 / (d2 - d6);
 		return D3DXVECTOR3(0.0f, 0.0f, 0.0f); //a + w * ac; // barycentric coordinates (1-w,0,w)
 	}
 
@@ -2082,7 +1809,7 @@ D3DXVECTOR3 CCollisionManager::ClosestPtPointTriangle(D3DXVECTOR3 p, D3DXVECTOR3
 	float va = d3*d6 - d5*d4;
 	if(va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
 	{
-		float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+		//float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
 		return D3DXVECTOR3(0.0f, 0.0f, 0.0f); //b + w * (c - b); // barycentric coordinates (0,1-w,w)
 	}
 
@@ -2099,7 +1826,7 @@ int CCollisionManager::TestObjAgainstWall(CCollideable* obj1)
 	TSphere s = obj1->GetSphere();
 	D3DXVECTOR3 mypos = s.cPosition + D3DXVECTOR3(0.0f, 0.1f, 0.0f);
 
-	for(unsigned int i = 0; i < m_nTriCount; ++i)
+	for(int i = 0; i < m_nTriCount; ++i)
 	{
 		D3DXVECTOR3 p = ClosestPtPointTriangle(mypos, m_pWallTris[i].tVert0, m_pWallTris[i].tVert1,
 			m_pWallTris[i].tVert2);
@@ -2122,6 +1849,14 @@ int CCollisionManager::TestObjAgainstWall(CCollideable* obj1)
 					*m_pReflect = m_pWallTris[i].tNorm;
 					SendImpactEvent("HeldItemInWorldCollision", obj1, 
 						obj1->GetParent(), (CObject*)GetInstance(), *m_pReflect, PRIORITY_IMMEDIATE);
+					return 0;
+				}
+				else if(obj1->GetObjType() == OBJPLAYER)
+				{
+					*m_pReflect = m_pWallTris[i].tNorm;
+					SendImpactEvent("EnvironmentHit", (IComponent*)GetInstance(), obj1->GetParent(), 
+						NULL, *m_pReflect, PRIORITY_IMMEDIATE);
+					return 0;
 				}
 			}
 		}
@@ -2130,21 +1865,28 @@ int CCollisionManager::TestObjAgainstWall(CCollideable* obj1)
 	return 0;
 }
 
+
 // this version is for the camera only
-int CCollisionManager::TestObjAgainstWall(D3DXVECTOR3 &cameraFrame)
+int CCollisionManager::TestObjAgainstWall(D3DXVECTOR3 &cameraFrame, D3DXVECTOR3 &vFwdVec)
 {
 
 	TSphere s;
 	s.cPosition = cameraFrame;
 	s.fRadius = 0.5f;
 	D3DXVECTOR3 mypos = s.cPosition;
+	D3DXVec3Normalize(&vFwdVec, &vFwdVec);
 
-	for(unsigned int i = 0; i < m_nTriCount; ++i)
+	for(int i = 0; i < m_nTriCount; ++i)
 	{
-		D3DXVECTOR3 p = ClosestPtPointTriangle(mypos, m_pWallTris[i].tVert0, m_pWallTris[i].tVert1,
-			m_pWallTris[i].tVert2);
+		D3DXVECTOR3 p;
+		float t;
 
-		if(D3DXVec3Dot(&p, &p) != 0.0f)
+		bool bCollided = IntersectRayTriangle(m_pWallTris[i].tVert0, m_pWallTris[i].tVert1, m_pWallTris[i].tVert2,
+			m_pWallTris[i].tNorm, mypos, vFwdVec, t);
+
+		p = mypos + vFwdVec*t; // t is filled out with the ray's time value for collision point
+
+		if(bCollided) // if we got a t back
 		{
 			D3DXVECTOR3 v = p - s.cPosition;
 			D3DXVECTOR3 test = p + m_pWallTris[i].tNorm * (s.fRadius+ 0.1f);
@@ -2166,5 +1908,56 @@ int CCollisionManager::TestObjAgainstWall(D3DXVECTOR3 &cameraFrame)
 
 
 
+bool CCollisionManager::IntersectRayTriangle( const D3DXVECTOR3 &vert0, const D3DXVECTOR3 &vert1, const D3DXVECTOR3 &vert2, 
+											 const D3DXVECTOR3 &norm, const D3DXVECTOR3 &start, const D3DXVECTOR3 &d, float &t )
+{
 
+	// *Skip testing against backfacing triangles*
+	//	If the ray starts behind the triangle plane OR the angle between ray direction and tri normal is greater than 90 degrees
+	//vec3f rayStartToPtOnPlane = vert0 ; // vert0*norm - start*norm
+	//float rayBehindDotProd = dot_product(rayStartToPtOnPlane, norm);
 
+	float f1 = D3DXVec3Dot(&vert0, &norm);
+	float f2 = D3DXVec3Dot(&start, &norm);
+	float fDiff = f1-f2; // distance in the direction of normal between raystart and ptonplane
+
+	float dDotNorm =  D3DXVec3Dot(&d, &norm); // "angle" between rayDir and triNorm
+
+	// in front of tri         ||   facing opposite direction (aka toward triangle)   
+	if(dDotNorm < -.01f)
+	{
+		return false;
+	}
+	// line segment to triangle 
+	D3DXVECTOR3 sa = vert0 - start;
+	D3DXVECTOR3 sb = vert1 - start;
+	D3DXVECTOR3 sc = vert2 - start;
+
+	D3DXVECTOR3 n1, n2, n3;
+	D3DXVec3Cross(&n1, &sc, &sb);
+	D3DXVec3Cross(&n2, &sa, &sc);
+	D3DXVec3Cross(&n3, &sb, &sa);
+
+	float dp1, dp2, dp3;
+	dp1 = D3DXVec3Dot(&n1, &d);
+	dp2 = D3DXVec3Dot(&n2, &d);
+	dp3 = D3DXVec3Dot(&n3, &d);
+
+	// this first because all 0 shares same sign
+	if(dp1 == dp2 && dp2 == dp3 && dp3 == 0)
+	{
+		// runs parallel to the triangle plane and intersects
+		t = 0;
+		return true;
+	}
+
+	if(SameSign(dp1, dp2) && SameSign(dp2, dp3))
+	{
+		if(fabs(fDiff) < .01f)
+			t = 0.0f;
+		else
+			t = fDiff / dDotNorm;
+		return true;
+	}
+	return false;
+}

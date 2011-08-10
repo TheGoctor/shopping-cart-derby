@@ -7,7 +7,7 @@
 //
 //  Date Created	:	04/07/2011
 //
-//  Last Changed	:	05/04/2011
+//  Last Changed	:	07/26/2011
 //
 //	Changed By		:	HN
 //
@@ -19,44 +19,40 @@
 #include "../../../Components/Collision/CCollideable.h"
 #include <queue>
 using std::queue;
-class CWwiseSoundManager;
-
 
 class CCamera
 {
 private:
 
-	queue<D3DXMATRIX> m_Matrices;
-	size_t m_iQueueSize;
+	queue<D3DXMATRIX>	m_Matrices;					
+	size_t				m_iQueueSize;				
 
-	D3DXMATRIX			m_mViewMatrix;
-	D3DXMATRIX			m_mProjectionMatrix;
+	D3DXMATRIX			m_mViewMatrix;				
+	D3DXMATRIX			m_mProjectionMatrix;		
 	D3DXMATRIX			m_mViewProjectionMatrix;
 	D3DXMATRIX			m_mWorld;
-
 	D3DXVECTOR3			m_vPostion;
 	D3DXVECTOR3			m_vEyePos;
 	D3DXVECTOR3			m_vLookAtPos;
-
 	CObject*			m_cFrustum;
 	CCollideable*		m_cFrustumBounds;
-	TSphere				m_tCameraSphere;	//Hack BV for camera
+	TSphere				m_tCameraSphere;	
 	D3DXVECTOR3			m_collisiontransform;
-	CWwiseSoundManager* m_pSound;
-
-	CFrame				m_frame;
-	CFrame				*m_pTarget;
+	CFrame					m_frame;
+	CFrame					*m_pTarget;
+	CFrame					m_Target;
+	static D3DXVECTOR3		s_vWorldUp;
 
 public:
+	//Constructor
 	CCamera(void);
+	//Copy constructor
 	CCamera(const CCamera &);
+	//Assignment operator
 	CCamera &operator=(const CCamera &);
+	//Destructor
 	~CCamera(void);
-	CFrame					m_Target;
-	static D3DXVECTOR3 s_vWorldUp;
-
-	//static CCamera* GetInstance();
-
+	
 	///////////////////////////////////////////////
 	//Accessors
 	////////////////////////////////////////////
@@ -68,35 +64,28 @@ public:
 	{
 		return this->m_mViewProjectionMatrix;
 	}
-
-	D3DXMATRIX &GetViewMatrix();
-
 	CFrame *GetTarget(void)
 	{
 		return m_pTarget;
 	}
-
 	CFrame &GetFrame(void)
 	{
 		return m_frame;
 	}
-	
 	CFrame &GetTarget1(void)
 	{
 		return m_Target;
 	}
-
 	D3DXVECTOR3 GetEyePos()
 	{
 		return m_vEyePos;
 	}
-
 	D3DXVECTOR3 GetLookAtPos()
 	{
 		return m_vLookAtPos;
 	}
 	const D3DXVECTOR3 &GetViewPosition();
-
+	D3DXMATRIX &GetViewMatrix();
 	/////////////////////////////////////////////////////
 	//Mutators/
 	////////////////////////////////////////////////////
@@ -104,41 +93,35 @@ public:
 	{
 		m_pTarget = pTarget;
 	}
-
 	void SetFrameParent(CFrame *frame)
 	{
 		m_frame.SetParent(frame);
 	}
-
-	void SetLookAtPos(D3DXVECTOR3 lookat)
-	{
-		m_vLookAtPos = lookat;
-	}
-
-	void SetEyePos(D3DXVECTOR3 eyepos)
-	{
-		m_vEyePos = eyepos;
-	}
-
-	void ResetCamera();
-
-	  void SetViewMatrix(D3DXMATRIX *_mMatrix);
-	////////////////////////////////////////////////////////////////////////////
-	//Accesors
-	///////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "BuildPerspective"
+	//
+	// Return: void
+	//
+	// Parameters: float -	the field of view value
+	//			float	-	the Aspect of the camera
+	//			float	-	the near plane
+	//			float	-	the far plane
+	//			
+	// Purpose: Builds the projection matrix for the camera
+	//    
+	////////////////////////////////////////////////////////////////////////////////
 	void BuildPerspective(float fFieldOfView, float fAspect, 
 		float fZNear, float fZFar);
-	void Initialize();
+	////////////////////////////////////////////////////////////////////////////////
+	// Function: "Update"
+	//
+	// Return: void
+	//
+	// Parameters: float - delta time
+	//
+	// Purpose:  updates the cameras position and does the look at 
+	//    
+	////////////////////////////////////////////////////////////////////////////////
 	void Update(float fDeltaTime);
-	
-	void ViewRotateLocalX(float fAngle);
-	void ViewRotateLocalY(float fAngle);
-	void ViewRotateLocalZ(float fAngle);
-	void ViewTranslateLocal(D3DXVECTOR3 vAxis, bool bFPS = false);
-	void ViewTranslateLocalX(float fScale, bool bFPS = false);
-	void ViewTranslateLocalY(float fScale, bool bFPS = false);
-	void ViewTranslateLocalZ(float fScale, bool bFPS = false);
-	
-
 };
 #endif //_CAMERA_H_

@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTORS
 ////////////////////////////////////////////////////////////////////////////////
-TKeyFrame::TKeyFrame(void) : m_fKeyTime(0.0f), m_fTweenTime(0.0f), m_cFrame()
+TKeyFrame::TKeyFrame(void) : m_fKeyTime(0.0f), m_cFrame()
 {
 }
 CAnimation::CAnimation(void) : m_fDuration(0.0f), m_nNumBones(0), m_cBones()
@@ -30,31 +30,31 @@ Interpolator::Interpolator(void) : m_pAnimation(NULL), m_pMesh(NULL),
 ////////////////////////////////////////////////////////////////////////////////
 TBone::~TBone(void)
 {
-	// Clean up Key Frames
-	m_cKeyFrames.clear();
+	//// Clean up Key Frames
+	//m_cKeyFrames.clear();
 
-	// Clean up Child Indices
-	m_cChildrenIdxs.clear();
+	//// Clean up Child Indices
+	//m_cChildrenIdxs.clear();
 }
 CAnimation::~CAnimation(void)
 {
 	// Clean up Bones
-	for(int bone = 0; bone < m_nNumBones; ++bone)
-	{
-		m_cBones[bone].m_cChildrenIdxs.clear();
-		
-		// Clean up Key Frames
-		for(int frame = 0; frame < m_cBones[bone].m_nNumKeyFrames; ++frame)
-		{
-			m_cBones[bone].m_cKeyFrames.clear();
-		}
-	}
-	m_cBones.clear();
+	//for(int bone = 0; bone < m_nNumBones; ++bone)
+	//{
+	//	m_cBones[bone].m_cChildrenIdxs.clear();
+	//	
+	//	// Clean up Key Frames
+	//	for(int frame = 0; frame < m_cBones[bone].m_nNumKeyFrames; ++frame)
+	//	{
+	//		m_cBones[bone].m_cKeyFrames.clear();
+	//	}
+	//}
+	//m_cBones.clear();
 }
 Interpolator::~Interpolator(void)
 {
 	// Clean up Frames
-	m_cBoneFrames.clear();
+	//m_cBoneFrames.clear();
 }
 
 
@@ -65,99 +65,111 @@ void CAnimation::AddBone(TBone tBone)
 }
 
 // Setup Tween Times
-void CAnimation::SetupTweenTimes(void)
-{
-	m_nNumBones = m_cBones.size();
+//void CAnimation::SetupTweenTimes(void)
+//{
+	//m_nNumBones = m_cBones.size();
 
-	// Loop through each Bone
-	for( int bone = 0; bone < m_nNumBones; bone++)
-	{
-		// Get Bone Pointer
-		TBone* pBone = &m_cBones[bone];
+	//// Loop through each Bone
+	//for( int bone = 0; bone < m_nNumBones; bone++)
+	//{
+	//	// Get Bone Pointer
+	//	TBone* pBone = &m_cBones[bone];
 
-		// Loop through each KeyFrame
-		pBone->m_nNumKeyFrames = pBone->m_cKeyFrames.size();
-		for( int frame = 0; frame < pBone->m_nNumKeyFrames; frame++)
-		{
-			// Get KeyFrame Pointer
-			TKeyFrame* pKeyFrame = &pBone->m_cKeyFrames[frame];
+	//	// Loop through each KeyFrame
+	//	pBone->m_nNumKeyFrames = pBone->m_cKeyFrames.size();
+	//	for( int frame = 0; frame < pBone->m_nNumKeyFrames; frame++)
+	//	{
+	//		// Get KeyFrame Pointer
+	//		TKeyFrame* pKeyFrame = &pBone->m_cKeyFrames[frame];
 
-			if(frame == pBone->m_nNumKeyFrames - 1)
-			{
-				// set the last keyframes tween time
-				pKeyFrame->m_fTweenTime = m_fDuration - pKeyFrame->m_fKeyTime;
-			}
-			else
-			{
-				// set the difference of the 2 frames
-				pKeyFrame->m_fTweenTime = pBone->m_cKeyFrames[frame+1].m_fKeyTime - pKeyFrame->m_fKeyTime;
-			}
-		}
-	}
-}
+	//		if(frame == pBone->m_nNumKeyFrames - 1)
+	//		{
+	//			// set the last keyframes tween time
+	//			pKeyFrame->m_fTweenTime = m_fDuration - pKeyFrame->m_fKeyTime;
+	//		}
+	//		else
+	//		{
+	//			// set the difference of the 2 frames
+	//			pKeyFrame->m_fTweenTime = pBone->m_cKeyFrames[frame+1].m_fKeyTime - pKeyFrame->m_fKeyTime;
+	//		}
+	//	}
+	//}
+//}
 
 // Interpolate
 void Interpolator::Process(void)
 {
-	// Find Current Time by Index
-	int currIdx = 0;
-	int nextIndex = 0;
-
 	while(m_fCurrentTime  < 0.0f)
 		m_fCurrentTime += m_pAnimation->GetDuration();
 
-	// Comment this out to prevent animations from looping
-	//while(m_fCurrentTime >= m_pAnimation->GetDuration())
-	//	m_fCurrentTime -= m_pAnimation->GetDuration();
-
-	// If the time is up, stop animating
-	if(m_fCurrentTime >= m_pAnimation->GetDuration())
+	if(m_pAnimation->GetLooping())
 	{
-		m_pAnimation = NULL;
-		return;
+		while(m_fCurrentTime >= m_pAnimation->GetDuration())
+			m_fCurrentTime -= m_pAnimation->GetDuration();
+	}
+	else
+	{
+		// If the time is up, stop animating
+		if(m_fCurrentTime >= m_pAnimation->GetDuration())
+		{
+			m_pAnimation = NULL;
+			return;
+		}
 	}
 
-	//m_vBoneFrames.clear();
-	//m_vBoneFrames.resize(m_pAnimation->GetBones().size());
-	//BuildHiearchy();
+	int nNumBones = m_pAnimation->GetNumBones();
 
 	// Loop Through Each Bone
-	for( int bone = 0; bone < m_pAnimation->GetNumBones(); ++bone)
+	//m_cBoneFrames.resize(nNumBones);
+	for( int bone = 0; bone < nNumBones; ++bone)
 	{
+		TBone* pCurrBone = &m_pAnimation->GetBones()[bone];
+		// Find Current Time by Index
+		int nCurrFrame = -1;
+		int nNextFrame = 0;
+
+		// Get current frame
+		int nNumFrames = pCurrBone->m_nNumKeyFrames;
+
 		// Loop through each Key Frame
-		for(int frame = 0; frame < m_pAnimation->GetBones()[bone].m_nNumKeyFrames; ++frame)
+		for(int frame = 1; frame < nNumFrames; ++frame)
 		{
 			// Move to the Next Frame
-			if(m_fCurrentTime < m_pAnimation->GetBones()[bone].m_cKeyFrames[frame].m_fKeyTime 
-				+ m_pAnimation->GetBones()[bone].m_cKeyFrames[frame].m_fTweenTime)
+			if(m_fCurrentTime < pCurrBone->m_cKeyFrames[frame].m_fKeyTime)
 			{
-				currIdx = nextIndex = frame;
-				++nextIndex %= m_pAnimation->GetBones()[bone].m_nNumKeyFrames;
+				nCurrFrame = frame - 1;
+				nNextFrame = frame;
 				break;
 			}
 		}
 
-		// Find Lamda
-		float fPercentTime;
-		if(nextIndex != 0)
+		if(nCurrFrame == -1)
+			return; //nCurrFrame = nNextFrame = nNumFrames - 1;
+
+		float fCurrTime = pCurrBone->m_cKeyFrames[nCurrFrame].m_fKeyTime;
+		float fNextTime = pCurrBone->m_cKeyFrames[nNextFrame].m_fKeyTime;
+
+		TKeyFrame* pCurrFrame = &pCurrBone->m_cKeyFrames[nCurrFrame];
+
+		// Find how far into the current frame the current time is
+		float fTotalFrameTime, fCurrFrameTime;
+		float fLambda;
+
+		if(nNextFrame != 0)
 		{
-			fPercentTime = m_fCurrentTime - m_pAnimation->GetBones()[bone].m_cKeyFrames[currIdx].m_fKeyTime;
-			fPercentTime /= (m_pAnimation->GetBones()[bone].m_cKeyFrames[nextIndex].m_fKeyTime - m_pAnimation->GetBones()[bone].m_cKeyFrames[currIdx].m_fKeyTime);
+			fTotalFrameTime = fNextTime - fCurrTime;
 		}
 		else
 		{
-			fPercentTime = m_fCurrentTime - m_pAnimation->GetBones()[bone].m_cKeyFrames[currIdx].m_fKeyTime;
-			fPercentTime /= (m_pAnimation->GetDuration() - m_pAnimation->GetBones()[bone].m_cKeyFrames[currIdx].m_fKeyTime);
+			fTotalFrameTime = m_pAnimation->m_fDuration - fCurrTime;
 		}
 
-		//m_vBoneFrames[bone].CloneLocal(m_pAnimation->GetBones()[bone].m_cKeyFrames[currIdx].m_cFrame);
+		fCurrFrameTime = m_fCurrentTime - fCurrTime;
+		fLambda = fCurrFrameTime / fTotalFrameTime;
 
 		// Interpolate
-		m_cBoneFrames[bone].GetLocalMatrix() = animInterpolate(m_pAnimation->GetBones()[bone].m_cKeyFrames[currIdx].m_cFrame.GetLocalMatrix(),
-			m_pAnimation->GetBones()[bone].m_cKeyFrames[nextIndex].m_cFrame.GetLocalMatrix(), fPercentTime);
-		
-		//BuildHiearchy();
-		//m_vBoneFrames[bone].Update();
+		m_cBoneFrames[bone].GetLocalMatrix() = animInterpolate(pCurrFrame->m_cFrame.GetLocalMatrix(),
+			pCurrBone->m_cKeyFrames[nNextFrame].m_cFrame.GetLocalMatrix(), fLambda);
 	}
 
 	// Update Frames' Matrices
@@ -173,8 +185,8 @@ void Interpolator::SetAnimation(CAnimation *newAnim)
 
 	// Clone the Matrices
 	m_pAnimation = newAnim;
-	//m_vBoneFrames.resize( m_pAnimation->GetBones().size() );
-	for( int frame = 0; frame < m_pAnimation->GetNumBones(); ++frame)
+	//m_cBoneFrames.resize(m_pAnimation->GetNumBones());
+	for(unsigned int frame = 0; frame < m_pAnimation->GetNumBones(); ++frame)
 	{
 		m_cBoneFrames[frame].CloneLocal(m_pAnimation->GetBones()[frame].m_cKeyFrames[0].m_cFrame);
 	}
@@ -198,10 +210,10 @@ void Interpolator::BuildHiearchy(void)
 		{
 			// Connect to Children
 			//if(bone != m_pMesh->GetBones()[bone].m_cChildrenIdxs[child])
-			//{
+	//	{
 				m_cBoneFrames[bone].AddChildFrame(
 					&m_cBoneFrames[m_pMesh->GetBones()[bone].m_cChildrenIdxs[child]]);
-			//}
+	//}
 		}
 	}
 

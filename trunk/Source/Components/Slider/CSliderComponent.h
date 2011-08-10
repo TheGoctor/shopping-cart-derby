@@ -30,6 +30,10 @@ private:
 	D3DXVECTOR3		m_vStartPosition;
 	D3DXVECTOR3		m_vEndPosition;
 
+	int				m_nSliderFor;
+
+	float			m_fSliderValue;
+	float			m_fStateEnteredSliderValue;
 public:
 	///////////////////////////////////////////////////////////////////////////
 	//	Name:			CButtonComponent
@@ -42,7 +46,7 @@ public:
 	static int CreateSliderComponent(lua_State* pLua);
 	static CSliderComponent* CreateSliderComponent(CObject* pObj, string szEventName, string szSpriteTextureName, 
 														  int nStartX, int nSartY, int nEndX, int nEndY, int nTextureDepth,
-														  bool bStartSelected, int eGameState);
+														  bool bStartSelected, int nSliderFor, int eGameState);
 
 	
 	void Init(string szButtonTexName, int nTextureDepth);
@@ -55,7 +59,7 @@ public:
 
 	void CalculateAndSendFloatEvent();
 	void MoveSliderOneTick(int nDirection);
-	void SetSliderToValue(float fAmount);
+	void SetSliderToValue(float fAmount, bool fSendValue = true);
 	static int SetSliderValue(lua_State* pLua);
 
 	///////////////////////////
@@ -80,6 +84,11 @@ public:
 	static void SlideLeft(IEvent* cEvent, IComponent* cCenter);
 	static void SlideRight(IEvent* cEvent, IComponent* cCenter);
 	static void SliderStateInit(IEvent* cEvent, IComponent* cCenter);
+	static void SliderCancelPause(IEvent* cEvent, IComponent* cCenter);
+	static void SliderCancelMain(IEvent* cEvent, IComponent* cCenter);
+
+	void SliderCancelNonStatic(int eState);
+
 	
 };
 

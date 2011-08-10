@@ -67,6 +67,15 @@ void CPickupItemComponent::EventInit()
 	szEvent = "Update";
 	szEvent += PAUSE_KEYBINDS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEvent = "Update";
+	szEvent += QUIT_CONFIRMATION_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
 
 	CEventManager::GetInstance()->RegisterEvent("PickupItemCollision", this, PickupItemCollisionCallback);
 }
@@ -77,6 +86,7 @@ void CPickupItemComponent::Init()
 	m_fTimeLeft = 15.0f;
 	m_fFlyOutSpeed = 8.0f;
 	m_fTimeToFly = 1.0f;
+	m_fMaxArcHeight = 4.0f;
 	m_bSpawned = true;
 	m_bRendering = true;
 	//m_nItemType = -1;
@@ -112,12 +122,19 @@ void CPickupItemComponent::Update(IEvent* cEvent, IComponent* cCenter)
 	{
 		comp->m_pObject->GetTransform()->GetLocalMatrix()._41 += comp->m_vDirectionToMove.x*fDt*comp->m_fFlyOutSpeed;
 		comp->m_pObject->GetTransform()->GetLocalMatrix()._43 += comp->m_vDirectionToMove.z*fDt*comp->m_fFlyOutSpeed;
+		
+		// set arc height
+		comp->m_pObject->GetTransform()->GetLocalMatrix()._42 = comp->GetArcYValue();
+
+	}
+	else // we're ready to be picked up
+	{
+		// oscillate on the Y axis (bounce up and down)
+		comp->m_pObject->GetTransform()->GetLocalMatrix()._42 = 1.0f + .5f*sin(comp->m_fTimeLeft);
 
 	}
 
-	// oscillate on the Y axis (bounce up and down)
-	comp->m_pObject->GetTransform()->GetLocalMatrix()._42 = 1.0f + .5f*sin(comp->m_fTimeLeft);
-
+	
 	// flash code
 	if(comp->m_bRendering)
 	{

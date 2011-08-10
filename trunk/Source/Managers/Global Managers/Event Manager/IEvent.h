@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	IEvent.h
 //	Date			:	3/31/11
-//	Mod. Date		:	3/31/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	MR
 //	Author			:	Mac Reichelt
 //	Purpose			:	Encapsulates the data for an event such as, the event ID
@@ -19,14 +19,15 @@ class IComponent;
 class IEvent
 {
 private:
-	unsigned int	m_nEventID;	// The ID used to identify this event
-	IComponent*		m_pcSender;
-	unsigned int	m_nPriority;
-	void*			m_pData;
+	unsigned int	m_nEventID;		// The ID used to identify this event
+	IComponent*		m_pcSender;		// The component sending the event
+	unsigned int	m_nPriority;	// When the event gets processed
+	void*			m_pData;		// Pointer to a structure containing additional data
 
 	friend class CEventManager;
 
 protected:
+	// Mutator
 	void SetPriority(unsigned int nPriority)
 	{
 		m_nPriority = nPriority;
@@ -61,11 +62,6 @@ public:
 	void* GetData()
 	{
 		return m_pData;
-	}
-
-	bool operator<(IEvent& pEvent)
-	{
-		return this->m_nPriority < pEvent.m_nPriority;
 	}
 };
 

@@ -11,6 +11,7 @@ using namespace EventStructs;
 CPeanutButter* CPeanutButter::CreatePeanutButterComponent(CObject *pObj)
 {
 	CPeanutButter* pComp = MMNEW(CPeanutButter(pObj));
+	pComp->PEANUT_BUTTER_ID = -1;
 	pComp->FirstInit();
 	pObj->AddComponent(pComp);
 	return pComp;
@@ -22,7 +23,7 @@ void CPeanutButter::FirstInit(void)
 	m_fDuration = 15.0f; // lifetime of pb
 	m_fTimeRemaining = m_fDuration;
 	m_bIsTossedForward = false;
-	PEANUT_BUTTER_ID = 0;
+	PEANUT_BUTTER_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 	// register for events
 	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldPlayerCollision", this, PlayerCollision);
 	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldCollision", this, ItemCollision);
@@ -46,10 +47,21 @@ void CPeanutButter::FirstInit(void)
 	szEventName += PAUSE_KEYBINDS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
 
+	szEventName = "Update";
+	szEventName += QUIT_CONFIRMATION_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
+	szEventName = "Update";
+	szEventName += IN_GAME_HOW_TO_PLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
+	szEventName = "Update";
+	szEventName += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
+
 }
 void CPeanutButter::ReInit()
 {
 	PEANUT_BUTTER_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
+	CWwiseSoundManager::GetInstance()->SetObjectPosition(PEANUT_BUTTER_ID, m_pParent->GetTransform()->GetWorldPosition(), 0.3f);
 	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_PEANUTBUTTER_USE, PEANUT_BUTTER_ID);
 	SetIsSpawned(true);
 	SetTimeRemaining(GetDuration());
@@ -101,12 +113,11 @@ void CPeanutButter::PlayerCollision(IEvent* cEvent, IComponent* cCenter)
 	// dont despawn until our timer's out NEVERMIND LOL NEVERMIND THAT NEVERMIND LOL
 	//pComp->Despawn();
 }
-void CPeanutButter::ItemCollision(IEvent* /*cEvent*/, IComponent* /*cCenter*/)
+void CPeanutButter::ItemCollision(IEvent* cEvent, IComponent* cCenter)
 {
-	//CPeanutButter* pComp = (CPeanutButter*)cCenter;
-	//TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
-	
-	// we dont care other than that we bounce out of it
+	CPeanutButter* pComp = (CPeanutButter*)cCenter;
+	TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
+
 
 }
 

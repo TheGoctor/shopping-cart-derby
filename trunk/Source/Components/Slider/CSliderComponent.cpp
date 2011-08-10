@@ -4,12 +4,17 @@
 #include "..\..\Managers\Global Managers\Event Manager\CIDGen.h"
 #include "..\..\Managers\Global Managers\Event Manager\EventStructs.h"
 #include "..\..\CObject.h"
+#include "..\..\Enums.h"
 #include "..\..\Managers\Global Managers\Object Manager\CObjectManager.h"
 #include "..\..\Managers\Global Managers\Input Manager\CInputManager.h"
 #include "..\..\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
+#include "..\..\Managers\Global Managers\Rendering Managers\Direct3DManager.h"
 using namespace EventStructs;
 
-CSliderComponent::CSliderComponent(CObject* pObj) : CButtonComponent(pObj)
+#include <iostream>
+using namespace std;
+
+CSliderComponent::CSliderComponent(CObject* pObj) : CButtonComponent(pObj), m_fSliderValue(0.0f), m_fStateEnteredSliderValue(69.0f)
 {
 
 }
@@ -21,20 +26,21 @@ CSliderComponent::CSliderComponent(CObject* pObj) : CButtonComponent(pObj)
 int CSliderComponent::CreateSliderComponent(lua_State* pLua)
 {
 	// top down is in order in param list. Start at bottom with -1 and work your way to the more negative numbers
-	CObject* pObj = (CObject*)lua_topointer(pLua, -10);
-	string szEventName = (string)lua_tostring(pLua, -9);
-	string szButtonTexName = (string)lua_tostring(pLua, -8);
-	int nStartX = lua_tointeger(pLua, -7);
-	int nStartY = lua_tointeger(pLua, -6);
-	int nEndX = lua_tointeger(pLua, -5);
-	int nEndY = lua_tointeger(pLua, -4);
-	int nTextureDepth = lua_tointeger(pLua, -3);
-	bool bStartSelected = (lua_toboolean(pLua, -2) != 0);
+	CObject* pObj = (CObject*)lua_topointer(pLua, -11);
+	string szEventName = (string)lua_tostring(pLua, -10);
+	string szButtonTexName = (string)lua_tostring(pLua, -9);
+	int nStartX = lua_tointeger(pLua, -8);
+	int nStartY = lua_tointeger(pLua, -7);
+	int nEndX = lua_tointeger(pLua, -6);
+	int nEndY = lua_tointeger(pLua, -5);
+	int nTextureDepth = lua_tointeger(pLua, -4);
+	bool bStartSelected = (lua_toboolean(pLua, -3) != 0);
+	int	nSliderFor = lua_tointeger(pLua, -2); 
 	int eState = lua_tointeger(pLua, -1);
 
 
 	CSliderComponent* pSlider = CreateSliderComponent(pObj, szEventName, szButtonTexName, 
-		nStartX, nStartY, nEndX, nEndY, nTextureDepth, bStartSelected, eState);
+		nStartX, nStartY, nEndX, nEndY, nTextureDepth, bStartSelected, nSliderFor, eState);
 
 	lua_pop(pLua, 10);
 
@@ -45,13 +51,14 @@ int CSliderComponent::CreateSliderComponent(lua_State* pLua)
 
 CSliderComponent* CSliderComponent::CreateSliderComponent(CObject* pObj, string szEventName, string szSpriteTextureName, 
 														  int nStartX, int nStartY, int nEndX, int nEndY, int nTextureDepth,
-														  bool bStartSelected, int eGameState)
+														  bool bStartSelected, int nSliderFor, int eGameState)
 {
 	CSliderComponent* comp = MMNEW(CSliderComponent(pObj));
 
 	comp->m_szSelectionFunc = szEventName;
 	comp->m_eAssociatedState = (EGameState)eGameState;
 
+	comp->m_nSliderFor = nSliderFor;
 
 	comp->Init(szSpriteTextureName, nTextureDepth);
 	comp->m_bSelected = bStartSelected;
@@ -74,7 +81,8 @@ int CSliderComponent::SetSliderValue(lua_State* pLua)
 
 	if(pComp)
 	{
-		pComp->SetSliderToValue(fAmount);
+		pComp->SetSliderToValue(fAmount, false);
+		SendFloatEvent(pComp->m_szSelectionFunc, pComp, fAmount, PRIORITY_NORMAL);
 	}
 
 	lua_pop(pLua, 2);
@@ -107,6 +115,9 @@ void CSliderComponent::Init(string textureName, int nTextureDepth)
 	CEventManager::GetInstance()->RegisterEvent("Left", this, SlideLeft);
 	CEventManager::GetInstance()->RegisterEvent("Back", this, InvalidSelection);
 	CEventManager::GetInstance()->RegisterEvent("Accept", this, SelectPressed);
+	
+	CEventManager::GetInstance()->RegisterEvent("CancelOptionsMain", this, SliderCancelMain);
+	CEventManager::GetInstance()->RegisterEvent("CancelOptionsPause", this, SliderCancelPause);
 
 	
 
@@ -233,6 +244,18 @@ void CSliderComponent::SlideRight(IEvent* /*cEvent*/, IComponent* cCenter)
 		comp->MoveSliderOneTick(1); // positive for right
 
 		comp->CalculateAndSendFloatEvent();
+
+		// sound for it
+		// sound cooldown
+		static float fAmountToWait = 0.0f;
+		fAmountToWait+= .1f;
+
+		// if the sound cd is up and we wanna play a ticking sound on this slider (aka slider = 2, which is sfx slider)
+		if(fAmountToWait > 1.0f && comp->m_nSliderFor == 2)
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
+			fAmountToWait = 0.0f;
+		}
 	}
 }
 
@@ -245,6 +268,18 @@ void CSliderComponent::SlideLeft(IEvent* /*cEvent*/, IComponent* cCenter)
 		comp->MoveSliderOneTick(-1); // negative for left
 
 		comp->CalculateAndSendFloatEvent();
+
+		// sound for it
+		// sound cooldown
+		static float fAmountToWait = 0.0f;
+		fAmountToWait+= .1f;
+
+		// if the sound cd is up and we wanna play a ticking sound on this slider (aka slider = 2, which is sfx slider)
+		if(fAmountToWait > 1.0f && comp->m_nSliderFor == 2)
+		{
+			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
+			fAmountToWait = 0.0f;
+		}
 	}
 }
 
@@ -263,6 +298,7 @@ void CSliderComponent::CalculateAndSendFloatEvent()
 																	//			and max(newvals, 0) puts us 0 to inf, so the overlap is 0 to 1 
 	fVal *= 100; // make it 0-100 instead of 0-1
 	SendFloatEvent(m_szSelectionFunc, this, fVal, PRIORITY_NORMAL);
+	//cout << "fVal:\t" << fVal << endl;
 }
 
 void CSliderComponent::MoveSliderOneTick(int nDirection)
@@ -307,20 +343,25 @@ void CSliderComponent::MoveSliderOneTick(int nDirection)
 		m_pDisplayComponentSelection->SetSpriteData(m_tSpriteDataSelection);
 	}
 
-	// sound cooldown
-	static float fAmountToWait = 0.0f;
-	fAmountToWait+= .1f;
+	// from start to current position on the bar
+	D3DXVECTOR3 vVolumeVec = D3DXVECTOR3((float)m_tSpriteDataButton.m_nX, (float)m_tSpriteDataButton.m_nY, 0.0f) - m_vStartPosition; 
+	// from start to end (Entire bar)
+	D3DXVECTOR3 vSliderBarVec = m_vEndPosition - m_vStartPosition;
 
-	if(fAmountToWait > 1.0f)
-	{
-		CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SCROLL, GLOBAL_ID);
-		fAmountToWait = 0.0f;
-	}
+	float fVolumeMag = D3DXVec3LengthSq(&vVolumeVec);
+	fSliderBarMag = D3DXVec3LengthSq(&vSliderBarVec);
+
+	float fVal = max(min(fVolumeMag / fSliderBarMag, 1.0f), 0.0f); // current/total 0-1 clamped between 0 and 1 (min(vals, 1) puts us from -inf to 1
+																	//			and max(newvals, 0) puts us 0 to inf, so the overlap is 0 to 1 
+	fVal *= 100; // make it 0-100 instead of 0-1
+	
+	m_fSliderValue = fVal;
 }
 
 
-void CSliderComponent::SetSliderToValue(float fAmount)
+void CSliderComponent::SetSliderToValue(float fAmount, bool fSendValue)
 {
+	/* // This isn't necessary anymroe but keeping just in case
 		// Get comparison values
 	D3DXVECTOR3 vSliderBarDirection = m_vEndPosition - m_vStartPosition; // from start to end
 	float fSliderBarMag = D3DXVec3Length(&vSliderBarDirection); // length of whole slider bar
@@ -362,8 +403,48 @@ void CSliderComponent::SetSliderToValue(float fAmount)
 		m_pDisplayComponentSelection->SetSpriteData(m_tSpriteDataSelection);
 	}
 
+	/**/
+
+	
+	if(m_fSliderValue > fAmount)
+	{
+		int nNumHit = 0;
+		while(m_fSliderValue >= fAmount)
+		{
+			MoveSliderOneTick(-1); 
+
+			nNumHit++;
+
+			if(nNumHit > 300)
+			{
+				//CWwiseSoundManager::GetInstance()->PlayTheSound(SASHA_ALLGOALITEMS, GLOBAL_ID);
+				break;
+			}
+		}
+	}
+	else if(m_fSliderValue < fAmount)
+	{
+		int nNumHit = 0;
+		while(m_fSliderValue <= fAmount)
+		{
+			MoveSliderOneTick(1);	
+			
+			nNumHit++;
+
+			if(nNumHit > 300)
+			{
+				//CWwiseSoundManager::GetInstance()->PlayTheSound(SASHA_ALLGOALITEMS, GLOBAL_ID);
+				break;
+			}
+		}
+	}
+
+
 	// let the slider stuff know that it changed.
-	CalculateAndSendFloatEvent();
+	if(fSendValue)
+	{
+		CalculateAndSendFloatEvent();
+	}
 }
 
 
@@ -372,7 +453,51 @@ void CSliderComponent::SliderStateInit(IEvent* /*cEvent*/, IComponent* cCenter)
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
 
+	CSliderComponent* pSliderComp = (CSliderComponent*)cCenter;
 
+	switch(pSliderComp->m_nSliderFor)
+	{
+	case 1:
+		pSliderComp->SetSliderToValue(CWwiseSoundManager::GetInstance()->GetMusicVolume(), false);
+		//cout << CWwiseSoundManager::GetInstance()->GetMusicVolume() << "\t1" << endl;
+		break;
+	case 2:
+		pSliderComp->SetSliderToValue(CWwiseSoundManager::GetInstance()->GetSoundVolume(), false);
+		//cout << CWwiseSoundManager::GetInstance()->GetSoundVolume() << "\t2" << endl;
+		break;
+	case 3:
+		pSliderComp->SetSliderToValue(Direct3DManager::GetInstance()->GetGamma(), false);
+		//cout << Direct3DManager::GetInstance()->GetGamma() << "\t3" << endl;
+		break;
+	};
+
+	cout << "From " << pSliderComp->m_fStateEnteredSliderValue << " to " << pSliderComp->m_fSliderValue << endl;
+	pSliderComp->m_fStateEnteredSliderValue = pSliderComp->m_fSliderValue;
 
 	comp->ReInitValues();
+}
+
+
+void CSliderComponent::SliderCancelMain(IEvent* /*cEvent*/, IComponent* cCenter)
+{
+	CSliderComponent* pSliderComp = (CSliderComponent*)cCenter;
+
+	pSliderComp->SliderCancelNonStatic(OPTIONS_STATE);
+}
+
+void CSliderComponent::SliderCancelPause(IEvent* /*cEvent*/, IComponent* cCenter)
+{
+	CSliderComponent* pSliderComp = (CSliderComponent*)cCenter;
+
+	pSliderComp->SliderCancelNonStatic(PAUSE_OPTIONS_STATE);
+}
+
+void CSliderComponent::SliderCancelNonStatic(int eState)
+{
+	if(m_eAssociatedState == eState)
+	{
+		cout << "Canceled to " << m_fStateEnteredSliderValue << endl;
+		SendFloatEvent(m_szSelectionFunc, this, m_fStateEnteredSliderValue, PRIORITY_NORMAL);
+	}
+	
 }

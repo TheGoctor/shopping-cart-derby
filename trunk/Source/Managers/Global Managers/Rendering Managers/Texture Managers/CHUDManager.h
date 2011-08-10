@@ -5,7 +5,9 @@
 //
 //  Date Created	:	04/10/11
 //
-//	Last Changed	:	04/11/11
+//	Last Changed	:	07/24/11
+//
+//	Last Changed by	:	HN
 //
 //  Purpose			:	Wrapper class for manageing HUD elements
 ////////////////////////////////////////////////////////
@@ -57,6 +59,8 @@ struct TRadarNode
 	int nGoalItemType; // the type of item spawned
 	D3DXVECTOR3 vTargetPosition; // the location of the spawned object (as opposed to an object which could cause problems)
 
+	bool bDespawning;
+
 	CSpriteComponent* pIconSpriteComponent;
 	CSpriteComponent* pBackgroundSpriteComponent;
 };
@@ -98,6 +102,7 @@ class CHUDManager
 	bool			  m_bHasHitThisUpdateBefore; //Turn icons on in gameplay bool
 	CBitmapFontComp* m_pKey1Comp;
 	CBitmapFontComp* m_pKey2Comp;
+	
 	int m_nRankNumberTextureIDs[4];
 	
 	int m_nEnergyDrinkID;
@@ -113,17 +118,10 @@ class CHUDManager
 	// Shopping List
 	int m_nGoalIconsTex;
 	int m_nGoalIconsDarkenedTex;
-	int m_nGoalIconsCheckMarkTex;
-	int m_nShoppingListBackgroundTex[5];
+	int m_nShoppingListBackgroundTex[7];
 
 	//PLAYER CHARACTER
 	int m_nPlayer[4];
-	int m_nPlayer1Char;
-	int m_nPlayer2Char;
-	int m_nPlayer3Char;
-	int m_nPlayer4Char;
-
-	
 	
 		// check mark stuff
 	TSpriteData m_tCheckMarkSpriteInfo;
@@ -144,6 +142,8 @@ class CHUDManager
 	list<TRadarNode, CAllocator<TRadarNode>> 
 		m_lRadarNodes; // inits in GoalItemInit
 	int			m_nRadarNodeTexture;
+
+	float m_fTimerAccumulator;
 	
 
 	// Objects on minimap
@@ -166,13 +166,13 @@ class CHUDManager
 	void InitShoppingList(void);
 	void InitEnemyProgress(void);
 	void InitMiniMap(void);
-	void UpdateMiniMap(void);
+	
 	void InitInventory(void);
 	RECT CellAlgo(int nID, int nNumCols,
 						   int nCellWidth, int nCellHeight);
 
 	
-
+bool m_bUpdateSprites;
 
 public:
 
@@ -186,56 +186,25 @@ int GetPlayerNum(CObject* player);
 	
 	void Render(void);
 
-	//Mutator for character select
-	//Player1
-	void SetPlayer1Char(int character)
-	{
-		character = m_nPlayer1Char;
-	}
-	//Player2
-	void SetPlayer2Char(int character)
-	{
-		character = m_nPlayer2Char;
-	}
-	//Player3
-	void SetPlayer3Char(int character)
-	{
-		character = m_nPlayer3Char;
-	}
-	//Player4
-	void SetPlayer4Char(int character)
-	{
-		character = m_nPlayer4Char;
-	}
-	//Accessors for character select
 	//Player1
 	int GetPlayer1Char()
 	{
-		return m_nPlayer1Char; 
+		return m_nPlayer[0]; 
 	}
-	//Player2
-	int GetPlayer2Char()
+	//returns the correct character for the player number passed in
+	int GetPlayerCharacter(int playernum)
 	{
-		return m_nPlayer2Char; 
-
+		return m_nPlayer[playernum];
 	}
-	//Player3
-	int GetPlayer3Char()
+	void SetPlayerChar(int player, int character)
 	{
-		return m_nPlayer3Char; 
-
+		m_nPlayer[player] = character;
 	}
-	//Player4
-	int GetPlayer4Char()
-	{
-		return m_nPlayer4Char; 
-	}
-
+	
 	int GetPlayerCharID(int playerNum);
 
 	// Callbacks
-	void RenderAiAgentsOnMiniMap(TObjectEvent* pcObjEvent);
-	static void RenderAiAgentsOnMiniMapCallback(IEvent* pEvent, IComponent* pComp);
+	
 	void UpdateAIAgentPos(void);
 
 	void GoalItemSpawned(TGoalItemEvent* pcObjEvent);
@@ -276,16 +245,32 @@ int GetPlayerNum(CObject* player);
 	static void PlayerPickupItem(IEvent* pEvent, IComponent* pComp);
 
 	static void PlayerLocation(IEvent* pEvent, IComponent* pComp);
-	static void RaceStarted(IEvent* pEvent, IComponent* pComp);
 
 	static void DisableImages(IEvent* pEvent, IComponent* pComp);
 	
 	static void InitCheckoutLocation(IEvent* pEvent, IComponent* pComp);
 
+	static void GoalItemDespawning(IEvent* pEvent, IComponent* pComp);
+
 
 	// Lua stuff
 	static int SetCharacterPicked(lua_State* pLua);
+
+	///Sound Stuff
+	void PlayUseItemSound(CObject* player);
+	void PlayLead(int playernum);
+
+	CSpriteComponent* GetListIconComponent(EGoalItemType eType); 
+
+	void SetUpdateSpriteData(bool bUpdateSprites) { m_bUpdateSprites = bUpdateSprites; }
+
+	void UpdateShoppingList();
+
+	void SendStolenVictimItemEvent(int nSlot);
+
+
 	
 };
+
 
 #endif // _CHUDMANAGER_H_

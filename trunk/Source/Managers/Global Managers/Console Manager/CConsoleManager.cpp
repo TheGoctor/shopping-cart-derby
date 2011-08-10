@@ -38,6 +38,7 @@ using namespace EventStructs;
 #include "..\..\..\Components\Rendering\CAnimatedDonutComp.h"
 #include "..\..\..\Components\Rendering\CSkidMarks.h"
 #include "..\..\..\Components\Rendering\CPeanutButterVFXComp.h"
+#include "..\..\..\Components\Rendering\CScrollingUVComp.h"
 #include "..\..\Component Managers\CInventoryManager.h"
 #include "..\..\Component Managers\CAnimateManager.h"
 #include "..\..\Component Managers\CLevelManager.h"
@@ -64,7 +65,7 @@ CConsoleManager& CConsoleManager::GetInstance()
 	return cConsoleManager;
 }
 
-bool CConsoleManager::Initialize()
+void CConsoleManager::Initialize()
 {	
 	string szState = "Update";
 	szState += CONSOLE_STATE;
@@ -76,12 +77,8 @@ bool CConsoleManager::Initialize()
 	
 	LoadLuaFile("luatest.lua");
 
-	//CallLuaFunc("CreatePlayerObj(\"Player0\", -16, 0, 31, 3.14159)");
-
 	lua_getglobal(m_pLua, "InitValues");
 	lua_pcall(m_pLua, 0, 0, 0);
-
-	return true;
 }
 
 void CConsoleManager::Shutdown(IEvent*, IComponent*)
@@ -168,6 +165,8 @@ void CConsoleManager::RegisterCFunctions()
 		&CSkidMarks::CreateSkidMarksComponent);
 	lua_register(m_pLua, "CreatePBVFXComp",
 		&CPeanutButterVFXComp::CreatePBVFXComponent);
+	lua_register(m_pLua, "CreateScrollingUVComponent",
+		&CScrollingUVComp::CreateScrollingUVComponent);
 
 	lua_register(m_pLua, "SetKey",
 		&CKeybindsManager::SetKeyCallback);
@@ -227,13 +226,12 @@ void CConsoleManager::DrawConsole()
 	if(m_bActive == false)
 		return;
 
-	Direct3DManager* pD3D = Direct3DManager::GetInstance();
-
 	// So the text starts at the bottom of the screen and works its way up
 	int nTop = 750 - ((m_nNumLines+1) * 16);
 	RECT fontRec = {0, nTop, 500, 750};
 
-	pD3D->GetFont()->DrawText(0, m_szToDraw.c_str(), -1, &fontRec, 0, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	Direct3DManager::GetInstance()->GetFont()->DrawText(0, m_szToDraw.c_str(),
+		-1, &fontRec, 0, D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void CConsoleManager::StackDump()
@@ -308,7 +306,7 @@ void CConsoleManager::Update(IEvent* pEvent, IComponent*)
 
 	if(ch)
 	{
-		if(ch == '\b')
+		if(ch == '\b' && pDebug.m_szCurrLine.size() > 0)
 		{
 			pDebug.m_szCurrLine.erase(pDebug.m_szCurrLine.end()-1);
 			pDebug.m_szToDraw.erase(pDebug.m_szToDraw.end()-1);
@@ -344,6 +342,6 @@ void CConsoleManager::Update(IEvent* pEvent, IComponent*)
 
 void CConsoleManager::Parse(string szCommand)
 {
-	// Parse the string for any possible commands
+	// Parse the string for any possible commands (Run it through Lua)
 	CallLuaFunc(szCommand);
 }

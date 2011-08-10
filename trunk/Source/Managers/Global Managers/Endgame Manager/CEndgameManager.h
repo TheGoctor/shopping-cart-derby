@@ -10,6 +10,7 @@
 // Header Protexction
 #ifndef _CENDGAMEMANAGER_H_
 #define _CENDGAMEMANAGER_H_
+#include "../Rendering Managers/Texture Managers/CBitmapFont.h"
 
 // Includes
 
@@ -29,19 +30,27 @@ private:
 	bool	m_bHumanWon;		// For Human player WINNING
 	bool	m_bSoundPlayed;
 	bool	m_bLoseFade;
+	bool	m_bCameraMoved;
+	bool	m_bVictoryPlayed;
+	float 	m_fCameraTime;
 	float	m_fFadeScreenAlpha;
 	float	m_fWinLoseAlpha;
 	float	m_fLoseFadeTimer;
+	float	m_fCameraMoveTimer;
+	
 	
 	// Sprite Components
 	CSpriteComponent* m_pFadeScreenComp;
 	CSpriteComponent* m_pWinLoseComp;
 	CSpriteComponent* m_pMainMenuComp;
+	
+	CSpriteComponent* m_pFinishFlag;
 
 	CObject*	m_pWinnerObject;
 	CObject*	m_pLoserObject1;
 	CObject*	m_pLoserObject2;
 	CObject*	m_pLoserObject3;
+	CObject*	m_pPlayerObject;
 	
 
 	// Singleton
@@ -54,6 +63,8 @@ private:
 
 public:
 
+	CBitmapFontComp*		m_pFont;	//mainly for when character unlock message pops up
+	int							m_nFontX, m_nFontY;
 	bool	m_bGameWon;		//for winning the game only once per play
 
 	// Singleton

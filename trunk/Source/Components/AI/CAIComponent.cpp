@@ -1,7 +1,7 @@
 /***********************************************
  * Filename:  		CAIComponent.cpp
  * Date:      		04/04/2011
- * Mod. Date: 		06/10/2011
+ * Mod. Date: 		07/26/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This is the AI's main class
@@ -12,12 +12,11 @@
 			Aggressive. Each state will dertermine
 			how the AI behaves in each situation.
  ************************************************/
-#include <iostream>
-using std::cout;
-
 #include "CAIComponent.h"
 #include "..\Level\CGoalItemComponent.h"
 #include "..\..\CObject.h"
+#include "..\Inventory\CInventoryComponent.h"
+#include "..\..\Managers\Component Managers\CInventoryManager.h"
 #include "..\..\Managers\Component Managers\CAIManager.h"
 #include "..\..\Managers\Component Managers\CSpawningManager.h"
 #include "..\..\Managers\Global Managers\Event Manager\CEventManager.h"
@@ -26,12 +25,16 @@ using std::cout;
 #include "..\..\Managers\Component Managers\CPickupItemManager.h"
 #include "..\..\Managers\Global Managers\Memory Manager\CMemoryManager.h"
 #include "..\..\Managers\Component Managers\CCollisionManager.h"
-#include "..\..\Managers\Global Managers\Console Manager\CConsoleManager.h"
 #include "..\..\Managers\Global Managers\Rendering Managers\Renderer.h"
 #include "..\..\Managers\Global Managers\Rendering Managers\DXMesh.h"
 #include "..\..\Managers\Global Managers\Object Manager\CObjectManager.h"
 #include "..\Rendering\CRenderComponent.h"
+#include "..\..\Components\Level\CHeldItemComponent.h"
 using namespace EventStructs;
+
+#define MIN_SPEED (7)
+#define USE_ITEM_TIMER (rand() % 26 + 25)
+#define TURKEY_TO_PLAYER (20.0f)
 
 static float Magnitude(D3DXVECTOR3 pt)
 {
@@ -62,18 +65,21 @@ inline static float DegreesToRadians(const float fDegrees)
 // time to fix it
 // Yay!!
 int nNumber = 0;
-CAIComponent::CAIComponent(CObject* pObj) : m_pObject(pObj)
+CAIComponent::CAIComponent(CObject* pObj) : m_pObject(pObj), m_pMesh(NULL), m_pRendComp(NULL), m_bShutdown(false)
 {
 }
 
 CAIComponent::~CAIComponent()
 {
+	// Delete all memory being used by this component
+
 	while(m_tKnowledge.m_cGoalItemsInLevel.empty() == false)
 	{
-		list<TGoalItem, CAllocator<TGoalItem>>::iterator pIter =
+		map<unsigned int, TGoalItem, less<unsigned int>,
+			CAllocator<pair<unsigned int, TGoalItem>>>::iterator pIter =
 			m_tKnowledge.m_cGoalItemsInLevel.begin();
 
-		MyDelete<TGoalItem>(&(*pIter), HEAPID_GENERAL);
+		MyDelete<TGoalItem>(&pIter->second, HEAPID_GENERAL);
 		
 		m_tKnowledge.m_cGoalItemsInLevel.erase(
 			m_tKnowledge.m_cGoalItemsInLevel.begin());
@@ -81,10 +87,11 @@ CAIComponent::~CAIComponent()
 
 	while(m_tKnowledge.m_cNeededGoalItems.empty() == false)
 	{
-		list<EGoalItemType, CAllocator<EGoalItemType>>::iterator pIter =
+		map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator pIter =
 			m_tKnowledge.m_cNeededGoalItems.begin();
 
-		MyDelete<EGoalItemType>(&(*pIter), HEAPID_GENERAL);
+		MyDelete<EGoalItemType>(&pIter->second, HEAPID_GENERAL);
 
 		m_tKnowledge.m_cNeededGoalItems.erase(
 			m_tKnowledge.m_cNeededGoalItems.begin());
@@ -94,10 +101,11 @@ CAIComponent::~CAIComponent()
 	{
 		while(m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.empty() == false)
 		{
-			list<EGoalItemType, CAllocator<EGoalItemType>>::iterator pIter =
+			map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator pIter =
 				m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.begin();
 
-			MyDelete<EGoalItemType>(&(*pIter), HEAPID_GENERAL);
+			MyDelete<EGoalItemType>(&pIter->second, HEAPID_GENERAL);
 
 			m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.erase(
 				m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.begin());
@@ -107,6 +115,8 @@ CAIComponent::~CAIComponent()
 
 void CAIComponent::InitCB(IEvent*, IComponent* pComp)
 {
+	// Reinit all agents
+
 	CAIComponent* cAIComp = (CAIComponent*)pComp;
 
 	cAIComp->m_pfWeight[COLLECTIVE] = 0;
@@ -128,13 +138,12 @@ void CAIComponent::InitCB(IEvent*, IComponent* pComp)
 
 	while(pItemIter != CAIManager::GetInstance()->m_cInitedGoalItems.end())
 	{
-		cAIComp->m_tKnowledge.m_cNeededGoalItems.push_back(*pItemIter);
+		cAIComp->m_tKnowledge.m_cNeededGoalItems.insert(make_pair(unsigned int(*pItemIter), *pItemIter));
 		++pItemIter;
 	}
 
 	for(unsigned nPlayers = 0; nPlayers < 3; ++nPlayers)
 	{
-		//cAIComp->m_tKnowledge.m_cOpponents[nPlayers].m_nPlayer = -1;
 		cAIComp->m_tKnowledge.m_cOpponents[nPlayers].m_bHasItem = false;
 		cAIComp->m_tKnowledge.m_cOpponents[nPlayers].m_bTarget = false;
 		cAIComp->m_tKnowledge.m_cOpponents[nPlayers].m_cGoalItems.clear();
@@ -145,20 +154,12 @@ void CAIComponent::InitCB(IEvent*, IComponent* pComp)
 
 	cAIComp->m_fTimer = 1.0f;
 
-	cAIComp->m_nFramesToAvoidObstacle = 0;
 	cAIComp->m_vTargetPosition = D3DXVECTOR3(0, 0, -65535);
 
-	cAIComp->m_vAvoidanceTargetPosition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	cAIComp->m_nControllerNumber = ++nNumber;
-	cAIComp->m_nFramesWeAreOnThisTarget = 500;
-	cAIComp->m_nFramesToAccel = 3;
-
-	cAIComp->m_fReactionDistance = 0.1f;
-	cAIComp->m_fSideReactionDistance = 0.1f;
 
 	cAIComp->m_nTargetTriangle = -1;
 	cAIComp->m_nCurrentTriangle = -1;
-	cAIComp->m_fwaaaaAaaaAAAAAattttt = 0;
 
 	cAIComp->m_tTargetPlayerLine.cRayNormal = D3DXVECTOR3(65535, 65535, 65535);
 
@@ -170,6 +171,9 @@ void CAIComponent::InitCB(IEvent*, IComponent* pComp)
 	cAIComp->fThreshold[0] = 0.5f;
 	cAIComp->fThreshold[1] = 0.8f;
 
+	cAIComp->m_fUseItemTimer = static_cast<float>(USE_ITEM_TIMER);
+	cAIComp->m_fTurkeyToPlayer = TURKEY_TO_PLAYER;
+
 	// Alert anyone who is waiting on AI
 	// that AI is now up and running
 	SendIEvent("AIInited", cAIComp, NULL, PRIORITY_RENDER);
@@ -177,6 +181,8 @@ void CAIComponent::InitCB(IEvent*, IComponent* pComp)
 
 void CAIComponent::Init()
 {
+	// Register for all events needed
+
 	CEventManager* pEM = CEventManager::GetInstance();
 
 	string szEvent = "Update";
@@ -187,46 +193,60 @@ void CAIComponent::Init()
 	szEvent3 += GAMEPLAY_STATE;
 
 	pEM->RegisterEvent("PlayerCharacterSet", this, PlayerCreated);
-	
 	pEM->RegisterEvent(szEvent, this, Update);
 	pEM->RegisterEvent(szEvent2, this, InitCB);
 	pEM->RegisterEvent(szEvent3, this, Shutdown);
-	pEM->RegisterEvent("CartCollision", this, PlayerAttacked);
 	pEM->RegisterEvent("GoalItemCollected", this, GoalItemCollected);
 	pEM->RegisterEvent("PickupItemCollected", this,	PickupItemCollected);
-	pEM->RegisterEvent("ShowRamSpeed", this, SetRamSpeed);
 	pEM->RegisterEvent("HeldItemSpawned", this, HeldItemSpawned);
 	pEM->RegisterEvent("HeldItemCollected", this, HeldItemCollected);
-	pEM->RegisterEvent("PlayerAttacked", this, PlayerAttacked);
 	pEM->RegisterEvent("GoalItemSpawned", this, GoalItemSpawned);
 	pEM->RegisterEvent("GoalItemDespawned", this, GoalItemDespawned);
 	pEM->RegisterEvent("SpeedValue", this, UpdateSpeeds);
 	pEM->RegisterEvent("ItemDropped", this, ItemDropped);
-
-
 	pEM->RegisterEvent("ToggleAI", this, ToggleAI);
 	pEM->RegisterEvent("ToggleTris", this, ToggleTris);
+	pEM->RegisterEvent("ShowRamSpeed", this, SetRamSpeed);
 	pEM->RegisterEvent("ShowTurnSpeed", this, ShowTurnSpeed);
+	pEM->RegisterEvent("ShowAcceleration", this, ShowAcceleration);
+	pEM->RegisterEvent("StealItem", this, ItemStealing);
+	pEM->RegisterEvent("Blind", this, Blind);
+	pEM->RegisterEvent("UseJam", this, Jammed);
 
 	string szEventName = "Update";
 	szEventName += PAUSE_STATE;
 	pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
 	
-	//szEventName = "Update";
-	//szEventName += CONSOLE_STATE;
-	//pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
-	//
-	//szEventName = "Update";
-	//szEventName += PAUSE_KEYBINDS_STATE;
-	//pEM->RegisterEvent(szEvent, this, PauseUpdateCallback); 
-	//
-	//szEventName = "Update";
-	//szEventName += PAUSE_OPTIONS_STATE;
-	//pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEventName = "Update";
+	szEventName += CONSOLE_STATE;
+	pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	
+	szEventName = "Update";
+	szEventName += PAUSE_KEYBINDS_STATE;
+	pEM->RegisterEvent(szEvent, this, PauseUpdateCallback); 
+	
+	szEventName = "Update";
+	szEventName += PAUSE_OPTIONS_STATE;
+	pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	
+	szEventName = "Update";
+	szEventName += QUIT_CONFIRMATION_STATE;
+	pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
+	szEventName = "Update";
+	szEventName += IN_GAME_HOW_TO_PLAY_STATE;
+	pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEventName = "Update";
+	szEventName += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	pEM->RegisterEvent(szEvent, this, PauseUpdateCallback);
 }
 
 void CAIComponent::PlayerCreated(IEvent* pEvent, IComponent* pComp)
 {
+	// Function is used for ToggleInfo event
+	// Allows us to display the name of each
+	// agent to the screen
+
 	TTwoIntEvent* pTwoInts = (TTwoIntEvent*)pEvent->GetData();
 	CAIComponent* pcAI = (CAIComponent*)pComp;
 
@@ -241,25 +261,32 @@ void CAIComponent::PlayerCreated(IEvent* pEvent, IComponent* pComp)
 
 void CAIComponent::Shutdown(IEvent*, IComponent* pComp)
 {
+	// Shutdown this agent
+
 	CAIComponent* pcAI = (CAIComponent*)pComp;
 
-	list<TGoalItem, CAllocator<TGoalItem>>::iterator pGoalItemLevelIter;
+	if(pcAI->m_bShutdown)
+		return;	// Don't shutdown the same thing twice
+
+	map<unsigned int, TGoalItem, less<unsigned int>,
+			CAllocator<pair<unsigned int, TGoalItem>>>::iterator pGoalItemLevelIter;
 	while(pcAI->m_tKnowledge.m_cGoalItemsInLevel.empty() == false)
 	{
-		pGoalItemLevelIter =	pcAI->m_tKnowledge.m_cGoalItemsInLevel.begin();
+		pGoalItemLevelIter = pcAI->m_tKnowledge.m_cGoalItemsInLevel.begin();
 
-		MyDelete<TGoalItem>(&(*pGoalItemLevelIter), HEAPID_GENERAL);
-
+		MyDelete<TGoalItem>(&pGoalItemLevelIter->second, HEAPID_GENERAL);
+		
 		pcAI->m_tKnowledge.m_cGoalItemsInLevel.erase(
 			pcAI->m_tKnowledge.m_cGoalItemsInLevel.begin());
 	}
 
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator pNeededItemsIter;
 	while(pcAI->m_tKnowledge.m_cNeededGoalItems.empty() == false)
 	{
-		pNeededItemsIter =	pcAI->m_tKnowledge.m_cNeededGoalItems.begin();
+		map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator pIter =
+			pcAI->m_tKnowledge.m_cNeededGoalItems.begin();
 
-		MyDelete<EGoalItemType>(&(*pNeededItemsIter), HEAPID_GENERAL);
+		MyDelete<EGoalItemType>(&pIter->second, HEAPID_GENERAL);
 
 		pcAI->m_tKnowledge.m_cNeededGoalItems.erase(
 			pcAI->m_tKnowledge.m_cNeededGoalItems.begin());
@@ -267,35 +294,38 @@ void CAIComponent::Shutdown(IEvent*, IComponent* pComp)
 
 	for(unsigned nIndex = 0; nIndex < 3; ++nIndex)
 	{
-		list<EGoalItemType, CAllocator<EGoalItemType>>::iterator pIter;
+		map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator pIter;
 		while(pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.empty() == false)
 		{
 			pIter =	pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.begin();
 
-			MyDelete<EGoalItemType>(&(*pIter), HEAPID_GENERAL);
+			MyDelete<EGoalItemType>(&pIter->second, HEAPID_GENERAL);
 
 			pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.erase(
 				pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.begin());
 		}
 	}
 
-	list<THeldItem, CAllocator<THeldItem>>::iterator pHeldItemsLevelIter;
+	map<unsigned int, THeldItem, less<unsigned int>,
+			CAllocator<pair<unsigned int, THeldItem>>>::iterator pHeldItemsLevelIter;
 	while(pcAI->m_tKnowledge.m_cHeldItemsInLevel.empty() == false)
 	{
 		pHeldItemsLevelIter =	pcAI->m_tKnowledge.m_cHeldItemsInLevel.begin();
 
-		MyDelete<THeldItem>(&(*pHeldItemsLevelIter), HEAPID_GENERAL);
+		MyDelete<THeldItem>(&pHeldItemsLevelIter->second, HEAPID_GENERAL);
 
 		pcAI->m_tKnowledge.m_cHeldItemsInLevel.erase(
 			pcAI->m_tKnowledge.m_cHeldItemsInLevel.begin());
 	}
 
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator pDroppedItemsIter;
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator pDroppedItemsIter;
 	while(pcAI->m_tKnowledge.m_cDroppedItems.empty() == false)
 	{
 		pDroppedItemsIter =	pcAI->m_tKnowledge.m_cDroppedItems.begin();
 
-		MyDelete<EGoalItemType>(&(*pDroppedItemsIter), HEAPID_GENERAL);
+		MyDelete<EGoalItemType>(&pDroppedItemsIter->second, HEAPID_GENERAL);
 
 		pcAI->m_tKnowledge.m_cDroppedItems.erase(
 			pcAI->m_tKnowledge.m_cDroppedItems.begin());
@@ -303,27 +333,70 @@ void CAIComponent::Shutdown(IEvent*, IComponent* pComp)
 
 	MMDEL(pcAI->m_pMesh);
 	MMDEL(pcAI->m_pRendComp);
+	pcAI->m_bShutdown = true;
 }
 
 // Events Start
+void CAIComponent::ItemStealing(IEvent* pEvent, IComponent* pComp)
+{
+	// A donut was used and someone was hit
+
+	TImpactEvent* pImpactEvent = (TImpactEvent*)pEvent->GetData();
+	CAIComponent* pcAI = (CAIComponent*)pComp;
+
+	if(pcAI->m_pObject->GetID() == pImpactEvent->m_pcCollider->GetID())
+	{
+		// We're the ones who is stealing an item
+		CInventoryComponent* pCompToStealFrom =
+			CInventoryManager::GetInstance()->GetInventoryComponent(pImpactEvent->m_pCollidedWith);
+
+		for(int i = 0; i < 2; ++i)
+		{
+			for(int j = 0; j < 2; ++j)
+			{
+				if(pcAI->m_tKnowledge.m_peMyHeldItems[i] == NO_HELD_ITEM)
+				{
+					if(pCompToStealFrom->GetHeldItem(j) != NO_HELD_ITEM)
+					{
+						pcAI->m_tKnowledge.m_peMyHeldItems[i] = pCompToStealFrom->GetHeldItem(j);
+					}
+				}
+			}
+		}
+	}
+	else if(pcAI->m_pObject->GetID() == pImpactEvent->m_pCollidedWith->GetID())
+	{
+		// We're losing the item
+		for(int i = 0; i < 2; ++i)
+		{
+			if(pcAI->m_tKnowledge.m_peMyHeldItems[i] != NO_HELD_ITEM)
+			{
+				pcAI->m_tKnowledge.m_peMyHeldItems[i] = NO_HELD_ITEM;
+				return;
+			}
+		}
+	}
+}
+
 void CAIComponent::ItemDropped(IEvent* piEvent, IComponent* piComponent)
 {
+	// A Goal Item was knocked out of someone's cart
+
 	CAIComponent* pcAI = (CAIComponent*)piComponent;
 	TGoalItemCollectedEvent* pcGoalItem = (TGoalItemCollectedEvent*)piEvent->GetData();
 
-	unsigned pType = (unsigned int)pcGoalItem->m_pcGoalItem;
-	std::map<unsigned int, CObject*, less<unsigned int>,
-		CAllocator<pair<unsigned int, CObject*>>>::iterator pIter = 
-		CAIManager::GetInstance()->m_cSpawnableGoalItems.find(pType);
+	// Get the type
+	unsigned int pType = (unsigned int)pcGoalItem->m_pcGoalItem;
 
-	pcAI->m_tKnowledge.m_cDroppedItems.push_back(
-		static_cast<EGoalItemType>(pType));
+	// Insert the type into the DroppedItems map
+	pcAI->m_tKnowledge.m_cDroppedItems.insert(make_pair(pType,
+		static_cast<EGoalItemType>(pType)));
 
 	if(pcAI->m_pObject->GetID() == pcGoalItem->m_pcCollector->GetID())
 	{
 		// If we dropped the item
-		pcAI->m_tKnowledge.m_cNeededGoalItems.push_back(
-			static_cast<EGoalItemType>(pType));
+		pcAI->m_tKnowledge.m_cNeededGoalItems.insert(make_pair(pType,
+			static_cast<EGoalItemType>(pType)));
 	}
 	else // If an opponent dropped the item
 	{
@@ -341,58 +414,25 @@ void CAIComponent::ItemDropped(IEvent* piEvent, IComponent* piComponent)
 		}
 
 		// Decrease how many Goal Items they have
-		pcAI->m_tKnowledge.m_cOpponents[nIndex].m_chAmtGoalItems--;
+		map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator ItemIter =
+		pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.find(pType);
 
-		// Check if they're within our radar
-		if(pcAI->WithinRadar(pcGoalItem->m_pcCollector->GetTransform()->GetWorldPosition()))
-		{
-			list<EGoalItemType, CAllocator<EGoalItemType>>::iterator ItemIter;
-			ItemIter = pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.begin();
+		// Remove the goal item from their collected goal item map
+		pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.erase(ItemIter);
 
-			// Loop through the collector's collected Goal Items
-			while(ItemIter != pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.end())
-			{
-				if(*ItemIter == static_cast<EGoalItemType>(pType))
-				{
-					// Remove the Goal Item from their collected list
-					pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.remove(*ItemIter);
-					break;
-				}
-
-				++ItemIter;
-			}
-		}
+		// Adjust the AmtGoalItems
+		pcAI->m_tKnowledge.m_cOpponents[nIndex].m_chAmtGoalItems = 
+			pcAI->m_tKnowledge.m_cOpponents[nIndex].m_cGoalItems.size();
 	}
 }
 
 void CAIComponent::SetupOpponents(CObject* pcObject)
 {
-	//CAIComponent* pcAI = (CAIComponent*)piComponent;
-	//TObjectEvent* pcObject = (TObjectEvent*)piEvent->GetData();
-
-	// Previously in Manager
-	//std::list<CObject*,	CAllocator<CObject*>>::iterator pcPlayerIter = 
-	//	CAIManager::GetInstance()->m_cPlayers.begin();
-	//bool bAlreadyAdded = false;
-
-	//while(pcPlayerIter != CAIManager::GetInstance()->m_cPlayers.end())
-	//{
-	//	if(*pcPlayerIter == pcObject)
-	//	{
-	//		bAlreadyAdded = true;
-	//		break;
-	//	}
-	//	pcPlayerIter++;
-	//}
-
-	//if(bAlreadyAdded == false)
-	//{
-	//	CAIManager::GetInstance()->m_cPlayers.push_back(pcObject);
-	//}
-
-	// Component part
+	// If not me
 	if(m_pObject->GetID() != pcObject->GetID())
 	{
+		// Remember this player
 		m_tKnowledge.m_cOpponents[m_tKnowledge.m_nOpponentID].m_nPlayer =
 			pcObject->GetID();
 		++m_tKnowledge.m_nOpponentID;
@@ -401,17 +441,21 @@ void CAIComponent::SetupOpponents(CObject* pcObject)
 
 void CAIComponent::ToggleAI(IEvent*, IComponent* pComp)
 {
+	// Toggles if the agent does certain things
 	pComp->ToggleIsActive();
 }
 
 void CAIComponent::ToggleTris(IEvent*, IComponent* pComp)
 {
+	// Toggles the rendering of the nav mesh
 	CAIComponent* pcAI = (CAIComponent*)pComp;
 	pcAI->bDrawTris = !pcAI->bDrawTris;
 }
 
-void CAIComponent::Use(EHeldItemType eType)
+bool CAIComponent::Use(EHeldItemType eType)
 {
+	// Loop through and use the passed in item
+	// if it is contained in our inventory
 	for(int nItem = 0; nItem < 2; ++nItem)
 	{
 		if(m_tKnowledge.m_peMyHeldItems[nItem] == eType)
@@ -422,9 +466,11 @@ void CAIComponent::Use(EHeldItemType eType)
 				SendInputEvent("UseHeldItem2", this, m_pObject, 1.0f);
 
 			m_tKnowledge.m_peMyHeldItems[nItem] = NO_HELD_ITEM;
-			break;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 CRenderComponent* CAIComponent::CreateMeshTriangle()
@@ -442,7 +488,9 @@ CRenderComponent* CAIComponent::CreateMeshTriangle()
 void CAIComponent::StartDraw()
 {
 	if(bDrawTris == false)
+	{
 		return;
+	}
 
 	TMeshVertexInfo& pVertInfo = m_pMesh->GetVertInfo();
 	// Add verts to mesh to be drawn
@@ -453,7 +501,9 @@ void CAIComponent::StartDraw()
 void CAIComponent::EndDraw()
 {
 	if(bDrawTris == false)
+	{
 		return;
+	}
 
 	TMeshVertexInfo& pVertInfo = m_pMesh->GetVertInfo();
 	// Render all lines and tris... and maybe spheres or w/e
@@ -469,20 +519,23 @@ void CAIComponent::EndDraw()
 void CAIComponent::DrawTriangle(D3DXVECTOR3 vVert0, D3DXVECTOR3 vVert1, D3DXVECTOR3 vVert2, D3DXCOLOR cColor)
 {
 	if(bDrawTris == false)
+	{
 		return;
+	}
 
 	TMeshVertexInfo& pVertInfo = m_pMesh->GetVertInfo();
+	D3DCOLOR color = cColor;
 
 	pVertInfo.m_vVertices.push_back(vVert0);
-	pVertInfo.m_vColors.push_back(cColor);
+	pVertInfo.m_vColors.push_back(color);
 	pVertInfo.m_vUV.push_back(D3DXVECTOR2(0.0f, 0.0f));
 
 	pVertInfo.m_vVertices.push_back(vVert1);
-	pVertInfo.m_vColors.push_back(cColor);
+	pVertInfo.m_vColors.push_back(color);
 	pVertInfo.m_vUV.push_back(D3DXVECTOR2(0.0f, 0.0f));
 
 	pVertInfo.m_vVertices.push_back(vVert2);
-	pVertInfo.m_vColors.push_back(cColor);
+	pVertInfo.m_vColors.push_back(color);
 	pVertInfo.m_vUV.push_back(D3DXVECTOR2(0.0f, 0.0f));
 }
 
@@ -510,17 +563,24 @@ void CAIComponent::Update(IEvent* piEvent, IComponent* piComponent)
 	CCollisionManager* cCollision = CCollisionManager::GetInstance();
 	TUpdateStateEvent* pcUpdate = (TUpdateStateEvent*)piEvent->GetData();
 
-	//if(pcAI->m_pObject->GetID() != CIDGen::GetInstance()->GetID("Player1"))
-	//{
-	//	// HACK !!!
-	//	return;
-	//}
-
-	pcAI->m_fTimer += pcUpdate->m_fDeltaTime;
 	SendRenderEvent("AddToSet", pcAI, pcAI->m_pObject, PRIORITY_IMMEDIATE);
 
 	if(CInputManager::GetInstance()->GetState() == GAMEPLAY_STATE)
 	{
+		if(pcAI->GetIsActive())
+		{
+			pcAI->m_fBlindTimer -= pcUpdate->m_fDeltaTime;
+			pcAI->m_fJamTimer -= pcUpdate->m_fDeltaTime;
+			pcAI->m_fTimer += pcUpdate->m_fDeltaTime;
+			
+			if(pcAI->m_bRandomItems == true)
+			{
+				pcAI->m_fUseItemTimer -= pcUpdate->m_fDeltaTime;
+				pcAI->m_fTurkeyToPlayer -= pcUpdate->m_fDeltaTime;
+			}
+		}
+
+		// Get agent's position offset by the heading
 		D3DXVECTOR3 Heading;
 		Heading.x = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._31;
 		Heading.y = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._32;
@@ -536,17 +596,29 @@ void CAIComponent::Update(IEvent* piEvent, IComponent* piComponent)
 		}
 		else
 		{
-			if(pcAI->m_fTimer > 0.4f)
+			if(pcAI->m_fJamTimer < 0)
 			{
-				pcAI->m_fTimer = 0.0f;
-				pcAI->EvaluateStateWeights();
+				// If not jammed update quickly
+				if(pcAI->m_fTimer > 0.4f)
+				{
+					pcAI->m_fTimer = 0.0f;
+					pcAI->EvaluateStateWeights();
+				}
+			}
+			else
+			{
+				// We're jammed so update slower
+				if(pcAI->m_fTimer > 4.0f)
+				{
+					pcAI->m_fTimer = 0.0f;
+					pcAI->EvaluateStateWeights();
+				}
 			}
 		}
 
 		pcAI->StartDraw();
 
 		// Declare/Initiliaze
-		//int nGoalEdge = -1;
 		int nHeadingEdge = -1;
 		int nAStarEdge = -1;
 		int nMiniGoalTriID = -1;
@@ -569,9 +641,9 @@ void CAIComponent::Update(IEvent* piEvent, IComponent* piComponent)
 			}
 
 			if(cAIManager->GetDistance(pFindIter->second->tPos, 
-				pcAI->m_vGoalPosition) < 500)
+				pcAI->m_vGoalPosition) < 144)
 			{
-				// TargetTriangle
+				// Finding TargetTriangle
 				tri.tVert0 = pFindIter->second->tEdges[0].cLineStart;
 				tri.tVert1 = pFindIter->second->tEdges[1].cLineStart;
 				tri.tVert2 = pFindIter->second->tEdges[2].cLineStart;
@@ -581,15 +653,17 @@ void CAIComponent::Update(IEvent* piEvent, IComponent* piComponent)
 					pcAI->DrawTriangle(tri.tVert0, tri.tVert1, tri.tVert2, D3DXCOLOR(255, 0, 0, 255));
 					pcAI->DrawLine(myPosition, pFindIter->second->tPos, D3DXCOLOR(0, 0, 255, 255));
 					pcAI->m_nTargetTriangle = pFindIter->first;
+
+					// Set goal for later
 					GoalPosition = pFindIter->second->tPos;
 					bTarFound = true;
 				}
 			}
 
 			if(cAIManager->GetDistance(pFindIter->second->tPos,
-				myPosition) < 500)
+				myPosition) < 144)
 			{
-				// CurrentTriangle
+				// Finding CurrentTriangle
 				tri.tVert0 = pFindIter->second->tEdges[0].cLineStart;
 				tri.tVert1 = pFindIter->second->tEdges[1].cLineStart;
 				tri.tVert2 = pFindIter->second->tEdges[2].cLineStart;
@@ -662,314 +736,305 @@ void CAIComponent::Update(IEvent* piEvent, IComponent* piComponent)
 			myMatress._43 = pFindIter->second->tPos.z - Heading.z;
 		}
 
-	// Find which edge the agent should be trying to go through
-	TTri *pTri = cAIManager->m_cTris.find(pcAI->m_nCurrentTriangle)->second;
-	map<int, TTri*, less<int>,
-		CAllocator<pair<int, TTri*>>>::iterator pCurTriIter = pTri->m_cConnections.begin();
-
-	nAStarEdge = cAIManager->m_nLookup[cAIManager->LookUpCellAlgorithm(pcAI->m_nCurrentTriangle,
-		pcAI->m_nTargetTriangle)];
-
-	int nNextTriID = -1;
-	// Find next triangle
-	while(pCurTriIter != pTri->m_cConnections.end())
-	{
-		for(int i = 0; i < 3; ++i)
-		{
-			if(cAIManager->LinesEqual(pTri->tEdges[nAStarEdge],
-				pCurTriIter->second->tEdges[i]))
-			{
-				pcAI->tNextTri = pCurTriIter->second;
-				nNextTriID = pCurTriIter->first;
-
-				// To easily get out of the while loop
-				// without using a goto
-				pCurTriIter = pTri->m_cConnections.end();
-				--pCurTriIter;
-				//
-				break;
-			}
-		}
-
-		++pCurTriIter;
-	}
-#pragma endregion
-
-	if(nNextTriID != -1)
-	{
-		// Find entire path within distance
-		float fDistanceOfPath = (pcAI->m_fSpeed * pcAI->m_fSpeed) * 0.66f;
+		// Find which edge the agent should be trying to go through
+		TTri *pTri = cAIManager->m_cTris.find(pcAI->m_nCurrentTriangle)->second;
 		map<int, TTri*, less<int>,
-			CAllocator<pair<int, TTri*>>>::iterator pTemp =
-			cAIManager->m_cTris.find(nNextTriID);
+			CAllocator<pair<int, TTri*>>>::iterator pCurTriIter = pTri->m_cConnections.begin();
 
-		do
-		{
-			if(pTemp->first == pcAI->m_nTargetTriangle)
-			{
-				// We found our Goal
-				pcAI->m_pMiniGoalTri = pTemp->second;
-				break;
-			}
-
-			pcAI->DrawTriangle(pTemp->second->tEdges[0].cLineStart, 
-				pTemp->second->tEdges[1].cLineStart,
-				pTemp->second->tEdges[2].cLineStart, D3DXCOLOR(126, 126, 126, 255));
-
-			// Find which edge the AI should try to
-			// be exiting out of
-			nAStarEdge = cAIManager->m_nLookup[cAIManager->LookUpCellAlgorithm(pTemp->first,
-				pcAI->m_nTargetTriangle)];
-
-			map<int, TTri*, less<int>,
-				CAllocator<pair<int, TTri*>>>::iterator pConnectionIter = 
-				pTemp->second->m_cConnections.begin();
-
-			// Loop through all connections and look for
-			// the next triangle in the path
-			while(pConnectionIter != pTemp->second->m_cConnections.end())
-			{
-				// For each edge
-				for(int nEdge = 0; nEdge < 3; ++nEdge)
-				{
-					// If the pConnectionIter's current edge is
-					// equal to the current triangle's AStarEdge
-					if(cAIManager->LinesEqual(pTemp->second->tEdges[nAStarEdge],
-						pConnectionIter->second->tEdges[nEdge]))
-					{
-						// Set the MiniGoalTri to pTemp
-						pcAI->DrawLine(pTemp->second->tPos, 
-							pConnectionIter->second->tPos, D3DXCOLOR(255, 255, 0, 255));
-						pcAI->m_pMiniGoalTri = pTemp->second;
-						nMiniGoalTriID = pTemp->first;
-
-						// Set pTemp to pConnectionIter
-						pTemp = cAIManager->m_cTris.find(pConnectionIter->first);
-
-						// To easily get out of the while
-						// loop without using a goto
-						pConnectionIter = pTemp->second->m_cConnections.end();
-						--pConnectionIter;
-						break;
-						//
-					}
-				}
-				++pConnectionIter;
-			}
-		}
-		while(fDistanceOfPath > pcAI->GetDistance(myPosition, pTemp->second->tPos));
-		pcAI->DrawLine(myPosition, pcAI->m_pMiniGoalTri->tPos, D3DXCOLOR(0, 255, 0, 255));
-		pcAI->DrawLine(myPosition, pTemp->second->tPos, D3DXCOLOR(126, 0, 126, 255));
-	}
-
-	if(pcAI->m_pMiniGoalTri == NULL)
-	{
-		return;
-	}
-
-	// Find which edge the heading collides with
-	pFindIter = cAIManager->m_cTris.find(pcAI->m_nCurrentTriangle);
-	TRay HeadingRay;
-	HeadingRay.cRayStart = myPosition;
-	HeadingRay.cRayNormal = Heading * 20.0f;
-	for(int nEdge = 0; nEdge < 3; ++nEdge)
-	{
-		if(cCollision->RayToLineIntersection(HeadingRay, 
-			pFindIter->second->tEdges[nEdge]) == true)
-		{
-			nHeadingEdge = nEdge;
-			break;
-		}
-	}
-
-	// Error checking
-	if( (nHeadingEdge == -1) )
-	{
-		pcAI->DrawLine(myPosition, Heading + myPosition, D3DXCOLOR(0, 255, 255, 255));
-		pcAI->EndDraw();
-		return;
-	}
-
-	// Move
-	nAStarEdge = cAIManager->m_nLookup[cAIManager->LookUpCellAlgorithm(pcAI->m_nCurrentTriangle,
+		// The edge that we're suppose to go through according to A*
+		nAStarEdge = cAIManager->m_nLookup[cAIManager->LookUpCellAlgorithm(pcAI->m_nCurrentTriangle,
 			pcAI->m_nTargetTriangle)];
 
-	D3DXVECTOR3 ToGoalNorm;
-	ToGoal = pcAI->m_pMiniGoalTri->tPos - myPosition;
-	if(nMiniGoalTriID == -1)
-	{
-		// Steer towards goal
-		ToGoal = pcAI->m_vGoalPosition - myPosition;
-
-		D3DXVECTOR3 cRtVec, cRtVecNorm;
-		cRtVec.x = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._11;
-		cRtVec.y = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._12;
-		cRtVec.z = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._13;
-		cRtVec *= -1;
-		D3DXVec3Normalize(&cRtVecNorm, &cRtVec);
-		D3DXVec3Normalize(&ToGoalNorm, &ToGoal);
-
-		float fDot = D3DXVec3Dot(&ToGoalNorm, &cRtVecNorm);
-
-		if(fDot > 0.0f)
+		int nNextTriID = -1;
+		// Find next triangle
+		while(pCurTriIter != pTri->m_cConnections.end())
 		{
-			if(pcAI->GetIsActive())
+			for(int i = 0; i < 3; ++i)
 			{
-				SendInputEvent("SteerRight", pcAI, pcAI->m_pObject, 1.0f);
+				// Get the next triangle based on A* edge
+				if(cAIManager->LinesEqual(pTri->tEdges[nAStarEdge],
+					pCurTriIter->second->tEdges[i]))
+				{
+					pcAI->tNextTri = pCurTriIter->second;
+					nNextTriID = pCurTriIter->first;
+
+					// To easily get out of the while loop
+					// without using a goto
+					pCurTriIter = pTri->m_cConnections.end();
+					--pCurTriIter;
+					//
+					break;
+				}
+			}
+
+			++pCurTriIter;
+		}
+#pragma endregion
+
+		if(nNextTriID != -1)
+		{
+			// Find entire path within distance
+			float fDistanceOfPath;
+			if(pcAI->m_fBlindTimer < 0)
+			{
+				// We aren't pied so do pathing reguraly
+				fDistanceOfPath = (pcAI->m_fSpeed * pcAI->m_fSpeed) * 0.35f;
+			}
+			else
+			{
+				// We are pied so create a longer path which
+				// will be less accurate
+				fDistanceOfPath = (pcAI->m_fSpeed * pcAI->m_fSpeed) * 2.5f;
+			}
+
+			// Get the next tri
+			map<int, TTri*, less<int>,
+				CAllocator<pair<int, TTri*>>>::iterator pTemp =
+				cAIManager->m_cTris.find(nNextTriID);
+
+			do
+			{
+				if(pTemp->first == pcAI->m_nTargetTriangle)
+				{
+					// We found our Goal
+					pcAI->m_pMiniGoalTri = pTemp->second;
+					break;
+				}
+
+				pcAI->DrawTriangle(pTemp->second->tEdges[0].cLineStart, 
+					pTemp->second->tEdges[1].cLineStart,
+					pTemp->second->tEdges[2].cLineStart, D3DXCOLOR(126, 126, 126, 255));
+
+				// Find which edge the AI should try to
+				// be exiting out of
+				nAStarEdge = cAIManager->m_nLookup[cAIManager->LookUpCellAlgorithm(pTemp->first,
+					pcAI->m_nTargetTriangle)];
+
+				map<int, TTri*, less<int>,
+					CAllocator<pair<int, TTri*>>>::iterator pConnectionIter = 
+					pTemp->second->m_cConnections.begin();
+
+				// Loop through all connections and look for
+				// the next triangle in the path
+				while(pConnectionIter != pTemp->second->m_cConnections.end())
+				{
+					// For each edge
+					for(int nEdge = 0; nEdge < 3; ++nEdge)
+					{
+						// If the pConnectionIter's current edge is
+						// equal to the current triangle's AStarEdge
+						if(cAIManager->LinesEqual(pTemp->second->tEdges[nAStarEdge],
+							pConnectionIter->second->tEdges[nEdge]))
+						{
+							// Set the MiniGoalTri to pTemp
+							pcAI->DrawLine(pTemp->second->tPos, 
+								pConnectionIter->second->tPos, D3DXCOLOR(255, 255, 0, 255));
+							pcAI->m_pMiniGoalTri = pTemp->second;
+							nMiniGoalTriID = pTemp->first;
+
+							// Set pTemp to pConnectionIter
+							pTemp = cAIManager->m_cTris.find(pConnectionIter->first);
+
+							// To easily get out of the while
+							// loop without using a goto
+							pConnectionIter = pTemp->second->m_cConnections.end();
+							--pConnectionIter;
+							break;
+							//
+						}
+					}
+					++pConnectionIter;
+				}
+			}
+			while(fDistanceOfPath > pcAI->GetDistance(myPosition, pTemp->second->tPos));
+			pcAI->DrawLine(myPosition, pcAI->m_pMiniGoalTri->tPos, D3DXCOLOR(0, 255, 0, 255));
+			pcAI->DrawLine(myPosition, pTemp->second->tPos, D3DXCOLOR(126, 0, 126, 255));
+		}
+
+		if(pcAI->m_pMiniGoalTri == NULL)
+		{
+			// Don't do more processing
+			// inless you want to crash
+			return;
+		}
+
+		// Find which edge the heading collides with
+		pFindIter = cAIManager->m_cTris.find(pcAI->m_nCurrentTriangle);
+		TRay HeadingRay;
+		HeadingRay.cRayStart = myPosition;
+		HeadingRay.cRayNormal = Heading * 20.0f;
+		for(int nEdge = 0; nEdge < 3; ++nEdge)
+		{
+			if(cCollision->RayToLineIntersection(HeadingRay, 
+				pFindIter->second->tEdges[nEdge]) == true)
+			{
+				nHeadingEdge = nEdge;
+				break;
 			}
 		}
-		else
+
+		// Error checking
+		if( (nHeadingEdge == -1) )
 		{
-			if(pcAI->GetIsActive())
-			{
-				SendInputEvent("SteerLeft", pcAI, pcAI->m_pObject, 1.0f);
-			}
+			pcAI->DrawLine(myPosition, Heading + myPosition, D3DXCOLOR(0, 255, 255, 255));
+			pcAI->EndDraw();
+			return;
 		}
 
-		if(pcAI->GetIsActive())
+		// Move
+		nAStarEdge = cAIManager->m_nLookup[cAIManager->LookUpCellAlgorithm(pcAI->m_nCurrentTriangle,
+			pcAI->m_nTargetTriangle)];
+
+		D3DXVECTOR3 ToGoalNorm;
+		ToGoal = pcAI->m_pMiniGoalTri->tPos - myPosition;
+		if(nMiniGoalTriID == -1)
 		{
-			SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, 1.0f);
-		}
-	}
-	else if(nHeadingEdge == nAStarEdge)
-	{
-		// Accelerate by some value
-		D3DXVec3Normalize(&ToGoalNorm, &ToGoal);
-		float fd = D3DXVec3Dot(&Heading, &ToGoalNorm);
+			// Steer towards goal
+			ToGoal = pcAI->m_vGoalPosition - myPosition;
 
-		float fMove1 = 1 - (D3DXToDegree(pcAI->fTurnSpeed) * pcAI->fThreshold[0]) / 90.0f;
-		float fMove2 = 1 - (D3DXToDegree(pcAI->fTurnSpeed) * pcAI->fThreshold[1]) / 90.0f;
+			D3DXVECTOR3 cRtVec, cRtVecNorm;
+			cRtVec.x = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._11;
+			cRtVec.y = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._12;
+			cRtVec.z = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._13;
 
-		if(fd > fMove1)
-		{			
-			if(pcAI->GetIsActive())
+			// It's a left vecotr at the moment
+			// so we need to switch it to right
+			cRtVec *= -1;
+
+			// Find out if we need to turn left or right
+			// by dot product from right vector and goal vector
+			D3DXVec3Normalize(&cRtVecNorm, &cRtVec);
+			D3DXVec3Normalize(&ToGoalNorm, &ToGoal);
+
+			float fDot = D3DXVec3Dot(&ToGoalNorm, &cRtVecNorm);
+
+			if(fDot > 0.0f)
 			{
-				SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, fd);
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("SteerRight", pcAI, pcAI->m_pObject, 1.0f);
+				}
 			}
-		}
-		else if( (fd > fMove2) &&
-			(pcAI->m_fSpeed > 5) )
-		{			
-			if(pcAI->GetIsActive())
+			else
 			{
-				SendInputEvent("Decelerate", pcAI, pcAI->m_pObject, 1 - fd);
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("SteerLeft", pcAI, pcAI->m_pObject, 1.0f);
+				}
 			}
-		}
-		else
-		{			
-			if(pcAI->GetIsActive())
-			{
-				SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, fabs(fd));
-			}
-		}
-	}
-	else if(pcAI->m_nCurrentTriangle == pcAI->m_nTargetTriangle)
-	{
-		// We're in the triangle we need to be in
-		// So steer towards the goal
-		if(pcAI->GetIsActive())
-		{
-			SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, 1.0f);
-		}
 
-		ToGoal = pcAI->m_vGoalPosition - myPosition;
-
-		// Check if we should turn left or right
-		D3DXVECTOR3 cRtVec, cRtVecNorm;
-		cRtVec.x = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._11;
-		cRtVec.y = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._12;
-		cRtVec.z = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._13;
-		cRtVec *= -1;
-		D3DXVec3Normalize(&cRtVecNorm, &cRtVec);
-		D3DXVec3Normalize(&ToGoalNorm, &ToGoal);
-		float fDot = D3DXVec3Dot(&ToGoalNorm, &cRtVecNorm);
-
-		//cout << "Inside target triangle!" << endl;
-
-		if(fDot > 0.0f)
-		{
-			//cout << "Turning Right" << endl;
-
-			if(pcAI->GetIsActive())
-			{
-				SendInputEvent("SteerRight", pcAI, pcAI->m_pObject, 1.0f);
-			}
-		}
-		else
-		{
-			//cout << "Turning Left" << endl;
-			
-			if(pcAI->GetIsActive())
-			{
-				SendInputEvent("SteerLeft", pcAI, pcAI->m_pObject, 1.0f);
-			}
-		}
-	}
-	else
-	{
-		// Steer Toward Next Tri
-		if(pcAI->m_fSpeed > 5)
-		{
-			if(pcAI->GetIsActive())
-			{
-				SendInputEvent("Decelerate", pcAI, pcAI->m_pObject, 1.0f);
-			}
-		}
-		else
-		{
 			if(pcAI->GetIsActive())
 			{
 				SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, 1.0f);
 			}
 		}
-
-		D3DXVECTOR3 cRtVec, cRtVecNorm;
-		cRtVec.x = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._11;
-		cRtVec.y = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._12;
-		cRtVec.z = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._13;
-		cRtVec *= -1;
-		D3DXVec3Normalize(&cRtVecNorm, &cRtVec);
-		D3DXVec3Normalize(&ToGoalNorm, &ToGoal);
-
-		float fDot = D3DXVec3Dot(&ToGoalNorm, &cRtVecNorm);
-
-		if(fDot > 0.0f)
+		else if(nHeadingEdge == nAStarEdge)
 		{
-			if(pcAI->GetIsActive())
+			// Accelerate by some value
+			D3DXVec3Normalize(&ToGoalNorm, &ToGoal);
+			float fd = D3DXVec3Dot(&Heading, &ToGoalNorm);
+
+			// Get move thresholds
+			float fMove1 = 1 - (D3DXToDegree(pcAI->fTurnSpeed) * pcAI->fThreshold[0]) / 90.0f;
+			float fMove2 = 1 - (D3DXToDegree(pcAI->fTurnSpeed) * pcAI->fThreshold[1]) / 90.0f;
+
+			if(fd > fMove1)
+			{		
+				// We're going good so we can speed up
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, fd);
+				}
+			}
+			else if( (fd > fMove2) &&
+				(pcAI->m_fSpeed > MIN_SPEED) )
+			{			
+				// We're going to need to turn soon
+				// so slow down some
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("Decelerate", pcAI, pcAI->m_pObject, 1 - fd);
+				}
+			}
+			else
 			{
-				SendInputEvent("SteerRight", pcAI, pcAI->m_pObject, 1.0f);
+				// We need to slow down now, but
+				// not too much
+				if(pcAI->GetIsActive())
+				{
+					if(pcAI->m_fSpeed > MIN_SPEED)
+					{
+						SendInputEvent("Decelerate", pcAI, pcAI->m_pObject, 1.0f);
+					}
+					else
+					{
+						SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, 0.2f);
+					}
+				}
 			}
 		}
 		else
 		{
-			if(pcAI->GetIsActive())
+			// Steer Toward Next Tri
+			if(pcAI->m_fSpeed > MIN_SPEED)
 			{
-				SendInputEvent("SteerLeft", pcAI, pcAI->m_pObject, 1.0f);
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("Decelerate", pcAI, pcAI->m_pObject, 1.0f);
+				}
+			}
+			else
+			{
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("Accelerate", pcAI, pcAI->m_pObject, 1.0f);
+				}
+			}
+
+			D3DXVECTOR3 cRtVec, cRtVecNorm;
+			cRtVec.x = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._11;
+			cRtVec.y = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._12;
+			cRtVec.z = pcAI->m_pObject->GetTransform()->GetWorldMatrix()._13;
+			cRtVec *= -1;
+			D3DXVec3Normalize(&cRtVecNorm, &cRtVec);
+			D3DXVec3Normalize(&ToGoalNorm, &ToGoal);
+
+			float fDot = D3DXVec3Dot(&ToGoalNorm, &cRtVecNorm);
+
+			if(fDot > 0.0f)
+			{
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("SteerRight", pcAI, pcAI->m_pObject, 1.0f);
+				}
+			}
+			else
+			{
+				if(pcAI->GetIsActive())
+				{
+					SendInputEvent("SteerLeft", pcAI, pcAI->m_pObject, 1.0f);
+				}
 			}
 		}
+
+		pcAI->DrawLine(myPosition, Heading + myPosition, D3DXCOLOR(0, 255, 255, 255));
+
+		pcAI->EndDraw();
+		pcAI->UseHeldItem();
 	}
-
-	pcAI->DrawLine(myPosition, Heading + myPosition, D3DXCOLOR(0, 255, 255, 255));
-
-	pcAI->EndDraw();
-}
 #pragma endregion
-
-	pcAI->UseHeldItem();
 }
 
-void CAIComponent::Update()
-{
-	// This horrible thing is how you
-	// call a member function pointer
-	// that calls a member function
-	//((*this).*(m_pfUpdateState))();
-}
+//void CAIComponent::Update()
+//{
+//	// This horrible thing is how you
+//	// call a member function pointer
+//	// that calls a member function
+//	//((*this).*(m_pfUpdateState))();
+//}
 
 void CAIComponent::UpdateCollective()
 {
-	//EvaluateOpponentWeights();
-	//EvaluateHeldItemWeights();
 	EvaluateGoalItemWeights();
 }
 
@@ -978,27 +1043,34 @@ void CAIComponent::UpdateAggressive()
 	bool bPassive = false;
 	EvaluateOpponentWeights();
 
-	if(GetDistance(m_pTargetPlayer->GetTransform()->GetWorldPosition(),
-		m_pObject->GetTransform()->GetWorldPosition()) < 250)
+	float fDist = GetDistance(m_pTargetPlayer->GetTransform()->GetWorldPosition(),
+		m_pObject->GetTransform()->GetWorldPosition());
+
+	if(fDist < 225)
 	{
-		if(m_fSpeed < m_fRammingSpeed)
+		if( (sqrtf(fDist) / m_fSpeed * m_fAcceleration + m_fSpeed) < m_fRammingSpeed)
 		{
-			// We aren't going fast enough
+			// We aren't going fast enough to ram
+			// so be passive
 			bPassive = true;
 		}
 	}
 
 	if(bPassive == true)
 	{
+		// Don't be aggressive
 		m_bTargetItem = false;
 		EvaluateGoalItemWeights();
 		EvaluateHeldItemWeights();
 
 		if(m_bTargetItem == false)
 		{
+			// We didn't find a held item to get,
+			// nor a goal item
 			map<int, TTri*, less<int>,
 				CAllocator<pair<int, TTri*>>>::iterator pIter;
 
+			// Set goal to random triangle
 			pIter = 
 				CAIManager::GetInstance()->m_cTris.find(
 				rand() % CAIManager::GetInstance()->m_cTris.size());
@@ -1016,64 +1088,37 @@ void CAIComponent::UpdateDefensive()
 
 CObject* CAIComponent::GetOpponent(int nPlayerID)
 {
-	CAIManager* pCAIManager = CAIManager::GetInstance();
-	list<CObject*,	CAllocator<CObject*>>::iterator OpponentIter = 
-		pCAIManager->m_cPlayers.begin();
+	map<unsigned int, CObject*, less<unsigned int>, 
+		CAllocator<pair<unsigned int, CObject*>>>::iterator OpponentIter =
+		CAIManager::GetInstance()->m_cPlayers.find(nPlayerID);
 
-	while(OpponentIter != pCAIManager->m_cPlayers.end())
-	{
-		if((*OpponentIter)->GetID() == nPlayerID)
-		{
-			return *OpponentIter;;
-		}
-
-		OpponentIter++;
-	}
-
-	return NULL;
+	return OpponentIter->second;
 }
 
 D3DXVECTOR3 CAIComponent::GetOpponentPos(int nPlayerID)
 {
-	CAIManager* pCAIManager = CAIManager::GetInstance();
-	list<CObject*,	CAllocator<CObject*>>::iterator OpponentIter = 
-		pCAIManager->m_cPlayers.begin();
-
-	D3DXVECTOR3 cPlayerPos;
-
-	while(OpponentIter != pCAIManager->m_cPlayers.end())
-	{
-		if((*OpponentIter)->GetID() == nPlayerID)
-		{
-			cPlayerPos = (*OpponentIter)->GetTransform()->
-				GetWorldPosition();
-
-			return cPlayerPos;
-		}
-
-		OpponentIter++;
-	}
-
-	return D3DXVECTOR3(0, 0, 0);
+	return CAIManager::GetInstance()->m_cPlayers.find(nPlayerID)->
+		second->GetTransform()->GetWorldPosition();
 }
 
 CObject* CAIComponent::GetClosestOpponent()
 {
-	CAIManager* pCAIManager = CAIManager::GetInstance();
-	list<CObject*,	CAllocator<CObject*>>::iterator OpponentIter = 
-		pCAIManager->m_cPlayers.begin();
+	map<unsigned int, CObject*, less<unsigned int>, 
+		CAllocator<pair<unsigned int, CObject*>>>::iterator OpponentIter = 
+		CAIManager::GetInstance()->m_cPlayers.begin();
 
 	CObject* cOpponents[3];
 	float fDist[3] = { FLT_MAX, FLT_MAX, FLT_MAX };
 	unsigned index = 0;
 
-	while((OpponentIter != pCAIManager->m_cPlayers.end()))
+	while(OpponentIter != CAIManager::GetInstance()->m_cPlayers.end())
 	{
-		if((*OpponentIter)->GetID() != m_pObject->GetID())
+		// Find positions of all opponents
+		if(OpponentIter->second->GetID() != m_pObject->GetID())
 		{
-			cOpponents[index] = *OpponentIter;
+			cOpponents[index] = OpponentIter->second;
 			fDist[index] = GetDistance(m_pObject->GetTransform()->GetWorldPosition(),
-				(*OpponentIter)->GetTransform()->GetWorldPosition());
+				OpponentIter->second->GetTransform()->GetWorldPosition());
 			++index;
 		}
 
@@ -1096,11 +1141,14 @@ CObject* CAIComponent::GetClosestOpponent()
 
 void CAIComponent::GoalItemInit(IEvent* piEvent, IComponent* piComponent)
 {
+	// We're getting the Goal Items for this level
+	// save them so we know what to go for
 	CAIComponent* pcAI = (CAIComponent*)piComponent;
 	TGoalItemEvent* pcGoalItem = (TGoalItemEvent*) piEvent->GetData();
 
-	pcAI->m_tKnowledge.m_cNeededGoalItems.push_back(
-		pcGoalItem->m_eGoalItemType);
+	pcAI->m_tKnowledge.m_cNeededGoalItems.insert(
+		make_pair(unsigned int(pcGoalItem->m_eGoalItemType),
+		pcGoalItem->m_eGoalItemType));
 }
 
 void CAIComponent::GoalItemCollected(IEvent* piEvent, IComponent* piComponent)
@@ -1109,7 +1157,7 @@ void CAIComponent::GoalItemCollected(IEvent* piEvent, IComponent* piComponent)
 	TGoalItemCollectedEvent* pcCollected = 
 		(TGoalItemCollectedEvent*)piEvent->GetData();
 
-	EGoalItemType pType = CSpawningManager::GetInstance()->
+	EGoalItemType eType = CSpawningManager::GetInstance()->
 					GetGoalItemType(pcCollected->m_pcGoalItem);
 
 	// Look for which player found it
@@ -1124,119 +1172,32 @@ void CAIComponent::GoalItemCollected(IEvent* piEvent, IComponent* piComponent)
 			if(pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_nPlayer ==
 				pcCollected->m_pcCollector->GetID())
 			{
-				// Duplicate check
-				bool bDupe = false;
-				
-				list<EGoalItemType, CAllocator<EGoalItemType>>::iterator
-					ItemIter = pcAI->m_tKnowledge.m_cOpponents[nPlayer]
-				.m_cGoalItems.begin();
+				// Add the Goal Item into their known
+				// collected Goal Items
+				pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.
+					insert(make_pair(unsigned int(eType), eType));
 
-				// Loop through the Goal Items this opponent
-				// already collected
-				while(ItemIter != 
-					pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.end())
-				{
-					// Check againts the Object's ID since that's how
-					// the AI stores needed/collected Goal Items
-					if((*ItemIter) == pType)
-					{
-						// We already have them marked down as
-						// collecting that Goal Item
-						bDupe = true;
-						break;
-					}
-					ItemIter++;
-				}
-
-				// If they didn't already collect the Goal Item
-				if(bDupe == false)
-				{
-					// Increment the amount of Goal Items we know they have
-					++pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_chAmtGoalItems;
-
-					// Get their position
-					D3DXVECTOR3 cOpponentPos;
-					cOpponentPos = pcCollected->m_pcCollector->GetTransform()->
-						GetWorldPosition();
-
-					// Look to see if it was in radar
-					//if(WithinRadar(cOpponentPos))
-					{
-						// Add the Goal Item into their known
-						// collected Goal Items
-						pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.
-							push_back(pType);
-					}
-
-					break;
-				}
+				// Increment the amount of Goal Items we know they have
+				pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_chAmtGoalItems =
+					pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.size();
 			}
 		}
 	}
 	else // This AI collected the Goal Item
 	{
-		list<EGoalItemType, CAllocator<EGoalItemType>>::iterator 
-			cNeededIter = pcAI->m_tKnowledge.m_cNeededGoalItems.begin();
+		// Remove from our needed map
+		map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator 
+			cNeededIter = pcAI->m_tKnowledge.m_cNeededGoalItems.find(eType);
 
-		// Loop through our needed list
-		while(cNeededIter != pcAI->m_tKnowledge.m_cNeededGoalItems.end())
+		if(cNeededIter != pcAI->m_tKnowledge.m_cNeededGoalItems.end())
 		{
-			if((*cNeededIter) == pType)
-			{
-				// Remove from our needed list
-				MyDelete<EGoalItemType>(&(*cNeededIter), HEAPID_GENERAL);
-				pcAI->m_tKnowledge.m_cNeededGoalItems.erase(cNeededIter);
-				break;
-			}
-
-			cNeededIter++;
+			pcAI->m_tKnowledge.m_cNeededGoalItems.erase(cNeededIter);
 		}
 	}
 
 	// Remove Goal Item from spawned list
-	list<TGoalItem, CAllocator<TGoalItem>>::iterator cGoalItemIter =
-		pcAI->m_tKnowledge.m_cGoalItemsInLevel.begin();
-
-	while(cGoalItemIter != pcAI->m_tKnowledge.m_cGoalItemsInLevel.end())
-	{
-		if(cGoalItemIter->m_nGoalItem == pType)
-		{
-			MyDelete<TGoalItem>(&(*cGoalItemIter), HEAPID_GENERAL);
-			pcAI->m_tKnowledge.m_cGoalItemsInLevel.erase(cGoalItemIter);
-			return;
-		}
-
-		cGoalItemIter++;
-	}
-}
-
-void CAIComponent::PlayerAttacked(IEvent* pEvent, IComponent* pComp)
-{
-	TImpactEvent* pImpactEvent = (TImpactEvent*)pEvent->GetData();
-	CAIComponent* pcAI = (CAIComponent*)pComp;
-
-	if(pImpactEvent->m_pcCollider->GetID() != pcAI->m_pObject->GetID())
-	{
-		// Not us
-		return;
-	}
-
-	if( (pcAI->m_pTargetPlayer == NULL) ||
-		(pImpactEvent->m_pCollidedWith->GetID() != pcAI->m_pTargetPlayer->GetID()) )
-	{
-		// Either we don't have a target,
-		// or hit player isn't our target
-		return;
-	}
-
-	if(pcAI->m_fSpeed >= pcAI->m_fRammingSpeed)
-	{
-		// We're going fast enough to ram
-	}
-	else
-	{
-		// We need to gain more speed
-	}
+	pcAI->RemoveGoalItemFromLevel(eType);
 }
 
 void CAIComponent::GoalItemSpawned(IEvent* piEvent, IComponent* piComponent)
@@ -1250,7 +1211,7 @@ void CAIComponent::GoalItemSpawned(IEvent* piEvent, IComponent* piComponent)
 	tGoalItem.m_cPos.x = pcGoalItem->m_pcGoalItem->GetParent()->GetTransform()->GetWorldMatrix()._41;
 	tGoalItem.m_cPos.y = pcGoalItem->m_pcGoalItem->GetParent()->GetTransform()->GetWorldMatrix()._42;
 	tGoalItem.m_cPos.z = pcGoalItem->m_pcGoalItem->GetParent()->GetTransform()->GetWorldMatrix()._43;
-	pcAI->m_tKnowledge.m_cGoalItemsInLevel.push_back(tGoalItem);
+	pcAI->m_tKnowledge.m_cGoalItemsInLevel.insert(make_pair(unsigned int(tGoalItem.m_nGoalItem), tGoalItem));
 }
 
 void CAIComponent::GoalItemDespawned(IEvent* piEvent, IComponent* piComponent)
@@ -1258,22 +1219,20 @@ void CAIComponent::GoalItemDespawned(IEvent* piEvent, IComponent* piComponent)
 	CAIComponent* pcAI = (CAIComponent*)piComponent;
 	TGoalItemEvent* pcGoalItem = (TGoalItemEvent*) piEvent->GetData();
 
-	list<TGoalItem, CAllocator<TGoalItem>>::iterator cGoalItemIter =
-		pcAI->m_tKnowledge.m_cGoalItemsInLevel.begin();
+	pcAI->RemoveGoalItemFromLevel(pcGoalItem->m_eGoalItemType);
+}
 
-	while(cGoalItemIter != pcAI->m_tKnowledge.m_cGoalItemsInLevel.end())
+void CAIComponent::RemoveGoalItemFromLevel(EGoalItemType eGoalItemType)
+{
+	map<unsigned int, TGoalItem, less<unsigned int>, 
+			CAllocator<pair<unsigned int, TGoalItem>>>::iterator cGoalItemIter =
+		m_tKnowledge.m_cGoalItemsInLevel.find(eGoalItemType);
+
+	if(cGoalItemIter != m_tKnowledge.m_cGoalItemsInLevel.end())
 	{
-		if(cGoalItemIter->m_nGoalItem == pcGoalItem->m_eGoalItemType)
-		{
-			MyDelete<TGoalItem>(&(*cGoalItemIter), HEAPID_GENERAL);
-			pcAI->m_tKnowledge.m_cGoalItemsInLevel.erase(cGoalItemIter);
-			return;
-		}
-
-		cGoalItemIter++;
+		m_tKnowledge.m_cGoalItemsInLevel.erase(cGoalItemIter);
 	}
 }
-// Events End
 
 void CAIComponent::EvaluateStateWeights()
 {
@@ -1282,66 +1241,64 @@ void CAIComponent::EvaluateStateWeights()
 		return;
 	}
 
+	bool bOpponentInFirst = false;
+
 	m_pfWeight[COLLECTIVE] = 0;
 	m_pfWeight[AGGRESSIVE] = 0;
 	m_pfWeight[DEFENSIVE] = 0;
 
 	// Iterator for Goal Items in the level
-	list<TGoalItem, CAllocator<TGoalItem>>::iterator			ItemIter;
+	map<unsigned int, TGoalItem, less<unsigned int>, 
+			CAllocator<pair<unsigned int, TGoalItem>>>::iterator		ItemIter;
 
 	// Iterator for any needed Goal Item
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator	NeededIter;
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator	NeededIter;
 
 	// Iterator for any Goal Item the opponent has
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator	OpponentIter;
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator	OpponentIter;
 
 	// Assign the Goal Item Level iter
-	ItemIter = m_tKnowledge.m_cGoalItemsInLevel.begin();
+	NeededIter = m_tKnowledge.m_cNeededGoalItems.begin();
 	
 	// Increase the collective weight per
 	// Goal Item needed
-	while(ItemIter != m_tKnowledge.m_cGoalItemsInLevel.end())
+	map<unsigned int, TGoalItem, less<unsigned int>, 
+			CAllocator<pair<unsigned int, TGoalItem>>>::iterator TempItemIter;
+	while(NeededIter != m_tKnowledge.m_cNeededGoalItems.end())
 	{
-		// Reset the NeededIter
-		NeededIter = m_tKnowledge.m_cNeededGoalItems.begin();
+		TempItemIter = m_tKnowledge.m_cGoalItemsInLevel.find(NeededIter->first);
 
-		while(NeededIter != m_tKnowledge.m_cNeededGoalItems.end())
+		if(TempItemIter != m_tKnowledge.m_cGoalItemsInLevel.end())
 		{
-			if(*NeededIter == ItemIter->m_nGoalItem)
-			{
-				m_pfWeight[COLLECTIVE] += 0.2f;
-				break;
-			}
-
-			NeededIter++;
+			m_pfWeight[COLLECTIVE] += 0.2f;
 		}
 
-		ItemIter++;
+		++NeededIter;
 	}
 
 	// Get an iterator for all the dropped
 	// items in the level
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator pDroppedIter = 
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator pDroppedIter = 
 		m_tKnowledge.m_cDroppedItems.begin();
 
 	// Increase the collective weight
 	// for all dropped items in the level
 	// that are needed
-	while(pDroppedIter != m_tKnowledge.m_cDroppedItems.end())
-	{
-		// Reset the NeededIter iterator
-		NeededIter = m_tKnowledge.m_cNeededGoalItems.begin();
+	NeededIter = m_tKnowledge.m_cNeededGoalItems.begin();
 
-		while(NeededIter != m_tKnowledge.m_cNeededGoalItems.end())
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+		CAllocator<pair<unsigned int, EGoalItemType>>>::iterator TempDroppedIter;
+	while(NeededIter != m_tKnowledge.m_cNeededGoalItems.end())
+	{
+		TempDroppedIter = m_tKnowledge.m_cDroppedItems.find(NeededIter->first);
+		if(TempDroppedIter != m_tKnowledge.m_cDroppedItems.end())
 		{
-			if(*NeededIter == *pDroppedIter)
-			{
-				m_pfWeight[COLLECTIVE] += 0.2f;
-				break;
-			}
-			++NeededIter;
+			m_pfWeight[COLLECTIVE] += 0.25f;
 		}
-		++pDroppedIter;
+		++NeededIter;
 	}
 
 	// Aggressive Weight
@@ -1349,60 +1306,133 @@ void CAIComponent::EvaluateStateWeights()
 	// Loop through each opponent and look to see if they have
 	// a Goal Item that we need and increase aggressive weight
 	// if they do
-	//if(m_pfWeight[COLLECTIVE] < 0.35f)
+	for(unsigned nPlayers = 0; nPlayers < 3; ++nPlayers)
 	{
-		for(unsigned nPlayers = 0; nPlayers < 3; ++nPlayers)
+		// Reset our knowledge of the
+		// current player
+		m_tKnowledge.m_cOpponents[nPlayers].m_bHasItem = false;
+
+		if(m_tKnowledge.m_cOpponents[nPlayers].m_chAmtGoalItems == 8)
 		{
-			// Reset our knowledge of the
-			// current player
-			m_tKnowledge.m_cOpponents[nPlayers].m_bHasItem = false;
+			bOpponentInFirst = true;
+		}
 
-			if(m_tKnowledge.m_cOpponents[nPlayers].m_chAmtGoalItems == 8)
+		// Set iterator for opponent's Goal Items
+		OpponentIter = 
+			m_tKnowledge.m_cOpponents[nPlayers].m_cGoalItems.begin();
+
+		// Search through their list of Goal Items
+		while(OpponentIter != 
+			m_tKnowledge.m_cOpponents[nPlayers].m_cGoalItems.end())
+		{
+			NeededIter = m_tKnowledge.m_cNeededGoalItems.begin();
+
+			// Search through our needed list with
+			// with what they have
+			while(NeededIter != m_tKnowledge.m_cNeededGoalItems.end())
 			{
-				m_pfWeight[AGGRESSIVE] += 1.0f;
-			}
-
-			// Set iterator for opponent's Goal Items
-			OpponentIter = 
-				m_tKnowledge.m_cOpponents[nPlayers].m_cGoalItems.begin();
-
-			// Increase aggressive weight depending
-			// on how aggresive they have been
-			m_pfWeight[AGGRESSIVE] += 
-				m_tKnowledge.m_cOpponents[nPlayers].m_nAggression * 0.1f;
-
-			// Mark them as target if they keep
-			// attacking us
-			//if(m_tKnowledge.m_cOpponents[nPlayers].m_nAggression > 2)
-			//{
-			//	m_pfWeight[AGGRESSIVE] += 0.15f;
-			//}
-
-			// Search through their list of Goal Items
-			while(OpponentIter != 
-				m_tKnowledge.m_cOpponents[nPlayers].m_cGoalItems.end())
-			{
-				NeededIter = m_tKnowledge.m_cNeededGoalItems.begin();
-
-				// Search through our needed list with
-				// with what they have
-				while(NeededIter != m_tKnowledge.m_cNeededGoalItems.end())
+				// Increase aggressive weight if they
+				// have an item we want
+				if(OpponentIter->second == NeededIter->second)
 				{
-					// Increase aggressive weight if they
-					// have an item we want
-					if(*OpponentIter == *NeededIter)
-					{
-						m_pfWeight[AGGRESSIVE] += 0.1f;
-						m_tKnowledge.m_cOpponents[nPlayers].m_bHasItem = true;
-						m_tKnowledge.m_cOpponents[nPlayers].m_nItem = 
-							*NeededIter;
-					}
-
-					NeededIter++;
+					m_pfWeight[AGGRESSIVE] += 0.10f;
+					m_tKnowledge.m_cOpponents[nPlayers].m_bHasItem = true;
+					m_tKnowledge.m_cOpponents[nPlayers].m_nItem = 
+						NeededIter->second;
 				}
 
-				OpponentIter++;
+				NeededIter++;
 			}
+
+			OpponentIter++;
+		}
+	}
+
+	// Adjust weights based on place
+	int nPlace = GetMyPlace();
+
+	switch(nPlace)
+	{
+	case 1:
+		{
+			// In first so don't put yourself in danger
+			m_pfWeight[AGGRESSIVE] -= 0.2f;
+			break;
+		}
+	case 2:
+		{
+			// In second...
+			if(bOpponentInFirst == true)
+			{
+				// opponent has 8 items
+				if( (m_pfWeight[COLLECTIVE] > 0.0f))
+				{
+					// Try and collect all 8 and win
+					m_pfWeight[AGGRESSIVE] -= 1.0f;
+					m_pfWeight[DEFENSIVE] -= 1.0f;
+					m_pfWeight[COLLECTIVE] += 1.0f;
+				}
+				else
+				{
+					// KILL THEM!
+					m_pfWeight[AGGRESSIVE] += 1.0f;
+				}
+			}
+			else
+			{
+				// just be a little defensive since
+				// there's no goal items to collect
+				if(m_pfWeight[COLLECTIVE] == 0.0f)
+				{
+					m_pfWeight[DEFENSIVE] += 0.2f;
+				}
+			}
+			break;
+		}
+	case 3:
+		{
+			// nothing...
+			break;
+		}
+	case 4:
+		{
+			// In last!
+			int nFirstPlaceID = CAIManager::GetInstance()->m_cPlayers.find(GetFirstPlace())->first;
+
+			 int nFirstPlaceIndex = 0;
+			 for(; nFirstPlaceIndex < 3; ++nFirstPlaceIndex)
+			 {
+				 // Find who's in first
+				 if(nFirstPlaceID == m_tKnowledge.m_cOpponents[nFirstPlaceIndex].m_nPlayer)
+				 {
+					 break;
+				 }
+			 }
+
+			int nItemDifference;
+			nItemDifference = m_tKnowledge.m_cOpponents[nFirstPlaceIndex].m_chAmtGoalItems - 
+				(8 - m_tKnowledge.m_cNeededGoalItems.size());
+
+			if(nItemDifference > 4)
+			{
+				// Screw it...
+				m_pfWeight[AGGRESSIVE] += 0.55f;
+			}
+			else if(nItemDifference > 3)
+			{
+				// We should attack them if there
+				// isn't a lot to collect
+				m_pfWeight[AGGRESSIVE] += 0.25f;
+			}
+			else if(nItemDifference > 2)
+			{
+				// We might want to hit them a bit
+				m_pfWeight[AGGRESSIVE] += 0.15f;
+			}
+
+			m_pfWeight[AGGRESSIVE] += 0.15f;
+
+			break;
 		}
 	}
 
@@ -1451,15 +1481,18 @@ void CAIComponent::EvaluateHeldItemWeights()
 	
 	if(m_pfWeight[COLLECTIVE] > m_pfWeight[AGGRESSIVE])
 	{
+		// Make it more defensive
 		bPowerup = true;
 	}
 	else
 	{
+		// Make it more aggressive
 		bPowerup = false;
 	}
 
-	if(FindNearbyHeldItem(bPowerup, tHeldItem))
+	if(FindNearbyHeldItem(bPowerup, tHeldItem) == true)
 	{
+		// We found a held item
 		m_bTargetItem = true;
 		m_vGoalPosition = tHeldItem.m_cPos;
 	}
@@ -1467,22 +1500,26 @@ void CAIComponent::EvaluateHeldItemWeights()
 
 void CAIComponent::EvaluateGoalItemWeights()
 {
-	list<TGoalItem, CAllocator<TGoalItem>>::iterator			ItemIter;
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator	NeededIter;
+	map<unsigned int, TGoalItem, less<unsigned int>, 
+			CAllocator<pair<unsigned int, TGoalItem>>>::iterator		ItemIter;
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator	NeededIter;
+	
 	D3DXVECTOR3 VecTo;
 	float fMyDist(0);
 	float fDist(0);
 
 	// See if there's a dropped item nearby
 	// that we need
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator	DroppedIter;
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator	DroppedIter;
 	DroppedIter = m_tKnowledge.m_cDroppedItems.begin();
 
 	CPickupItemComponent* pPickup;
 	while(DroppedIter != m_tKnowledge.m_cDroppedItems.end())
 	{
 		pPickup = CPickupItemManager::GetInstance()->GetPickupComp(
-			(*DroppedIter));
+			DroppedIter->second);
 
 		if(pPickup == NULL)
 		{
@@ -1491,8 +1528,9 @@ void CAIComponent::EvaluateGoalItemWeights()
 		}
 
 		if(GetDistance(pPickup->GetObject()->GetTransform()->GetWorldPosition(),
-			m_pObject->GetTransform()->GetWorldPosition()) <= 400)
+			m_pObject->GetTransform()->GetWorldPosition()) <= 225)
 		{
+			// We found a goal 
 			m_vGoalPosition = pPickup->GetObject()->GetTransform()->GetWorldPosition();
 			return;
 		}
@@ -1501,7 +1539,9 @@ void CAIComponent::EvaluateGoalItemWeights()
 	}
 
 	ItemIter = m_tKnowledge.m_cGoalItemsInLevel.begin();
-	TGoalItem* pcTarget = NULL;
+	TGoalItem pcTarget;
+	pcTarget.m_nGoalItem = NO_ITEM;
+	pcTarget.m_pfWeight = FLT_MAX;
 
 	// Loop through each Goal Item which the AI knows is in the level.
 	// {
@@ -1515,7 +1555,7 @@ void CAIComponent::EvaluateGoalItemWeights()
 
 		while(NeededIter != m_tKnowledge.m_cNeededGoalItems.end())
 		{
-			if(*NeededIter == ItemIter->m_nGoalItem)
+			if(NeededIter->second == ItemIter->second.m_nGoalItem)
 			{
 				// This will take the distance from each goal item
 				// the agent is and make it a value between 0 - 1,
@@ -1531,92 +1571,67 @@ void CAIComponent::EvaluateGoalItemWeights()
 				cHeading.y = m_pObject->GetTransform()->GetWorldMatrix()._32;
 				cHeading.z = m_pObject->GetTransform()->GetWorldMatrix()._33;
 
-				cToGoal = ItemIter->m_cPos - cMe;
+				cToGoal = ItemIter->second.m_cPos - cMe;
 				D3DXVec3Normalize(&cHeadingNorm, &cHeading);
 				D3DXVec3Normalize(&cToGoalNorm, &cToGoal);
 
-				fMyDist = GetDistance(ItemIter->m_cPos, cMe);
-				float MyWeight = sqrtf(fMyDist) + (m_fSpeed * D3DXVec3Dot(&cHeadingNorm, &cToGoalNorm));
-				//cout << sqrtf(fMyDist) << " + (" << m_fSpeed << " * " << D3DXVec3Dot(&cHeadingNorm, &cToGoalNorm) <<
-				//	") = " << MyWeight << endl;
+				fMyDist = GetDistance(ItemIter->second.m_cPos, cMe);
 
-				// This will loop through each opponent in your minimap
+				float MyWeight = (1 - (fMyDist / MAXDIST)) + m_fSpeed + D3DXVec3Dot(&cHeadingNorm, &cToGoalNorm);
+				ItemIter->second.m_pfWeight = fMyDist;
+
+				// This will get the closest opponent to you
 				// and find out their weight and then will subtract
 				// from each of the item's weights
-				//list<CObject*,	CAllocator<CObject*>>::iterator iter;
-				//iter = CAIManager::GetInstance()->m_cPlayers.begin();
-
 				CObject* pOpponent = GetClosestOpponent();
-				//while((*iter) != pOpponent)
-				//{
-				//	++iter;
-				//}
 
 				D3DXVECTOR3 OpponentPos;
 				D3DXVECTOR3 OpponentHeading;
 
-				//for(unsigned nCurPlayer = 0; nCurPlayer <
-				//	CAIManager::GetInstance()->m_cPlayers.size(); ++nCurPlayer)
+				// If the current player is not me
+				if(pOpponent->GetID() != m_pObject->GetID())
 				{
-					// If the current player is not me
-					if(pOpponent->GetID() != m_pObject->GetID())
+					OpponentPos.x = pOpponent->GetTransform()->GetWorldMatrix()._41;
+					OpponentPos.y = pOpponent->GetTransform()->GetWorldMatrix()._42;
+					OpponentPos.z = pOpponent->GetTransform()->GetWorldMatrix()._43;
+
+					OpponentHeading.x = pOpponent->GetTransform()->GetLocalMatrix()._31;
+					OpponentHeading.y = pOpponent->GetTransform()->GetLocalMatrix()._32;
+					OpponentHeading.z = pOpponent->GetTransform()->GetLocalMatrix()._33;
+
+					VecTo = ItemIter->second.m_cPos - OpponentPos;
+					fDist = GetDistance(ItemIter->second.m_cPos, OpponentPos);
+
+					D3DXVECTOR3 OpponentHeadingNorm, VecToNorm;
+					D3DXVec3Normalize(&OpponentHeadingNorm, &OpponentHeading);
+					D3DXVec3Normalize(&VecToNorm, &VecTo);
+
+					// Find opponent in knowledge
+					int nIndex;
+					for(nIndex = 0; ; ++nIndex)
 					{
-						OpponentPos.x = pOpponent->GetTransform()->GetWorldMatrix()._41;
-						OpponentPos.y = pOpponent->GetTransform()->GetWorldMatrix()._42;
-						OpponentPos.z = pOpponent->GetTransform()->GetWorldMatrix()._43;
-
-						OpponentHeading.x = pOpponent->GetTransform()->GetLocalMatrix()._31;
-						OpponentHeading.y = pOpponent->GetTransform()->GetLocalMatrix()._32;
-						OpponentHeading.z = pOpponent->GetTransform()->GetLocalMatrix()._33;
-
-						VecTo = ItemIter->m_cPos - OpponentPos;
-						fDist = GetDistance(ItemIter->m_cPos, OpponentPos);
-
-						D3DXVECTOR3 OpponentHeadingNorm, VecToNorm;
-						D3DXVec3Normalize(&OpponentHeadingNorm, &OpponentHeading);
-						D3DXVec3Normalize(&VecToNorm, &VecTo);
-
-						//if(D3DXVec3Dot(&OpponentHeading, &VecTo) < 0)
+						if(m_tKnowledge.m_cOpponents[nIndex].m_nPlayer == 
+							pOpponent->GetID())
 						{
-							// Find opponent in knowledge
-							int nIndex;
-							for(nIndex = 0; ; ++nIndex)
-							{
-								if(m_tKnowledge.m_cOpponents[nIndex].m_nPlayer == 
-									pOpponent->GetID())
-								{
-									break;
-								}
-							}
-
-							float OpponentWeight = sqrtf(fDist) + 
-								m_tKnowledge.m_cOpponents[nIndex].m_fCurrentSpeed * 
-								D3DXVec3Dot(&OpponentHeadingNorm, &VecToNorm);
-
-							ItemIter->m_pfWeight = OpponentWeight;
-							ItemIter->m_pfWeight -= MyWeight;
-							cout << ItemIter->m_pfWeight << endl;
-
-							if(ItemIter->m_pfWeight < 0.0f)
-							{
-								ItemIter->m_pfWeight = 0.0f;
-							}
-
+							break;
 						}
 					}
-					//iter++;
+
+					float OpponentWeight = (1 - (fDist / MAXDIST) + 
+						m_tKnowledge.m_cOpponents[nIndex].m_fCurrentSpeed) + 
+						D3DXVec3Dot(&OpponentHeadingNorm, &VecToNorm);
+
+					ItemIter->second.m_pfWeight -= OpponentWeight;
+
+					if(ItemIter->second.m_pfWeight < 0.0f)
+					{
+						ItemIter->second.m_pfWeight = 0.0f;
+					}
 				}
 
-				if(pcTarget == NULL)
+				if(pcTarget.m_pfWeight > ItemIter->second.m_pfWeight)
 				{
-					pcTarget = &(*ItemIter);
-				}
-				else
-				{
-					if(pcTarget->m_pfWeight < ItemIter->m_pfWeight)
-					{
-						pcTarget = &(*ItemIter);
-					}
+					memcpy(&pcTarget, &ItemIter->second, sizeof(pcTarget));
 				}
 			}
 
@@ -1626,15 +1641,26 @@ void CAIComponent::EvaluateGoalItemWeights()
 		ItemIter++;
 	}
 
-	if((pcTarget != NULL) && (pcTarget->m_pfWeight > 0))
+	if( (pcTarget.m_pfWeight > 0) &&
+		(pcTarget.m_nGoalItem != NO_ITEM) )
 	{
 		m_bTargetItem = true;
-		m_vGoalPosition = pcTarget->m_cPos;
+		m_vGoalPosition = pcTarget.m_cPos;
 	}
 }
 
 void CAIComponent::EvaluateOpponentWeights()
 {
+	if(GetMyPlace() == 4)
+	{
+		// We're in last place so just auto target the
+		// guy in first place
+		m_pTargetPlayer = CAIManager::GetInstance()->m_cPlayers.find(GetFirstPlace())->second;
+		m_vGoalPosition = m_pTargetPlayer->GetTransform()->GetWorldPosition();
+
+		return;
+	}
+
 	CObject* pTempTargetPlayer;
 	m_pTargetPlayer = NULL;
 
@@ -1643,6 +1669,7 @@ void CAIComponent::EvaluateOpponentWeights()
 	{
 		if(m_tKnowledge.m_cOpponents[CurOpponent].m_chAmtGoalItems == 8)
 		{
+			// This guy has 8 items... KILL HIM!
 			m_pTargetPlayer = GetOpponent(
 					m_tKnowledge.m_cOpponents[CurOpponent].m_nPlayer);
 			break;
@@ -1650,6 +1677,7 @@ void CAIComponent::EvaluateOpponentWeights()
 
 		if(m_tKnowledge.m_cOpponents[CurOpponent].m_bHasItem == true)
 		{
+			// Find a player who has our 
 			if(m_pTargetPlayer == NULL)
 			{
 				m_pTargetPlayer = GetOpponent(
@@ -1675,6 +1703,7 @@ void CAIComponent::EvaluateOpponentWeights()
 
 	if(m_pTargetPlayer == NULL)
 	{
+		// We don't have a target so just get whoever is closer
 		m_pTargetPlayer = GetClosestOpponent();
 	}
 
@@ -1684,13 +1713,9 @@ void CAIComponent::EvaluateOpponentWeights()
 	}
 }
 
-bool CAIComponent::WithinRadar(const D3DXVECTOR3& cPos) const
-{
-	return GetDistance(m_pObject->GetTransform()->GetWorldPosition(), cPos) < MINIMAP_RADIUS;
-}
-
 float CAIComponent::GetDistance(const D3DXVECTOR3 &cPos1, const D3DXVECTOR3 &cPos2) const
 {
+	// return SQUARED distance
 	float x = cPos2.x - cPos1.x;
 	float z = cPos2.z - cPos1.z;
 	return ( (x * x) + (z * z) );
@@ -1703,15 +1728,18 @@ void CAIComponent::UpdateSpeeds(IEvent* pEvent, IComponent* pComp)
 
 	if(pcAI->m_pObject->GetID() == pSpeed->m_pObject->GetID())
 	{
+		// Set our speed
 		pcAI->m_fSpeed = pSpeed->m_fSpeed;
 		return;
 	}
 
 	for(int nIndex = 0; nIndex < 3; ++nIndex)
 	{
+		// Find the guy in our known opponents
 		if(pcAI->m_tKnowledge.m_cOpponents[nIndex].m_nPlayer ==
 			pSpeed->m_pObject->GetID())
 		{
+			// set their speed
 			pcAI->m_tKnowledge.m_cOpponents[nIndex].m_fCurrentSpeed = 
 				pSpeed->m_fSpeed;
 
@@ -1735,7 +1763,7 @@ void CAIComponent::HeldItemSpawned(IEvent* pEvent, IComponent* pComp)
 	tHeldItem.m_nHeldItem = pHeldItem->m_pHeldItem->GetType();
 	tHeldItem.m_bPowerup = pcAI->IsPowerup(pHeldItem->m_pHeldItem->GetType());
 	tHeldItem.m_nID = pHeldItem->m_pHeldItem->GetParent()->GetID();
-	pcAI->m_tKnowledge.m_cHeldItemsInLevel.push_back(tHeldItem);
+	pcAI->m_tKnowledge.m_cHeldItemsInLevel.insert(make_pair(tHeldItem.m_nID, tHeldItem));
 }
 
 void CAIComponent::HeldItemCollected(IEvent* pEvent, IComponent* pComp)
@@ -1745,36 +1773,30 @@ void CAIComponent::HeldItemCollected(IEvent* pEvent, IComponent* pComp)
 
 	if(pcAI->m_tKnowledge.m_cHeldItemsInLevel.size() == 0)
 	{
+		// No Held Items in level
 		return;
 	}
 
-	list<THeldItem, CAllocator<THeldItem>>::iterator pHeldItemIter =
-		pcAI->m_tKnowledge.m_cHeldItemsInLevel.begin();
-
-	while(pHeldItemIter != pcAI->m_tKnowledge.m_cHeldItemsInLevel.end())
-	{
-		if((*pHeldItemIter).m_nID == 
-			pHeldItem->m_pcHeldItem->GetID())
-		{
-			// Found our iterator
-			break;
-		}
-		++pHeldItemIter;
-	}
+	// Find the iterator
+	map<unsigned int, THeldItem, less<unsigned int>,
+			CAllocator<pair<unsigned int, THeldItem>>>::iterator pHeldItemIter =
+		pcAI->m_tKnowledge.m_cHeldItemsInLevel.find(pHeldItem->m_pcHeldItem->GetID());
 
 	if(pHeldItemIter == pcAI->m_tKnowledge.m_cHeldItemsInLevel.end())
 	{
+		// Error
 		return;
 	}
 
 	if(pHeldItem->m_pcCollector->GetID() == 
 		pcAI->m_pObject->GetID())
 	{
+		// If us
 		for(int nItem = 0; nItem < 2; ++nItem)
 		{
 			if(pcAI->m_tKnowledge.m_peMyHeldItems[nItem] == NO_HELD_ITEM)
 			{
-				pcAI->m_tKnowledge.m_peMyHeldItems[nItem] = pHeldItemIter->m_nHeldItem;
+				pcAI->m_tKnowledge.m_peMyHeldItems[nItem] = pHeldItemIter->second.m_nHeldItem;
 				break;
 			}
 		}
@@ -1782,7 +1804,6 @@ void CAIComponent::HeldItemCollected(IEvent* pEvent, IComponent* pComp)
 
 	if(pHeldItemIter != pcAI->m_tKnowledge.m_cHeldItemsInLevel.end())
 	{
-		MyDelete<THeldItem>(&(*pHeldItemIter), HEAPID_GENERAL);
 		pcAI->m_tKnowledge.m_cHeldItemsInLevel.erase(pHeldItemIter);
 	}
 }
@@ -1804,7 +1825,8 @@ bool CAIComponent::FindNearbyHeldItem(bool bPowerup, THeldItem& tHeldItem)
 	float fIncrement = 50.0f;
 	float fDist = fIncrement;
 
-	list<THeldItem, CAllocator<THeldItem>>::iterator pHeldItemIter;
+	map<unsigned int, THeldItem, less<unsigned int>,
+			CAllocator<pair<unsigned int, THeldItem>>>::iterator pHeldItemIter;
 
 	while(fDist < 3600)
 	{
@@ -1813,24 +1835,24 @@ bool CAIComponent::FindNearbyHeldItem(bool bPowerup, THeldItem& tHeldItem)
 		while(pHeldItemIter != m_tKnowledge.m_cHeldItemsInLevel.end())
 		{
 			if(GetDistance(
-				pHeldItemIter->m_cPos, 
+				pHeldItemIter->second.m_cPos, 
 				m_pObject->GetTransform()->GetWorldPosition()) <= fDist)
 			{
-				if(IsPowerup(pHeldItemIter->m_nHeldItem) == bPowerup)
+				if(IsPowerup(pHeldItemIter->second.m_nHeldItem) == bPowerup)
 				{
 					if(m_eCurrentState == AGGRESSIVE)
 					{
-						if( (pHeldItemIter->m_nHeldItem == TURKEY) ||
-							(pHeldItemIter->m_nHeldItem == SOUP) ||
-							(pHeldItemIter->m_nHeldItem == DONUT) )
+						if( (pHeldItemIter->second.m_nHeldItem == TURKEY) ||
+							(pHeldItemIter->second.m_nHeldItem == SOUP) ||
+							(pHeldItemIter->second.m_nHeldItem == DONUT) )
 						{
-							tHeldItem = *pHeldItemIter;
+							tHeldItem = pHeldItemIter->second;
 							return true;
 						}
 					}
 					else
 					{
-						tHeldItem = *pHeldItemIter;
+						tHeldItem = pHeldItemIter->second;
 						return true;
 					}
 				}
@@ -1846,14 +1868,22 @@ bool CAIComponent::FindNearbyHeldItem(bool bPowerup, THeldItem& tHeldItem)
 
 void CAIComponent::UseHeldItem()
 {
-	// Check to see if the agent has any held items
-	if( (m_tKnowledge.m_peMyHeldItems[0] == NO_HELD_ITEM) &&
-		(m_tKnowledge.m_peMyHeldItems[1] == NO_HELD_ITEM) )
+	// Use random held item if timer is up
+	if(m_fUseItemTimer < 0.0f)
 	{
-		return;
+		m_fUseItemTimer = static_cast<float>(USE_ITEM_TIMER);
+		PickRandomHeldItem();
 	}
 
-	list<CObject*,	CAllocator<CObject*>>::iterator OpponentIter = 
+	// Check to see if the agent has any held items
+	//if( (m_tKnowledge.m_peMyHeldItems[0] == NO_HELD_ITEM) &&
+	//	(m_tKnowledge.m_peMyHeldItems[1] == NO_HELD_ITEM) )
+	//{
+	//	return;
+	//}
+
+	map<unsigned int, CObject*, less<unsigned int>, 
+		CAllocator<pair<unsigned int, CObject*>>>::iterator OpponentIter = 
 		CAIManager::GetInstance()->m_cPlayers.begin();
 
 	CObject* pOpponents[3];
@@ -1862,9 +1892,9 @@ void CAIComponent::UseHeldItem()
 	// Get a pointer to each opponent
 	while((OpponentIter != CAIManager::GetInstance()->m_cPlayers.end()))
 	{
-		if((*OpponentIter)->GetID() != m_pObject->GetID())
+		if(OpponentIter->second->GetID() != m_pObject->GetID())
 		{
-			pOpponents[index] = *OpponentIter;
+			pOpponents[index] = OpponentIter->second;
 			++index;
 		}
 
@@ -1893,7 +1923,7 @@ void CAIComponent::UseHeldItem()
 	// Loop through each opponent and see
 	// if we should use an item that needs
 	// los or distance requirements
-	for(int i = 0; i < (CAIManager::GetInstance()->m_cPlayers.size() - 1); ++i)
+	for(size_t i = 0; i < (CAIManager::GetInstance()->m_cPlayers.size() - 1); ++i)
 	{
 		// Get opponent's heading
 		OpponentHeading.x = pOpponents[i]->GetTransform()->GetWorldMatrix()._31;
@@ -1909,7 +1939,7 @@ void CAIComponent::UseHeldItem()
 			(MyHeading + m_pObject->GetTransform()->GetWorldPosition());
 
 		// Check the distance
-		if(GetDistance(m_tTargetPlayerLine.cRayStart, m_tTargetPlayerLine.cRayNormal) > 400)
+		if(GetDistance(m_tTargetPlayerLine.cRayStart, m_tTargetPlayerLine.cRayNormal) > 225)
 		{
 			// Target is too far away;
 			continue;
@@ -1922,8 +1952,31 @@ void CAIComponent::UseHeldItem()
 		// Check to see if they're infront
 		if(fDot > 0.95f)
 		{
-			Use(TURKEY);
-			Use(PIE);
+			if(Use(TURKEY) == true)
+			{
+				continue;
+			}
+			else if(pOpponents[i]->GetID() == CIDGen::GetInstance()->GetID("Player0"))
+			{
+				if(m_fTurkeyToPlayer < 0.0f)
+				{
+					if( (rand() % 101) <= 10)
+					{
+						SendStatusEffectEvent("UseTurkeyForward", this, m_pObject, 1.0f);
+						m_fTurkeyToPlayer = TURKEY_TO_PLAYER;
+						continue;
+					}
+					else
+					{
+						m_fTurkeyToPlayer = 3.0f;
+					}
+				}
+			}
+
+			if(Use(PIE) == true)
+			{
+				continue;
+			}
 		}
 
 		// Check Soup
@@ -1950,6 +2003,7 @@ void CAIComponent::UseHeldItem()
 		if(m_eCurrentState == AGGRESSIVE)
 		{
 			Use(DONUT);
+			Use(ENERGY_DRINK);
 		}
 	}
 }
@@ -1976,12 +2030,42 @@ void CAIComponent::ShowTurnSpeed(IEvent* pEvent, IComponent* pComp)
 	}
 }
 
+void CAIComponent::ShowAcceleration(IEvent* pEvent, IComponent* pComp)
+{
+	TSpeedEvent* pSpeedEvent = (TSpeedEvent*)pEvent->GetData();
+	CAIComponent* pcAI = (CAIComponent*)pComp;
+
+	if(pSpeedEvent->m_pObject->GetID() == pcAI->m_pObject->GetID())
+	{
+		pcAI->m_fAcceleration = pSpeedEvent->m_fSpeed;
+	}
+}
+
+void CAIComponent::Blind(IEvent* pEvent, IComponent* pComp)
+{
+	TStatusEffectEvent* pStatusEffect = (TStatusEffectEvent*)pEvent->GetData();
+	CAIComponent* pcAI = (CAIComponent*)pComp;
+
+	pcAI->m_fBlindTimer = 5.0F;
+}
+
+void CAIComponent::Jammed(IEvent* pEvent, IComponent* pComp)
+{
+	TStatusEffectEvent* pStatusEffect = (TStatusEffectEvent*)pEvent->GetData();
+	CAIComponent* pcAI = (CAIComponent*)pComp;
+	
+	if(pcAI->m_pObject->GetID() != pStatusEffect->m_pObject->GetID())
+	{
+		pcAI->m_fJamTimer = 10.0f;
+	}
+}
+
 void CAIComponent::PickupItemCollected(IEvent* pEvent, IComponent* pComp)
 {
 	TPickupItemCollectedEvent* pPickup = (TPickupItemCollectedEvent*)pEvent->GetData();
 	CAIComponent* pcAI = (CAIComponent*)pComp;
 
-	EGoalItemType pType = pPickup->m_eItemType;
+	EGoalItemType eType = pPickup->m_eItemType;
 
 	// Look for which player found it
 	// if Our ID == Collector's ID
@@ -1995,87 +2079,179 @@ void CAIComponent::PickupItemCollected(IEvent* pEvent, IComponent* pComp)
 			if(pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_nPlayer ==
 				pPickup->m_pcCollector->GetID())
 			{
-				// Duplicate check
-				bool bDupe = false;
+				// Add the Goal Item into their known
+				// collected Goal Items
+				pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.
+					insert(make_pair(unsigned int(eType), eType));
 
-				list<EGoalItemType, CAllocator<EGoalItemType>>::iterator
-					ItemIter = pcAI->m_tKnowledge.m_cOpponents[nPlayer]
-				.m_cGoalItems.begin();
-
-				// Loop through the Goal Items this opponent
-				// already collected
-				while(ItemIter != 
-					pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.end())
-				{
-					// Check againts the Object's ID since that's how
-					// the AI stores needed/collected Goal Items
-					if((*ItemIter) == pType)
-					{
-						// We already have them marked down as
-						// collecting that Goal Item
-						bDupe = true;
-						break;
-					}
-					ItemIter++;
-				}
-
-				// If they didn't already collect the Goal Item
-				if(bDupe == false)
-				{
-					// Increment the amount of Goal Items we know they have
-					++pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_chAmtGoalItems;
-
-					// Add the Goal Item into their known
-					// collected Goal Items
-					pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.
-						push_back(pType);
-
-					break;
-				}
+				// Increment the amount of Goal Items we know they have
+				pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_chAmtGoalItems = 
+					pcAI->m_tKnowledge.m_cOpponents[nPlayer].m_cGoalItems.size();
 			}
 		}
 	}
 	else // This AI collected the Goal Item
 	{
-		list<EGoalItemType, CAllocator<EGoalItemType>>::iterator 
-			cNeededIter = pcAI->m_tKnowledge.m_cNeededGoalItems.begin();
+		// Remove from our needed list
+		map<unsigned int, EGoalItemType, less<unsigned int>,
+			CAllocator<pair<unsigned int, EGoalItemType>>>::iterator 
+			cNeededIter = pcAI->m_tKnowledge.m_cNeededGoalItems.find(unsigned int(eType));
 
-		// Loop through our needed list
-		while(cNeededIter != pcAI->m_tKnowledge.m_cNeededGoalItems.end())
+		if(cNeededIter != pcAI->m_tKnowledge.m_cNeededGoalItems.end())
 		{
-			if((*cNeededIter) == pType)
-			{
-				// Remove from our needed list
-				MyDelete<EGoalItemType>(&(*cNeededIter), HEAPID_GENERAL);
-				pcAI->m_tKnowledge.m_cNeededGoalItems.erase(cNeededIter);
-				break;
-			}
-
-			cNeededIter++;
+			pcAI->m_tKnowledge.m_cNeededGoalItems.erase(cNeededIter);
 		}
 	}
 
 	// Remove Dropped Item from dropped list
-	list<EGoalItemType, CAllocator<EGoalItemType>>::iterator cDroppedIter =
-		pcAI->m_tKnowledge.m_cDroppedItems.begin();
+	map<unsigned int, EGoalItemType, less<unsigned int>,
+		CAllocator<pair<unsigned int, EGoalItemType>>>::iterator cDroppedIter =
+		pcAI->m_tKnowledge.m_cDroppedItems.find(eType);
 
-	while(cDroppedIter != pcAI->m_tKnowledge.m_cDroppedItems.end())
+	if(cDroppedIter != pcAI->m_tKnowledge.m_cDroppedItems.end())
 	{
-		if(*cDroppedIter == pType)
-		{
-			MyDelete<EGoalItemType>(&(*cDroppedIter), HEAPID_GENERAL);
-			pcAI->m_tKnowledge.m_cDroppedItems.erase(cDroppedIter);
-			return;
-		}
-
-		++cDroppedIter;
+		pcAI->m_tKnowledge.m_cDroppedItems.erase(cDroppedIter);
 	}
 }
-
 
 void CAIComponent::PauseUpdateCallback(IEvent*, IComponent* pComp)
 {
 	// Get the Effect Comp
 	CAIComponent* comp = (CAIComponent*)pComp;
 	SendRenderEvent("AddToSet", comp, comp->m_pObject, PRIORITY_UPDATE);
+}
+
+int CAIComponent::GetFirstPlace()
+{
+	CAIManager* pAIManager = CAIManager::GetInstance();
+
+	map<unsigned int, CAIComponent*, less<unsigned int>,
+		CAllocator<pair<unsigned int, CAIComponent*>>>::iterator pIter;
+	pIter = pAIManager->m_cAIComponents.begin();
+
+	// Check human player
+	int nPlayerID = CIDGen::GetInstance()->GetID("Player0");
+	int i = 0;
+	for(; i < 3; ++i)
+	{
+		if(pIter->second->m_tKnowledge.m_cOpponents[i].m_nPlayer == 
+			nPlayerID)
+		{
+			break;
+		}
+	}
+
+	// Check other agents
+	int nID = pIter->second->m_tKnowledge.m_cOpponents[i].m_nPlayer;
+	int nFirstPlaceAmtItems = pIter->second->m_tKnowledge.m_cOpponents[i].m_chAmtGoalItems;
+	int nTempItems = -1;
+
+	while(pIter != pAIManager->m_cAIComponents.end())
+	{
+		nTempItems = 8 - pIter->second->m_tKnowledge.m_cNeededGoalItems.size();
+
+		if(nFirstPlaceAmtItems < nTempItems)
+		{
+			nID = pIter->second->m_pObject->GetID();
+			nFirstPlaceAmtItems = nTempItems;
+		}
+
+		++pIter;
+	}
+
+	return nID;
+}
+
+int CAIComponent::GetMyPlace()
+{
+	CAIManager* pAIManager = CAIManager::GetInstance();
+
+	map<unsigned int, CAIComponent*, less<unsigned int>,
+		CAllocator<pair<unsigned int, CAIComponent*>>>::iterator pIter;
+	pIter = pAIManager->m_cAIComponents.begin();
+
+	// Auto set to first place
+	int nPlace = 1;
+
+	// Check human player
+	int nPlayerID = CIDGen::GetInstance()->GetID("Player0");
+	int i = 0;
+	for(; i < 3; ++i)
+	{
+		if(pIter->second->m_tKnowledge.m_cOpponents[i].m_nPlayer == 
+			nPlayerID)
+		{
+			break;
+		}
+	}
+
+	if( (8 - m_tKnowledge.m_cNeededGoalItems.size()) <= 
+		static_cast<unsigned int>(pIter->second->m_tKnowledge.m_cOpponents[i].m_chAmtGoalItems) )
+	{
+		++nPlace;
+	}
+
+	while(pIter != pAIManager->m_cAIComponents.end())
+	{
+		if(pIter->second->m_pObject->GetID() == 
+			m_pObject->GetID())
+		{
+			// Don't check myself
+			++pIter;
+			continue;
+		}
+
+		if(pIter->second->m_tKnowledge.m_cNeededGoalItems.size() <=
+			m_tKnowledge.m_cNeededGoalItems.size())
+		{
+			// This person has more Goal Items than I do
+			++nPlace;
+		}
+
+		++pIter;
+	}
+
+	return nPlace;
+}
+
+void CAIComponent::PickRandomHeldItem()
+{	
+	switch(rand() % 11)
+	{
+	case 0:
+	case 6:
+		{
+			SendStatusEffectEvent("UseBananaForward", this, this->m_pObject, 1.0);
+			break;
+		}
+	case 1:
+	case 7:
+		{
+			SendStatusEffectEvent("UsePeanutButterForward", this, this->m_pObject, 1.0);
+			break;
+		}
+	case 2:
+	case 8:
+		{
+			SendStatusEffectEvent("UseSoup", this, this->m_pObject, 1.0);
+			break;
+		}
+	case 3:
+		{
+			SendStatusEffectEvent("UseJam", this, this->m_pObject, 1.0);
+			break;
+		}
+	case 4:
+	case 9:
+		{
+			SendStatusEffectEvent("UseDonut", this, this->m_pObject, 1.0);
+			break;
+		}
+	case 5:
+	case 10:
+		{
+			SendStatusEffectEvent("UseTurkeyForward", this, this->m_pObject, 1.0);
+			break;
+		}
+	}
 }

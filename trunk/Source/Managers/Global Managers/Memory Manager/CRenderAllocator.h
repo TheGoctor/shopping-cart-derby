@@ -1,10 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	CRenderAllocator.h
 //	Date			:	3/29/11
-//	Mod. Date		:	3/29/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	MR
 //	Author			:	Mac Reichelt
-//	Purpose			:	Allocates memory into CHeaps for STL containers
+//	Purpose			:	Allocates memory into the Render Heap for STL containers
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef _CRENDERALLOCATOR_H_

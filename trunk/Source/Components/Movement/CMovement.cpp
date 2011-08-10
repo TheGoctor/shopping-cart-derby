@@ -1,24 +1,38 @@
+///////////////////////////////////////////////////////////////////////////////
+//  File			:	"CMovement.cpp"
+//
+//  Author			:	Malcolm Smith (MS)
+//
+//  Date Created	:	04/17/11
+//
+//	Last Changed	:	7/27/11
+//
+//  Purpose			:	Handles player movement.
+///////////////////////////////////////////////////////////////////////////////
+
+
 #include "CMovement.h"
 #include "..\..\CObject.h"
 
 #include "..\..\Managers\Global Managers\Event Manager\EventStructs.h"
 using namespace EventStructs;
 
-#include "..\..\Managers\Global Managers\Input Manager\CInputManager.h"
 #include "..\..\Managers\Component Managers\CMovementManager.h"
 
 //Sound Hack//
 #include "..\..\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
 #include "..\..\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
 
-#include <iostream>
-using namespace std;
 
-#define REFLECT_DOT_MIN .6f
+#define REFLECT_DOT_MIN .7f
+
+// Minimum angle dot value for ramming someone
+#define RAM_HEADING_DIFFERENCE .8f
 
 #define ACCEL_SOUNDLENGTH 0.4f
-#define BRAKE_SOUNDLENGTH 0.45f
-///Sound Hack
+#define BRAKE_SOUNDLENGTH 5.0f
+
+///Sound 
 CWwiseSoundManager *pSound = CWwiseSoundManager::GetInstance();
 bool isplaying = false;
 
@@ -29,8 +43,6 @@ bool isplaying = false;
 #define MOVEMENT_UPDATE_FRAMERATE 60.0f
 #endif
 
-//behold, the great speedening - Raymoney
-#define RAYMONEY_KING_OF_CHAMPIONS_ULTIMATE_BUFF (false)
 
 CMovement::CMovement() : m_pObject(NULL),  
 m_fTurnAmount(0.0f), m_fTranslateThreshold(0.1f), m_bIsBackingUp(false),
@@ -43,8 +55,8 @@ m_bIsDrifting(false), m_fBounceOffTimeLeft(0.0f), m_fTimeToDrift(0.0f), m_fInver
 m_nFramesDrifting(0), m_vPrevVel(1.0f, 0.0f, 0.0f), m_bEndgameSlowingDown(false), m_fOriginalTurnRate(0.1f)
 {
 	CEventManager* pEM = CEventManager::GetInstance();
-	
-	
+
+
 	string szEventName = "Update";
 	szEventName += GAMEPLAY_STATE;
 	pEM->RegisterEvent(szEventName, this, Update);
@@ -67,14 +79,14 @@ m_nFramesDrifting(0), m_vPrevVel(1.0f, 0.0f, 0.0f), m_bEndgameSlowingDown(false)
 	pEM->RegisterEvent("Invulnerable", this, InvulnerableStatusCallback);
 	pEM->RegisterEvent("Boost", this, Boost);
 	pEM->RegisterEvent("Blind", this, BlindStatusCallback);
-	pEM->RegisterEvent("Lobstered", this, LobsteredStatusCallback);
+	pEM->RegisterEvent("Steal", this, StealCallback);
 
 	pEM->RegisterEvent("CartCollision", this, BounceCallbackPlayer);
 	pEM->RegisterEvent("EnvironmentHit", this, BounceCallbackEnvironment);
 
 	pEM->RegisterEvent("DisableMovement", this, DisableMovementInput);
 	pEM->RegisterEvent("EnableMovement", this, EnableMovementInput);
-	
+
 	szEventName = "InitObjects";
 	szEventName += GAMEPLAY_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEventName, this, StartOfGame);
@@ -106,39 +118,6 @@ void CMovement::Init()
 
 void CMovement::CalculateValuesFromWeight()
 {
-	if(RAYMONEY_KING_OF_CHAMPIONS_ULTIMATE_BUFF)
-	{
-		m_fMaxSpeed = (m_eWeight + 6.0f)*10.0f;
-		m_fMaxReverseSpeed = m_fMaxSpeed;// * 1.5f;
-
-		m_fAccelerateCoefficient = (12 - m_eWeight*1.5f) * 1.5f;	
-		m_fBrakeCoefficient = m_fAccelerateCoefficient * 1.5f; // brake faster than accelerate	
-		m_fCoastCoefficient = 2.0f + m_eWeight;	
-		m_fReverseCoefficient = m_fAccelerateCoefficient;	
-
-		m_fRammingSpeed = m_fMaxSpeed * ((4 - m_eWeight)/12.0f);
-
-		m_fTurnRate = D3DXToRadian(150 - 30*m_eWeight);
-		m_fSlipTurnSpeed = m_fTurnRate * 0.5f;
-
-		m_fShoveDuration = .5f;
-		m_fShoveTimeLeft = 0.0f;
-		m_fShovePower = 20.0f-m_eWeight;
-		m_fShoveCooldown = 0.0f;
-		m_fShoveCooldown *= -1.0f; // needed for check in handle shove (since it decrements) 
-		//(checks if it's less than the cooldown, which since the 
-		//time starts at, say .5f for the duration, and decrements, 
-		//if the cd is negative, we can see if, say, timeleft < -4.0f)
-		m_nShoveDirection = 0;
-
-		m_fBounceOffWallDuration = 0.1f;
-		m_fBounceOffWallSpeed = 3.5f;
-
-		m_fOriginalTurnRate = m_fTurnRate;
-
-	}
-	else
-	{
 		m_fMaxSpeed = (m_eWeight + 6.0f)*2.0f;
 		m_fMaxReverseSpeed = m_fMaxSpeed * .5f;
 
@@ -147,7 +126,7 @@ void CMovement::CalculateValuesFromWeight()
 		m_fCoastCoefficient = 2.0f + m_eWeight;	
 		m_fReverseCoefficient = m_fAccelerateCoefficient;	
 
-		m_fRammingSpeed = m_fMaxSpeed * .6f;
+		m_fRammingSpeed = m_fMaxSpeed * .7f;
 
 		m_fTurnRate = D3DXToRadian(150 - 30*m_eWeight);
 		m_fSlipTurnSpeed = m_fTurnRate * 3.0f;
@@ -167,8 +146,6 @@ void CMovement::CalculateValuesFromWeight()
 		m_fBounceOffWallSpeed = 10.5f;
 
 		m_fOriginalTurnRate = m_fTurnRate;
-
-	}
 }
 
 void CMovement::Shutdown()
@@ -187,13 +164,6 @@ void CMovement::UpdatePosition(float fDt)
 			m_pObject->GetTransform()->GetLocalMatrix()._32, 
 			m_pObject->GetTransform()->GetLocalMatrix()._33);
 
-		// if we're not stunned, tell the frozen sound to stop
-		if(m_fStunDuration <= 0.0f)
-		{
-			pSound->PlayTheSound(STATUS_FROZEN_STOP, BIKER_ID);
-
-		}
-
 		// if we're bouncing back off a wall
 		if(m_fBounceOffTimeLeft > 0.0f)
 		{
@@ -211,7 +181,7 @@ void CMovement::UpdatePosition(float fDt)
 		{
 			// calc right vector
 			D3DXVECTOR3 vRightDir;
-			D3DXVec3Cross(&vRightDir, &D3DXVECTOR3(0.0f ,1.0f, 0.0f), &m_vPrevVel);
+			D3DXVec3Cross(&vRightDir, &D3DXVECTOR3(0.0f ,1.0f, 0.0f), &m_vCurVel);
 			D3DXVec3Normalize(&vRightDir, &vRightDir);
 
 			if(m_fTurnAmount > 0.0f)
@@ -219,11 +189,11 @@ void CMovement::UpdatePosition(float fDt)
 				vRightDir *= -1; // make it face the correct drift direction
 			}
 
-			D3DXVECTOR3 vOutput = (vTranslateVec + vRightDir);
+			D3DXVECTOR3 vOutput = (1.0f*vRightDir + .8f*m_vPrevVel + m_vCurVel);
 			//D3DXVec3Normalize(&vOutput, &vOutput);
 
 			// store previous vel
-			m_vPrevVel = m_vCurVel;
+			//m_vPrevVel = m_vCurVel;
 			// update cur vel
 			m_vCurVel = vOutput;
 
@@ -332,7 +302,7 @@ void CMovement::UpdateVelocity(float fDt)
 		if(m_fSpeed > 0.0f)
 		{
 			// lower the speed by the average of the brake and coast coeff
-			m_fSpeed -= (m_fBrakeCoefficient) * .8f * fDt; // scale the brake coeff by a constant
+			m_fSpeed -= (m_fBrakeCoefficient) * .3f * fDt; // scale the brake coeff by a constant
 		}
 	}
 	else if(m_eAccelerateBehavior == ACCELERATE && m_fSpeed < m_fMaxSpeed)
@@ -349,6 +319,12 @@ void CMovement::UpdateVelocity(float fDt)
 		float fSpeedModification = m_fCoastCoefficient * fDt * fForwardBackwardDeterminator;
 
 		m_fSpeed += fSpeedModification;
+
+		// if we're not holding accel (since if we are and we're max it still hits the elseif)
+		if(m_eAccelerateBehavior != ACCELERATE)
+		{
+			SendInputEvent("DecelerateEffect", this, this->m_pObject, m_fSpeed);
+		}
 	}
 
 	if(m_eAccelerateBehavior == BRAKE)
@@ -425,37 +401,34 @@ void CMovement::UpdateVelocity(float fDt)
 	}
 
 	float newVal = (((m_fSpeed) * (70.0f))/ (m_fMaxSpeed));
-	int player_num = -1;
-	player_num = CHUDManager::GetInstance()->GetPlayerNum(m_pObject);
 
-	switch (player_num)
+
+	pSound->SetObjectPosition(CHUDManager::GetInstance()->GetPlayerCharID(CHUDManager::GetInstance()->GetPlayerNum(m_pObject)), 
+		m_pObject->GetTransform()->GetWorldPosition(), 0.25f);
+	pSound->SetRPMValueForSound(newVal, 
+		CHUDManager::GetInstance()->GetPlayerCharID(CHUDManager::GetInstance()->GetPlayerNum(m_pObject)));
+
+	if(CHUDManager::GetInstance()->GetPlayerNum(m_pObject) == 0)
 	{
-	case 0:
-		{
-			pSound->SetObjectPosition(BIKER_ID, m_pObject->GetTransform()->GetWorldPosition(), 0.25f);
-			pSound->SetRPMValueForSound(newVal, BIKER_ID);
-			break;
-		}
+		D3DXVECTOR3 posit;
+		posit = m_pObject->GetTransform()->GetWorldPosition();
+		posit.z = m_pObject->GetTransform()->GetWorldPosition().z;
+		D3DXVECTOR3 forwardvec;
+		forwardvec.x = m_pObject->GetTransform()->GetLocalMatrix()._31;
+		forwardvec.y = m_pObject->GetTransform()->GetLocalMatrix()._32;
+		forwardvec.z = m_pObject->GetTransform()->GetLocalMatrix()._33;
+		pSound->SetListenerPosition(posit, forwardvec, 1.0f, 0);
 
-	case 1:
-		{
-			pSound->SetObjectPosition(LARPER_ID, m_pObject->GetTransform()->GetWorldPosition(), 0.25f);
-			pSound->SetRPMValueForSound(newVal, LARPER_ID);
-			break;
-		}
+	}
 
-	case 2:
-		{
-			pSound->SetObjectPosition(SCIENTIST_ID, m_pObject->GetTransform()->GetWorldPosition(), 0.25f);
-			pSound->SetRPMValueForSound(newVal, SCIENTIST_ID);
-			break;
-		}
-	case 3:
-		{
-			pSound->SetObjectPosition(BANDITOS_ID, m_pObject->GetTransform()->GetWorldPosition(), 0.25f);
-			pSound->SetRPMValueForSound(newVal, BANDITOS_ID);
-			break;
-		}
+	if(m_bIsSlowed)
+	{
+		SendInputEvent("SlowAnimation", this, m_pObject, 1.0f);
+	}
+	// else if we're boosting (aka going more than max speed and we're not in a peanut butter)
+	else if(m_fSpeed > m_fMaxSpeed * 1.1f) // since speed slightly goes above max speed occasionally, raise the max speed value tested against)
+	{
+		SendInputEvent("BoostAnimation", this, m_pObject, 1.0f);
 	}
 }
 
@@ -509,8 +482,8 @@ void CMovement::Update(IEvent* cEvent, IComponent* cCenter)
 
 	// output our position to the console window
 	/*cout << pComp->m_pObject->GetTransform()->GetWorldPosition().x << "x " <<
-		pComp->m_pObject->GetTransform()->GetWorldPosition().y << "y " <<
-		pComp->m_pObject->GetTransform()->GetWorldPosition().z << "z " << "\n";/**/
+	pComp->m_pObject->GetTransform()->GetWorldPosition().y << "y " <<
+	pComp->m_pObject->GetTransform()->GetWorldPosition().z << "z " << "\n";/**/
 }
 
 void CMovement::HandleInput(EAccelerateBehavior eInput, float fAmount = 1.0f)
@@ -532,7 +505,7 @@ void CMovement::HandleInput(EAccelerateBehavior eInput, float fAmount = 1.0f)
 			// don't turn
 			return;
 		}
-		
+
 		// get our speed turn modifier
 		float percentOfMaxSpeed = m_fSpeed / m_fMaxSpeed;
 		// invert it
@@ -542,7 +515,7 @@ void CMovement::HandleInput(EAccelerateBehavior eInput, float fAmount = 1.0f)
 
 		// else we're drifting right, do our right stuff  and add our turn modifier that's based on speeed
 		m_fTurnAmount += fAmount * m_fTurnRate * m_fDeltaTime + scaledInvertedPercentMaxSpeed*m_fTurnRate*m_fDeltaTime;
-		
+
 		// if we're drifting and turning
 		if(m_nFramesDrifting > 0)
 		{
@@ -615,16 +588,17 @@ void CMovement::HandleCollision(IEvent* cEvent, IComponent* cCenter)
 	TRamEvent* pRamEvent = (TRamEvent*)cEvent->GetData();
 	CMovement* pComp = (CMovement*)cCenter;
 
+	CMovement* pRammeeComp = CMovementManager::GetInstance()->GetMovementComponent(pRamEvent->m_pcRammee);
+
+
 	// SHOVE RAMMING 
-	// if we're the rammer and we're shoving (shovetime) 
+	// if we're the rammer and we're shoving (shovetime) and the ramEE isn't invincible
 	if((pComp->GetObject() == pRamEvent->m_pcRammer) &&
-		pComp->m_fShoveTimeLeft > 0.0f)
+		pComp->m_fShoveTimeLeft > 0.0f && pRammeeComp->m_fInvulnerableDuration <= 0.0f)
 	{
 		// The rammer is using shove
 
-		// grab the component of the rammee
-		CMovement* pRammeeComp = CMovementManager::GetInstance()->
-			GetMovementComponent(pRamEvent->m_pcRammee);
+
 
 		// if we didn't get one back or what we did get back is invulnerable or the rammEE has a ram cd on him
 		if(pRammeeComp == NULL || pRammeeComp->m_fInvulnerableDuration > 0.0f || 
@@ -642,10 +616,9 @@ void CMovement::HandleCollision(IEvent* cEvent, IComponent* cCenter)
 	}
 
 	// SPEED RAMMING
-	if( pComp->m_pObject == pRamEvent->m_pcRammer && pComp->m_fSpeed > pComp->m_fRammingSpeed)/**/
+	if( pComp->m_pObject == pRamEvent->m_pcRammer)/**/
 	{	
 		// grab the component of the rammee
-		CMovement* pRammeeComp = CMovementManager::GetInstance()->GetMovementComponent(pRamEvent->m_pcRammee);
 
 		// if we didn't get one back or what we did get is invulnerable or the rammEE has a cd on being rammed
 		if(pRammeeComp == NULL || pRammeeComp->m_fInvulnerableDuration > 0.0f || 
@@ -666,57 +639,43 @@ void CMovement::HandleCollision(IEvent* cEvent, IComponent* cCenter)
 		// grab the vector between each object (to compare heading) (from rammer to ramee)
 		D3DXVECTOR3 vVecBetween(pRamEvent->m_pcRammee->GetTransform()->GetWorldPosition() -
 			pRamEvent->m_pcRammer->GetTransform()->GetWorldPosition());
+		D3DXVec3Normalize(&vVecBetween, &vVecBetween);
+
+		// makes it up to 1 for facing towards (or opposte, which wont trigger speed for ram) and down to -1 for facing same direction
+		//float fAngleDifferenceInHeading = D3DXVec3Dot(&vRammeeHeading, &vRammerHeading) * -1.0f; // *-1 so facing towards each other is good and facing away is bad
+
+		// get the difference of the heading vs the vector between the two to compare how headon it is
+		float fHeadingDifferenceFromVecBetween = D3DXVec3Dot(&vVecBetween, &vRammerHeading);
 
 		// scale the headings by their speed to make velocity
 		D3DXVec3Scale(&vRammerHeading, &vRammerHeading, pComp->m_fSpeed);
 		D3DXVec3Scale(&vRammeeHeading, &vRammeeHeading, pRammeeComp->m_fSpeed);
 
 		// get the difference between the velocities
-		D3DXVECTOR3 vDifferenceInHeadings = vRammerHeading - vRammeeHeading;
+		D3DXVECTOR3 vDifferenceInHeadings = vRammeeHeading - vRammerHeading;
 
 		// get the magnitude of the difference (converts to velocities then back to speed to get relative angles)
 		float fSpeedDifference = D3DXVec3Length(&vDifferenceInHeadings);
 
+
+		// if we're slowed by pb, since that doesn't affect the speed variable, affect it here
+		if(pComp->m_bIsSlowed)
+		{
+			fSpeedDifference *= pComp->m_fSlowAmount;
+		}
+
 		// if the speed difference is greater than the threshold needed for the rammer to ram
-		if(fSpeedDifference > pComp->m_fRammingSpeed)
+		if(pComp->m_fSpeed > pComp->m_fRammingSpeed && fHeadingDifferenceFromVecBetween > RAM_HEADING_DIFFERENCE)
 		{
 			pRammeeComp->m_fTimeSinceRammedLast = pRammeeComp->m_fRammedCooldown;
 
 			// Post event: Rammed passing the players
 			SendRamEvent("PlayerRammed", pComp, pRamEvent->m_pcRammer, pRamEvent->m_pcRammee);
 
-
-			// TODO: Play effect stuff here
-
-
-			// HACK: Play sound so I know the dude got rammed. Also put the send ram event back in
-			int player_num = pComp->GetPlayerNumber();
-
-			switch (player_num)
-			{
-			case 0:
-				{
-					pSound->PlayTheSound(BULLDOG_HURT, BIKER_ID);
-					break;
-				}
-			case 1:
-				{
-					pSound->PlayTheSound(CART_PLAYER_COLLISION, LARPER_ID);
-					break;
-				}
-
-			case 2:
-				{
-					pSound->PlayTheSound(CART_PLAYER_COLLISION, SCIENTIST_ID);
-					break;
-				}
-			case 3:
-				{	
-					pSound->PlayTheSound(CART_PLAYER_COLLISION, BANDITOS_ID);
-					break;
-				}
-			}
 		}
+		int charID = -1;
+		charID = CHUDManager::GetInstance()->GetPlayerCharID(CHUDManager::GetInstance()->GetPlayerNum(pRamEvent->m_pcRammer));
+		pSound->PlayTheSound(CART_PLAYER_COLLISION, charID);
 	}
 }
 
@@ -739,11 +698,8 @@ void CMovement::HandleShoveLeft(IEvent* cEvent, IComponent* cCenter)
 			pComp->m_nShoveDirection *= -1; 
 		}
 
-		///sound hack
-		if (pComp->m_nPlayerNumber == 0)
-		{
-			pSound->PlayTheSound(BULLDOG_SHOVE, BIKER_ID);
-		}
+		///sound 
+		pComp->PlayShoveSound(pComp->m_pObject);
 		// TODO: Send effect event now
 		SendInputEvent("ShoveLeftAnimation", pComp, pComp->m_pObject, 1.0f);
 	}
@@ -769,55 +725,27 @@ void CMovement::HandleShoveRight(IEvent* cEvent, IComponent* cCenter)
 			pComp->m_nShoveDirection *= -1; 
 		}
 
-		// sound hack
-		if (pComp->m_nPlayerNumber == 0)
-		{
-			pSound->PlayTheSound(BULLDOG_SHOVE, BIKER_ID);
-		}
-		// TODO: Send effect event now
+		pComp->PlayShoveSound(pComp->m_pObject);
+		//  Send effect event now
 		SendInputEvent("ShoveRightAnimation", pComp, pComp->m_pObject, 1.0f);
 	}
 }
 
 void CMovement::Boost(IEvent* cEvent, IComponent* cCenter)
 {
-	// TODO: Change this to receive boost event rather than handling space bar
+	// Change this to receive boost event rather than handling space bar
 	TStatusEffectEvent* pEvent = (TStatusEffectEvent*)cEvent->GetData();
 	CMovement* pComp = (CMovement*)cCenter;
 
 	if(pEvent->m_pObject == pComp->m_pObject)
 	{
-		pComp->m_fSpeed = pComp->m_fMaxSpeed;
-		pComp->m_fSpeed *= 2.0f;
-	
-		//sound hack
-		int player_num = pComp->GetPlayerNumber();
+		pComp->m_fSpeed = pComp->m_fMaxSpeed * 2.0f;
 
-		switch (player_num)
-		{
-		case 0:
-			{
-				pSound->PlayTheSound(BULLDOG_CART_BOOST, BIKER_ID);
-				break;
-			}
-		case 1:
-			{
-				pSound->PlayTheSound(BULLDOG_CART_BOOST, LARPER_ID);
-				break;
-			}
-		case 2:
-			{
-				pSound->PlayTheSound(BULLDOG_CART_BOOST, SCIENTIST_ID);
-				break;
-			}
-		case 3:
-			{	
-				pSound->PlayTheSound(BULLDOG_CART_BOOST, BANDITOS_ID);
-				break;
-			}
-		}
+		//sound 
+		int charID = -1;
+		charID = CHUDManager::GetInstance()->GetPlayerCharID(pComp->GetPlayerNumber());
+		pSound->PlayTheSound(BULLDOG_CART_BOOST, charID);
 
-		// TODO: send boost effect now
 	}
 }
 
@@ -839,6 +767,10 @@ void CMovement::HandleInputAccelerate(IEvent* cEvent, IComponent* cCenter)
 			{
 				pComp->HandleInput(ACCELERATE, pEvent->m_fAmount);
 			}
+
+			pComp->m_vPrevVel.x = pComp->m_pObject->GetTransform()->GetLocalMatrix()._31;
+			pComp->m_vPrevVel.y = pComp->m_pObject->GetTransform()->GetLocalMatrix()._32;
+			pComp->m_vPrevVel.z = pComp->m_pObject->GetTransform()->GetLocalMatrix()._33;
 		}
 	}
 
@@ -921,11 +853,12 @@ void CMovement::SlipStatusCallback(IEvent* cEvent, IComponent* cCenter)
 		pComp->m_vSlipDirection.z = pComp->m_pObject->GetTransform()->GetWorldMatrix()._33;
 
 		SendStatusEffectEvent("SlipEffect", cEvent->GetSender(), pEvent->m_pObject, pEvent->m_fDuration);
-
+		int playernum = CHUDManager::GetInstance()->GetPlayerNum(pComp->m_pObject);
+		pSound->PlayTheSound(BULLDOG_BIKE_SLIP, CHUDManager::GetInstance()->GetPlayerCharID(playernum));
+		pSound->PlayerHurtSound(playernum);
 		pComp->m_fSlipTurnAmt = 0.0f;
 		pComp->m_bIsSlipping = true;
-		//sound hack
-		// TODO: Send Effect stuff here
+		
 	}
 
 }
@@ -992,7 +925,9 @@ void CMovement::BlindStatusCallback(IEvent* cEvent, IComponent* cCenter)
 	if(pComp->m_pObject == pEvent->m_pObject  && pComp->m_fInvulnerableDuration <= 0.0f)
 	{
 		SendStatusEffectEvent("BlindEffect", cEvent->GetSender(), pEvent->m_pObject, pEvent->m_fDuration);
-
+		int playernum = CHUDManager::GetInstance()->GetPlayerNum(pComp->m_pObject);
+		pSound->PlayTheSound(STATUS_BLIND, CHUDManager::GetInstance()->GetPlayerCharID(playernum));
+		pSound->PlayerHurtSound(playernum);
 	}
 }
 
@@ -1027,7 +962,7 @@ void CMovement::UpdateTimers(float fDt)
 	m_fBounceOffTimeLeft -= fDt;
 	m_fTimeToDrift -= fDt;
 	m_fInvertedControlTimeLeft -= fDt;
-	
+
 	if(m_fSlowAmount > .5f)
 	{
 		// only slow if we're above the normal .5 slow amount
@@ -1080,12 +1015,93 @@ void CMovement::PlayAccelerateOrBrakeSound(EAccelerateBehavior eInput)
 	m_fSoundPlayingTime += m_fDeltaTime;
 
 	if(m_fSoundPlayingTime > BRAKE_SOUNDLENGTH && 
-		(m_eAccelerateBehavior == BRAKE || m_eAccelerateBehavior == DRIFTING))
+		(m_eAccelerateBehavior == BRAKE))
 	{
 		m_fSoundPlayingTime = 0.0f;
-		// PLAY BRAKE SOUND HERE Sound Hack
-		pSound->PlayTheSound(BULLDOG_CART_BRAKE, BIKER_ID);
+		// PLAY BRAKE SOUND HERE 
+		switch(CHUDManager::GetInstance()->GetPlayer1Char())
+		{
+		case BIKER_CHARACTER:
+			{
+				pSound->PlayTheSound(BULLDOG_CART_BRAKE, BIKER_ID);
+				break;
+			}
+		case BANDITOS_CHARACTER:
+			{
+				pSound->PlayTheSound(WOODCART_BRAKE, BANDITOS_ID);
+				break;
+			}
+		case LARPERS_CHARACTER:
+			{
+				pSound->PlayTheSound(WOODCART_BRAKE, LARPER_ID);
+				break;
+			}
+		case SCIENTIST_CHARACTER:
+			{
+				pSound->PlayTheSound(SCIENTIST_BRAKE, SCIENTIST_ID);
+				break;
+			}
+		case SASHA_CHARACTER:
+			{
+				pSound->PlayTheSound(SASHA_BRAKE, SASHA_ID);
+				break;
+			}
+		case CRYGAME_CHARACTER:
+			{
+				pSound->PlayTheSound(SCIENTIST_BRAKE, CRYGAME_ID);
+				break;
+			}
+		case STORYTIME_CHARACTER:
+			{
+				pSound->PlayTheSound(SCIENTIST_BRAKE, STORYTIME_ID);
+				break;
+			}
+		}
 	}
+	else if (m_fSoundPlayingTime > BRAKE_SOUNDLENGTH && m_eAccelerateBehavior == DRIFTING)
+	{
+		m_fSoundPlayingTime = 0.0f;
+
+		switch(CHUDManager::GetInstance()->GetPlayer1Char())
+		{
+		case BIKER_CHARACTER:
+			{
+				pSound->PlayTheSound(BULLDOG_CART_BRAKE, BIKER_ID);
+				break;
+			}
+		case BANDITOS_CHARACTER:
+			{
+				pSound->PlayTheSound(WOODCART_DRIFT, BANDITOS_ID);
+				break;
+			}
+		case LARPERS_CHARACTER:
+			{
+				pSound->PlayTheSound(WOODCART_DRIFT, LARPER_ID);
+				break;
+			}
+		case SCIENTIST_CHARACTER:
+			{
+				pSound->PlayTheSound(SCIENTIST_DRIFT, SCIENTIST_ID);
+				break;
+			}
+		case SASHA_CHARACTER:
+			{
+				pSound->PlayTheSound(SASHA_DRIFT, SASHA_ID);
+				break;
+			}
+		case CRYGAME_CHARACTER:
+			{
+				pSound->PlayTheSound(SCIENTIST_DRIFT, CRYGAME_ID);
+				break;
+			}
+		case STORYTIME_CHARACTER:
+			{
+				pSound->PlayTheSound(SCIENTIST_DRIFT, STORYTIME_ID);
+				break;
+			}
+		}
+	}
+
 
 }
 
@@ -1095,25 +1111,11 @@ void CMovement::StartOfGame(IEvent* /*cEvent*/, IComponent* cCenter)
 
 	pComp->m_pObject->GetTransform()->GetLocalMatrix() = pComp->m_mStartMatrix;
 
-	// if we're the player
-	if(pComp->m_nPlayerNumber == 0)
+	if (CHUDManager::GetInstance()->GetPlayerNum(pComp->m_pObject) == 0)
 	{
-		// attach camera to us (in case it's not attached)
 		SendObjectEvent("AttachToCamera", pComp, pComp->m_pObject,
 			PRIORITY_IMMEDIATE);
-		pSound->PlayTheSound(BULLDOG_SPEED_PLAY, BIKER_ID);
-	}
-	if(pComp->m_nPlayerNumber == 1)
-	{
-		pSound->PlayTheSound(BULLDOG_SPEED_PLAY, LARPER_ID);
-	}
-	if(pComp->m_nPlayerNumber == 2)
-	{
-		pSound->PlayTheSound(BULLDOG_SPEED_PLAY, BANDITOS_ID);	
-	}
-	if(pComp->m_nPlayerNumber == 3)
-	{
-		pSound->PlayTheSound(BULLDOG_SPEED_PLAY, SCIENTIST_ID);
+
 	}
 
 	pComp->m_fSpeed = 0.0f;
@@ -1123,7 +1125,6 @@ void CMovement::StartOfGame(IEvent* /*cEvent*/, IComponent* cCenter)
 
 	// reset our debuff timers and stuff 
 	pComp->m_fInvulnerableDuration = 0.0f;
-	pComp->m_fShoveDuration = 0.0f;
 	pComp->m_fSlowDuration = 0.0f;
 	pComp->m_fStunDuration = 0.0f;
 	pComp->m_fSlipDuration = 0.0f;
@@ -1152,10 +1153,17 @@ void CMovement::BounceCallbackPlayer(IEvent* cEvent, IComponent* cCenter)
 
 	if(tEvent->m_pcCollider == pComp->m_pObject && pComp->m_fBounceOffTimeLeft <= 0.0f)
 	{
+		// if we're going too slow, don't bounce
+		if(pComp->m_fSpeed < 5.0f)
+		{
+			return;
+		}
+
+
 		D3DXVECTOR3 vForward(pComp->m_pObject->GetTransform()->GetLocalMatrix()._31,
 			pComp->m_pObject->GetTransform()->GetLocalMatrix()._32,
 			pComp->m_pObject->GetTransform()->GetLocalMatrix()._33);
-		D3DXVec3Normalize(&vForward, &vForward);
+		//D3DXVec3Normalize(&vForward, &vForward);
 
 
 		// get the normal from the event
@@ -1171,8 +1179,7 @@ void CMovement::BounceCallbackPlayer(IEvent* cEvent, IComponent* cCenter)
 
 		if(fabs(fDot) > REFLECT_DOT_MIN)
 		{
-			float slide = .1f;
-
+			float slide = .025f;
 
 			pComp->m_vBounceVec = reflectvec * slide;
 			pComp->m_vBounceVec.y = 0.0f;
@@ -1184,7 +1191,7 @@ void CMovement::BounceCallbackPlayer(IEvent* cEvent, IComponent* cCenter)
 			}
 			else
 			{
-				pComp->m_fSpeed *= .3f; // lower the speed by half since it was head on
+				pComp->m_fSpeed *= .5f; // lower the speed by half since it was head on
 			}
 
 			SendImpactEvent("CartCollisionEffect", cEvent->GetSender(), tEvent->m_pcCollider, tEvent->m_pCollidedWith, D3DXVECTOR3(0.0f, 1.0f, 0.0f));
@@ -1208,8 +1215,8 @@ void CMovement::BounceCallbackEnvironment(IEvent* cEvent, IComponent* cCenter)
 	movedir.x = pComp->GetObjectA()->GetTransform()->GetLocalMatrix()._31;
 	movedir.y = pComp->GetObjectA()->GetTransform()->GetLocalMatrix()._32;
 	movedir.z = pComp->GetObjectA()->GetTransform()->GetLocalMatrix()._33;
-	float fDotRes = D3DXVec3Dot(&tEvent->m_vNormal, &movedir);
-	float slide = .1f;
+	//float fDotRes = D3DXVec3Dot(&tEvent->m_vNormal, &movedir);
+	float slide = .05f;
 
 	//	if(fDotRes < 1.0f && fDotRes > 0.717f ||
 	//	fDotRes > -1.0f && fDotRes < -0.717f)
@@ -1222,7 +1229,7 @@ void CMovement::BounceCallbackEnvironment(IEvent* cEvent, IComponent* cCenter)
 		D3DXVECTOR3 vForward(pComp->m_pObject->GetTransform()->GetLocalMatrix()._31,
 			pComp->m_pObject->GetTransform()->GetLocalMatrix()._32,
 			pComp->m_pObject->GetTransform()->GetLocalMatrix()._33);
-		D3DXVec3Normalize(&vForward, &vForward);
+		//D3DXVec3Normalize(&vForward, &vForward);
 
 
 		// get the normal from the event
@@ -1240,31 +1247,9 @@ void CMovement::BounceCallbackEnvironment(IEvent* cEvent, IComponent* cCenter)
 		if(fabs(fDot) > REFLECT_DOT_MIN && pComp->m_fSpeed > 5.0f)
 		{
 			// play collison sound only if speed is greater than 3 (and we're mostly head on)
-			int player_num = pComp->GetPlayerNumber();
-
-			switch (player_num)
-			{
-			case 0:
-				{
-					pSound->PlayTheSound(CART_WALL_COLLISION, BIKER_ID);
-					break;
-				}
-			case 1:
-				{
-					pSound->PlayTheSound(CART_WALL_COLLISION, LARPER_ID);
-					break;
-				}
-			case 2:
-				{
-					pSound->PlayTheSound(CART_WALL_COLLISION, SCIENTIST_ID);
-					break;
-				}
-			case 3:
-				{	
-					pSound->PlayTheSound(CART_WALL_COLLISION, BANDITOS_ID);
-					break;
-				}
-			}
+			int charID = -1; 
+			charID = CHUDManager::GetInstance()->GetPlayerCharID(pComp->GetPlayerNumber());
+			pSound->PlayTheSound(CART_WALL_COLLISION, charID);
 
 			pComp->m_vBounceVec = reflectvec * slide * 2.0f;
 			pComp->m_vBounceVec.y = 0.0f;
@@ -1277,7 +1262,7 @@ void CMovement::BounceCallbackEnvironment(IEvent* cEvent, IComponent* cCenter)
 			}
 			else
 			{
-				pComp->m_fSpeed *= .3f; // lower the speed by half since it was head on
+				pComp->m_fSpeed *= .5f; // lower the speed by half since it was head on
 			}
 
 
@@ -1285,26 +1270,31 @@ void CMovement::BounceCallbackEnvironment(IEvent* cEvent, IComponent* cCenter)
 		}
 		else 
 		{
-			
-		}
-		// turn them a little bit 		
-		// generate a right vector
-		D3DXVECTOR3 vRight;
-		D3DXVec3Cross(&vRight, &vForward, &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
-		// half space test on that to see right or left turn
-		float fHalfSpaceValue = D3DXVec3Dot(&vRight, &colNormal);
 
-		// increase or decrease the turn amount based on that
-		// if it's on the right side
-		if(fHalfSpaceValue < 0.0f)
-		{
-			// turn right
-			pComp->m_fTurnAmount += pComp->m_fTurnRate * pComp->m_fDeltaTime * 1.0f; // *constant so it's a smaller value
 		}
-		else // otehr side
+
+
+		// turn them a little bit if they're not actively turning and they're accelerating (so if you're still it doesn't break)
+		if(pComp->m_fTurnAmount == 0.0f && pComp->m_eAccelerateBehavior == ACCELERATE)
 		{
-			// turn left
-			pComp->m_fTurnAmount -= pComp->m_fTurnRate * pComp->m_fDeltaTime * 1.0f; // *constant so it's a smaller value
+			// generate a right vector
+			D3DXVECTOR3 vRight;
+			D3DXVec3Cross(&vRight, &vForward, &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
+			// half space test on that to see right or left turn
+			float fHalfSpaceValue = D3DXVec3Dot(&vRight, &colNormal);
+
+			// increase or decrease the turn amount based on that
+			// if it's on the right side
+			if(fHalfSpaceValue < 0.0f)
+			{
+				// turn right
+				pComp->m_fTurnAmount += pComp->m_fTurnRate * pComp->m_fDeltaTime * 1.0f; // *constant so it's a smaller value
+			}
+			else // otehr side
+			{
+				// turn left
+				pComp->m_fTurnAmount -= pComp->m_fTurnRate * pComp->m_fDeltaTime * 1.0f; // *constant so it's a smaller value
+			}
 		}
 
 		// play sideswipe sound (eventually)
@@ -1343,20 +1333,7 @@ void CMovement::HandleInputDrift(IEvent* cEvent, IComponent* cCenter)
 		pComp->m_vCurVel.y = pComp->m_pObject->GetTransform()->GetLocalMatrix()._32;
 		pComp->m_vCurVel.z = pComp->m_pObject->GetTransform()->GetLocalMatrix()._33;
 
-	}
-}
-
-
-void CMovement::LobsteredStatusCallback(IEvent* cEvent, IComponent* cCenter)
-{
-	TStatusEffectEvent* pEvent = (TStatusEffectEvent*)cEvent->GetData();
-	CMovement* pComp = (CMovement*)cCenter;
-
-	if(pComp->m_pObject == pEvent->m_pObject)
-	{
-		// we're the one's invulnerable. Init invulnerable data
-		pComp->m_fInvertedControlTimeLeft = pEvent->m_fDuration == 0.0f ? 5.0f : pEvent->m_fDuration; // if duration is 0, use default of 3
-		SendStatusEffectEvent("LobsteredEffect", cEvent->GetSender(), pEvent->m_pObject, pEvent->m_fDuration);
+		//pComp->m_vPrevVel = pComp->m_vCurVel;
 
 	}
 }
@@ -1377,17 +1354,18 @@ void CMovement::SendMovementInformation(IEvent*, IComponent* pComp)
 	SendSpeedEvent("ShowRamSpeed", pMovement, pMovement->m_pObject, pMovement->m_fRammingSpeed);
 	SendSpeedEvent("ShowMaxSpeed", pMovement, pMovement->m_pObject, pMovement->m_fMaxSpeed);
 	SendSpeedEvent("ShowTurnSpeed", pMovement, pMovement->m_pObject, pMovement->m_fTurnRate);
+	SendSpeedEvent("ShowAcceleration", pMovement, pMovement->m_pObject, pMovement->m_fAccelerateCoefficient);
 }
 
 
-void CMovement::DisableMovementInput(IEvent* cEvent, IComponent* iComp)
+void CMovement::DisableMovementInput(IEvent* /*cEvent*/, IComponent* iComp)
 {
 	CMovement* pComp = (CMovement*)iComp;
 	pComp->m_bInputEnabled = false;
 
 }
 
-void CMovement::EnableMovementInput(IEvent* cEvent, IComponent* iComp)
+void CMovement::EnableMovementInput(IEvent* /*cEvent*/, IComponent* iComp)
 {
 	CMovement* pComp = (CMovement*)iComp;
 	pComp->m_bInputEnabled = true;
@@ -1396,7 +1374,7 @@ void CMovement::EnableMovementInput(IEvent* cEvent, IComponent* iComp)
 void CMovement::GameWonCallback(IEvent*, IComponent* iComp)
 {
 	CMovement* pComp = (CMovement*)iComp;
-	
+
 	pComp->m_bEndgameSlowingDown = true;
 
 	// reset our debuff timers and stuff 
@@ -1405,4 +1383,59 @@ void CMovement::GameWonCallback(IEvent*, IComponent* iComp)
 	pComp->m_fSlowDuration = 0.0f;
 	pComp->m_fStunDuration = 0.0f;
 	pComp->m_fSlipDuration = 0.0f;/**/
+}
+
+void CMovement::StealCallback(IEvent* iEvent, IComponent* iComp)
+{
+	TImpactEvent* pEvent = (TImpactEvent*)iEvent->GetData();
+	CMovement* pComp = (CMovement*)iComp;
+
+	if(pComp->m_pObject == pEvent->m_pCollidedWith  && pComp->m_fInvulnerableDuration <= 0.0f)
+	{
+		SendImpactEvent("StealItem", pComp, pEvent->m_pcCollider, pEvent->m_pCollidedWith, D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	}
+}
+void CMovement::PlayShoveSound(CObject* object)
+{
+	int playerNum = -1;
+	playerNum = CHUDManager::GetInstance()->GetPlayerNum(object);
+
+	switch(CHUDManager::GetInstance()->GetPlayerCharacter(playerNum))
+	{
+	case BIKER_CHARACTER:
+		{
+			pSound->PlayTheSound(BULLDOG_SHOVE, BIKER_ID);
+			break;
+		}
+	case BANDITOS_CHARACTER:
+		{
+			pSound->PlayTheSound(BANDITOS_SHOVE, BANDITOS_ID);
+			break;
+		}
+	case LARPERS_CHARACTER:
+		{
+			pSound->PlayTheSound(LARPER_SHOVE, LARPER_ID);
+			break;
+		}
+	case SCIENTIST_CHARACTER:
+		{
+			pSound->PlayTheSound(SCIENTIST_SHOVE, SCIENTIST_ID);
+			break;
+		}
+	case SASHA_CHARACTER:
+		{
+			pSound->PlayTheSound(SASHA_ITEMUSE, SASHA_ID);
+			break;
+		}
+	case CRYGAME_CHARACTER:
+		{
+			pSound->PlayTheSound(CRYGAME_SHOVE, CRYGAME_ID);
+			break;
+		}
+	case STORYTIME_CHARACTER:
+		{
+			pSound->PlayTheSound(STORYTIME_SHOVE, STORYTIME_ID);
+			break;
+		}
+	}
 }

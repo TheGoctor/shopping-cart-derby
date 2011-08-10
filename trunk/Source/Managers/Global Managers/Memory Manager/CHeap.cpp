@@ -74,8 +74,6 @@ void CHeap::Init(unsigned int nPoolSizeInBytes)
 {
 	m_nTotalPoolSize = (nPoolSizeInBytes+(BYTE_ALIGN-1)) & ~(BYTE_ALIGN-1);
 
-	// TODO: align malloc call to 4 bytes but not 8 bytes
-	// so end of first header is 8 byte-aligned
 	m_pchPool = (char*)malloc(m_nTotalPoolSize);
 	memset(m_pchPool, 0, m_nTotalPoolSize);
 
@@ -112,15 +110,32 @@ CHeap::THeader * CHeap::FirstAvailable(unsigned int nAllocSize)
 	if(m_ptFreeHead == NULL || m_ptFreeHead->m_nSize == 0)
 		return NULL;
 
-	THeader* ptIter = m_ptFreeHead->m_ptNext;
-	do
-	{
-		if(ptIter->m_nSize >= nAllocSize)
-			return ptIter;
-		else
-			ptIter = ptIter->m_ptNext;
+	unsigned int nAvgMemSize = m_nNumPtrs > 0 ? (m_nTotalPoolSize - m_nMemoryAvailable) / (m_nNumPtrs) : 0;
 
-	} while(ptIter != m_ptFreeHead->m_ptNext);
+	if(nAllocSize < nAvgMemSize)
+	{
+		THeader* ptIter = m_ptFreeHead->m_ptNext;
+		do
+		{
+			if(ptIter->m_nSize >= nAllocSize)
+				return ptIter;
+			else
+				ptIter = ptIter->m_ptNext;
+
+		} while(ptIter != m_ptFreeHead->m_ptNext);
+	}
+	else
+	{
+		THeader* ptIter = m_ptFreeHead->m_ptPrev;
+		do
+		{
+			if(ptIter->m_nSize >= nAllocSize)
+				return ptIter;
+			else
+				ptIter = ptIter->m_ptPrev;
+
+		} while(ptIter != m_ptFreeHead->m_ptPrev);
+	}
 
 	// No More Memory
 	throw;
@@ -373,8 +388,6 @@ void CHeap::Init(unsigned int nPoolSizeInBytes)
 {
 	m_nTotalPoolSize = (nPoolSizeInBytes+(BYTE_ALIGN-1)) & ~(BYTE_ALIGN-1);
 
-	// TODO: align malloc call to 4 bytes but not 8 bytes
-	// so end of first header is 8 byte-aligned
 	m_pchPool = (char*)malloc(m_nTotalPoolSize);
 	memset(m_pchPool, 0, m_nTotalPoolSize);
 
@@ -411,15 +424,34 @@ CHeap::THeader * CHeap::FirstAvailable(unsigned int nAllocSize)
 	if(m_ptFreeHead == NULL || m_ptFreeHead->m_nSize == 0)
 		return NULL;
 
-	THeader* ptIter = m_ptFreeHead->m_ptNext;
-	do
-	{
-		if(ptIter->m_nSize >= nAllocSize)
-			return ptIter;
-		else
-			ptIter = ptIter->m_ptNext;
+	// Attempting to separate the small and large pointers to help avoid
+	// memory fragmentation
+	unsigned int nAvgMemSize = m_nNumPtrs > 0 ? (m_nTotalPoolSize - m_nMemoryAvailable) / (m_nNumPtrs) : 0;
 
-	} while(ptIter != m_ptFreeHead->m_ptNext);
+	if(nAllocSize < nAvgMemSize)
+	{
+		THeader* ptIter = m_ptFreeHead->m_ptNext;
+		do
+		{
+			if(ptIter->m_nSize >= nAllocSize)
+				return ptIter;
+			else
+				ptIter = ptIter->m_ptNext;
+
+		} while(ptIter != m_ptFreeHead->m_ptNext);
+	}
+	else
+	{
+		THeader* ptIter = m_ptFreeHead->m_ptPrev;
+		do
+		{
+			if(ptIter->m_nSize >= nAllocSize)
+				return ptIter;
+			else
+				ptIter = ptIter->m_ptPrev;
+
+		} while(ptIter != m_ptFreeHead->m_ptPrev);
+	}
 
 	// No More Memory
 	throw;

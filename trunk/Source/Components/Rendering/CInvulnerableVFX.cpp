@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //	File			:	CInvulnerableVFX.cpp
-//	Date			:	6/10/11
-//	Mod. Date		:	6/10/11
+//	Date			:	7/26/11
+//	Mod. Date		:	7/26/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Encapsulates the Chiken Soup VFX
@@ -33,9 +33,6 @@ void CInvulnerableVFX::Init(void)
 	// Boost
 	pEM->RegisterEvent("UseBoost", this, BoostCallback);
 
-	// End
-	//pEM->RegisterEvent("InvulnerableEnd", this, InvulnerableEndCallback);
-
 	// Update
 	string szEventName = "Update";
 	szEventName += GAMEPLAY_STATE;
@@ -48,28 +45,6 @@ void CInvulnerableVFX::Init(void)
 
 	// Destroy Obj
 	pEM->RegisterEvent("DestroyObject", this, DestroyObjectCallback);
-
-	/*string szEvent3 = "ShutdownObjects";
-	szEvent3 += GAMEPLAY_STATE;
-	pEM->RegisterEvent(szEvent3, this, ShutdownCallBack);*/
-}
-
-// Shutdown
-void CInvulnerableVFX::ShutdownCallBack(IEvent*, IComponent* pComp)
-{
-	CInvulnerableVFX* pInvuln = (CInvulnerableVFX*)pComp;
-	pInvuln->Shutdown();
-}
-
-void CInvulnerableVFX::Shutdown(void)
-{
-	// Register for Events
-	CEventManager* pEM = CEventManager::GetInstance();
-
-	//if(m_pParentObj->GetID())
-	//	m_pParentObj->RemoveComponent(this);
-
-	pEM->UnregisterEventAll(this);
 }
 
 // Factory
@@ -118,6 +93,7 @@ void CInvulnerableVFX::InvulnerableCallback(IEvent* pEvent, IComponent* pComp)
 	CInvulnerableVFX* pIVFXComp = (CInvulnerableVFX*)pComp;
 	TStatusEffectEvent* pData = (TStatusEffectEvent*)pEvent->GetData();
 
+	// Call Handler
 	pIVFXComp->Invulnerable(pData);
 }
 void CInvulnerableVFX::Invulnerable(TStatusEffectEvent* pcObjEvent)
@@ -140,6 +116,7 @@ void CInvulnerableVFX::BoostCallback(IEvent* pEvent, IComponent* pComp)
 	CInvulnerableVFX* pIVFXComp = (CInvulnerableVFX*)pComp;
 	TStatusEffectEvent* pData = (TStatusEffectEvent*)pEvent->GetData();
 
+	// Call Handler
 	pIVFXComp->Boost(pData);
 }
 void CInvulnerableVFX::Boost(TStatusEffectEvent* pcObjEvent)
@@ -150,26 +127,6 @@ void CInvulnerableVFX::Boost(TStatusEffectEvent* pcObjEvent)
 		//m_bActive = true;
 		m_pMesh->SetFlashingBlue(true);
 		m_fBoostDuration = pcObjEvent->m_fDuration;
-	}
-}
-
-// End
-void CInvulnerableVFX::InvulnerableEndCallback(IEvent* pEvent, IComponent* pComp)
-{
-	// Get Data from Event
-	CInvulnerableVFX* pIVFXComp = (CInvulnerableVFX*)pComp;
-	TObjectEvent* pData = (TObjectEvent*)pEvent->GetData();
-
-	pIVFXComp->InvulnerableEnd(pData);
-}
-void CInvulnerableVFX::InvulnerableEnd(TObjectEvent* pcObjEvent)
-{
-	if(CheckForPlayerMatch(pcObjEvent->m_pcObj))
-	{
-		// Turn Off
-		m_bActive = false;
-		m_pMesh->SetFlashingYellow(false);
-		m_pEffect->SetContinuous(EC_TYPE_CHICKEN_INV, false);
 	}
 }
 
@@ -219,6 +176,11 @@ void CInvulnerableVFX::Update(float fDT)
 			m_pMesh->SetFlashingBlue(false);
 			m_pMesh->SetFlashingWhite(false);
 		}
+	}
+	else
+	{
+		m_pMesh->SetFlashingBlue(false);
+		m_pMesh->SetFlashingWhite(false);
 	}
 
 	// Inv
@@ -281,8 +243,6 @@ void CInvulnerableVFX::DestroyObjectCallback(IEvent* pEvent, IComponent* pComp)
 	
 	if(pIVFXComp->GetParent()->GetID() == pData->m_pcObj->GetID())
 	{
-		//pIVFXComp->m_bActive = false;
-		pIVFXComp->m_pEffect->SwitchOnOffEmitters(EC_TYPE_CHICKEN_INV, false);
-		pIVFXComp->Shutdown();
+		CEventManager::GetInstance()->UnregisterEventAll(pComp);
 	}
 }

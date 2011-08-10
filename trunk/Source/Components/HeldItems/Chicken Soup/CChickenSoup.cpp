@@ -11,7 +11,7 @@ CChickenSoupComponent* CChickenSoupComponent::CreateChickenSoupComponent(CObject
 {
 	CChickenSoupComponent* pComp = MMNEW(CChickenSoupComponent(pObj));
 	pComp->FirstInit();
-	
+	pComp->CHICKENSOUP_ID = -1;
 	pObj->AddComponent(pComp);
 
 	return pComp;
@@ -20,7 +20,7 @@ void CChickenSoupComponent::FirstInit(void)
 {
 	m_fDuration = 10.0f;
 	m_fTimeRemaining = m_fDuration;
-	CHICKENSOUP_ID = 0;
+	CHICKENSOUP_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 	//(event)registration forms!
 	string szEventName = "Update";
 	szEventName += GAMEPLAY_STATE;
@@ -32,10 +32,10 @@ void CChickenSoupComponent::ReInit()
 	SetIsSpawned(true);
 	SetTimeRemaining(GetDuration());
 	CHICKENSOUP_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
-	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_CHICKENSOUP_USE, CHICKENSOUP_ID);
-	CWwiseSoundManager::GetInstance()->PlayTheSound(STATUS_INVULNERABLE, CHICKENSOUP_ID);
 	// tell movement that it's invulnerable (since it has invulnerable checks in all its status effects)
 	SendStatusEffectEvent("Invulnerable", this, m_pAttachedObject, m_fDuration);
+	CWwiseSoundManager::GetInstance()->SetObjectPosition(CHICKENSOUP_ID, m_pAttachedObject->GetTransform()->GetWorldPosition(), 0.3f);
+	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_CHICKENSOUP_USE, CHICKENSOUP_ID);
 }
 //call backs
 void CChickenSoupComponent::Update(IEvent* cEvent, IComponent* cCenter)
@@ -77,7 +77,7 @@ void CChickenSoupComponent::Despawn()
 
 	m_fTimeRemaining = 0.0f;
 	m_bIsSpawned = false;
-	CWwiseSoundManager::GetInstance()->PlayTheSound(STATUS_INVULNERABLE_STOP, CHICKENSOUP_ID);
+	CWwiseSoundManager::GetInstance()->PlayTheSound(CHICKENSOUP_STOP, CHICKENSOUP_ID);
 	CWwiseSoundManager::GetInstance()->UnregisterObject(CHICKENSOUP_ID);
 	m_pParent->GetTransform()->GetLocalMatrix()._41 = 300.0f;
 	m_pParent->GetTransform()->GetLocalMatrix()._42 = 300.0f;

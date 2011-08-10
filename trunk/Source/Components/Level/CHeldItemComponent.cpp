@@ -1,20 +1,17 @@
 /*******************************************************************************
  * Filename:  		CHeldItemComponent.cpp
  * Date:      		05/01/2011
- * Mod. Date: 		05/09/2011
+ * Mod. Date: 		07/26/2011
  * Mod. Initials:	JS
  * Author:    		Jesse A. Stanciu
  * Purpose:   		This will represent the Held Item in the world.
 					When created, Init should be called and a EHeldItemType
 					should be given.
  ******************************************************************************/
-#include <string>
 #include "CHeldItemComponent.h"
-#include "..\..\Managers\Global Managers\Object Manager\CObjectManager.h"
 #include "..\..\Managers\Global Managers\Event Manager\CEventManager.h"
 #include "..\..\Managers\Global Managers\Event Manager\EventStructs.h"
 #include "..\..\Managers\Global Managers\Rendering Managers\DXRenderContextManager.h"
-#include "..\..\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
 #include "..\..\Managers\Component Managers\CSpawningManager.h"
 #include "..\Rendering\CRenderComponent.h"
 using namespace EventStructs;
@@ -36,10 +33,21 @@ CHeldItemComponent::CHeldItemComponent(CObject* pObj) : m_pParent(pObj)
 	szEvent = "Update";
 	szEvent += PAUSE_OPTIONS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
 	szEvent = "Update";
 	szEvent += PAUSE_KEYBINDS_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
 
+	szEvent = "Update";
+	szEvent += QUIT_CONFIRMATION_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
+	szEvent = "Update";
+	szEvent += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
+	CEventManager::GetInstance()->RegisterEvent(szEvent, this, PauseUpdateCallback);
 }
 
 CHeldItemComponent::CHeldItemComponent()
@@ -112,6 +120,7 @@ void CHeldItemComponent::Spawn()
 	m_tSpawnLocation->m_bUsed = true;
 
 	SendHeldItemSpawnedEvent("HeldItemSpawned", this, this);
+	SendObjectEvent("BlueLightSpecialSpawned", this, m_tSpawnLocation->m_cEndCap);
 
 	D3DXMatrixIdentity(&m_pParent->GetTransform()->GetLocalMatrix());
 
@@ -166,8 +175,8 @@ void CHeldItemComponent::Update(IEvent* piEvent, IComponent* piComponent)
 		}
 
 		SendRenderEvent("AddToSet", pcHeldItem, pcHeldItem->m_pParent, PRIORITY_IMMEDIATE);
-		pcHeldItem->m_pParent->GetTransform()->GetLocalMatrix()._42 = sin(pcHeldItem->m_fSpawnTimer)*.2f + 1.3f;
-		pcHeldItem->m_pParent->GetTransform()->RotateFrame(D3DXVECTOR3(0,1,0), fDT*.5f);
+		pcHeldItem->m_pParent->GetTransform()->GetLocalMatrix()._42 = sin(pcHeldItem->m_fSpawnTimer * 2.5f)*.2f + 1.3f;
+		pcHeldItem->m_pParent->GetTransform()->RotateFrame(D3DXVECTOR3(0,1,0), fDT* 1.5f);
 
 		return;
 	}
@@ -184,100 +193,19 @@ void CHeldItemComponent::HeldItemCollision(IEvent* iEvent, IComponent* comp)
 	THeldItemCollected* tEvent = (THeldItemCollected*)iEvent->GetData();
 	CHeldItemComponent* pComp = (CHeldItemComponent*)comp;
 
-
 	CObject* pHeldItem = tEvent->m_pcHeldItem;
 	CObject* pCollector = tEvent->m_pcCollector;
 
 	if(pHeldItem == pComp->m_pParent)
 	{
-		switch(pComp->GetType())
+		// if we have valid endcaps and location
+		if(pComp->m_tSpawnLocation && pComp->m_tSpawnLocation->m_cEndCap)
 		{
-		case TURKEY:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-			}
-			break;
-		case BANANA:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-
-			}
-			break;
-		case PEANUT_BUTTER:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-
-				
-			}
-			break;
-		case PIE:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-
-				
-			}
-			break;
-		case ENERGY_DRINK:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-
-		
-			}
-			break;
-		case SOUP:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-
-			
-			}
-			break;
-		case DONUT:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-
-				
-			}
-			break;
-		case JAM:
-			{
-				D3DXVECTOR3 pos;
-				pos.x = pComp->GetParent()->GetTransform()->GetWorldMatrix()._41;
-				pos.y = pComp->GetParent()->GetTransform()->GetWorldMatrix()._42;
-				pos.z = pComp->GetParent()->GetTransform()->GetWorldMatrix()._43;
-
-				
-			}
-			break;
-		default:
-			{
-				return;
-			}
+			SendObjectEvent("BlueLightSpecialDespawned", pComp, pComp->m_tSpawnLocation->m_cEndCap);
 		}
-
 		// Tell everyone else
 		SendGoalItemCollectedEvent("HeldItemCollected", pComp,
-			pHeldItem, pCollector, PRIORITY_IMMEDIATE);
+			pHeldItem, pCollector, PRIORITY_IMMEDIATE);		
 	}
 }
 
@@ -287,7 +215,6 @@ void CHeldItemComponent::HeldItemCollected(IEvent* iEvent, IComponent* comp)
 	CHeldItemComponent* pComp = (CHeldItemComponent*)comp;
 
 	CObject* pHeldItem = tEvent->m_pcHeldItem;
-	//CObject* pCollector = tEvent->m_pcCollector;
 
 	if(pHeldItem == pComp->m_pParent)
 	{

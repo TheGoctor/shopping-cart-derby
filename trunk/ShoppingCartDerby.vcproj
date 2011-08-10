@@ -251,10 +251,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Resource\Shaders\ChickenNoodle.fx"
-					>
-				</File>
-				<File
 					RelativePath=".\Resource\Shaders\MultiTexture.fx"
 					>
 				</File>
@@ -587,10 +583,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CCameraBehaviorBase.h"
-					>
-				</File>
-				<File
 					RelativePath=".\Source\Managers\Global Managers\Camera Manager\CCameraManager.cpp"
 					>
 				</File>
@@ -620,6 +612,18 @@
 				</File>
 				<File
 					RelativePath=".\Source\Managers\Global Managers\Endgame Manager\CEndgameManager.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Unlockable Manager"
+				>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Unlockable Manager\CUnlockableManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Managers\Global Managers\Unlockable Manager\CUnlockableManager.h"
 					>
 				</File>
 			</Filter>
@@ -715,11 +719,35 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Source\Components\Rendering\CHUDEffectsComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CHUDEffectsComp.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\Components\Rendering\CInvulnerableVFX.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\Source\Components\Rendering\CInvulnerableVFX.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CJamHitEffectComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CJamHitEffectComp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CJamUseEffectComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CJamUseEffectComp.h"
 					>
 				</File>
 				<File
@@ -736,6 +764,14 @@
 				</File>
 				<File
 					RelativePath=".\Source\Components\Rendering\CRenderComponent.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CScrollingUVComp.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Source\Components\Rendering\CScrollingUVComp.h"
 					>
 				</File>
 				<File
@@ -1041,14 +1077,6 @@
 			</File>
 			<File
 				RelativePath=".\Source\Managers\Component Managers\CPickupItemManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Managers\Component Managers\CSoundManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Source\Managers\Component Managers\CSoundManager.h"
 				>
 			</File>
 			<File

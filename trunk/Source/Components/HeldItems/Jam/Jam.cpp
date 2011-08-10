@@ -9,6 +9,7 @@ using namespace EventStructs;
 CRayJam* CRayJam::CreateRayJamComponent(CObject* pObj)
 {
 	CRayJam* pComp = MMNEW(CRayJam(pObj));
+	pComp->JAM_ID = -1;
 	pComp->FirstInit();
 	pObj->AddComponent(pComp);
 	return pComp;
@@ -16,7 +17,7 @@ CRayJam* CRayJam::CreateRayJamComponent(CObject* pObj)
 void CRayJam::FirstInit()
 {
 	m_fDuration = 10.0f;
-	JAM_ID = 0;
+	JAM_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 	std::string szEvent = "Update";
 	szEvent += GAMEPLAY_STATE;
 	CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
@@ -34,7 +35,7 @@ void CRayJam::Update(IEvent* cEvent, IComponent* cCenter)
 		return;
 	}
 	pComp->SetTimeLeft(pComp->GetTimeLeft()-fDt);
-	CWwiseSoundManager::GetInstance()->SetObjectPosition((int)pComp->JAM_ID, pComp->GetParent()->GetTransform()->GetWorldPosition(), 0.35f);
+	CWwiseSoundManager::GetInstance()->SetObjectPosition(pComp->JAM_ID, pComp->GetParent()->GetTransform()->GetWorldPosition(), 0.35f);
 	if(pComp->GetTimeLeft() <= 0.0f)
 	{
 		pComp->Despawn();
@@ -47,6 +48,7 @@ void CRayJam::ReInit(IEvent* /*cEvent*/, IComponent* cCenter)
 	//TStatusEffectEvent* eEvent = (TStatusEffectEvent*)cEvent->GetData();
 	//m_fTimeLeft = m_fDuration;
 	pComp->JAM_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
+	CWwiseSoundManager::GetInstance()->SetObjectPosition(pComp->JAM_ID, pComp->m_pParent->GetTransform()->GetWorldPosition(), 0.35f);
 	//SendStatusEffectEvent("JamEffect",pComp, eEvent->m_pObject, pComp->m_fDuration);
 	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_JAM_USE, pComp->JAM_ID);
 	//pComp->SetIsSpawned(true);

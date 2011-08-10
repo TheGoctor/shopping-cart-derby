@@ -13,6 +13,7 @@ CObjectManager::~CObjectManager(void)
 	pIter = m_cObjects.begin();
 	while(pIter != m_cObjects.end())
 	{
+		// Use ID to make sure the Object wasn't already deleted
 		if((*pIter)->GetID() != 0)
 		{
 			MMDEL(*pIter);
@@ -20,34 +21,6 @@ CObjectManager::~CObjectManager(void)
 		++pIter;
 	}
 	m_cObjects.clear();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// EnableStateObjects()	:	Enables the Objects in the passed in states
-//
-// Ins		:	EGameStates	- The state to enable objects in
-//
-// Returns	:	void
-//
-// Mod. Date		:	4/4/11
-// Mod. Initials	:	JL
-////////////////////////////////////////////////////////////////////////////////
-void CObjectManager::EnableStateObjects(EGameState)
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// DisableStateObjects()	:	Disables the Objects in the passed in states
-//
-// Ins		:	EGameStates	- The state to disable objects from
-//
-// Returns	:	void
-//
-// Mod. Date		:	4/4/11
-// Mod. Initials	:	JL
-////////////////////////////////////////////////////////////////////////////////
-void CObjectManager::DisableStateObjects(EGameState)
-{
 }
 
 int CObjectManager::CreateObject(lua_State* pL)
@@ -87,21 +60,17 @@ CObject* CObjectManager::CreateObject(string szName,
 		GetInstance()->BindObjects(pcFramesParent, pObj);
 	}
 	
-	// Add Obg to List
+	// Add Obj to List
 	GetInstance()->m_cObjects.push_back(pObj);
 	
 	// Return the Obj
 	return pObj;
 }
 
-int CObjectManager::DestroyObject(lua_State*)
-{
-	// Not currently used, in here for future reference
-	return 0;
-}
-
 void CObjectManager::DestroyObject(CObject* pObj)
 {
+	// Send an event to notify all component managers to destroy the components
+	// associated with this object
 	SendObjectEvent("DestroyObject", (IComponent*)GetInstance(), pObj, PRIORITY_IMMEDIATE);
 	GetInstance()->m_cObjects.remove(pObj);
 	MMDEL(pObj);
@@ -126,11 +95,13 @@ void CObjectManager::BindObjects(CObject* pParent, CObject* pChild)
 
 int CObjectManager::GetObjectByName(lua_State* pLua)
 {
+	// Get the name from Lua
 	string szObjName = lua_tostring(pLua, -1);
 	lua_pop(pLua, 1);
 
 	CObject* pObj = GetInstance()->GetObjectByName(szObjName);
 
+	// Pass the object pointer back to Lua
 	lua_pushlightuserdata(pLua, (void*)pObj);
 
 	return 1;
@@ -138,6 +109,7 @@ int CObjectManager::GetObjectByName(lua_State* pLua)
 
 CObject* CObjectManager::GetObjectByName(string szName)
 {
+	// use the passed in name to find the object with the same name
 	list<CObject*, CAllocator<CObject*>>::iterator pIter;
 	pIter = m_cObjects.begin();
 	unsigned int nNameID = CIDGen::GetInstance()->GetID(szName);
@@ -148,5 +120,7 @@ CObject* CObjectManager::GetObjectByName(string szName)
 
 		++pIter;
 	}
+
+	// Didn't find object with specified name
 	return NULL;
 }

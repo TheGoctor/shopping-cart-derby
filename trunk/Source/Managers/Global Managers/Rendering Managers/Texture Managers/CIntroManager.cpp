@@ -5,19 +5,22 @@
 //
 //  Date Created	:	05/18/11
 //
-//	Last Changed	:	05/18/11
+//	Last Changed	:	07/24/11
 //
-//	Changed By		:				
+//	Changed By		:	HN			
 //
 //  Purpose			:	Wrapper class for manageing Intro screen
 ////////////////////////////////////////////////////////////////////////////////
 #include "CIntroManager.h"
 #include "..\\..\\Object Manager\\CObjectManager.h"
-#include "..\\..\\Object Manager\\CObjectManager.h"
 #include "..\\..\\Event Manager\\CEventManager.h"
 #include "..\\..\\Event Manager\\EventStructs.h"
 #include "..\\..\\..\\..\\Enums.h"
 #include "..\\..\\Sound Manager\CWwiseSoundManager.h"
+#include"..\\..\\Unlockable Manager\\CUnlockableManager.h"
+#include "CTextureManager.h"
+
+using namespace EventStructs;
 
 CIntroManager::CIntroManager() : m_pFalconSplash(NULL), m_pGPSplash(NULL),
 m_pTM(NULL), m_pShatteredSplash(NULL), m_pWwiseSplash(NULL),
@@ -31,11 +34,7 @@ CIntroManager::~CIntroManager(void)
 {
 }
 
-CIntroManager& CIntroManager::operator=(const CIntroManager&)
-{
-	return *this;
-}
-
+//Loads all the assets for all the splash screens
 void CIntroManager::InitIntro(void)
 {
 	nTexID1 = m_pTM->LoadTexture("Resource\\Splash Screens\\GPGlogo.png");
@@ -46,8 +45,9 @@ void CIntroManager::InitIntro(void)
 	nTexID6 = m_pTM->LoadTexture("Resource\\HUD\\T_Press_Start_D.png");
 
 	m_pIntroObj = m_pOM->CreateObject("IntroSplash");
-
-	// Get Inital Sprite Data
+	////////////////////////////////////////////////////////////////////////////
+	// Get Inital Sprite Data  for GP games splash screen
+	////////////////////////////////////////////////////////////////////////////
 	TSpriteData tSpriteData;
 
 	tSpriteData.m_nTexture = nTexID1;
@@ -68,6 +68,9 @@ void CIntroManager::InitIntro(void)
 	m_pGPSplash = m_pTM->CreateSpriteComp(m_pIntroObj, tSpriteData, 
 		true);
 
+	////////////////////////////////////////////////////////////////////////////
+	// Get Inital Sprite Data  for Shattered Studios splash screen
+	////////////////////////////////////////////////////////////////////////////
 	tSpriteData.m_nTexture = nTexID2;
 	tSpriteData.m_nX = 0;
 	tSpriteData.m_nY = -100;
@@ -85,7 +88,9 @@ void CIntroManager::InitIntro(void)
 
 	m_pShatteredSplash = m_pTM->CreateSpriteComp(m_pIntroObj, tSpriteData, 
 		false);
-
+	////////////////////////////////////////////////////////////////////////////
+	// Get Inital Sprite Data  for Wwise splash screen
+	////////////////////////////////////////////////////////////////////////////
 	tSpriteData.m_nTexture = nTexID3;
 	tSpriteData.m_nX = 0;
 	tSpriteData.m_nY = -100;
@@ -103,7 +108,9 @@ void CIntroManager::InitIntro(void)
 
 	m_pWwiseSplash = m_pTM->CreateSpriteComp(m_pIntroObj, tSpriteData, 
 		false);
-
+	////////////////////////////////////////////////////////////////////////////
+	// Get Inital Sprite Data  for Falcon Fish splash screen
+	////////////////////////////////////////////////////////////////////////////
 	tSpriteData.m_nTexture = nTexID4;
 	tSpriteData.m_nX = 275;
 	tSpriteData.m_nY = 125;
@@ -121,7 +128,9 @@ void CIntroManager::InitIntro(void)
 
 	m_pFalconSplash = m_pTM->CreateSpriteComp(m_pIntroObj, tSpriteData, 
 		false);
-
+	////////////////////////////////////////////////////////////////////////////
+	// Get Inital Sprite Data  for Title screen
+	////////////////////////////////////////////////////////////////////////////
 	tSpriteData.m_nTexture = nTexID5;
 	tSpriteData.m_nX = 0;
 	tSpriteData.m_nY = 0;
@@ -190,7 +199,8 @@ void CIntroManager::Update(void)
 	if (m_dt > 0.1f)
 	{
 		////////////////////////////////////////////////////////////////////////
-		//GP studios splash screen
+		// Fade in and out for GP studios splash screen
+		////////////////////////////////////////////////////////////////////////
 		if (m_pGPSplash->IsActive())
 		{
 			if (m_fSeconds < 1)
@@ -226,7 +236,8 @@ void CIntroManager::Update(void)
 
 		}
 		////////////////////////////////////////////////////////////////////////
-		//Shattered Studios Screen
+		//Fade in and out for Shattered Studios Screen
+		////////////////////////////////////////////////////////////////////////
 		if (m_pShatteredSplash->IsActive())
 		{
 			if (m_fSeconds < 1)
@@ -262,7 +273,8 @@ void CIntroManager::Update(void)
 
 		}
 		////////////////////////////////////////////////////////////////////////
-		//Wwise Splash Screen
+		//Fade in and out for Wwise Splash Screen
+		////////////////////////////////////////////////////////////////////////
 		if (m_pWwiseSplash->IsActive())
 		{
 			if (m_fSeconds < 1)
@@ -298,7 +310,8 @@ void CIntroManager::Update(void)
 
 		}
 		////////////////////////////////////////////////////////////////////////
-		//Falcon Fish Splash Screen
+		//Fade in and out for Falcon Fish Splash Screen
+		////////////////////////////////////////////////////////////////////////
 		if (m_pFalconSplash->IsActive())
 		{
 			if (m_fSeconds < 1)
@@ -336,7 +349,8 @@ void CIntroManager::Update(void)
 			}
 		}
 		////////////////////////////////////////////////////////////////////////
-		//Title Screen
+		//Fade in and out for Title Screen
+		////////////////////////////////////////////////////////////////////////
 		if (m_pTitleScreen->IsActive())
 		{
 			if (m_fSeconds < 1)
@@ -421,6 +435,9 @@ void CIntroManager::UpdateCallback(IEvent* pEvent, IComponent* /*pComp*/)
 	GetInstance()->Update();
 
 }
+////////////////////////////////////////////////////////////////////////
+//Unload all the textures
+////////////////////////////////////////////////////////////////////////
 void CIntroManager::Shutdown(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 {
 	CIntroManager* pIM = CIntroManager::GetInstance();
@@ -439,8 +456,13 @@ void CIntroManager::Shutdown(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 	pIM->m_pTM->UnloadTexture(pIM->nTexID5);
 	pIM->m_pTM->UnloadTexture(pIM->nTexID6);
 }
+////////////////////////////////////////////////////////////////////////
+//Makes sure you enter the Main menu correctly
+////////////////////////////////////////////////////////////////////////
 void CIntroManager::EnterMenu(IEvent* /*pEvent*/, IComponent* /*pComp*/)
 {
+	CUnlockableManager::GetInstance()->SetIntroSkip(true);
+	CUnlockableManager::GetInstance()->UpdateFile();
 	GetInstance()->m_bEnterMenu = true;	
 }
 void CIntroManager::PlayMusic(void)
@@ -449,7 +471,6 @@ void CIntroManager::PlayMusic(void)
 }
 void CIntroManager::ChangeToMainMenu()
 {
-	CWwiseSoundManager::GetInstance()->PlayMusic(MENU_MUSIC_STOP, GLOBAL_ID);
 	CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_OPTION_CHANGE, GLOBAL_ID);
 	SendStateEvent("StateChange", (IComponent*)GetInstance(),
 		MAIN_MENU_STATE, PRIORITY_IMMEDIATE);

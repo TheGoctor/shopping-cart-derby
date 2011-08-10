@@ -1,3 +1,16 @@
+////////////////////////////////////////////////////////////////////////////////
+//  File			:	"CCreditManager.h"
+//
+//  Author			:	Huy Nguyen (HN)
+//
+//  Date Created	:	05/18/11
+//
+//	Last Changed	:	07/24/11
+//
+//	Changed By		:	HN			
+//
+//  Purpose			:	Wrapper class for managing the credit screen
+////////////////////////////////////////////////////////////////////////////////
 #ifndef _CCREDITMANAGER_H_
 #define _CCREDITMANAGER_H_
 
@@ -32,27 +45,25 @@ class CBitmapFontComp;
 class CCreditManager
 {
 private: 
-	CTextureManager*		m_pTM;
-	CObjectManager*		m_pOM;
-	CSpriteComponent*	m_pBMFont;
-	CBitmapFontComp*	m_pCredits;
+	CTextureManager*			m_pTM;
+	CObjectManager*				m_pOM;
+	CSpriteComponent*			m_pBMFont;
+	CBitmapFontComp*			m_pCredits;
 	float						m_fSeconds;
 	float						m_fDT;
 	CObject*					m_pCreditObj;
 	CObject*					m_pCreditObj2;
 	float						fX, fY;
 	string						m_szCredits;
-	CButtonComponent*	pButton;
-	CScrollerComponent*	pScroller; 
-	CButtonComponent*	pButton2;
-	CScrollerComponent*	pScroller2; 
-
-
-
-
-
-
-
+	//credit start
+	CButtonComponent*			pButton;
+	CScrollerComponent*			pScroller; 
+	//credit middle
+	CButtonComponent*			pButton2;
+	CScrollerComponent*			pScroller2;
+	//credit end
+	CButtonComponent*			pButton3;
+	CScrollerComponent*			pScroller3;
 
 	CCreditManager(void);
 	~CCreditManager(void);

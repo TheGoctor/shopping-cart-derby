@@ -7,6 +7,10 @@
 //
 //  Date Created	:	4/02/2011
 //
+//	Last Changed	:	07/24/11
+//
+//	Changed By		:	HN			
+//
 //  Purpose			:	Handles the Rendering of Bitmap Fonts
 //
 ////////////////////////////////////////////////////////
@@ -34,7 +38,7 @@ CBitmapFont::CBitmapFont(int nImageID, int nRectWidth, int nCharHeight,
 CBitmapFont::~CBitmapFont(void)
 {
 }
-
+//Draws the string to the screen at the positions pasted in
 void CBitmapFont::DrawString(const char* szString, int nPosX, int nPosY, 
 							 float fScale, DWORD dwColor)
 {
@@ -66,7 +70,7 @@ void CBitmapFont::DrawString(const char* szString, int nPosX, int nPosY,
 		nPosX += (int)(m_nCharWidth[nID] * fScale);
 	}
 }
-
+//Load in the the Bitmap font
 void CBitmapFont::LoadFont(const char *szFilename, const char* szFileWidths)
 {
 	// set the image id of this bitmap font
@@ -110,7 +114,7 @@ void CBitmapFont::LoadFont(const char *szFilename, const char* szFileWidths)
 		}
 	}
 }
-
+//Unload the Bitmap font
 void CBitmapFont::UnLoadFont()
 {
 	m_pTM->UnloadTexture(GetImageID());

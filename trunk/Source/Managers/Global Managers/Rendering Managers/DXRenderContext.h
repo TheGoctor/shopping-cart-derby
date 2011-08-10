@@ -13,15 +13,71 @@
 
 // Includes
 #include <string>
+#include <set>
 #include <list>
 using namespace std;
 #include "RenderNode.h"
+#include "DXRenderShape.h"
 #include "Direct3DManager.h"
 #include "..\Memory Manager\CRenderAllocator.h"
+#include "..\Camera Manager\CCameraManager.h"
+
+struct RenNodeCmp
+{
+	bool operator()(const RenderNode* lhs, const RenderNode* rhs)
+	{
+		// Get Camera Pos
+		D3DXMATRIX camMap = CCameraManager::GetInstance()->GetCam()->GetViewMatrix(); 
+		D3DXVECTOR3 vCamZVec  = D3DXVECTOR3(camMap._31, camMap._32, camMap._33);
+		D3DXVECTOR3 vCamVec	  = D3DXVECTOR3(camMap._41, camMap._42, camMap._43);
+
+		DXRenderShape* pLHSShape = (DXRenderShape*)lhs;
+		DXRenderShape* pRHSShape = (DXRenderShape*)rhs;
+
+		D3DXVECTOR3 vLHS = pLHSShape->GetFrame()->GetWorldPosition() - vCamVec;
+		D3DXVECTOR3 vRHS = pRHSShape->GetFrame()->GetWorldPosition() - vCamVec;
+
+		// Mags
+		//D3DXVec2LengthSq(&vLHS);
+
+		float fLHS = D3DXVec3LengthSq(&vLHS); //D3DXVec3Dot(&vLHS, &vLHS);
+		float fRHS = D3DXVec3LengthSq(&vRHS); //D3DXVec3Dot(&vRHS, &vLHS);
+		if(fLHS == fRHS)
+		{
+			return lhs < rhs;
+		}
+		return fLHS > fRHS;
+	}
+};
+
+//struct RenNodeCmp
+//{
+//	bool operator()(const RenderNode* lhs, const RenderNode* rhs)
+//	{
+//		// Get Camera Pos
+//		D3DXMATRIX camMap = CCameraManager::GetInstance()->GetCam()->GetViewMatrix(); 
+//		D3DXVECTOR3 vCamVec  = D3DXVECTOR3(camMap._31, camMap._32, camMap._33);
+//		D3DXVECTOR3 vCamZVec = D3DXVECTOR3(camMap._41, camMap._42, camMap._43);
+//
+//		DXRenderShape* pLHSShape = (DXRenderShape*)lhs;
+//		DXRenderShape* pRHSShape = (DXRenderShape*)rhs;
+//
+//		D3DXVECTOR3 vLHS = pLHSShape->GetFrame()->GetWorldPosition() - vCamZVec;
+//		D3DXVECTOR3 vRHS = pRHSShape->GetFrame()->GetWorldPosition() - vCamZVec;
+//
+//		float fLHS = D3DXVec3Dot(&vLHS, &vCamVec);
+//		float fRHS = D3DXVec3Dot(&vRHS, &vCamVec);
+//		if(fLHS == fRHS)
+//		{
+//			return fLHS < fRHS;
+//		}
+//		return fLHS < fRHS;
+//	}
+//};
 
 // Foward Declares
 class RenderShape;
-typedef std::list<RenderNode*, CRenderAllocator<RenderNode*>> RenderSet;
+typedef std::list<RenderNode*, /* RenNodeCmp,*/ CRenderAllocator<RenderNode*>> RenderSet;
 
 // Render Context
 class DXRenderContext : public RenderNode
@@ -64,9 +120,11 @@ public:
 	static void FlatRenderContextFunc(RenderNode &node);
 	static void TexturedRenderContextFunc(RenderNode &node);
 	static void ParticleContextFunc(RenderNode &node);
+	static void ParticleZWriteContextFunc(RenderNode &node);
 	static void ParticleAlphaContextFunc(RenderNode &node);
 	static void LitTexturedRenderContextFunc(RenderNode &node);
 	static void AnimationRenderContextFunc(RenderNode &node);
+	static void AnimationAlphaRenderContextFunc(RenderNode &node);
 	static void TextureChangeContextFunc(RenderNode &node);
 	static void BlueLightContextFunc(RenderNode &node);
 	//static void SkyBoxRenderContextFunc(RenderNode &node);
@@ -76,7 +134,7 @@ public:
 	bool AddTexture( const char *pUniformName, const char *pFileName);//, bool bCubeMap = false );
 	
 	// Render Set Funcs
-	inline void AddRenderNode(RenderNode *pNode) { m_cRenderSet.push_back(pNode); }
+	inline void AddRenderNode(RenderNode *pNode) { m_cRenderSet.push_back(pNode);	  }
 	inline void ClearRenderSet(void)			 { m_cRenderSet.clear();		  }
 
 	// Create Render Set

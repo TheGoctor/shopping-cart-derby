@@ -25,9 +25,6 @@ class CObject;
 
 namespace EventStructs
 {
-	// Global Event Man
-	//CEventManager* g_pEM = CEventManager::GetInstance();
-
 	void SendIEvent(string szEventName, IComponent* pSender, void* pData,
 		EEventPriority ePriority);
 
@@ -223,15 +220,18 @@ namespace EventStructs
 		CObject* m_pcCollider;	//object to rebound
 		CObject* m_pCollidedWith;
 		D3DXVECTOR3 m_vNormal;	
-		TImpactEvent(CObject* pCollider, CObject* pCollidedwith, D3DXVECTOR3 vNorm) : 
-		m_pcCollider(pCollider), m_pCollidedWith(pCollidedwith), m_vNormal(vNorm)
+		D3DXVECTOR3 m_vColPt;
+		TImpactEvent(CObject* pCollider, CObject* pCollidedwith, D3DXVECTOR3 vNorm, D3DXVECTOR3 vColPt) : 
+		m_pcCollider(pCollider), m_pCollidedWith(pCollidedwith), m_vNormal(vNorm), m_vColPt(vColPt)
 		{
 		}
 	};
 	int CreateImpactEvent(lua_State* pLua);
 	void SendImpactEvent(string szEventName, IComponent* pSender,
-		CObject* pCollider, CObject* pCollidedwith, D3DXVECTOR3 vNormal,
-		EEventPriority ePriority = PRIORITY_NORMAL);
+								   CObject* pCollider, CObject* pCollidedwith, 
+								   D3DXVECTOR3 vNormal, 
+								   EEventPriority ePriority = PRIORITY_NORMAL, 
+								   D3DXVECTOR3 vColPt = D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 
 	////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////

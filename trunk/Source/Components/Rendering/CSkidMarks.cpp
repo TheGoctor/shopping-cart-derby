@@ -196,16 +196,6 @@ void CSkidMarks::Init(void)
 		m_pRDustEmitter->GetTransform()->TranslateFrame(D3DXVECTOR3(-0.4f, 1.0f, -1.0f));
 		m_pRDustEffect = pEffMan->CreateDustEffectComponent(m_pRDustEmitter);
 	}
-	else if(m_eCharacterSetType == CS_SCIENTISTS)
-	{
-		szObjName = "SciGlow";
-		szObjName += (char*)m_pParentObj->GetID();
-		m_pGlowEmitter = pOM->CreateObject(szObjName);
-		pOM->BindObjects(m_pParentObj, m_pGlowEmitter);
-		m_pGlowEmitter->GetTransform()->TranslateFrame(D3DXVECTOR3(0.0f, 0.0f, -0.5f));
-		m_pGlowEffect = pEffMan->CreateScientistEffectComponent(m_pGlowEmitter);
-	}
-
 
 	// Register for Events
 	CEventManager* pEM = CEventManager::GetInstance();
@@ -254,11 +244,6 @@ void CSkidMarks::Shutdown(void)
 	{
 		m_pRDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, false);
 		pOM->DestroyObject(m_pRDustEmitter);
-	}
-	if(m_pGlowEffect && m_pGlowEmitter)
-	{
-		m_pGlowEffect->SwitchOnOffEmitters(EC_TYPE_SCIENTIST_GLOW, false);
-		pOM->DestroyObject(m_pGlowEmitter);
 	}
 
 	// Clean Active
@@ -406,11 +391,6 @@ void CSkidMarks::Update(float fDT)
 			m_pRDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, true);//SetLifespan(EC_TYPE_CART_SMOKE, 0.001F * fDT);
 			m_pRDustEffect->SetLifespan(EC_TYPE_CART_SMOKE, 0.001F * fDT);
 		}
-		if(m_pGlowEffect)
-		{
-			m_pGlowEffect->SwitchOnOffEmitters(EC_TYPE_SCIENTIST_GLOW, true);
-			//m_pGlowEffect->SetLifespan(EC_TYPE_SCIENTIST_GLOW, 0.001F * fDT);
-		}
 	}
 
 	// If we are currently droping Skids
@@ -449,17 +429,6 @@ void CSkidMarks::Update(float fDT)
 		// Just stop Drifting
 		m_pCurrentSkidMeshPair->SetFading(true);
 		m_pCurrentSkidMeshPair = NULL;
-
-		//if(m_pLDustEffect)
-		//{
-		//	m_pLDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, true);
-		//	m_pRDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, true);
-		//}
-
-		/*if(m_pGlowEffect)
-		{
-			m_pGlowEffect->SwitchOnOffEmitters(EC_TYPE_SCIENTIST_GLOW, true);
-		}*/
 
 		m_bPrevDrift = false;
 	}
@@ -600,11 +569,6 @@ void CSkidMarks::Drift(TInputEvent* pcObjEvent)
 			m_pLDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, false);
 			m_pRDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, false);
 		}
-
-		if(m_pGlowEffect)
-		{
-			m_pGlowEffect->SwitchOnOffEmitters(EC_TYPE_SCIENTIST_GLOW, false);
-		}
 	}
 }
 
@@ -623,20 +587,7 @@ void CSkidMarks::Accelerate(TInputEvent* pcObjEvent)
 		if(pcObjEvent->m_fAmount > 0.0f)
 		{
 			m_bAccelerating = true;
-
-			//if(m_pLDustEffect)
-			//{
-			//	m_pLDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, false);
-			//	m_pRDustEffect->SwitchOnOffEmitters(EC_TYPE_CART_SMOKE, false);
-			//}
-
-			//if(m_pGlowEffect)
-			//{
-			//	m_pGlowEffect->SwitchOnOffEmitters(EC_TYPE_SCIENTIST_GLOW, false);
-			//}
 		}
-
-		
 	}
 }
 
@@ -656,7 +607,6 @@ void CSkidMarks::DestroyObjectCallback(IEvent* pEvent, IComponent* pComp)
 		//pSMC->m_bActive = false;
 		//pIVFXComp->m_pEffect->SwitchOnOffEmitters(EC_TYPE_CHICKEN_INV, false);
 		pSMC->Shutdown();
-		pSMC->m_pGlowEffect = NULL;
 		pSMC->m_pLDustEffect = NULL;
 		pSMC->m_pRDustEffect = NULL;
 	}

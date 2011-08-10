@@ -1,5 +1,9 @@
 Audio Bus	ID	Name			Wwise Object Path	Notes
+	394800600	DXEndScreen			\Default Work Unit\Master Audio Bus\DXEndScreen	
+	482453236	DXAnnouncer			\Default Work Unit\Master Audio Bus\DXAnnouncer	
+	510201636	Pause			\Default Work Unit\Master Audio Bus\Pause	
 	652183330	Master Audio Bus			\Default Work Unit\Master Audio Bus	
+	801472522	DXAllGoalItems			\Default Work Unit\Master Audio Bus\DXAllGoalItems	
 	808170187	DX			\Default Work Unit\Master Audio Bus\DX	
 	914722684	FX			\Default Work Unit\Master Audio Bus\FX	
 	937925804	MX			\Default Work Unit\Master Audio Bus\MX	

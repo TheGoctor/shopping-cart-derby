@@ -119,10 +119,30 @@ technique Particle
         CullMode = NONE;
         
 		AlphaBlendEnable = true;
-		SrcBlend = 3;
+		SrcBlend = 5;
 		DestBlend = 6;
         
         ZWriteEnable = false;
+        ZEnable = true;
+    }
+}
+
+technique ParticleZWrite
+{
+    pass P0
+    {
+        vertexShader = compile vs_2_0 TransformVS();
+        pixelShader  = compile ps_2_0 AlphaPS();
+      
+		ShadeMode = Flat;
+        FillMode = Solid;
+        CullMode = NONE;
+        
+		AlphaBlendEnable = true;
+		SrcBlend = 5;
+		DestBlend = 6;
+        
+        ZWriteEnable = true;
         ZEnable = true;
     }
 }
@@ -139,7 +159,7 @@ technique AlphaParticle
         CullMode = NONE;
         
 		AlphaBlendEnable = true;
-		SrcBlend = 3;
+		SrcBlend = 5;
 		DestBlend = 6;
         
         ZWriteEnable = false;

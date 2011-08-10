@@ -20,10 +20,9 @@ using std::cout;
 using namespace EventStructs;
 
 // Constructor
-CAnimateComponent::CAnimateComponent(CObject* pParent, DXMesh* pMesh,
-									 Interpolator cInterpolator)
-	: m_pcParent(pParent), m_pMesh(pMesh), m_cInterpolator(cInterpolator),
-	m_pDefaultAnim(NULL), m_bOn(true)
+CAnimateComponent::CAnimateComponent(CObject* pParent, DXMesh* pMesh)
+	: m_pcParent(pParent), m_pMesh(pMesh), m_cInterpolator(), m_cSteerInterp(),
+	m_pDefaultAnim(NULL), m_bOn(true), m_bSlowed(false), m_bSteering(false), m_bPrevSteer(false)
 {
 	// Register for Events
 	CEventManager* pEM = CEventManager::GetInstance();
@@ -64,6 +63,11 @@ CAnimateComponent::CAnimateComponent(CObject* pParent, DXMesh* pMesh,
 	pEM->RegisterEvent(szEventName, this, ActivateCallback);
 }
 
+CAnimateComponent::~CAnimateComponent()
+{
+	MMDEL(m_pMesh);
+}
+
 // Handlers
 void CAnimateComponent::Update(float fDT)
 {
@@ -72,56 +76,50 @@ void CAnimateComponent::Update(float fDT)
 		return;
 
 	// If the Interpolator does not have a Valid Animation set it
-	if(m_cInterpolator.GetAnimation() == NULL)
+	if(m_cInterpolator.GetAnimation() == NULL || (m_bSteering == false && m_bPrevSteer))
 	{
 		int nDefaultID = CIDGen::GetInstance()->GetID("Default");
 		unsigned int nNoID = CIDGen::GetInstance()->GetID("");
 		AnimMap::iterator pAnimIter = m_cAnimationList.find(m_cCurrAnim.first);
+
+		// Animation is not the default animation so we need to see if we are playing
+		// the pre-anim or the loop anim
 		if(pAnimIter != m_cAnimationList.end() && pAnimIter->second.second != nNoID && 
 			m_nCurrAnim == pAnimIter->second.first)
 		{
-			// Animation is not the default animation so we need to see if we are playing
-			// the pre-anim or the loop anim
-
-				// We were playing the pre-anim so switch to loop
-				m_nCurrAnim = pAnimIter->second.second;
-				//cout << "Switching to secondary animation from Update\n";
+			// We were playing the pre-anim so switch to loop
+			m_nCurrAnim = pAnimIter->second.second;
 		}
 		else
 		{
-
-			//if(m_nCurrAnim != 0)
-			//	cout << "Current Animation is " << (char*)m_nCurrAnim << endl;
-			//else
-			//	cout << "No Current Animation\n";
-
-			//cout << "Switching Animation to Default\n";
-
 			// Currently playing the Default Animation
 			pAnimIter = m_cAnimationList.find(nDefaultID);
 			m_nCurrAnim = pAnimIter->second.first;
+		}
 
+		if(m_bSteering == false && m_bPrevSteer && !m_bSlowed)
+		{
+			// Currently playing the Default Animation
+			pAnimIter = m_cAnimationList.find(nDefaultID);
+			m_nCurrAnim = pAnimIter->second.first;
 		}
 
 		CAnimation* pAnim = ModelManager::GetInstance()->GetAnim(m_nCurrAnim);
 		m_cInterpolator.SetAnimation(pAnim);
 	}
 
-	//if(m_nCurrAnim)
-	//	cout << endl << "Current Animation " << (char*)m_nCurrAnim <<endl << endl;
-
 	// Interpolate Between Frame
 	m_cInterpolator.AddTime(fDT);
 	m_cInterpolator.Process();
-
-	//if(m_cInterpolator.GetAnimation() == NULL)
-	//	cout << "Current Animation is now NULL\n";
 
 	// Skin the Mesh
 	SkinMesh();
 
 	// HACK: Add to set
 	SendRenderEvent("AddToSet", this, this->m_pcParent, PRIORITY_UPDATE);
+	m_bPrevSteer = m_bSteering;
+	m_bSteering = false;
+	m_bSlowed = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,17 +148,31 @@ void CAnimateComponent::HandleAnimationSwitchCallback(IEvent* pEvent, IComponent
 
 	// Get the Parent's ID
 	TInputEvent *pIE = (TInputEvent*)pEvent->GetData();
-	//char* pParentName = (char*)pAC->m_pcParent->GetID();
 
 	//// So the correct player plays the right animation
-	//if(pParentName[6] != pIE->m_nPlayer + '0')
-	//	return;
 	if(pAC->m_pcParent != pIE->m_pPlayer && ((char*)pAC->m_pcParent->GetID())[6]
 		!= ((char*)pIE->m_pPlayer->GetID())[6])
 		return;
 
 	// Get Event ID
 	unsigned int uEventID = pEvent->GetEventID();
+
+	unsigned int nSlowed = CIDGen::GetInstance()->GetID("SlowAnim");
+	if(uEventID == nSlowed)
+		pAC->m_bSlowed = true;
+	else if(pAC->m_bSlowed)
+		return;	// Keep Trudging
+
+	// Check to see if it's a steering animation
+	unsigned int nSteerLeft = CIDGen::GetInstance()->GetID("SteerLeftAnim");
+	unsigned int nSteerRight = CIDGen::GetInstance()->GetID("SteerRightAnim");
+	if(uEventID == nSteerLeft || uEventID == nSteerRight)
+	{
+		if(pAC->m_bSlowed)
+			return; // Don't steer if you're slowed
+		else
+			pAC->m_bSteering = true;
+	}
 
 	// Old Code
 	//////////////////////////////////////////////////////////////////////////
@@ -188,39 +200,12 @@ void CAnimateComponent::HandleAnimationSwitchCallback(IEvent* pEvent, IComponent
 			pAC->m_nCurrAnim = pAnimIDs.first;
 			//cout << "Primary Animation is " << (char*)pAC->m_nCurrAnim << endl;
 		}
+
 		// Set the Animation
-		pAnim = ModelManager::GetInstance()->GetInstance()->GetAnim(pAC->m_nCurrAnim);
+		pAnim = ModelManager::GetInstance()->GetAnim(pAC->m_nCurrAnim);
 		pAC->m_cInterpolator.SetAnimation(pAnim);
-		pAC->m_pCurrentAnimation = pAC->m_cInterpolator.GetAnimation();
+		pAC->m_pCurrentAnimation = pAnim;
 	}
-
-	//////////////////////////////////////////////////////////////////////////
-
-	// New Code
-	//////////////////////////////////////////////////////////////////////////
-
-	//	// Switch from pre animation to loop animation when pre animation finishes
-	//	if(NULL == pAC->m_cInterpolator.GetAnimation() &&
-	//		pAC->m_pCurrentAnimation == pPreAnim)
-	//	{
-	//		pAC->m_cInterpolator.SetAnimation(pLoopAnim);
-	//		m_nCurrAnim = pAnimIDs.second;
-	//	}
-	//	else
-	//	{
-	//		m_nCurrAnim = pAnimIDs.first;
-	//	}
-
-	//	// Loop the loop animation
-	//	if(pAC->m_pCurrentAnimation == pLoopAnim)
-	//	{
-	//		pAC->m_cInterpolator.SetAnimation(pLoopAnim);
-	//		m_nCurrAnim = pAnimIDs.second;
-	//	}
-	//	else
-	//	{
-	//		m_nCurrAnim = pAnimIDs.first;
-	//	}
 
 	//////////////////////////////////////////////////////////////////////////
 }
@@ -232,13 +217,14 @@ void CAnimateComponent::SkinMesh(void)
 	TMeshVertexInfo* vertInfo = ModelManager::GetInstance()->GetCloneVerts(m_pMesh->GetName());
 
 	// Get Bones
-	vector<TBindBone>& pBindBones = m_pMesh->GetBones();
+	//vector<TBindBone, CRenderAllocator<TBindBone>>;
+	CDynArray<TBindBone>& pBindBones = m_pMesh->GetBones();
 
 	// Get Frames
 	FrameMap& pCurrFrames = m_cInterpolator.GetCurrentBoneFrames();
 
 	// Get Influences
-	vector<vector<TBoneInfluence>>& pWeights = m_pMesh->GetWeights();
+	InfluCont& pWeights = m_pMesh->GetWeights();
 
 	// Create Verts
 	VERTEX_POS3_NORM3_TEX2 *verts = new VERTEX_POS3_NORM3_TEX2[m_pMesh->GetVertCount()];
@@ -250,9 +236,9 @@ void CAnimateComponent::SkinMesh(void)
 		D3DXVECTOR3 vFinalPos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		D3DXVECTOR3 bindVert = vertInfo->m_vVertices[nVert];
 
-		int nNumIf = pWeights[nVert].size();
-		int nBoneIdx = 0;
-		for(int nInf = 0; nInf < nNumIf; ++nInf)
+		unsigned int nNumIf = pWeights[nVert].size();
+		unsigned int nBoneIdx = 0;
+		for(unsigned int nInf = 0; nInf < nNumIf; ++nInf)
 		{
 			// Inverse Bind Pose at Current Frame
 			nBoneIdx = pWeights[nVert][nInf].m_nBoneIndex;
@@ -308,7 +294,9 @@ void CAnimateComponent::AddAnimation(string szEventName, string szPreAnimationNa
 
 	// Call this to load all the animation for this character as they're created
 	CAnimation* pPreAnim = ModelManager::GetInstance()->GetAnim(szPreAnimationName);
-	/*CAnimation* pLoopAnim =*/ ModelManager::GetInstance()->GetAnim(szLoopAnimationName);
+	CAnimation* pLoopAnim = ModelManager::GetInstance()->GetAnim(szLoopAnimationName);
+	pPreAnim->SetLooping(false);
+	if(pLoopAnim) pLoopAnim->SetLooping(true);
 
 	// Set Default Animation
 	if(szEventName == "Default")
@@ -346,5 +334,3 @@ void CAnimateComponent::PauseUpdateCallback(IEvent*, IComponent* pComp)
 	SendRenderEvent("AddToSet", pAC, pAC->m_pcParent, PRIORITY_UPDATE);
 	
 }
-
-

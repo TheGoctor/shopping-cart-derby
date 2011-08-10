@@ -110,7 +110,7 @@ public:
 	// Component
 	~CVictoryVFXComp(void)
 	{
-		Shutdown();
+		//Shutdown();
 		GetManager()->Remove(this);
 	}
 
