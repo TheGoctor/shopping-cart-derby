@@ -1,0 +1,326 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{268B119C-8AE4-4113-AF72-E3CA899289FB}</ProjectGuid>
+    <RootNamespace>ShoppingCartDerby</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>Lua5.1.4\src;C:\Program Files\Audiokinetic\Wwise\SDK\include;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>AkSoundEngine.lib;AkMusicEngine.lib;AkMemoryMgr.lib;AkStreamMgr.lib;AkVorbisDecoder.lib;AkAudioInputSource.lib;AkDelayFX.lib;AkPeakLimiterFX.lib;AkSoundSeedImpactFX.lib;dxguid.lib;ws2_32.lib;CommunicationCentral.lib;AkMotionGenerator.lib;AkRumble.lib;AkRoomVerbFX.lib;akparametriceqfx.lib;dbghelp.lib;Winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\Audiokinetic\Wwise\SDK\Win32_vc90\Debug\lib;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\Win32_vc90\Debug\lib;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;C:\Program Files\Microsoft DirectX SDK (June 2010)\Lib\x86;C:\Program Files (x86)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>Lua5.1.4\src;C:\Program Files\Audiokinetic\Wwise\SDK\include;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>AkSoundEngine.lib;AkMusicEngine.lib;AkMemoryMgr.lib;AkStreamMgr.lib;AkVorbisDecoder.lib;dxguid.lib;ws2_32.lib;AkAudioInputSource.lib;AkDelayFX.lib;AkPeakLimiterFX.lib;AkSoundSeedImpactFX.lib;AkMotionGenerator.lib;AkRumble.lib;AkRoomVerbFX.lib;akparametriceqfx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\Audiokinetic\Wwise\SDK\Win32_vc90\Release(StaticCRT)\lib;C:\Program Files (x86)\Audiokinetic\Wwise\SDK\Win32_vc90\Release(StaticCRT)\lib;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\CGame.cpp" />
+    <ClCompile Include="Source\WinMain.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Memory Manager\CHeap.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Memory Manager\CMemoryManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Event Manager\CEventManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Event Manager\CIDGen.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Event Manager\EventStructs.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Input Manager\CInputManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\State Manager\CStateManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Object Manager\CObjectManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\CAnimation.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\CBlindSpriteEffect.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\CEffectManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\CJamSpriteEffect.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\CParticleEmitter.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\CStealEffect.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\Direct3DManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\DXMesh.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\DXRenderContext.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\DXRenderContextManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\DXRenderShape.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\DXRenderStatic.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\ModelManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\Renderer.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CBitmapFont.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CCreditManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CIntroManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Sound Manager\CWwiseSoundManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Console Manager\CConsoleManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Camera Manager\Camera.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Camera Manager\CCameraManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Keybind Manager\CKeybindsManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Endgame Manager\CEndgameManager.cpp" />
+    <ClCompile Include="Source\Managers\Global Managers\Unlockable Manager\CUnlockableManager.cpp" />
+    <ClCompile Include="Source\Components\AI\CAIComponent.cpp" />
+    <ClCompile Include="Source\Components\Level\CDepartment.cpp" />
+    <ClCompile Include="Source\Components\Level\CGoalItemComponent.cpp" />
+    <ClCompile Include="Source\Components\Level\CHeldItemComponent.cpp" />
+    <ClCompile Include="Source\Components\Movement\CMovement.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CAnimateComponent.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CAnimatedDonutComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CBlueLightSpecialComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CEffectComponent.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CHUDEffectsComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CInvulnerableVFX.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CJamHitEffectComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CJamUseEffectComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CPeanutButterVFXComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CRenderComponent.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CScrollingUVComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CShadowComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CSkidMarks.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CSlipVFXComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CSpriteComponent.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CVictoryVFXComp.cpp" />
+    <ClCompile Include="Source\Components\Rendering\CWindSpriteEffect.cpp" />
+    <ClCompile Include="Source\Components\Collision\CCollideable.cpp" />
+    <ClCompile Include="Source\Components\StartOfRace\CStartOfRaceComponent.cpp" />
+    <ClCompile Include="Source\Components\Button\CButtonComponent.cpp" />
+    <ClCompile Include="Source\Components\Inventory\CInventoryComponent.cpp" />
+    <ClCompile Include="Source\Components\PickupItem\CPickupItemComponent.cpp" />
+    <ClCompile Include="Source\Components\Slider\CSliderComponent.cpp" />
+    <ClCompile Include="Source\Components\Scroller\CScrollerComponent.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\Turkey\CTurkeyComponent.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\Energy Drink\EnergyDrink.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\Chicken Soup\CChickenSoup.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\Donut\Donut.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\Banana\CBanana.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\Cream Pie\CreamPie.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\Jam\Jam.cpp" />
+    <ClCompile Include="Source\Components\HeldItems\PeanutButter\PeanutButter.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CAIManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CAnimateManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CCollisionManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CHeldItemManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CInventoryManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CLevelManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CMovementManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CPickupItemManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CSpawningManager.cpp" />
+    <ClCompile Include="Source\Managers\Component Managers\CStartOfRaceManager.cpp" />
+    <ClCompile Include="Source\Wwise\includes\AkDefaultIOHookBlocking.cpp" />
+    <ClCompile Include="Source\Wwise\includes\AkDefaultIOHookDeferred.cpp" />
+    <ClCompile Include="Source\Wwise\includes\AkDefaultLowLevelIODispatcher.cpp" />
+    <ClCompile Include="Source\Wwise\includes\AkFileLocationBase.cpp" />
+    <ClCompile Include="Source\Wwise\includes\AkFilePackage.cpp" />
+    <ClCompile Include="Source\Wwise\includes\AkFilePackageLUT.cpp" />
+    <ClCompile Include="Source\Wwise\includes\AlignedPtr.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Enums.h" />
+    <ClInclude Include="Source\CFrame.h" />
+    <ClInclude Include="Source\CGame.h" />
+    <ClInclude Include="Source\CObject.h" />
+    <ClInclude Include="Source\IComponent.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Memory Manager\CAllocator.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Memory Manager\CDynArray.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Memory Manager\CEventAllocator.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Memory Manager\CHeap.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Memory Manager\CMemoryManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Memory Manager\CRenderAllocator.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Event Manager\CEventManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Event Manager\CIDGen.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Event Manager\EventStructs.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Event Manager\IEvent.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Input Manager\CInputManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\State Manager\CStateManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Object Manager\CObjectManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\CAnimation.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\CBlindSpriteEffect.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\CEffectManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\CJamSpriteEffect.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\CParticleEmitter.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\CStealEffect.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\Direct3DManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\DXMesh.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\DXRenderContext.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\DXRenderContextManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\DXRenderShape.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\dxrenderstatic.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\dxutil.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\ModelManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\Renderer.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\RenderNode.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\VertexStructs.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CBitmapFont.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CCreditManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CIntroManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Sound Manager\CWwiseSoundManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Console Manager\CConsoleManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Camera Manager\Camera.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Camera Manager\CCameraManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Keybind Manager\CKeybindsManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Endgame Manager\CEndgameManager.h" />
+    <ClInclude Include="Source\Managers\Global Managers\Unlockable Manager\CUnlockableManager.h" />
+    <ClInclude Include="Source\Components\AI\CAIComponent.h" />
+    <ClInclude Include="Source\Components\Level\CDepartment.h" />
+    <ClInclude Include="Source\Components\Level\CGoalItemComponent.h" />
+    <ClInclude Include="Source\Components\Level\CHeldItemComponent.h" />
+    <ClInclude Include="Source\Components\Movement\CMovement.h" />
+    <ClInclude Include="Source\Components\Rendering\CAnimateComponent.h" />
+    <ClInclude Include="Source\Components\Rendering\CAnimatedDonutComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CBlueLightSpecialComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CEffectComponent.h" />
+    <ClInclude Include="Source\Components\Rendering\CHUDEffectsComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CInvulnerableVFX.h" />
+    <ClInclude Include="Source\Components\Rendering\CJamHitEffectComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CJamUseEffectComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CPeanutButterVFXComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CRenderComponent.h" />
+    <ClInclude Include="Source\Components\Rendering\CScrollingUVComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CShadowComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CSkidMarks.h" />
+    <ClInclude Include="Source\Components\Rendering\CSlipVFXComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CSpriteComponent.h" />
+    <ClInclude Include="Source\Components\Rendering\CVictoryVFXComp.h" />
+    <ClInclude Include="Source\Components\Rendering\CWindSpriteEffect.h" />
+    <ClInclude Include="Source\Components\Collision\CCollideable.h" />
+    <ClInclude Include="Source\Components\StartOfRace\CStartOfRaceComponent.h" />
+    <ClInclude Include="Source\Components\Button\CButtonComponent.h" />
+    <ClInclude Include="Source\Components\Inventory\CInventoryComponent.h" />
+    <ClInclude Include="Source\Components\PickupItem\CPickupItemComponent.h" />
+    <ClInclude Include="Source\Components\Slider\CSliderComponent.h" />
+    <ClInclude Include="Source\Components\Scroller\CScrollerComponent.h" />
+    <ClInclude Include="Source\Components\HeldItems\Turkey\CTurkeyComponent.h" />
+    <ClInclude Include="Source\Components\HeldItems\Energy Drink\EnergyDrink.h" />
+    <ClInclude Include="Source\Components\HeldItems\Chicken Soup\CChickenSoup.h" />
+    <ClInclude Include="Source\Components\HeldItems\Donut\Donut.h" />
+    <ClInclude Include="Source\Components\HeldItems\Banana\CBanana.h" />
+    <ClInclude Include="Source\Components\HeldItems\Cream Pie\CreamPie.h" />
+    <ClInclude Include="Source\Components\HeldItems\Jam\Jam.h" />
+    <ClInclude Include="Source\Components\HeldItems\PeanutButter\PeanutButter.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CAIManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CAnimateManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CCollisionManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CComponentManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CHeldItemManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CInventoryManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CLevelManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CMovementManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CPickupItemManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CSpawningManager.h" />
+    <ClInclude Include="Source\Managers\Component Managers\CStartOfRaceManager.h" />
+    <ClInclude Include="Source\Wwise\includes\AkCommunication.h" />
+    <ClInclude Include="Source\Wwise\includes\akdefaultiohookblocking.h" />
+    <ClInclude Include="Source\Wwise\includes\AkDefaultIOHookDeferred.h" />
+    <ClInclude Include="Source\Wwise\includes\AkDefaultLowLevelIODispatcher.h" />
+    <ClInclude Include="Source\Wwise\includes\AkFileHelpers.h" />
+    <ClInclude Include="Source\Wwise\includes\AkFileLocationBase.h" />
+    <ClInclude Include="Source\Wwise\includes\AkFilePackage.h" />
+    <ClInclude Include="Source\Wwise\includes\AkFilePackageLowLevelIO.h" />
+    <ClInclude Include="Source\Wwise\includes\akfilepackagelowlevelioblocking.h" />
+    <ClInclude Include="Source\Wwise\includes\AkFilePackageLowLevelIODeferred.h" />
+    <ClInclude Include="Source\Wwise\includes\AkFilePackageLUT.h" />
+    <ClInclude Include="Source\Wwise\includes\AkSoundEngineDLL.h" />
+    <ClInclude Include="Source\Wwise\includes\AlignedPtr.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ShoppingCartDerby.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="T_Game_Cursor_D.cur" />
+    <None Include="Resource\Icons\T_Game_Icon_D.ico" />
+    <None Include="Resource\Shaders\basic.fx" />
+    <None Include="Resource\Shaders\Character.fx" />
+    <None Include="Resource\Shaders\MultiTexture.fx" />
+    <None Include="Resource\Shaders\Particle.fx" />
+    <None Include="Resource\Shaders\Shadows.fx" />
+    <None Include="Resource\Shaders\Texture2D.fx" />
+    <None Include="Source\Scripts\luatest.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Lua5.1.4\Lua5.1.4.vcxproj">
+      <Project>{01e8770f-b0ac-4cc9-8709-12a764c4c83d}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
