@@ -1,0 +1,42 @@
+# Find definitions at http://clang.llvm.org/docs/ClangFormatStyleOptions.html.
+# C++ Settings
+
+---
+Language: Cpp
+AlignAfterOpenBracket: AlwaysBreak
+AlignEscapedNewlines: Left
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+AlwaysBreakTemplateDeclarations: 'true'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeInheritanceComma: 'true'
+BreakBeforeTernaryOperators: 'true'
+BreakConstructorInitializers: BeforeComma
+ColumnLimit: '100'
+DerivePointerAlignment: 'false'
+FixNamespaceComments: 'true'
+IncludeCategories:
+    # Local project headers first
+    - Regex:    '^".*"$'
+      Priority: 1
+    # External project headers
+    - Regex:    '^<.*[/\\].*>$'
+      Priority: 2
+    # Try to create a filter for standard C headers
+    - Regex:    '^<c.*>$'
+      Priority: 4
+    # Standard C++ headers
+    - Regex:    '^<.*>$'
+      Priority: 3
+IncludeIsMainRegex: ""
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+Language: Cpp
+MaxEmptyLinesToKeep: '1'
+PointerAlignment: Left
+ReflowComments: 'true'
+SortIncludes: 'true'
+Standard: Cpp20
+UseTab: Never
+
+...
