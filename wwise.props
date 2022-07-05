@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="WwiseVariables">
+    <WwiseSdkLocation>C:\Program Files\Audiokinetic\Wwise\SDK</WwiseSdkLocation>
+    <WwisePreprocessorDefinitions></WwisePreprocessorDefinitions>
+    <WwiseIncludeDirectories>$(WwiseSdkLocation)\include;</WwiseIncludeDirectories>
+    <WwiseResourceDirectories></WwiseResourceDirectories>
+    <WwiseLibraryDirectories Condition="'$(Configuration)'=='Debug'">$(WwiseSdkLocation)\Win32_vc90\Debug\lib;</WwiseLibraryDirectories>
+    <WwiseLibraryDirectories Condition="'$(Configuration)'=='Release'">$(WwiseSdkLocation)\Win32_vc90\Release(StaticCRT)\lib;</WwiseLibraryDirectories>
+    <WwiseLibraryDirectories>$(WwiseSdkLocation)\Win32_vc90\Release(StaticCRT)\lib;</WwiseLibraryDirectories>
+    <WwiseBinaryDirectories></WwiseBinaryDirectories>
+    <WwiseLibraries>AkSoundEngine.lib;AkMusicEngine.lib;AkMemoryMgr.lib;AkStreamMgr.lib;AkVorbisDecoder.lib;AkAudioInputSource.lib;AkDelayFX.lib;AkPeakLimiterFX.lib;AkSoundSeedImpactFX.lib;CommunicationCentral.lib;AkMotionGenerator.lib;AkRumble.lib;AkRoomVerbFX.lib;akparametriceqfx.lib;</WwiseLibraries>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(WwiseIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(WwiseLibraries);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WwiseLibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>
