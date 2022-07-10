@@ -1,7 +1,7 @@
 #include "object_manager.h"
 
 #include "core/object.h"
-#include "events/events.h"
+//#include "events/events.h"
 
 namespace scd {
 
@@ -36,7 +36,7 @@ object* object_manager::create(const std::string& name,
 
   // Set Transform Frame
   if (parent != nullptr) {
-    bind_objects(parent, obj);
+    bind_objects(*parent, *obj);
   }
 
   _objects.emplace_back(obj);
@@ -47,8 +47,7 @@ object* object_manager::create(const std::string& name,
 void object_manager::destroy(object* obj) {
   // Send an event to notify all component managers to destroy the components
   // associated with this object
-  events::object::send(
-    "DestroyObject", (IComponent*)GetInstance(), pObj, PRIORITY_IMMEDIATE);
+  //events::object::send("DestroyObject", obj, PRIORITY_IMMEDIATE);
 
   _objects.remove(obj);
 }
@@ -64,8 +63,8 @@ int object_manager::bind_objects(lua_State* lua) {
   return 0;
 }
 
-void object_manager::bind_objects(object* parent, object* child) {
-  parent->add_child(*child);
+void object_manager::bind_objects(object& parent, object& child) {
+  parent->add_child(child);
 }
 
 int object_manager::by_name(lua_State* lua) {
@@ -73,7 +72,7 @@ int object_manager::by_name(lua_State* lua) {
   std::string name = lua_tostring(lua, -1);
   lua_pop(lua, 1);
 
-  object* obj = by_name(name);
+  std::shared_ptr<object> obj = by_name(name);
 
   // Pass the object pointer back to Lua
   lua_pushlightuserdata(lua, static_cast<void*> obj);
@@ -83,7 +82,7 @@ int object_manager::by_name(lua_State* lua) {
 
 object* object_manager::by_name(const std::string& name) {
   // use the passed in name to find the object with the same name
-  unsigned int name_id = id_gen::get().get_id(name);
+  object::id_t name_id = id_gen::get().get_id(name);
 
   for (const auto& obj : _objects) {
     if (obj->id() == name_id)
