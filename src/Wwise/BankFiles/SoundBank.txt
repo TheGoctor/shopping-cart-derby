@@ -1,0 +1,411 @@
+Event	ID	Name			Wwise Object Path	Notes
+	4359486	Stop_All_ExceptMenu			\Default Work Unit\Stop_All_ExceptMenu	
+	15304226	Stop_SFX_Scientist_Speed			\Default Work Unit\Stop_SFX_Scientist_Speed	
+	21627493	Play_DX_Announcer_CaptainFlakys			\Default Work Unit\Play_DX_Announcer_CaptainFlakys	
+	37185357	Play_SFX_Player_Status_Stun			\Default Work Unit\Play_SFX_Player_Status_Stun	
+	144076093	Play_DX_Scientist_Loss			\Default Work Unit\Play_DX_Scientist_Loss	
+	153953338	Play_SFX_Item_Jam_Use			\Default Work Unit\Play_SFX_Item_Jam_Use	
+	162794052	Play_DX_Announcer_PirateSquid			\Default Work Unit\Play_DX_Announcer_PirateSquid	
+	214446584	Play_DX_GamePlay_StartRaceCountDown			\Default Work Unit\Play_DX_GamePlay_StartRaceCountDown	
+	271749363	Play_DX_Germinal_Victory			\Default Work Unit\Play_DX_Germinal_Victory	
+	419057718	Play_SFX_Item_Doughnut_Aura			\Default Work Unit\Play_SFX_Item_Doughnut_Aura	
+	443251955	Play_DX_Sasha_Lose			\Default Work Unit\Play_DX_Sasha_Lose	
+	452547817	Stop_All			\Default Work Unit\Stop_All	
+	489997781	Play_SFX_Cart_Bike_Start			\Default Work Unit\Play_SFX_Cart_Bike_Start	
+	522619720	Play_SFX_Item_Jam_Hit			\Default Work Unit\Play_SFX_Item_Jam_Hit	
+	531062666	Play_SFX_Player_Status_Blind			\Default Work Unit\Play_SFX_Player_Status_Blind	
+	561626645	Play_DX_Announcer_LeadTaken_Bikers			\Default Work Unit\Play_DX_Announcer_LeadTaken_Bikers	
+	607727799	Play_DX_Fitz_Collection			\Default Work Unit\Play_DX_Fitz_Collection	
+	615957756	Play_SFX_Scientist_Speed			\Default Work Unit\Play_SFX_Scientist_Speed	
+	640624807	Play_DX_Germinal_AllGoalItems			\Default Work Unit\Play_DX_Germinal_AllGoalItems	
+	656860145	Play_SFX_Banana_Use			\Default Work Unit\Play_SFX_Banana_Use	
+	659986852	Play_DX_Announcer_GorillaMilk			\Default Work Unit\Play_DX_Announcer_GorillaMilk	
+	674762364	Play_SFX_Impact_Cart_Wall			\Default Work Unit\Play_SFX_Impact_Cart_Wall	
+	705855416	Play_SFX_Scientist_Drift			\Default Work Unit\Play_SFX_Scientist_Drift	
+	734419379	Play_SFX_WoodCart_Speed			\Default Work Unit\Play_SFX_WoodCart_Speed	
+	786567787	Play_DX_Dave_Loss			\Default Work Unit\Play_DX_Dave_Loss	
+	788432253	Play_SFX_Menu_OptionChange			\Default Work Unit\Play_SFX_Menu_OptionChange	
+	837004335	Play_SFX_Item_Turkey_Travel			\Default Work Unit\Play_SFX_Item_Turkey_Travel	
+	1009633674	Play_DX_Scientist_Victory			\Default Work Unit\Play_DX_Scientist_Victory	
+	1012471866	Play_DX_Germinal_Loss			\Default Work Unit\Play_DX_Germinal_Loss	
+	1019617330	Play_DX_Girl_AllGoal			\Default Work Unit\Play_DX_Girl_AllGoal	
+	1022453873	Play_MX_Menu			\Default Work Unit\Play_MX_Menu	
+	1056005650	Play_DX_Sasha_ItemUse			\Default Work Unit\Play_DX_Sasha_ItemUse	
+	1093370160	Play_DX_Sasha_AllGoalItems			\Default Work Unit\Play_DX_Sasha_AllGoalItems	
+	1193296238	Play_SFX_Item_GoalItem_Drop			\Default Work Unit\Play_SFX_Item_GoalItem_Drop	
+	1203945548	Play_DX_Fitz_Hurt			\Default Work Unit\Play_DX_Fitz_Hurt	
+	1222678624	Play_SFX_Item_Turkey_Use			\Default Work Unit\Play_SFX_Item_Turkey_Use	
+	1272336075	Play_SFX_Characters_BulldogMa_Cart_Brake			\Default Work Unit\Play_SFX_Characters_BulldogMa_Cart_Brake	
+	1272724714	Play_DX_Announcer_LeadTaken_Scientists			\Default Work Unit\Play_DX_Announcer_LeadTaken_Scientists	
+	1288948046	Play_SFX_Item_CreamPie_Use			\Default Work Unit\Play_SFX_Item_CreamPie_Use	
+	1300443900	Play_DX_Announcer_BlueBomber			\Default Work Unit\Play_DX_Announcer_BlueBomber	
+	1404408530	Play_DX_Announcer_BirthdayCake			\Default Work Unit\Play_DX_Announcer_BirthdayCake	
+	1446014026	Play_DX_Girl_Collection			\Default Work Unit\Play_DX_Girl_Collection	
+	1597195139	Play_DX_Scientist_Hurt			\Default Work Unit\Play_DX_Scientist_Hurt	
+	1614540647	Play_DX_Announcer_LeadTaken_Banditos			\Default Work Unit\Play_DX_Announcer_LeadTaken_Banditos	
+	1667376673	Stop_SFX_Item_Turkey_Travel			\Default Work Unit\Stop_SFX_Item_Turkey_Travel	
+	1734360170	Play_DX_Sasha_Win			\Default Work Unit\Play_DX_Sasha_Win	
+	1750222301	Play_DX_Girl_Shove			\Default Work Unit\Play_DX_Girl_Shove	
+	1808949856	Stop_SFX_Characters_BulldogMa_Speed			\Default Work Unit\Stop_SFX_Characters_BulldogMa_Speed	
+	1817299394	Play_DX_Bulldog_Loss			\Default Work Unit\Play_DX_Bulldog_Loss	
+	1818073039	Play_DX_Bulldog_AllGoalItems			\Default Work Unit\Play_DX_Bulldog_AllGoalItems	
+	1857457371	Play_DX_Sasha_Hurt			\Default Work Unit\Play_DX_Sasha_Hurt	
+	1909026293	Play_DX_Dave_Shove			\Default Work Unit\Play_DX_Dave_Shove	
+	1940130352	Play_DX_Announcer_LeadTaken_Larpers			\Default Work Unit\Play_DX_Announcer_LeadTaken_Larpers	
+	1980260364	Play_SFX_Sasha_Speed			\Default Work Unit\Play_SFX_Sasha_Speed	
+	2043993842	Play_DX_Dave_Collection			\Default Work Unit\Play_DX_Dave_Collection	
+	2054602668	Play_SFX_Sasha_Brake			\Default Work Unit\Play_SFX_Sasha_Brake	
+	2095117656	Play_SFX_Item_EnergyDrink_Use			\Default Work Unit\Play_SFX_Item_EnergyDrink_Use	
+	2125088011	Play_DX_Fitz_Victory			\Default Work Unit\Play_DX_Fitz_Victory	
+	2127105977	Play_SFX_Cart_Bike_Slip			\Default Work Unit\Play_SFX_Cart_Bike_Slip	
+	2151728965	Play_SFX_Menu_Scroll			\Default Work Unit\Play_SFX_Menu_Scroll	
+	2163963135	Play_SFX_Player_Status_Frozen			\Default Work Unit\Play_SFX_Player_Status_Frozen	
+	2214460854	Play_SFX_Characters_BulldogMa_Hurt			\Default Work Unit\Play_SFX_Characters_BulldogMa_Hurt	
+	2237525028	Play_SFX_Menu_CashRegister			\Default Work Unit\Play_SFX_Menu_CashRegister	
+	2248950394	Play_DX_Announcer_SammytheSandwich			\Default Work Unit\Play_DX_Announcer_SammytheSandwich	
+	2262152452	Play_DX_Germinal_Hurt			\Default Work Unit\Play_DX_Germinal_Hurt	
+	2283042907	Play_DX_Announcer_Welcome			\Default Work Unit\Play_DX_Announcer_Welcome	
+	2347502000	Play_DX_Girl_Victory			\Default Work Unit\Play_DX_Girl_Victory	
+	2474703931	Play_SFX_Item_Turkey_Bounce			\Default Work Unit\Play_SFX_Item_Turkey_Bounce	
+	2522700081	Play_SFX_Characters_BulldogMa_Collection			\Default Work Unit\Play_SFX_Characters_BulldogMa_Collection	
+	2589350695	Play_DX_Germinal_ItemUse			\Default Work Unit\Play_DX_Germinal_ItemUse	
+	2638592923	Stop_MX_Menu			\Default Work Unit\Stop_MX_Menu	
+	2663220750	Play_SFX_Item_ChickenSoup			\Default Work Unit\Play_SFX_Item_ChickenSoup	
+	2671775103	Play_DX_Germinal_Collection			\Default Work Unit\Play_DX_Germinal_Collection	
+	2732421642	Play_DX_Dave_AllGoal			\Default Work Unit\Play_DX_Dave_AllGoal	
+	2799213180	Play_SFX_Scientist_Brake			\Default Work Unit\Play_SFX_Scientist_Brake	
+	2805830564	Play_DX_Sasha_Collection			\Default Work Unit\Play_DX_Sasha_Collection	
+	2806041147	Play_DX_Scientist_Shove			\Default Work Unit\Play_DX_Scientist_Shove	
+	2865586440	Play_SFX_Item_Doughnut_Use			\Default Work Unit\Play_SFX_Item_Doughnut_Use	
+	2983935368	Play_DX_Scientist_AllGoalItems			\Default Work Unit\Play_DX_Scientist_AllGoalItems	
+	2999084434	Stop_SFX_Sasha_Speed			\Default Work Unit\Stop_SFX_Sasha_Speed	
+	3046364910	Play_DX_Announcer_AgentOrange			\Default Work Unit\Play_DX_Announcer_AgentOrange	
+	3067388081	Stop_SFX_WoodCart_Speed			\Default Work Unit\Stop_SFX_WoodCart_Speed	
+	3121019700	Play_SFX_Characters_BulldogMa_Shove			\Default Work Unit\Play_SFX_Characters_BulldogMa_Shove	
+	3144608409	Play_DX_Girl_Hurt			\Default Work Unit\Play_DX_Girl_Hurt	
+	3165009754	Stop_MX_Gameplay			\Default Work Unit\Stop_MX_Gameplay	
+	3176729083	Play_DX_Announcer_LeadTaken_Sasha			\Default Work Unit\Play_DX_Announcer_LeadTaken_Sasha	
+	3261970607	Play_DX_Fitz_ItemUse			\Default Work Unit\Play_DX_Fitz_ItemUse	
+	3266394469	Play_SFX_Characters_BulldogMa_Victory			\Default Work Unit\Play_SFX_Characters_BulldogMa_Victory	
+	3295171945	Play_DX_Fitz_AllGoal			\Default Work Unit\Play_DX_Fitz_AllGoal	
+	3311313428	Play_DX_Dave_ItemUse			\Default Work Unit\Play_DX_Dave_ItemUse	
+	3312685852	Play_SFX_Cart_Bike_Start_Fail			\Default Work Unit\Play_SFX_Cart_Bike_Start_Fail	
+	3347368258	Play_SFX_HUD_Fireworks			\Default Work Unit\Play_SFX_HUD_Fireworks	
+	3351683445	Play_SFX_Player_Status_Slowed_01			\Default Work Unit\Play_SFX_Player_Status_Slowed_01	
+	3409434019	Play_SFX_Item_PeanutButter_Use			\Default Work Unit\Play_SFX_Item_PeanutButter_Use	
+	3429428747	Play_SFX_WoodCart_Brake			\Default Work Unit\Play_SFX_WoodCart_Brake	
+	3493076058	Play_DX_Scientist_ItemUse			\Default Work Unit\Play_DX_Scientist_ItemUse	
+	3519348969	Play_SFX_Item_Turkey_Impact			\Default Work Unit\Play_SFX_Item_Turkey_Impact	
+	3526221634	Play_SFX_Item_Pickup			\Default Work Unit\Play_SFX_Item_Pickup	
+	3654188337	Play_DX_Dave_Hurt			\Default Work Unit\Play_DX_Dave_Hurt	
+	3676295357	Play_SFX_Characters_BulldogMa_ItemUse			\Default Work Unit\Play_SFX_Characters_BulldogMa_ItemUse	
+	3679762312	Resume_All			\Default Work Unit\Resume_All	
+	3759090466	Play_SFX_Menu_Select			\Default Work Unit\Play_SFX_Menu_Select	
+	3764057931	Play_SFX_Item_Boost			\Default Work Unit\Play_SFX_Item_Boost	
+	3780720065	Stop_SFX_Player_Status_Frozen			\Default Work Unit\Stop_SFX_Player_Status_Frozen	
+	3864097025	Pause_All			\Default Work Unit\Pause_All	
+	3933281935	Play_SFX_WoodCart_Drift			\Default Work Unit\Play_SFX_WoodCart_Drift	
+	3943547742	Play_DX_Fitz_Shove			\Default Work Unit\Play_DX_Fitz_Shove	
+	3964241269	Stop_SFX_Item_ChickenSoup_Loop			\Default Work Unit\Stop_SFX_Item_ChickenSoup_Loop	
+	3984204929	Play_SFX_Item_Doughnut_Impact			\Default Work Unit\Play_SFX_Item_Doughnut_Impact	
+	3990934659	Play_DX_Girl_Loss			\Default Work Unit\Play_DX_Girl_Loss	
+	3993419091	Play_DX_Announcer_BearInACan			\Default Work Unit\Play_DX_Announcer_BearInACan	
+	4036433688	Play_DX_Dave_Victory			\Default Work Unit\Play_DX_Dave_Victory	
+	4045827926	Play_DX_Germinal_Shove			\Default Work Unit\Play_DX_Germinal_Shove	
+	4052040880	Stop_SFX_Item_Doughnut_Aura			\Default Work Unit\Stop_SFX_Item_Doughnut_Aura	
+	4056774930	Play_SFX_Characters_BulldogMa_Speed			\Default Work Unit\Play_SFX_Characters_BulldogMa_Speed	
+	4152653343	Play_SFX_Menu_InvalidSelection			\Default Work Unit\Play_SFX_Menu_InvalidSelection	
+	4175615188	Play_SFX_Impact_Cart_Enemy			\Default Work Unit\Play_SFX_Impact_Cart_Enemy	
+	4214635528	Play_SFX_Sasha_Drift			\Default Work Unit\Play_SFX_Sasha_Drift	
+	4251792114	Play_DX_Fitz_Loss			\Default Work Unit\Play_DX_Fitz_Loss	
+	4267831395	Play_DX_Announcer_Carrots			\Default Work Unit\Play_DX_Announcer_Carrots	
+	4273930620	Play_DX_Scientist_Collection			\Default Work Unit\Play_DX_Scientist_Collection	
+
+Game Parameter	ID	Name			Wwise Object Path	Notes
+	640949982	Speed			\Default Work Unit\Speed	
+
+Effect plug-ins	ID	Name	Type				Notes
+	960762675	New_Wwise_Delay	Wwise Delay			
+
+In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
+	1731146	FFP_GamePlay_Impact_CartLayer_07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_07_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Metal\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_07		7788
+	3326018	DX_Granny_BeatGranny_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_BeatGranny_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\DX_Granny_BeatGranny_03		33682
+	7553088	DX_Dave_Hit_06_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_06_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_06_PS		7101
+	8898382	SFX_Cart_Brake_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Brake_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\WoodCart\SFX_WoodCart_Brake\SFX_Cart_Brake_01		8955
+	12283474	DX_Announcer_PirateSquid	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_PirateSquid_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_PirateSquid		18798
+	13770154	FFP_Menu_Elevator_Music	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Menu_Elevator_Music_95287D31.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_Menu\FFP_Menu_Elevator_Music\FFP_Menu_Elevator_Music		664538
+	22097780	FFP_Cart_Bike_Drive	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Drive_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Characters_BulldogMa_Speed\FFP_Cart_Bike_Drive		25091
+	24898906	MX_Gameplay	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\MX_Gameplay_95287D31.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_Gameplay\MX_Gameplay\MX_Gameplay		1521183
+	28835473	DX_Bulldog_GoalItem_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_GoalItem_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\DX_Bulldog_GoalItem_03_PS		40576
+	30566985	Silence	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Silence_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Silence		931
+	33591227	DX_LittleGirl_Grunt_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_Grunt_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Hurt\DX_LittleGirl_Grunt_03		4229
+	36921204	DX_Bulldog_AllGoalItems_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_AllGoalItems_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Bulldog_AllGoalItems\DX_Bulldog_AllGoalItems_03_PS		38366
+	39935100	DX_Sasha_Itemuse_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Itemuse_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_ItemUse\DX_Sasha_Itemuse_04		18428
+	42656699	FFP_GamePlay_Impact_CartLayer_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_04_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_04		10247
+	47372894	DX_Eugene_Loss_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Loss_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Loss\DX_Eugene_Loss_02		52704
+	48266026	DX_Granny_MyBoy_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_MyBoy_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\Thatsmyboy\DX_Granny_MyBoy_02		17636
+	52791380	FFP_GamePlay_Impact_FlavorLayer_07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_07_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_07		9306
+	53088590	DX_Bulldog_Hit_08_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_08_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_08_PS		35375
+	57361006	FFP_GamePlay_Impact_CartLayer_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_05_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Metal\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_05		8556
+	62505095	SFX_Player_Status_Frozen	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Player_Status_Frozen_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Status\SFX_Player_Status_Frozen		25641
+	63517313	SFX_Cart_Bike_Start_Fail	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Start_Fail_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Cart_Bike_Start_Fail		20619
+	69964960	DX_Rico_Shove_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Shove_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Shove\DX_Rico_Shove_01		5078
+	70423440	SFX_Item_Turkey_Travel	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Item_Turkey_Collision_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey\SFX_Item_Turkey_Travel		17524
+	77384567	DX_Announcer_WeCurrently01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_WeCurrently01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\DX_Announcer_SaleOn\DX_Announcer_WeCurrently01		34976
+	77632516	DX_Bulldog_Shove_05_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Shove_05_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Bulldog_Shove_05_PS		8953
+	79343935	DX_Bulldog_Hit_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_03_PS		4927
+	104451412	DX_LittleGirl_YesWhisper_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_YesWhisper_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Collection\DX_LittleGirl_YesWhisper_01		9344
+	107169611	DX_Eugene_Victory_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Victory_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Victory\DX_Eugene_Victory_02		33520
+	121032647	SFX_Item_Doughnut_Aura	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_Doughnut_Aura_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Doughnut\SFX_Item_Doughnut_Aura		4843
+	126039646	SFX_Menu_Scroll	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Main_Menu_Scanner_Beep_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_Scroll		1609
+	128495588	DX_Eugene_Victory_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Victory_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Victory\DX_Eugene_Victory_01		36597
+	129531549	SFX_Item_Turkey_Impact	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Item_Turkey_Bounce_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey\SFX_Item_Turkey_Impact		6840
+	134811766	DX_Steve_Hit_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Steve_Hit_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Steve_Hit_03		3279
+	136006487	DX_Announcer_GorillaMilk	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_GorillaMilk_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_GorillaMilk		18286
+	139966956	SFX_Player_Status_Slowed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_PB_Stuck_Status_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Status\SFX_Player_Status_Slowed		157828
+	142428945	DX_Announcer_SammytheSandwich	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_SammytheSandwich_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_SammytheSandwich		29613
+	146308771	DX_Dave_Hit_08_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_08_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_08_PS		5919
+	150356234	DX_Dave_Shove_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Shove_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Shove\DX_Dave_Shove_02_PS		5114
+	152770422	Explo_Small_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Explo_Small_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Boost\Explo_Small_02		22225
+	153260112	FFP_GamePlay_Impact_CartLayer_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_03		9838
+	158008143	DX_Dave_Hit_09_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_09_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_09_PS		33736
+	158065284	DX_Sasha_AllGoalItems_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_AllGoalItems_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_AllGoalItems\DX_Sasha_AllGoalItems_02		26584
+	161503497	DX_Sasha_Win_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Win_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Win\DX_Sasha_Win_02		33765
+	167185137	FFP_GamePlay_Impact_CartLayer_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_02		13782
+	175993935	DX_Bulldog_GoalItem_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_GoalItem_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\DX_Bulldog_GoalItem_01_PS		25128
+	185184145	FFP_GamePlay_Impact_FlavorLayer_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_06_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_06		6627
+	189334175	DX_Sasha_Hurt_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Hurt_06_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Hurt\DX_Sasha_Hurt_06		25722
+	191666583	SFX_Item_ChickenSoup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_ChickenSoup_Intro_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_ChickenSoup\SFX_Item_ChickenSoup		65409
+	212164153	SFX_Cart_Brake_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Brake_03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\WoodCart\SFX_WoodCart_Brake\SFX_Cart_Brake_03		6518
+	212549853	FFP_GamePlay_Impact_MeatyLayer_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_02		9140
+	220460236	DX_Eugene_Shove_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Shove_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Shove\DX_Eugene_Shove_03		3902
+	223190434	DX_Fitz_NotAgain_01Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_NotAgain_01Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Loss\DX_Fitz_NotAgain_01Processed		19056
+	225947396	DX_Dave_Shove_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Shove_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Shove\DX_Dave_Shove_01_PS		4533
+	231796401	FFP_GamePlay_Impact_FlavorLayer_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_02		5592
+	233553080	DX_Steve_GoalItem_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Steve_GoalItem_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Collection\DX_Steve_GoalItem_01		7357
+	233933952	DX_Fitz_AlmostCapture_04Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_AlmostCapture_04Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Hurt\DX_Fitz_AlmostCapture_04Processed		19951
+	236842048	DX_Dave_ItemUse_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_ItemUse_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_ItemUse\DX_Dave_ItemUse_02_PS		15151
+	237738924	DX_Eugene_Shove_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Shove_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Shove\DX_Eugene_Shove_04		20376
+	243223150	DX_Seymour_Collection_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Collection_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Collection\DX_Seymour_Collection_02		53742
+	249861235	DX_Sasha_Itemuse_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Itemuse_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_ItemUse\DX_Sasha_Itemuse_02		18702
+	250577604	DX_Announcer_CaptainFlakys	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_CaptainFlakys_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_CaptainFlakys		26025
+	251952595	SFX_Cart_Slow	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Slow_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\WoodCart\SFX_WoodCart_Speed\SFX_Cart_Slow		168320
+	266824994	DX_Rico_ItemUse_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_ItemUse_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_ItemUse\DX_Rico_ItemUse_01		31749
+	273267103	SFX_Sasha_Cart_Engine_Acc1	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Sasha_Cart_Engine_Acc1_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Sasha\SFX_Sasha_Speed\SFX_Sasha_Cart_Engine_Acc1		28034
+	275418565	DX_Dave_Hit_07_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_07_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_07_PS		4503
+	276347463	DX_Bulldog_ItemUse_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_ItemUse_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_ItemUse\DX_Bulldog_ItemUse_02_PS		6150
+	281340773	SFX_Cart_Drift_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Drift_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\WoodCart\SFX_WoodCart_Drift\SFX_Cart_Drift_01		17186
+	282493318	DX_Sasha_ItemPickup_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_ItemPickup_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Collection\DX_Sasha_ItemPickup_03		20072
+	288736601	DX_Bulldog_Shove_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Shove_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Bulldog_Shove_03_PS		7028
+	292414615	DX_Fitz_Okay_02Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_Okay_02Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_ItemUse\DX_Fitz_Okay_02Processed		7015
+	295168975	DX_Sasha_Hurt_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Hurt_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Hurt\DX_Sasha_Hurt_02		7509
+	297693094	DX_Eugene_Hurt_07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Hurt_07_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Eugene_Hurt_07		28599
+	299200493	DX_Steve_Hit_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Steve_Hit_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Steve_Hit_02		5105
+	299262557	FFP_GamePlay_Impact_MeatyLayer_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_01		9583
+	299331762	DX_Bulldog_Shove_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Shove_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Bulldog_Shove_01_PS		12183
+	299782389	SFX_Item_GoalItem_Drop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_GoalItem_Drop_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_GoalItem_Drop		4003
+	299946749	DX_Eugene_Shove_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Shove_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Shove\DX_Eugene_Shove_01		10793
+	304432821	DX_Dave_Hit_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_01_PS		10546
+	307658096	StoryTimeVictory	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\StoryTimeVictory_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Victory\StoryTimeVictory		153011
+	315019231	SFX_Banana_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Banana_Use_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Banana\SFX_Banana_Use		3601
+	316296518	DX_Bulldog_Hit_07_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_07_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_07_PS		27008
+	319692829	DX_Granny_BeatGranny_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_BeatGranny_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\DX_Granny_BeatGranny_02		24084
+	323547634	DX_Sasha_ItemPickup_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_ItemPickup_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Collection\DX_Sasha_ItemPickup_02		19371
+	323715861	DX_Rico_Victory_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Victory_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Victory\DX_Rico_Victory_01		25742
+	324061747	DX_Granny_Hold_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_Hold_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Granny_Hold_01		18492
+	326214134	DX_Granny_CutBack_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_CutBack_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\Cutback\DX_Granny_CutBack_01		38713
+	330288857	FFP_GamePlay_Impact_FlavorLayer_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_04_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_04		8306
+	335680466	SFX_Item_Donut_Impact_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_Donut_Impact_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Doughnut\SFX_Item_Doughnut_Impact\SFX_Item_Donut_Impact_02		14942
+	336676011	FFP_GamePlay_Impact_CartLayer_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_06_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_06		8961
+	344667493	SFX_Sasha_Cart_Engine_Acc2	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Sasha_Cart_Engine_Acc2_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Sasha\SFX_Sasha_Speed\SFX_Sasha_Cart_Engine_Acc2		91408
+	349828708	SFX_Menu_CashRegister	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Menu_CashRegister_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_CashRegister		13787
+	350753877	SFX_Cart_Brake_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Brake_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\WoodCart\SFX_WoodCart_Brake\SFX_Cart_Brake_02		6956
+	350882730	SFX_Item_CreamPie_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_CreamPie_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_CreamPie\SFX_Item_CreamPie_Use		7952
+	359719900	SFX_Menu_InvalidSelection	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Menu_InvalidSelection_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_InvalidSelection		2803
+	364888928	DX_Seymour_Hit_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Hit_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Seymour_Hit_04		15850
+	371342235	SFX_Sasha_Cart_Drift_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Sasha_Cart_Drift_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Sasha\SFX_Sasha_Drift\SFX_Sasha_Cart_Drift_02		13627
+	373689692	DX_Granny_Chew_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_Chew_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_ItemUse\DX_Granny_Chew_01		18690
+	375201123	DX_Sasha_Hurt_07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Hurt_07_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Hurt\DX_Sasha_Hurt_07		40102
+	379011416	DX_Bulldog_Victory_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Victory_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\DX_Bulldog_Victory_01_PS		55978
+	379743337	DX_Announcer_Carrots	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Carrots_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_Carrots		17809
+	380813880	FFP_Cart_Bike_Idle	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Idle_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Characters_BulldogMa_Speed\FFP_Cart_Bike_Idle		71190
+	383858227	DX_Bulldog_Loss_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Loss_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Bulldog_Loss\DX_Bulldog_Loss_PS		98962
+	395868470	DX_Bulldog_AllGoalItems_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_AllGoalItems_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Bulldog_AllGoalItems\DX_Bulldog_AllGoalItems_02_PS		38775
+	399819585	DX_Fitz_AlmostCapture_05Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_AlmostCapture_05Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_AllGoal\DX_Fitz_AlmostCapture_05Processed		18586
+	400639631	SFX_Scientist_Cart_Drift_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Scientist_Cart_Drift_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\ScientistCart\SFX_Scientist_Drift\SFX_Scientist_Cart_Drift_01		5874
+	401881317	DX_Dave_GoalItem_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_GoalItem_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Collection\DX_Dave_GoalItem_01_PS		18051
+	402044871	DX_Sasha_Lose_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Lose_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Lose\DX_Sasha_Lose_02		38621
+	402288626	DX_Dave_Hit_04_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_04_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_04_PS		4946
+	406698206	DX_Seymour_Hit_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Hit_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Seymour_Hit_01		8807
+	411163767	SFX_Scientist_Cart_Drift_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Scientist_Cart_Drift_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\ScientistCart\SFX_Scientist_Drift\SFX_Scientist_Cart_Drift_02		8516
+	417274760	SFX_Item_Doughnut_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_Donut_Impact_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Doughnut\SFX_Item_Doughnut_Use		13167
+	417348575	FFP_Cart_Bike_Brake_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Brake_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Characters_BulldogMa_Cart_Brake\FFP_Cart_Bike_Brake_01		12856
+	417846149	SFX_Jam_Status_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Jam_Status_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Jam\SFX_Item_Jam_Hit\SFX_Player_Status_RadarJam\SFX_Jam_Status_01		27589
+	419045458	DX_Bulldog_Hit_09_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_09_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_09_PS		21219
+	419812602	DX_Bulldog_Shove_04_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Shove_04_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Bulldog_Shove_04_PS		8113
+	435253695	DX_LittleGirl_Grunt_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_Grunt_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Hurt\DX_LittleGirl_Grunt_01		5056
+	445178440	Hit_ImpactWood04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Hit_ImpactWood04_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey\SFX_Item_Turkey_Bounce\Hit_ImpactWood04		7903
+	450150487	FFP_GamePlay_Impact_MeatyLayer_10	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_10_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_10		11950
+	456247255	DX_Germinal_GoalIItem_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Germinal_GoalIItem_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Collection\DX_Germinal_GoalIItem_01_PS		16790
+	456922597	DX_Announcer_LeadTaken_Sasha	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Sasha_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\LeadTaken\DX_Announcer_LeadTaken_Sasha		35075
+	461105326	DX_Announcer_Go	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Go_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Start\DX_Announcer_Go		17230
+	467456607	DX_Sasha_Hurt_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Hurt_05_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Hurt\DX_Sasha_Hurt_05		16651
+	472829259	DX_Eugene_Hurt_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Hurt_06_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Eugene_Hurt_06		6743
+	473810762	SFX_Cart_Start_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Start_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Cart__Bike_Start\SFX_Cart_Start_01		20573
+	474961006	DX_Dave_ItemUse_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_ItemUse_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_ItemUse\DX_Dave_ItemUse_03_PS		14026
+	476073614	DX_Sasha_ItemUse_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_ItemUse_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_ItemUse\DX_Sasha_ItemUse_01		19040
+	480464589	Hit_ImpactWood02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Hit_ImpactWood02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey\SFX_Item_Turkey_Bounce\Hit_ImpactWood02		8480
+	484453347	SFX_Menu_Select	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Strat_Screen_Register_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_Select		8284
+	488656354	DX_Rico_Hit_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Hit_05_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Hurt\DX_Rico_Hit_05		6999
+	489703860	SFX_Cart_Start_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Start_03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Cart__Bike_Start\SFX_Cart_Start_03		46828
+	494806478	DX_Dave_GoalItem_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_GoalItem_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Collection\DX_Dave_GoalItem_03_PS		29048
+	500915227	DX_Dave_Victory_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Victory_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Victory\DX_Dave_Victory_01_PS		29806
+	501813729	DX_Bulldog_Hit_05_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_05_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_05_PS		11221
+	508273642	SFX_Scientist_Cart_Brake_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Scientist_Cart_Brake_03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\ScientistCart\SFX_Scientist_Brake\SFX_Scientist_Cart_Brake_03		5739
+	516491503	DX_Fitz_AchievementYes_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_AchievementYes_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Collection\DX_Fitz_AchievementYes_01		11661
+	517454125	DX_Dave_Hit_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_02_PS		24434
+	520454184	DX_Eugene_AllGoalItems_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_AllGoalItems_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_AllGoalItems\DX_Eugene_AllGoalItems_01		27658
+	522141218	DX_Announcer_One	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_One_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Start\DX_Announcer_One		11384
+	524071755	DX_Rico_Hit_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Hit_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Hurt\DX_Rico_Hit_01		19079
+	525275159	DX_Dave_AllGoal_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_AllGoal_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_AllGoal\DX_Dave_AllGoal_01_PS		31893
+	526689647	Firework03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Firework03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework03		29040
+	528587331	DX_Bulldog_GoalItem_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_GoalItem_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\DX_Bulldog_GoalItem_02_PS		25735
+	529610394	SFX_Cart_Bike_Slip	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Slip_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Cart_Bike_Slip		17262
+	533718356	FFP_GamePlay_Impact_MeatyLayer_08	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_08_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_08		16895
+	538832210	DX_LittleGirl_NotAgainWhisper_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_NotAgainWhisper_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Loss\DX_LittleGirl_NotAgainWhisper_01		15628
+	540557975	DX_Granny_Hooligans_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_Hooligans_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Granny_Hooligans_01		22404
+	549232647	SFX_Scientist_Cart_Engine	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Scientist_Cart_Engine_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\ScientistCart\SFX_Scientist_Speed\SFX_Scientist_Cart_Engine		48287
+	552042407	DX_Rico_Hit_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Hit_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Hurt\DX_Rico_Hit_02		26116
+	553561759	DX_Sasha_Hurt_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Hurt_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Hurt\DX_Sasha_Hurt_01		12445
+	566030995	DX_Granny_MyBoy_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_MyBoy_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\Thatsmyboy\DX_Granny_MyBoy_01		19144
+	572971447	DX_Granny_BeatGranny_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_BeatGranny_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\DX_Granny_BeatGranny_01		36154
+	576726700	Firework08	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Fireworks_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework08		45205
+	577739332	Firework07	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Firework07_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework07		25445
+	585118301	DX_Germinal_AllGoalItems_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Germinal_AllGoalItems_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_AllGoalItems\DX_Germinal_AllGoalItems_02_PS		41068
+	587074033	DX_Germinal_Shove_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Germinal_Shove_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Shove\DX_Germinal_Shove_02_PS		14786
+	587081619	DX_Eugene_Hurt_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Hurt_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Eugene_Hurt_01		3934
+	603448249	SFX_Item_ChickenSoup_Loop	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_ChickenSoup_Loop_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_ChickenSoup\SFX_Item_ChickenSoup_Loop		40802
+	609230652	DX_Bulldog_ItemUse_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_ItemUse_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_ItemUse\DX_Bulldog_ItemUse_01_PS		9669
+	612770648	FFP_GamePlay_Impact_MeatyLayer_06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_06_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_06		14410
+	618508762	SFX_Cart_Drift_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Drift_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\WoodCart\SFX_WoodCart_Drift\SFX_Cart_Drift_02		12824
+	619495742	DX_Eugene_Hurt_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Hurt_05_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Eugene_Hurt_05		3990
+	624784791	FFP_Cart_Bike_Brake_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Cart_Bike_Brake_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Characters_BulldogMa_Cart_Brake\FFP_Cart_Bike_Brake_02		13981
+	625352139	DX_Announcer_Two	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Two_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Start\DX_Announcer_Two		12214
+	627727415	DX_Seymour_AllCollected_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_AllCollected_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_AllGoal\DX_Seymour_AllCollected_01		38578
+	640515530	JamShot	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\JamShot_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Jam\SFX_Item_Jam_Use\JamShot		17264
+	640735967	DX_Eugene_Hurt_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Hurt_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Eugene_Hurt_04		6230
+	641675271	DX_Granny_Ouch_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_Ouch_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Granny_Ouch_01		11609
+	646313837	DX_Announcer_LeadTaken_Scientists	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Scientists_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\LeadTaken\DX_Announcer_LeadTaken_Scientists		43962
+	646476963	DX_Announcer_BearInACan	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_BearInACan_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_BearInACan		19855
+	648413042	SFX_Sasha_Brake	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Sasha_Brake_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Sasha\SFX_Sasha_Brake		4430
+	652078962	SFX_Item_Pickup	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_Pickup_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Pickup		7107
+	657510233	SFX_Scientist_Cart_Brake_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Scientist_Cart_Brake_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\ScientistCart\SFX_Scientist_Brake\SFX_Scientist_Cart_Brake_02		5791
+	658573653	FFP_GamePlay_Impact_CartLayer_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_CartLayer_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Metal\FFP_GamePlay_Impact_CartLayer_01		7620
+	658789038	DX_Dave_Loss_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Loss_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Loss\DX_Dave_Loss_PS		53772
+	658865036	Firework04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Firework04_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework04		24857
+	659969926	DX_Granny_Chew_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_Chew_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_ItemUse\DX_Granny_Chew_02		18704
+	661830015	DX_Eugene_Collection_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Collection_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Collection\DX_Eugene_Collection_01		17481
+	666909903	DX_Sasha_Pickup_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_GoalItem_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Collection\DX_Sasha_Pickup_03		21891
+	668056382	SFX_Item_EnergyDrink_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_EnergyDrink_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Boost\SFX_Item_EnergyDrink_Use		8098
+	668523533	DX_Announcer_AgentOrange	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_AgentOrange_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_AgentOrange		25828
+	675084121	SFX_Scientist_Cart_Brake_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Scientist_Cart_Brake_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\ScientistCart\SFX_Scientist_Brake\SFX_Scientist_Cart_Brake_01		5991
+	680217851	DX_Eugene_Collection_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Collection_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Collection\DX_Eugene_Collection_03		17295
+	682621982	DX_Announcer_BirthdayCake	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_BirthdayCake_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_BirthdayCake		18471
+	686209623	DX_LittleGirl_YesWhisper_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_YesWhisper_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Collection\DX_LittleGirl_YesWhisper_03		10112
+	688332856	DX_Sasha_AllGoalItems_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_AllGoalItems_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_AllGoalItems\DX_Sasha_AllGoalItems_03		22845
+	688673339	Firework05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Firework05_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework05		30458
+	689985384	FFP_GamePlay_Impact_FlavorLayer_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_01		8480
+	690202749	DX_Eugene_Hurt_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Hurt_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Eugene_Hurt_03		4852
+	693775423	DX_Germinal_ItemUse_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Germinal_ItemUse_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_ItemUse\DX_Germinal_ItemUse_01_PS		12715
+	696745147	SFX_Item_Jam	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_Jam_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Jam\SFX_Item_Jam_Hit\SFX_Item_Jam		30949
+	696873345	DX_Announcer_Three	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Three_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Start\DX_Announcer_Three		12212
+	705643203	DX_Sasha_Win_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Win_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Win\DX_Sasha_Win_01		24412
+	707150595	DX_Germinal_Victory_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Germinal_Victory_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Victory\DX_Germinal_Victory_PS		47981
+	712160487	DX_Bulldog_AllGoalItems_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_AllGoalItems_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Bulldog_AllGoalItems\DX_Bulldog_AllGoalItems_PS		38029
+	714916085	DX_Fitz_Sigh_01Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_Sigh_01Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Hurt\DX_Fitz_Sigh_01Processed		11206
+	718049334	SFX_Player_Status_Blind	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Player_Status_Blind_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Status\SFX_Player_Status_Blind		48871
+	724294092	DX_Bulldog_Shove_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Shove_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Bulldog_Shove_02_PS		9728
+	727615517	DX_Eugene_Hurt_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Hurt_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Eugene_Hurt_02		5285
+	729565081	FFP_GamePlay_Impact_MeatyLayer_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_MeatyLayer_05_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Enemy\SFX_Impact_Cart_Smash\FFP_GamePlay_Impact_MeatyLayer_05		15817
+	730869819	DX_Sasha_Lose_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Lose_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Lose\DX_Sasha_Lose_01		34423
+	746693539	DX_LittleGirl_AahWhisper_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_AahWhisper_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Hurt\DX_LittleGirl_AahWhisper_01		7653
+	748632124	DX_Fitz_AchievementYay_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_AchievementYay_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Collection\DX_Fitz_AchievementYay_02		13116
+	753007139	MX_GameStart	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\MX_GameStart_95287D31.ogg		\Interactive Music Hierarchy\Default Work Unit\MX_Gameplay\MX_GameStart\MX_GameStart		45062
+	756886430	DX_Granny_BeatGranny_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_BeatGranny_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Victory\DX_Granny_BeatGranny_04		25625
+	760235483	DX_Bulldog_Shove_06_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Shove_06_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Bulldog_Shove_06_PS		14639
+	771627256	DX_Eugene_AllGoalItems_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_AllGoalItems_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_AllGoalItems\DX_Eugene_AllGoalItems_02		26744
+	774692991	DX_Eugene_Collection_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Collection_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Collection\DX_Eugene_Collection_02		17866
+	777882250	DX_Bulldog_Hit_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_02_PS		9922
+	778556009	DX_Sasha_Hurt_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Hurt_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Hurt\DX_Sasha_Hurt_03		6109
+	788550780	DX_Sasha_Pickup_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_GoalItem_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Collection\DX_Sasha_Pickup_02		18018
+	796664071	DX_Granny_GoodWork_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_GoodWork_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\DX_Granny_GoodWork_01		20672
+	797899453	DX_Granny_CutBack_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_CutBack_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\Cutback\DX_Granny_CutBack_02		40982
+	798384816	DX_Dave_Shove_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Shove_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Shove\DX_Dave_Shove_03_PS		6594
+	809014455	DX_Fitz_AchievementYay_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_AchievementYay_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Collection\DX_Fitz_AchievementYay_01		15612
+	814571061	DX_LittleGirl_Grunt_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_Grunt_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Shove\DX_LittleGirl_Grunt_02		9486
+	820480844	DX_Seymour_Shove_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Shove_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Shove\DX_Seymour_Shove_02		83170
+	831199662	DX_Rico_AllCollected_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_AllCollected_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_AllGoalItems\DX_Rico_AllCollected_01		24077
+	834543699	DX_Dave_Victory_02_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Victory_02_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Victory\DX_Dave_Victory_02_PS		37268
+	834818856	DX_LittleGirl_Yay_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_Yay_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_AllGoal\DX_LittleGirl_Yay_01		7647
+	836628506	SFX_Item_PeanutButter_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Item_PeanutButter_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_PeanutButter\SFX_Item_PeanutButter_Use		3763
+	838322404	SFX_Player_Status_RadarJam	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Player_Status_RadarJam_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Jam\SFX_Item_Jam_Hit\SFX_Player_Status_RadarJam\SFX_Player_Status_RadarJam		18313
+	838526649	DX_Rico_Loss_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Loss_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Loss\DX_Rico_Loss_01		33568
+	842117000	DX_Seymour_Collection_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Collection_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Collection\DX_Seymour_Collection_01		21524
+	842339762	DX_Announcer_LeadTaken_Bikers	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Bikers_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\LeadTaken\DX_Announcer_LeadTaken_Bikers		38108
+	849391902	Hit_ImpactWood01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Hit_ImpactWood01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey\SFX_Item_Turkey_Bounce\Hit_ImpactWood01		6298
+	850276247	SFX_Player_Status_Stun	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Player_Status_Stun_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Status\SFX_Player_Status_Stun		25479
+	851841240	DX_Fitz_Okay_01Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_Okay_01Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_ItemUse\DX_Fitz_Okay_01Processed		8295
+	854122148	DX_Steve_Hit_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Steve_Hit_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Hurt\DX_Steve_Hit_01		4318
+	859797848	FFP_GamePlay_Impact_FlavorLayer_09	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_09_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_09		7903
+	860203592	DX_LittleGirl_Grunt_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_Grunt_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Shove\DX_LittleGirl_Grunt_04		5882
+	864979834	Firework06	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Firework06_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework06		22366
+	865195283	DX_Dave_ItemUse_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_ItemUse_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_ItemUse\DX_Dave_ItemUse_01_PS		20963
+	881735852	DX_Eugene_Shove_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_Shove_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_Shove\DX_Eugene_Shove_02		7092
+	884149918	DX_Sasha_Hurt_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Hurt_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Hurt\DX_Sasha_Hurt_04		12157
+	893986733	DX_Fitz_Sigh_02Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_Sigh_02Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Hurt\DX_Fitz_Sigh_02Processed		8595
+	895681471	DX_Announcer_LeadTaken_Larpers	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Larpers_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\LeadTaken\DX_Announcer_LeadTaken_Larpers		39713
+	900796379	DX_Fitz_Huh_01Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_Huh_01Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Hurt\DX_Fitz_Huh_01Processed		5148
+	901648764	DX_Sasha_Itemuse_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_Itemuse_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_ItemUse\DX_Sasha_Itemuse_03		16394
+	903118697	DX_Announcer_BlueBomber	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_BlueBomber_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Items\DX_Announcer_BlueBomber		24790
+	905725411	DX_Fitz_AchievementOkay_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_AchievementOkay_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_ItemUse\DX_Fitz_AchievementOkay_01		15763
+	906930131	Firework02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Firework02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework02		15939
+	906992418	DX_LittleGirl_YesWhisper_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_LittleGirl_YesWhisper_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Girl\DX_Girl_Collection\DX_LittleGirl_YesWhisper_02		8820
+	908147602	DX_Seymour_Hit_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Hit_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Seymour_Hit_02		8053
+	908457899	DX_Seymour_Hit_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Hit_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Seymour_Hit_03		7713
+	910922157	FFP_GamePlay_Impact_FlavorLayer_08	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_08_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_08		9723
+	919105042	SFX_Menu_OptionChange	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Menu_OptionChange_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Menu\SFX_Menu_OptionChange		1420
+	932894675	DX_Eugene_ItemUse_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_ItemUse_02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_ItemUse\DX_Eugene_ItemUse_02		3366
+	937962122	Firework01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Firework01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\HUD\SFX_HUD_Fireworks\Firework01		21739
+	941130912	DX_Announcer_BetterLuckFinal	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_BetterLuckFinal_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\BetterLuck\DX_Announcer_BetterLuckFinal		28422
+	952278110	DX_Granny_Aah_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_Aah_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Granny_Aah_01		9799
+	952770169	DX_Sasha_GoalItem_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_GoalItem_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_Collection\DX_Sasha_GoalItem_02		28830
+	956166249	DX_Bulldog_Hit_04_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_04_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_04_PS		6841
+	964483180	DX_Seymour_Shove_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Seymour_Shove_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Shove\DX_Seymour_Shove_01		19440
+	965233363	DX_Fitz_AlmostCapture_01Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_AlmostCapture_01Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Shove\DX_Fitz_AlmostCapture_01Processed		15348
+	968891318	DX_Eugene_ItemUse_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_ItemUse_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_ItemUse\DX_Eugene_ItemUse_03		12136
+	976033798	DX_Germinal_Shove_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Germinal_Shove_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Shove\DX_Germinal_Shove_01_PS		19454
+	976485895	DX_Rico_Hit_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Hit_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Hurt\DX_Rico_Hit_03		7751
+	980447024	DX_Announcer_WeCurrently02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_WeCurrently02_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\DX_Announcer_SaleOn\DX_Announcer_WeCurrently02		34918
+	991006245	JamShot2	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\JamShot2_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Jam\SFX_Item_Jam_Use\JamShot2		11735
+	992606988	DX_Bulldog_Hit_10_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_10_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_10_PS		19569
+	994508121	SFX_Sasha_Cart_Drift_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Sasha_Cart_Drift_01_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Sasha\SFX_Sasha_Drift\SFX_Sasha_Cart_Drift_01		9183
+	998868135	DX_Dave_Hit_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_03_PS		6045
+	1000083897	DX_Rico_Collection_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Collection_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Collection\DX_Rico_Collection_01		27114
+	1005673385	FFP_GamePlay_Impact_FlavorLayer_05	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_05_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_05		6685
+	1007708080	SFX_Item_Turkey_Use	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_Item_Turkey_Use_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Turkey\SFX_Item_Turkey_Use		9253
+	1012417208	DX_Announcer_LeadTaken_Banditos	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Banditos_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\LeadTaken\DX_Announcer_LeadTaken_Banditos		45533
+	1016707925	FFP_GamePlay_Impact_FlavorLayer_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\FFP_GamePlay_Impact_FlavorLayer_03_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\SFX_Impact_Cart_Wall\SFX_Impact_Cart_Layer\FFP_GamePlay_Impact_FlavorLayer_03		5426
+	1019467368	DX_Sasha_AllGoalItems_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Sasha_AllGoalItems_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Sasha\DX_Sasha_AllGoalItems\DX_Sasha_AllGoalItems_01		24519
+	1019895620	SFX_Cart_Fast	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Fast_95287D31.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\WoodCart\SFX_WoodCart_Speed\SFX_Cart_Fast		215340
+	1030926132	DX_Rico_Hit_04	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Rico_Hit_04_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Germinal_Rico\DX_Germinal_Hurt\DX_Rico_Hit_04		7082
+	1043359881	DX_Bulldog_Hit_01_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_Hit_01_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Hurt\DX_Bulldog_Hit_01_PS		6997
+	1049139523	DX_Fitz_CantTouchThis_01Processed	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Fitz_CantTouchThis_01Processed_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Fitz\DX_Fitz_Victory\DX_Fitz_CantTouchThis_01Processed		60406
+	1051159634	Thunder08	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\Thunder08_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Items\Offensive\SFX_Item_Boost\Thunder08		32083
+	1051388208	DX_Granny_ISee_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_ISee_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Shove\DX_Granny_ISee_01		17150
+	1054760060	DX_Announcer_Welcome	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Announcer_Welcome_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Announcer\Start\DX_Announcer_Welcome		76573
+	1056672601	DX_Bulldog_ItemUse_03_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Bulldog_ItemUse_03_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_ItemUse\DX_Bulldog_ItemUse_03_PS		16660
+	1065635456	DX_Dave_Hit_05_PS	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Dave_Hit_05_PS_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Dave_Seymour\DX_Dave_Hurt\DX_Dave_Hit_05_PS		5727
+	1066489637	SFX_Cart_Start_02	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\SFX_Cart_Start_02_95287D30.ogg		\Actor-Mixer Hierarchy\FX\SFX\Characters\Bike\SFX_Cart__Bike_Start\SFX_Cart_Start_02		17029
+	1068031472	DX_Eugene_ItemUse_01	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Eugene_ItemUse_01_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Scientist_Steve\DX_Scientist_ItemUse\DX_Eugene_ItemUse_01		17305
+	1073168794	DX_Granny_MyBoy_03	D:\_Wwise Projects\Shattered\Falcon Fish\.cache\Windows\SFX\DX_Granny_MyBoy_03_444760E1.ogg		\Actor-Mixer Hierarchy\FX\SFX\DX\Characters\Bulldog_Ma\DX_Characters_BulldogMa_Collection\Thatsmyboy\DX_Granny_MyBoy_03		20738
+
