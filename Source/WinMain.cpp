@@ -13,11 +13,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 #include <windows.h>	//	Needed for Windows Applications.
 #include <dbghelp.h>
-#pragma comment(lib, "dbghelp.lib")
-
-#define VLD_AGGREGATE_DUPLICATES	//	don't show me the same leak 50 times!!
-#define VLD_MAX_DATA_DUMP 0
-#include <vld.h>		//	for Visual Leak Detection
 
 #include <crtdbg.h>
 #include <io.h>
