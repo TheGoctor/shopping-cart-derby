@@ -9,11 +9,13 @@
 
 #pragma once
 
+#include "enums.h"
+
 #include <memory>
 
 namespace scd {
 
-template <class _Ty, int _HeapId = HEAPID_GENERAL>
+template <class _Ty, heap _heap = heap::general>
 class allocator
   : public _Allocator_base<_Ty> {
 public:
@@ -63,21 +65,21 @@ public:
   void deallocate(pointer _Ptr, size_type) {
     // deallocate object at _Ptr, ignore size
     //::operator delete(_Ptr);
-    CMemoryManager::GetInstance()->Deallocate((char*)_Ptr, HEAPID_GENERAL);
+    CMemoryManager::GetInstance()->Deallocate((char*)_Ptr, _heap);
   }
 
   pointer allocate(size_type _Count) {
     // allocate array of _Count elements
     // return (_Allocate(_Count, (pointer)0));
     return (pointer)CMemoryManager::GetInstance()->Allocate(
-      sizeof(_Ty) * _Count, _HeapId, __FILE__, __LINE__);
+      sizeof(_Ty) * _Count, _heap, __FILE__, __LINE__);
   }
 
   pointer allocate(size_type _Count, const void _FARQ*) {
     // allocate array of _Count elements, ignore hint
     // return (allocate(_Count));
     return (pointer)CMemoryManager::GetInstance()->Allocate(
-      sizeof(_Ty) * _Count, _HeapId, __FILE__, __LINE__);
+      sizeof(_Ty) * _Count, _heap, __FILE__, __LINE__);
   }
   //^^
   void construct(pointer _Ptr,

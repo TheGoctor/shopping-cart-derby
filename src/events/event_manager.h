@@ -1,142 +1,52 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	EventManager.h
-//	Date			:	3/29/11
-//	Mod. Date		:	7/26/11
-//	Mod. Initials	:	MR
-//	Author			:	Mac Reichelt
-//	Purpose			:	Handles events sent between components for the entire
-//						game.
-////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file event_manager.h
+ *
+ * @author Mac Reichelt
+ *
+ * @brief Handles events sent between components for the entire game.
+ */
 
-#ifndef _CEVENTMANAGER_H_
-#define _CEVENTMANAGER_H_
+#pragma once
 
 #include <string>
-#include <map>
-#include <set>
-#include <list>
-using namespace std;
 
-#include "../Memory Manager/CEventAllocator.h"
-#include "IEvent.h"
-#include "..\..\..\Enums.h"
+#include "enums.h"
+#include "events/ievent.h"
 
-//class IEvent;
-class IComponent;
-typedef unsigned int EventID;
+namespace scd {
+class event;
+class base_component;
+using event_id = std::uint32_t;
 
-class CEventManager
-{
-	// Struct needed to correctly insert new events into the event set
-	struct cmp
-	{
-		bool operator()(const IEvent* lhs, const IEvent* rhs)
-		{
-			if(lhs->m_nPriority == rhs->m_nPriority)
-			{
-				// If two priorities are the same, sort based on
-				// address
-				return lhs < rhs;
-			}
-			return lhs->m_nPriority < rhs->m_nPriority;
-		}
-	};
-	struct TListener
-	{
-		IComponent* m_pcListener;
-		void (*m_pfCallback)(IEvent*, IComponent*);
-	};
-
-typedef multimap<EventID, TListener*, less<EventID>, 
-CEventAllocator<pair<EventID, TListener*>>> EventMap;
-
-typedef multimap<EventID, TListener*, less<EventID>, 
-CEventAllocator<pair<EventID, TListener*>>>::iterator EventIter;
-
-	EventMap	m_cListeners;
-
-	set<IEvent*, cmp, CEventAllocator<IEvent*> > m_cEventList;
-
-	/////////////////
-	// Constructor //
-	/////////////////
-	CEventManager();
-
-	/////////////////////
-	// Trilogy of Evil //
-	/////////////////////
-	~CEventManager();
-	CEventManager(const CEventManager&);
-	CEventManager& operator=(const CEventManager&);
-
-	// Things needed to properly unregister events
-	struct TUnregister
-	{
-		EventID nEventID;
-		IComponent* pListener;
-	};
-	// Container for events that need to be unregistered
-	list<TUnregister, CEventAllocator<TUnregister>> m_cUnregisterList;
-
-	void UnregisterEvents();
-
-	void ActuallyUnregisterEvent(EventID nEventID, IComponent* pcListener);
-
-	void ActuallyUnregisterEventAll(IComponent* pcListener);
-
-
+class event_manager {
 public:
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	static CEventManager* GetInstance();
+  using event_callback = std::function<void(const event&)>;
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	EventID RegisterEvent(string szEventName, IComponent* pcListener, 
-		void(*pfCallback)(IEvent*, IComponent*)); // callback(Comp* sender, iEvent);
+  event_id register_event(const std::string& event_name,
+                          event_callback callback);
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	void RegisterEvent(EventID nEventID, IComponent* pcListener, 
-		void(*pfCallback)(IEvent*, IComponent*));
+  void register_event(event_id id, event_callback callback);
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	bool AlreadyRegistered(EventID nEventID, IComponent* pcListener);
+  void unregister_event(event_id id, event_callback callback);
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	void UnregisterEvent(EventID nEventID, IComponent* pcListener);
+  void post(std::unique_ptr<event>&& event, event_priority priority);
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	void UnregisterEventAll(IComponent* pcListener);
+  void process();
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	void PostEvent(IEvent* pcEvent, unsigned int nPriority);
+  void clear();
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	void ProcessEvents();
+private:
+  // Struct needed to correctly insert new events into the event set
+  struct cmp {
+    bool operator()(const std::unique_ptr<event>& lhs,
+                    const std::unique_ptr<event>& rhs) {
+      return lhs->_priority > rhs->_priority;
+    }
+  };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	void ClearEvents();
+  scd::multimap<event_id, event_callback, heap::event> _listeners;
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-	void Shutdown();
+  scd::priority_queue<std::unique_ptr<event>, cmp, heap::event> _event_list;
 };
 
-#endif
+} // namespace scd

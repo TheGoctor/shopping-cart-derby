@@ -1,66 +1,51 @@
-// TODO: File Header
-#ifndef _CMOVEMENTMANAGER_H_
-#define _CMOVEMENTMANAGER_H_
+#pragma once
 
-#include <map>
+#include "core/containers.h"
 
-extern "C"
-{
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
+namespace scd {
 
-#include "Global Managers\Memory Manager\scd::allocator.h"
+enum class cart_weight { none, light, medium, heavy };
 
+enum class turn_direction { left = -1, none, right, drift_waiting_for_turn };
 
-enum ECartWeight
-{
-	NOWEIGHT, LWEIGHT, MWEIGHT, HWEIGHT
+class object;
+class event;
+class base_component;
+class movement;
+
+enum class acceleration_behavior {
+  error = -1,
+  accelerate,
+  brake,
+  coast,
+  go_right,
+  go_left,
+  drifting,
+  max
 };
 
-enum ETurnDirection
-{
-	TURNLEFT = -1, NOTURN, TURNRIGHT, DRIFTWAITINGFORTURN
-};
+class movement_manager {
+  scd::map<unsigned int, movement*> _components;
 
-
-class scd::object;
-class IEvent;
-class scd::base_component;
-class CMovement;
-
-enum EAccelerateBehavior
-{
-	ACC_ERR = -1, ACCELERATE, BRAKE, COAST, GORIGHT, GOLEFT, DRIFTING, ACC_MAX
-};
-
-class CMovementManager
-{
-	std::map<unsigned int, CMovement*, less<unsigned int>, 
-		scd::allocator<pair<unsigned int, CMovement*>>> m_cMovements;
-
-	CMovementManager();
-	~CMovementManager() {};
-	CMovementManager(const CMovementManager&) {};
-	CMovementManager& operator=(const CMovementManager&);
+  movement_manager();
+  ~movement_manager(){};
+  movement_manager(const movement_manager&){};
+  movement_manager& operator=(const movement_manager&);
 
 public:
-	static CMovementManager* GetInstance()
-	{
-		static CMovementManager cMovementManager;
-		return &cMovementManager;
-	}
-	static int CreateMovementComponent(lua_State* pLua);
-	static CMovement* CreateMovementComponent(scd::object* pObj);
-	static void Shutdown(IEvent*, scd::base_component*);
+  static movement_manager& get() {
+    static movement_manager _manager;
+    return _manager;
+  }
+  static int create_component(lua_State* pLua);
+  static movement* create_component(object& owner);
+  static void on_shutdown(event*, base_component*);
 
-	static int SetCartWeight(lua_State* pLua);
+  static int set_cart_weight(lua_State* pLua);
 
-	bool PlayerIsInvincible(scd::object* pPlayer);
-	float GetPlayerSpeed(scd::object* pPlayer);
-	CMovement* GetMovementComponent(scd::object* pOwner);
-
+  bool is_player_invincible(object& player);
+  float player_speed(object& player);
+  movement* get_component(object& owner);
 };
 
-#endif //_CMOVEMENTMANAGER_H__H_
+} // namespace scd

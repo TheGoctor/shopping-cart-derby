@@ -1,87 +1,67 @@
-///////////////////////////////////////////////////////////////////////////////
-//  File			:	"CCamera.cpp"
-//
-//  Author			:	Huy Nguyen (HN)
-//
-//	Team			:	Falcon Fish Productions
-//
-//  Date Created	:	04/07/2011
-//
-//	Last Changed	:	07/26/2011
-//
-//  Purpose			:	Camera class that controls the camera movement and view
-///////////////////////////////////////////////////////////////////////////////
-#include "Camera.h"
-#include "..\Object Manager\CObjectManager.h"
-#include "..\..\Component Managers\CCollisionManager.h"
-D3DXVECTOR3 CCamera::s_vWorldUp(0.0f, 1.0f, 0.0f);
+/**
+ * @file camera.cpp
+ *
+ * @author Huy Nguyen
+ *
+ * @brief Camera class that controls the camera movement and view
+ */
 
-CCamera::CCamera(void)
-{	
-	m_pTarget = NULL;
-	m_iQueueSize = 4;
+#include "camera.h"
+#include "core/object_manager.h"
 
-	D3DXMatrixIdentity(&m_mViewMatrix);
-	D3DXMatrixIdentity(&m_mProjectionMatrix);
-	D3DXMatrixIdentity(&m_mViewProjectionMatrix);
+namespace scd {
+scd::vector3 scd::camera::_world_up(0.0f, 1.0f, 0.0f);
+
+camera::camera() {
+  _target_ptr = nullptr;
 }
 
-CCamera::~CCamera(void)
-{
+camera::~camera() {}
+
+scd::transform& camera::view_matrix() const {
+  D3DXMatrixInverse(&_view_matrix, 0, &_view_matrix);
+  _view_matrix._11 *= -1.0f;
+  _view_matrix._12 *= -1.0f;
+  _view_matrix._13 *= -1.0f;
+  _view_matrix._14 *= -1.0f;
+  D3DXMatrixInverse(&_view_matrix, 0, &_view_matrix);
+  return _view_matrix;
 }
 
-scd::transform &CCamera::GetViewMatrix()
-{
-	D3DXMatrixInverse(&m_mViewMatrix, 0, &m_mViewMatrix);
-	m_mViewMatrix._11 *= -1.0f;
-	m_mViewMatrix._12 *= -1.0f;
-	m_mViewMatrix._13 *= -1.0f;
-	m_mViewMatrix._14 *= -1.0f;
-	D3DXMatrixInverse(&m_mViewMatrix, 0, &m_mViewMatrix);
-	return m_mViewMatrix;
+void camera::update(float delta_time) {
+  float time = 0.0f;
+  time += delta_time;
+
+  scd::transform camera_matrix;
+
+  _eye_position = _frame.p;
+
+  _look_at_position = _target_ptr->p;
+
+  physics_manager::get().TestObjAgainstWall(
+    _eye_position, (_look_at_position - _eye_position));
+
+  D3DXMatrixLookAtLH(&cameraMatrix, &m_vEyePos, &m_vLookAtPos, &s_vWorldUp);
+
+  _matrices.push(camera_matrix);
+
+  if (_matrices.size() >= m_iQueueSize) {
+    _view_matrix = _matrices.front();
+    _matrices.pop();
+  }
+
+  D3DXMatrixMultiply(
+    &_view_projection_matrix, &view_matrix(), &projection_matrix());
 }
 
-void CCamera::Update(float fDeltaTime)
-{
-	float fTime = 0.0f;
-	fTime += fDeltaTime;
-
-	scd::transform cameraMatrix;
-
-	m_vEyePos = D3DXVECTOR3(m_frame.GetWorldMatrix()._41, 
-		m_frame.GetWorldMatrix()._42, 
-		m_frame.GetWorldMatrix()._43);
-
-	m_vLookAtPos.x = m_pTarget->GetWorldMatrix()._41;
-	m_vLookAtPos.y = m_pTarget->GetWorldMatrix()._42;
-	m_vLookAtPos.z = m_pTarget->GetWorldMatrix()._43;
-
-	CCollisionManager::GetInstance()->TestObjAgainstWall( m_vEyePos, (m_vLookAtPos-m_vEyePos));
-
-	D3DXMatrixLookAtLH(&cameraMatrix, &m_vEyePos, &m_vLookAtPos, &s_vWorldUp);
-
-	m_Matrices.push(cameraMatrix);
-
-	if (m_Matrices.size() >= m_iQueueSize)
-	{
-		m_mViewMatrix = m_Matrices.front();
-		m_Matrices.pop();
-	}
-
-	D3DXMatrixMultiply(&m_mViewProjectionMatrix, &GetViewMatrix(), 
-		&GetProjectionMatrix());
+void camera::build_perspective(float field_of_view, float aspect_ratio,
+                               float near_z, float far_z) {
+  D3DXMatrixPerspectiveFovLH(
+    &_projection_matrix, field_of_view, aspect_ratio, near_z, far_z);
 }
 
-void CCamera::BuildPerspective(float fFieldOfView, float fAspectRatio, 
-							   float fZNear, float fZFar)
-{
-	D3DXMatrixPerspectiveFovLH(&this->m_mProjectionMatrix, fFieldOfView, 
-		fAspectRatio, fZNear, fZFar);
+const scd::vector3& camera::view_position() {
+  _position = _view_matrix.p;
+  return _position;
 }
-
-const D3DXVECTOR3 &CCamera::GetViewPosition()
-{
-	m_vPostion = D3DXVECTOR3(m_mViewMatrix._41, m_mViewMatrix._42, 
-		m_mViewMatrix._43);
-	return m_vPostion;
-}
+} // namespace scd

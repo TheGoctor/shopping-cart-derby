@@ -1,126 +1,96 @@
-#include "CObjectManager.h"
-#include "..\..\..\CObject.h"
-#include "..\Event Manager\EventStructs.h"
-using namespace EventStructs;
+#include "object_manager.h"
 
-CObjectManager::CObjectManager(void)
-{
+#include "core/object.h"
+#include "events/events.h"
+
+namespace scd {
+
+int object_manager::create(lua_State* lua) {
+  // Get the Obj Name from LUA
+  std::string name = lua_tostring(lua, -5);
+  float position_x = static_cast<float>(lua_tonumber(lua, -4));
+  float position_y = static_cast<float>(lua_tonumber(lua, -3));
+  float position_z = static_cast<float>(lua_tonumber(lua, -2));
+  float heading    = static_cast<float>(lua_tonumber(lua, -1));
+
+  // Take the Data off the LUA Stack
+  lua_pop(lua, 5);
+
+  // Create the Obj
+  object* object = create(name, {position_x, position_y, position_z}, heading);
+
+  // Push the Obj onto the LUA Stack
+  lua_pushlightuserdata(lua, object);
+
+  // 1 Return Value(s)
+  return 1;
 }
 
-CObjectManager::~CObjectManager(void)
-{
-	list<CObject*, scd::allocator<CObject*>>::iterator pIter;
-	pIter = m_cObjects.begin();
-	while(pIter != m_cObjects.end())
-	{
-		// Use ID to make sure the Object wasn't already deleted
-		if((*pIter)->GetID() != 0)
-		{
-			MMDEL(*pIter);
-		}
-		++pIter;
-	}
-	m_cObjects.clear();
+object* object_manager::create(const std::string& name,
+                               const scd::vector3& position, float heading,
+                               object* parent) {
+  std::shared_ptr<object> obj = std::make_shared<object>(name);
+
+  obj->set_local_position(position);
+  obj->rotate(_world_up, heading);
+
+  // Set Transform Frame
+  if (parent != nullptr) {
+    bind_objects(parent, obj);
+  }
+
+  _objects.emplace_back(obj);
+
+  return obj.get();
 }
 
-int CObjectManager::CreateObject(lua_State* pL)
-{
-	// Get the Obj Name from LUA
-	string szName = lua_tostring(pL, -5);
-	float fPosX = (float)lua_tonumber(pL, -4);
-	float fPosY = (float)lua_tonumber(pL, -3);
-	float fPosZ = (float)lua_tonumber(pL, -2);
-	float fRot  = (float)lua_tonumber(pL, -1);
-	
-	// Take the Data off the LUA Stack
-	lua_pop(pL, 5);
+void object_manager::destroy(object* obj) {
+  // Send an event to notify all component managers to destroy the components
+  // associated with this object
+  events::object::send(
+    "DestroyObject", (IComponent*)GetInstance(), pObj, PRIORITY_IMMEDIATE);
 
-	// Create the Obj
-	CObject* pObj = CreateObject(szName, fPosX, fPosY, fPosZ, fRot);
-
-	// Push the Obj onto the LUA Stack
-	lua_pushlightuserdata(pL, pObj);
-
-	// 1 Return Value(s)
-	return 1;
+  _objects.remove(obj);
 }
 
-CObject* CObjectManager::CreateObject(string szName,
-									  float fPosX, float fPosY, float fPosZ, float fRot,
-									  CObject* pcFramesParent)
-{
-	// Create the Object
-	CObject* pObj = MMNEW(CObject(szName));
-	
-	pObj->GetTransform()->TranslateFrame(D3DXVECTOR3(fPosX, fPosY, fPosZ));
-	pObj->GetTransform()->RotateFrame(D3DXVECTOR3(0,1,0), fRot);
-	// Set Transform Frame
-	if(pcFramesParent != NULL)
-	{
-		GetInstance()->BindObjects(pcFramesParent, pObj);
-	}
-	
-	// Add Obj to List
-	GetInstance()->m_cObjects.push_back(pObj);
-	
-	// Return the Obj
-	return pObj;
+int object_manager::bind_objects(lua_State* lua) {
+  object* parent = (object*)lua_topointer(lua, -2);
+  object* child  = (object*)lua_topointer(lua, -1);
+
+  bind_objects(parent, child);
+
+  lua_pop(lua, 2);
+
+  return 0;
 }
 
-void CObjectManager::DestroyObject(CObject* pObj)
-{
-	// Send an event to notify all component managers to destroy the components
-	// associated with this object
-	SendObjectEvent("DestroyObject", (IComponent*)GetInstance(), pObj, PRIORITY_IMMEDIATE);
-	GetInstance()->m_cObjects.remove(pObj);
-	MMDEL(pObj);
-}	
-
-int CObjectManager::BindObjects(lua_State* pL)
-{
-	CObject* pParent = (CObject*)lua_topointer(pL, -2);
-	CObject* pChild = (CObject*)lua_topointer(pL, -1);
-
-	GetInstance()->BindObjects(pParent, pChild);
-
-	lua_pop(pL, 2);
-
-	return 0;
+void object_manager::bind_objects(object* parent, object* child) {
+  parent->add_child(*child);
 }
 
-void CObjectManager::BindObjects(CObject* pParent, CObject* pChild)
-{
-	pParent->GetTransform()->AddChildFrame(pChild->GetTransform());
+int object_manager::by_name(lua_State* lua) {
+  // Get the name from Lua
+  std::string name = lua_tostring(lua, -1);
+  lua_pop(lua, 1);
+
+  object* obj = by_name(name);
+
+  // Pass the object pointer back to Lua
+  lua_pushlightuserdata(lua, static_cast<void*> obj);
+
+  return 1;
 }
 
-int CObjectManager::GetObjectByName(lua_State* pLua)
-{
-	// Get the name from Lua
-	string szObjName = lua_tostring(pLua, -1);
-	lua_pop(pLua, 1);
+object* object_manager::by_name(const std::string& name) {
+  // use the passed in name to find the object with the same name
+  unsigned int name_id = id_gen::get().get_id(name);
 
-	CObject* pObj = GetInstance()->GetObjectByName(szObjName);
+  for (const auto& obj : _objects) {
+    if (obj->id() == name_id)
+      return obj.get();
+  }
 
-	// Pass the object pointer back to Lua
-	lua_pushlightuserdata(pLua, (void*)pObj);
-
-	return 1;
+  // Didn't find object with specified name
+  return nullptr;
 }
-
-CObject* CObjectManager::GetObjectByName(string szName)
-{
-	// use the passed in name to find the object with the same name
-	list<CObject*, scd::allocator<CObject*>>::iterator pIter;
-	pIter = m_cObjects.begin();
-	unsigned int nNameID = CIDGen::GetInstance()->GetID(szName);
-	while(pIter != m_cObjects.end())
-	{
-		if((*pIter)->GetID() == nNameID)
-			return *pIter;
-
-		++pIter;
-	}
-
-	// Didn't find object with specified name
-	return NULL;
-}
+} // namespace scd

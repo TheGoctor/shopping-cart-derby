@@ -5,18 +5,23 @@
 #include "enums.h"
 #include "rendering/texture_manager.h"
 
-namespace scd::components {
-class IEvent;
+struct lua_State;
+
+namespace scd {
+class event;
+}
+
+namespace scd::ui {
 
 class button : public scd::base_component {
 public:
-  button(scd::object* owner);
+  button(scd::object& owner);
 
   static int CreateButtonComponent(lua_State* lua);
-  static button* CreateButtonComponent(scd::object* owner,
-                                       std::string function_name,
-                                       std::string on_rollover_function_name,
-                                       std::string sprite_texture_name,
+  static button* CreateButtonComponent(scd::object& owner,
+                                       const std::string& function_name,
+                                       const std::string& on_rollover_function_name,
+                                       const std::string& sprite_texture_name,
                                        int position_x, int position_y,
                                        bool start_selected, int game_state,
                                        int texture_depth);
@@ -25,8 +30,8 @@ public:
   static void SetNextButtonComponent(button* me, button* down, button* up,
                                      button* left, button* right);
 
-  void init(std::string button_texture_name, int texture_depth);
-  void load(std::string button_texture_name, int texture_depth, int position_x,
+  void init(const std::string& button_texture_name, int texture_depth);
+  void load(const std::string& button_texture_name, int texture_depth, int position_x,
             int position_y);
   void reinit_values();
   void activate();
@@ -47,27 +52,27 @@ public:
    * @param cSender the sender of the event
    * @param cEvent Actually a CUpdateEvent that holds the frame's delta time
    */
-  static void update(IEvent* cEvent, scd::base_component* cCenter);
+  static void update(event* cEvent, scd::base_component* cCenter);
 
   // This is to fix the menu creeper bug - This means in update we'll never
   // have buttons taht work
-  static void gameplay_update(IEvent* cEvent, scd::base_component* cCenter);
+  static void gameplay_update(event* cEvent, scd::base_component* cCenter);
 
-  static void up_pressed(IEvent* cEvent, scd::base_component* cCenter);
-  static void down_pressed(IEvent* cEvent, scd::base_component* cCenter);
-  static void left_pressed(IEvent* cEvent, scd::base_component* cCenter);
-  static void right_pressed(IEvent* cEvent, scd::base_component* cCenter);
-  static void select_pressed(IEvent* cEvent, scd::base_component* cCenter);
-  static void invalid_selection(IEvent* cEvent, scd::base_component* cCenter);
-  static void button_state_enabled(IEvent* cEvent,
+  static void up_pressed(event* cEvent, scd::base_component* cCenter);
+  static void down_pressed(event* cEvent, scd::base_component* cCenter);
+  static void left_pressed(event* cEvent, scd::base_component* cCenter);
+  static void right_pressed(event* cEvent, scd::base_component* cCenter);
+  static void select_pressed(event* cEvent, scd::base_component* cCenter);
+  static void invalid_selection(event* cEvent, scd::base_component* cCenter);
+  static void button_state_enabled(event* cEvent,
                                    scd::base_component* cCenter);
-  static void button_state_disabled(IEvent* cEvent,
+  static void button_state_disabled(event* cEvent,
                                     scd::base_component* cCenter);
-  static void button_state_init(IEvent* cEvent, scd::base_component* cCenter);
-  static void button_state_load(IEvent* cEvent, scd::base_component* cCenter);
+  static void button_state_init(event* cEvent, scd::base_component* cCenter);
+  static void button_state_load(event* cEvent, scd::base_component* cCenter);
 
 protected:
-  EGameState _associated_state;
+  game_state _associated_state;
 
   scd::button* _select_down;
   scd::button* _select_up;
@@ -91,4 +96,4 @@ protected:
   bool _selected_start_value;
 };
 
-} // namespace scd::components
+} // namespace scd::ui

@@ -1,120 +1,105 @@
-///////////////////////////////////////////////////////////////////////////////
-//  File			:	"CCameraManager.cpp"
-//
-//  Author			:	Joseph Leybovich (JL)
-//
-//  Date Created	:	04/12/11
-//
-//	Last Changed	:	07/26/11
-//
-//	Changed By		:	HN
-//
-//  Purpose			:	A manager for cameras
-///////////////////////////////////////////////////////////////////////////////
-#include "../Event Manager/CEventManager.h"
-#include "../Event Manager/EventStructs.h"
-#include "../Object Manager/CObjectManager.h"
-#include "../../Component Managers/CCollisionManager.h"
-#include "../../../../Source/CObject.h"
-using namespace EventStructs;
+/**
+ * @file camera_manager.cpp
+ *
+ * @author Joseph Leybovich
+ *
+ * @brief A manager for cameras
+ */
+#include "camera_manager.h"
 
-#include "CCameraManager.h"
+namespace scd {
+void camera_manager::camera_manager(int screen_width, int screen_height) {
+  // Setup camera.
+  object* camera = object_manager::get().create("Camera0");
 
-// Initalize
-void CCameraManager::Init(int nScreenWidth, int nScreenHeight)
-{
-	// Setup camera.
-	CObject* pCam = CObjectManager::GetInstance()->CreateObject("Camera0");
+  _camera = std::make_unique<camera>();
 
-	m_pCam = MMNEW(CCamera);
+  // BuildPerspective(field of view, aspect ratio, near plane, far plane)
+  _camera->build_perspective(
+    D3DX_PI / 3.0f, (float)nScreenWidth / (float)nScreenHeight, 1.0f, 200.0f);
 
-	//BuildPerspective(field of view, aspect ratio, near plane, far plane)
-	m_pCam->BuildPerspective(D3DX_PI/3.0f, (float)nScreenWidth/(float)nScreenHeight,
-							1.0f, 200.0f);
-	CEventManager* pEM = CEventManager::GetInstance();
-	pEM->RegisterEvent("AttachToCamera", (IComponent*)GetInstance(), AttachToCamCallback);
-	pEM->RegisterEvent("UpdateState", (IComponent*)GetInstance(), UpdateCallback);
-	pEM->RegisterEvent("AttachToCameraWin", (IComponent*)GetInstance(), AttachToWinStateCallback);
-	pEM->RegisterEvent("AttachToCameraLose",  (IComponent*)GetInstance(), AttachToLoseStateCallback);
+  event_manager& event_manager = event_manager::get();
+  event_manager.register_event("AttachToCamera",
+                               std::bind(&on_attach_to_camera, this));
+  event_manager.register_event("UpdateState", std::bind(&on_update, this));
+  event_manager.register_event("AttachToCameraWin",
+                               std::bind(&on_attach_to_win_state, this));
+  event_manager.register_event("AttachToCameraLose",
+                               std::bind(&on_attach_to_lose_state, this));
 }
 
-// Attach To Camera
+int camera_manager::attach_camera_to_player(lua_State* pLua) {
+  std::string object_name = lua_tostring(pLua, -1);
+  lua_pop(pLua, 1);
 
-int CCameraManager::AttachCamToPlayer(lua_State* pLua)
-{
-	string szObjName = lua_tostring(pLua, -1);
-	lua_pop(pLua, 1);
+  object* object = object_manager::get().find_by_name(object_name);
 
-	CObject* pObj = CObjectManager::GetInstance()->GetObjectByName(szObjName);
+  if (object == nullptr) {
+    Debug.Print("Invalid Object Name");
+    return 0;
+  }
 
-	if(pObj == NULL)
-	{
-		Debug.Print("Invalid Object Name");
-		return 0;
-	}
+  _camera->GetTarget1().SetParent(pObj->GetTransform());
+  _camera->SetTarget(&_camera->GetTarget1());
+  _camera->SetFrameParent(pObj->GetTransform());
 
-	GetInstance()->m_pCam->GetTarget1().SetParent(pObj->GetTransform());
-	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
-	GetInstance()->m_pCam->SetFrameParent(pObj->GetTransform());
-
-	return 0;
+  return 0;
 }
 
-void CCameraManager::AttachToCamCallback(IEvent* e, IComponent*)
-{
-	TObjectEvent* eObj = static_cast<TObjectEvent*>(e->GetData());
+void camera_manager::on_attach_to_camera(const event& e) {
+  object_event* event_data = dynamic_cast<object_event*>(&e.data());
 
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
-	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
+  D3DXMatrixIdentity(&_camera->GetFrame().GetLocalMatrix());
+  _camera->GetFrame().SetParent(NULL);
 
-	GetInstance()->m_pCam->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetTarget1().GetLocalMatrix());
+  _camera->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
+  D3DXMatrixIdentity(&_camera->GetTarget1().GetLocalMatrix());
 
-	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
-	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
-	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 4.5f, -4.0f));
-	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, 5.0f));
+  _camera->SetTarget(&_camera->GetTarget1());
+  _camera->SetFrameParent(eObj->m_pcObj->GetTransform());
+  _camera->GetFrame().TranslateFrame(
+    D3DXVECTOR3(0.0f, 4.5f, -4.0f));
+  _camera->GetTarget()->TranslateFrame(
+    D3DXVECTOR3(0.0f, 1.0f, 5.0f));
 }
 
-void CCameraManager::UpdateCallback(IEvent* e, IComponent*)
-{
-	// Get the Values for the Event
-	TUpdateStateEvent* pEvent = static_cast<TUpdateStateEvent*>(e->GetData());
-	float fDt = pEvent->m_fDeltaTime;
+void camera_manager::on_update(const event& e) {
+  update_state_event* event_data = dynamic_cast<update_state_event*>(&e.data());
 
-	//// Update Camera
-	GetInstance()->m_pCam->Update(fDt);
+  _camera->update(event_data->delta_time);
 }
 
-void CCameraManager::AttachToWinStateCallback(IEvent* e, IComponent* comp)
-{
-	TObjectEvent* eObj = static_cast<TObjectEvent*>(e->GetData());
+void camera_manager::on_attach_to_win_state(const event& e) {
+  object_event* event_data = dynamic_cast<object_event*>(&e.data());
 
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
-	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
+  D3DXMatrixIdentity(&_camera->GetFrame().GetLocalMatrix());
+  _camera->GetFrame().SetParent(NULL);
 
-	GetInstance()->m_pCam->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetTarget1().GetLocalMatrix());
-	
-	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
-	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
-	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 4.0f));
-	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, -2.0f));
+  _camera->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
+  D3DXMatrixIdentity(&_camera->GetTarget1().GetLocalMatrix());
+
+  _camera->SetTarget(&_camera->GetTarget1());
+  _camera->SetFrameParent(eObj->m_pcObj->GetTransform());
+  _camera->GetFrame().TranslateFrame(
+    D3DXVECTOR3(0.0f, 2.0f, 4.0f));
+  _camera->GetTarget()->TranslateFrame(
+    D3DXVECTOR3(0.0f, 1.0f, -2.0f));
 }
 
-void CCameraManager::AttachToLoseStateCallback(IEvent* e, IComponent* comp)
-{
-	
-	TObjectEvent* eObj = static_cast<TObjectEvent*>(e->GetData());
+void camera_manager::on_attach_to_lose_state(const event& e) {
+  object_event* event_data = dynamic_cast<object_event*>(&e.data());
 
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetFrame().GetLocalMatrix());
-	GetInstance()->m_pCam->GetFrame().SetParent(NULL);
+  D3DXMatrixIdentity(&_camera->GetFrame().GetLocalMatrix());
+  _camera->GetFrame().SetParent(NULL);
 
-	GetInstance()->m_pCam->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
-	D3DXMatrixIdentity(&GetInstance()->m_pCam->GetTarget1().GetLocalMatrix());
+  _camera->GetTarget1().SetParent(eObj->m_pcObj->GetTransform());
+  D3DXMatrixIdentity(&_camera->GetTarget1().GetLocalMatrix());
 
-	GetInstance()->m_pCam->SetTarget(&GetInstance()->m_pCam->GetTarget1());
-	GetInstance()->m_pCam->SetFrameParent(eObj->m_pcObj->GetTransform());
-	GetInstance()->m_pCam->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 4.0f));
-	GetInstance()->m_pCam->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, -2.0f));
+  _camera->SetTarget(&_camera->GetTarget1());
+  _camera->SetFrameParent(eObj->m_pcObj->GetTransform());
+  _camera->GetFrame().TranslateFrame(
+    D3DXVECTOR3(0.0f, 2.0f, 4.0f));
+  _camera->GetTarget()->TranslateFrame(
+    D3DXVECTOR3(0.0f, 1.0f, -2.0f));
 }
+} // namespace scd

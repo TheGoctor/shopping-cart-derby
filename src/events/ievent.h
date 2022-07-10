@@ -10,59 +10,47 @@
 //						be able to use it.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _IEVENT_H_
-#define _IEVENT_H_
-#define NULL 0
+#pragma once
 
-class IComponent;
+#include <memory>
 
-class IEvent
-{
+namespace scd {
+
+class base_component;
+
+class event {
 private:
-	unsigned int	m_nEventID;		// The ID used to identify this event
-	IComponent*		m_pcSender;		// The component sending the event
-	unsigned int	m_nPriority;	// When the event gets processed
-	void*			m_pData;		// Pointer to a structure containing additional data
+  // The ID used to identify this event
+  unsigned int _event_id;
 
-	friend class CEventManager;
+  // The component sending the event
+  base_component* _sender;
+
+  // When the event gets processed
+  event_priority _priority;
+
+  // Pointer to a structure containing additional data
+  std::unique_ptr<void*> _data;
+
+  friend class event_manager;
 
 protected:
-	// Mutator
-	void SetPriority(unsigned int nPriority)
-	{
-		m_nPriority = nPriority;
-	}
+  void set_priority(event_priority priority) { _priority = priority; }
 
 public:
-	// Constructor
-	IEvent(unsigned int nEventID, IComponent* pcSender, void* pData = NULL)
-	{
-		m_nEventID = nEventID;
-		m_pcSender = pcSender;
-		m_pData = pData;
-	}
+  event(unsigned int event_id, base_component& sender,
+        std::unique_ptr<void*>&& data = nullptr) {
+    _event_id = event_id;
+    _sender   = &sender;
+    _data     = std::move(data);
+  }
 
-	// Destructor
-	~IEvent()
-	{
-		MMDELEVENT(m_pData);
-	}
+  // Accessors
+  unsigned int event_id() const { return _event_id; }
 
-	// Accessors
-	unsigned int GetEventID()
-	{
-		return m_nEventID;
-	}
+  base_component* sender() const { return _sender; }
 
-	IComponent* GetSender()
-	{
-		return m_pcSender;
-	}
-
-	void* GetData()
-	{
-		return m_pData;
-	}
+  void* data() const { return _data.get(); }
 };
 
-#endif
+} // namespace scd

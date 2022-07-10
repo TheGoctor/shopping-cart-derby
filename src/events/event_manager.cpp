@@ -1,240 +1,74 @@
-#include "CEventManager.h"
+#include "event_manager.h"
+
+#include "core/base_component.h"
+#include "core/id_generator.h"
+#include "core/object.h"
+#include "events/ievent.h"
+
 #include <assert.h>
-#include "IEvent.h"
-#include "../../../IComponent.h"
-#include "../../../CObject.h"
-#include "CIDGen.h"
 
-CEventManager::CEventManager(void)
-{
+namespace scd {
+
+event_id event_manager::register_event(const std::string& event_name,
+                                       event_callback callback) {
+  // Convert string to int
+  event_id id = id_generator::get().get_id(event_name);
+
+  // Register the callback
+  register_event(id, callback);
+
+  return id;
 }
 
-CEventManager::~CEventManager(void)
-{
+void event_manager::register_event(event_id id, event_callback callback) {
+  _listeners.emplace(id, callback);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-CEventManager* CEventManager::GetInstance()
-{
-	static CEventManager cEventManager;
-	return &cEventManager;
+void event_manager::unregister_event(event_id id, event_callback callback) {
+  auto range = _listeners.equal_range(id);
+
+  for (auto iter = range.first; iter != range.second; ++iter) {
+    if (iter->second == callback) {
+      iter = _listeners.erase(iter);
+      break;
+    }
+  }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-EventID CEventManager::RegisterEvent(string szEventName, IComponent* pcListener,
-									 void(*pfCallback)(IEvent*, IComponent*))
-{
-	// Convert string to int
-	EventID nEventID = CIDGen::GetInstance()->GetID(szEventName);
+void event_manager::post(std::unique_ptr<event>&& event,
+                         event_priority priority) {
+  if (priority != event_priority::immediate) {
+    event->set_priority(priority);
+    _event_list.push(event);
+  } else {
+    auto range = _listeners.equal_range(event->id());
 
-	// Register the Listener
-	RegisterEvent(nEventID, pcListener, pfCallback);
+    for (auto iter = range.first; iter != range.second; ++iter) {
+      iter->second(*event);
+    }
 
-	return nEventID;
+    event.reset();
+  }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-void CEventManager::RegisterEvent(EventID nEventID, IComponent* pcListener,
-								  void(*pfCallback)(IEvent*, IComponent*))
-{
-	// Make sure someone is actually listening
-	assert(pcListener != NULL);
-
-	// Make sure we don't re-register the same listener for the same event
-	pair<EventIter, EventIter> range;
-	range = m_cListeners.equal_range(nEventID);
-
-	for(EventIter cMapIter = range.first; cMapIter != range.second;
-		cMapIter++)
-	{
-		if(cMapIter->second->m_pcListener == pcListener &&
-			cMapIter->second->m_pfCallback == pfCallback)
-			return;	// The Listener is already registered
-	}
-
-	// Make Listener Object
-	TListener* ptListener = MMNEWEVENT(TListener);
-	ptListener->m_pcListener = pcListener;
-	ptListener->m_pfCallback = pfCallback;
-
-	// use generated int to pair with listener into map
-	// and add listener to map
-	m_cListeners.insert(make_pair(nEventID, ptListener));
+void event_manager::clear() {
+  _event_list.clear();
 }
 
-void CEventManager::UnregisterEvents()
-{
-	while(m_cUnregisterList.empty() == false)
-	{
-		TUnregister& pEvent = m_cUnregisterList.front();
-		if(pEvent.nEventID == 0)
-		{
-			ActuallyUnregisterEventAll(pEvent.pListener);
-		}
-		else
-		{
-			ActuallyUnregisterEvent(pEvent.nEventID, pEvent.pListener);
-			pEvent.pListener->SetIsActive(true);
-		}
+void event_manager::process() {
+  auto events = std::move(_event_list);
 
-		m_cUnregisterList.pop_front();
-	}
+  while (!events.empty()) {
+    const auto& top = events.top();
+
+    auto range = _listeners.equal_range(top->id());
+
+    for (auto iter = range.first; iter != range.second; ++iter) {
+      iter->second(*event);
+    }
+
+    events.pop();
+  }
 }
 
-void CEventManager::ActuallyUnregisterEvent(EventID nEventID, IComponent* pcListener)
-{
-	pair<EventIter, EventIter> range;
-
-	range = m_cListeners.equal_range(nEventID);
-
-	for(EventIter iter = range.first; iter != range.second; iter++)
-	{
-		if((*iter).second->m_pcListener == pcListener)
-		{
-			iter = m_cListeners.erase(iter);
-			break;
-		}
-	}
-}
-
-void CEventManager::ActuallyUnregisterEventAll(IComponent* pcListener)
-{
-	EventIter iter = m_cListeners.begin();
-	
-	while(iter != m_cListeners.end())
-	{
-		if((*iter).second->m_pcListener == pcListener)
-			iter = m_cListeners.erase(iter);
-		else
-			iter++;
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-void CEventManager::UnregisterEvent(EventID nEventID, IComponent* pcListener)
-{
-	TUnregister pEvent;
-	pEvent.nEventID = nEventID;
-	pEvent.pListener = pcListener;
-	pcListener->SetIsActive(false);
-	m_cUnregisterList.push_back(pEvent);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-void CEventManager::UnregisterEventAll(IComponent* pcListener)
-{
-	TUnregister pEvent;
-	pEvent.nEventID = 0;
-	pEvent.pListener = pcListener;
-	pcListener->SetIsActive(false);
-	m_cUnregisterList.push_back(pEvent);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-void CEventManager::PostEvent(IEvent* pEvent, unsigned int nPriority)
-{
-	if(nPriority != PRIORITY_IMMEDIATE)
-	{
-		pEvent->SetPriority(nPriority);
-		m_cEventList.insert(pEvent);
-	}
-	else
-	{
-		pair<EventIter, EventIter> range;
-		range = m_cListeners.equal_range(pEvent->GetEventID());
-
-		for(EventIter cMapIter = range.first; cMapIter != range.second;
-			cMapIter++)
-		{
-			//if(cMapIter->second->m_pcListener->GetIsActive())
-			{
-				cMapIter->second->m_pfCallback(pEvent, 
-					cMapIter->second->m_pcListener);
-			}
-		}
-		MMDELEVENT(pEvent);
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-void CEventManager::ClearEvents()
-{
-	set<IEvent*, cmp, CEventAllocator<IEvent*>>::iterator cIter;
-	cIter = m_cEventList.begin();
-	while(cIter != m_cEventList.end())
-	{
-		// Delete because the Event Manager is responsible for cleaning dynamic
-		// memory.
-		MMDEL(*cIter);
-		cIter++;
-	}
-	
-	// Just in case we missed something
-	m_cEventList.clear();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-void CEventManager::ProcessEvents()
-{
-	while(!m_cEventList.empty())
-	{
-		IEvent* pEvent = *m_cEventList.begin();
-
-		// Remove from the list now to avoid problems with sorting new events
-		m_cEventList.erase(m_cEventList.begin());
-
-		// Make range of listeners for the current event
-		pair<EventIter, EventIter> range;
-		range = m_cListeners.equal_range(pEvent->GetEventID());
-
-
-		for(EventIter cMapIter = range.first; cMapIter != range.second; 
-			cMapIter++)
-		{
-			// Call the callback function of each listener listening for this
-			// event
-			//if(cMapIter->second->m_pcListener->GetIsActive())
-			{
-				cMapIter->second->m_pfCallback(pEvent, 
-					cMapIter->second->m_pcListener);
-			}
-		}
-
-		// clean up the event's memory
-		MMDELEVENT(pEvent);
-
-		// Unregister any events
-		UnregisterEvents();
-	}
-}	
-
-////////////////////////////////////////////////////////////////////////////////
-//
-////////////////////////////////////////////////////////////////////////////////
-void CEventManager::Shutdown()
-{
-	ClearEvents();
-	EventIter pIter = m_cListeners.begin();
-	while(pIter != m_cListeners.end())
-	{
-		MMDELEVENT(pIter->second);
-		++pIter;
-	}
-	m_cListeners.clear();
-}
+} // namespace scd

@@ -1,5 +1,5 @@
 /*
- * @file Settings.h
+ * @file settings.h
  *
  * @brief Contains and loads settings from various sources.
  *
@@ -7,8 +7,7 @@
  *
  * @copyright (c) 2016 Mac Reichelt
  */
-#ifndef __scd_settings_h__
-#define __scd_settings_h__
+#pragma once
 
 #include <string>
 
@@ -36,5 +35,3 @@ private:
   int _window_width;
 };
 } // namespace scd
-
-#endif // __scd_settings_h__

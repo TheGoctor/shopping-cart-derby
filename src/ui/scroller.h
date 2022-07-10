@@ -1,39 +1,32 @@
-#ifndef __scd_components_scroller_h__
-#define __scd_components_scroller_h__
+#pragma once
 
-extern "C" {
-#include "lauxlib.h"
-#include "lua.h"
-#include "lualib.h"
+#include "core/base_component.h"
+#include "physics/math_types.h"
+
+struct lua_State;
+
+namespace scd {
+class event;
 }
 
-#include "component.h"
-
-#include "Enums.h"
-#include "object.h"
-#include "Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h"
-
-namespace scd::components {
+namespace scd::ui {
 class button;
-
-class IEvent;
 
 class scroller : public scd::base_component {
 public:
-  scroller(scd::object* owner);
+  scroller(scd::object& owner);
 
   static int create(lua_State* pLua);
-  static scroller* create(button* button, float xVel, float yVel, float xSize,
-                          float ySize);
+  static scroller* create(button* button, const vector2& velocity, const vector2& size);
 
   void set_position_x(float fX) { _position.x = fX; }
   void set_position_y(float fY) { _position.y = fY; }
 
-  static void update(IEvent* cEvent, scd::base_component* cCenter);
+  static void update(event* cEvent, scd::base_component* cCenter);
 
-  static void on_init(IEvent* cEvent, scd::base_component* cCenter);
-  static void on_enable(IEvent* cEvent, scd::base_component* cCenter);
-  static void on_disable(IEvent* cEvent, scd::base_component* cCenter);
+  static void on_init(event* cEvent, scd::base_component* cCenter);
+  static void on_enable(event* cEvent, scd::base_component* cCenter);
+  static void on_disable(event* cEvent, scd::base_component* cCenter);
 
 private:
   button* _button;
@@ -44,6 +37,4 @@ private:
 
   scd::vector2 _start_position;
 };
-} // namespace scd::components
-
-#endif // __scd_components_scroller_h__
+} // namespace scd::ui

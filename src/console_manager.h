@@ -1,15 +1,13 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	CConsoleManager.h
-//	Date			:	5/3/11
-//	Mod. Date		:	7/26/11
-//	Mod. Initials	:	MR
-//	Author			:	Mac Reichelt
-//	Purpose			:	Class displays a debugging console as text over the game
-//						screen. Console can be used to display debugging
-//						information on different parts of the screen. Also,
-//						users can type commands into the console to change data
-//						in the game and in lua files.
-////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file console_manager.h
+ *
+ * @author Mac Reichelt
+ *
+ * @description Class displays a debugging console as text over the game screen.
+ * Console can be used to display debugging information on different parts of
+ * the screen. Also, users can type commands into the console to change data
+ * in the game and in lua files.
+ */
 
 #pragma once
 
@@ -26,228 +24,111 @@ namespace scd {
 
 class console_manager {
 private:
-  unsigned int
-    m_nNumLines; // The current number of lines present in the console window
+  unsigned int _visible_line_count;
 
-  std::string
-    _current_line; // String of text representing the current line of text
-  std::string
-    _console_buffer; // String of text representing all the text in the console
+  std::string _current_line;
+  std::string _console_buffer;
 
-  bool _is_active; // Whether the console is currently active
+  bool _is_active;
 
-  lua_State* m_pLua;
+  lua_State* _lua;
 
-  // Constructor
   console_manager();
-
   ~console_manager();
 
 public:
-  ////////////////////////////////////////////////////////////////////////////////
-  // GetInstance()	:	Gets a singleton instance of the Console Manager
-  //
-  // Ins				:	void
-  //
-  // Outs				:	void
-  //
-  // Returns			:	CConsoleManager&	-	Reference to the singleton
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Gets a singleton instance of the Console Manager
+   *
+   * @return Reference to the singleton
+   */
   static console_manager& get();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Initialize()		:	Initializes the Console Manager and Lua
-  //
-  // Ins				:	void
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Initializes the Console Manager and Lua
+   */
   void initialize();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Shutdown()		:	Closes and shuts down Lua
-  //
-  // Ins				:	IEvent*		-	Not used in this function
-  //						IComponent*	-	Not used in this function
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Closes and shuts down Lua
+   *
+   * @param[in] event Not used in this function
+   * @param[in] component Not used in this function
+   */
   static void shutdown(event*, base_component*);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // RegisterCFunctions()		:	Registers all the C++ functions that lua needs
-  //
-  // Ins				:	void
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Registers all the C++ functions that lua needs
+   */
   void register_c_functions();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // LoadLuaFile()	:	Loads the specified lua file into lua's memory and
-  //						and executes it
-  //
-  // Ins				:	string szFileName	-	The name of the Lua file
-  //
-  // Outs				:	void
-  //
-  // Returns			:	bool	-	True if the Lua file loaded, false if not
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Loads the specified lua file into lua's memory and executes it
+   *
+   * @param[in] file_path	The path to the Lua file
+   *
+   * @return Whether the lua file successfully loaded.
+   */
   bool load_lua_file(const std::string& file_path);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // DisplayConsole()	:	Displays the Console
-  //
-  // Ins				:	void
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Displays the Console
+   */
   void display();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // HideConsole()	:	Hides the console
-  //
-  // Ins				:	void
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Hides the console
+   */
   void hide();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // DrawConsole()	:	Draws the console to the screen
-  //
-  // Ins				:	void
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Draws the console to the screen
+   */
   void draw();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // StackDump()		:	Displays the contents of the Lua Stack to the Windows
-  //						Console Screen and the in-game console screen
-  //
-  // Ins				:	void
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Displays the contents of the Lua Stack to the Windows Console Screen and
+   * the in-game console screen.
+   */
   void dump_stack();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Print()			:	Prints the passed in text to the Windows Console and the
-  //						In-Game Console
-  //
-  // Ins				:	string szTextToPrint	-	The text to be displayed
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
-  static int print(lua_State* pLua);
+  /**
+   * Prints the passed in text to the Windows Console and the In-Game Console
+   *
+   * @param[in] line The text to be displayed
+   */
   void print(const std::string& line);
+  static int print(lua_State* pLua);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // CallLuaFunc()	:	Executes the passed in string as if it were Lua code
-  //
-  // Ins				:	string szFunc	-	The line of code to be executed in
-  //											Lua
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Executes the passed in string as if it were Lua code
+   *
+   * @param[in] lua_code The line of code to be executed in Lua
+   */
   void call_lua_function(const std::string& lua_code);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Parse()			:	Executed when the Enter key is pressed from the console.
-  //						Executes the CurrentLine as Lua Code
-  //
-  // Ins				:	string szCommand	-	The line of code to execute
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Executed when the Enter key is pressed from the console.
+   * Executes the CurrentLine as Lua Code
+   *
+   * @param[in] lua_code The line of code to execute
+   */
   void parse(const std::string& lua_code);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // ToggleConsole()	:	If the console is currently displayed, it hides, and
-  //						vice versa
-  //
-  // Ins				:	IEvent*		-	Not used
-  //						IComponent*	-	Not used
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * If the console is currently displayed, it hides, and vice versa
+   *
+   * @param[in] event Not used.
+   * @param[in] component Not used.
+   */
   static void toggle_console(event*, base_component*);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Update()			:	Checks for input
-  //
-  // Ins				:	IEvent*		- Not used
-  //						IComponent*	- Not used
-  //
-  // Outs				:	void
-  //
-  // Returns			:	void
-  //
-  // Mod. Date		:	3/29/11
-  // Mod. Initials	:	MR
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * Checks for input
+   *
+   * @param[in] event Not used.
+   * @param[in] component Not used.
+   */
   static void update(event*, base_component*);
 };
 

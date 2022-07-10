@@ -1,233 +1,118 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	Heap.h
-//	Date			:	3/29/11
-//	Mod. Date		:	7/26/11
-//	Mod. Initials	:	MR
-//	Author			:	Mac Reichelt
-//	Purpose			:	Chunks of memory that can be allocated and used as 
-//						dynamic memory
-////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file heap.h
+ *
+ * @author Mac Reichelt
+ *
+ * @brief Chunks of memory that can be allocated and used as dynamic memory
+ */
 
-#ifndef _CHEAP_H_
-#define _CHEAP_H_
-
-#if _DEBUG
-	#define MM_LEAK_DETECTION 1
-#else
-	#define MM_LEAK_DETECTION 0
-#endif
-
-#if MM_LEAK_DETECTION
-// This version of the class uses Leak Detection
+#pragma once
 
 #include <map>
-using std::map;
 
-class CHeap
-{
+namespace scd {
+class heap {
 public:
-	struct THeader
-	{
-		// How much memory is free INSIDE the block : excludes header and footer size
-		// High order bit of 1 == used memory block
-		// High order bit of 0 == free memory block
-		unsigned int m_nSize;
-		// Pointer to the previous free header in the Cyclic Doubly Linked List
-		THeader * m_ptPrev;
-		// Pointer to the next free header in the Cyclic Doubly Linked List
-		THeader * m_ptNext;
-	};
-	struct TFooter
-	{
-		// How much memory is free INSIDE the block : excludes header and footer size
-		// High order bit of 1 == used memory block
-		// High order bit of 0 == free memory block
-		unsigned int m_nSize;
-	};
+  using size_type = std::size_t;
+
+  struct header {
+    // How much memory is free INSIDE the block : excludes header and footer
+    // size High order bit of 1 == used memory block High order bit of 0 == free
+    // memory block
+    size_type _size;
+    // Pointer to the previous free header in the Cyclic Doubly Linked List
+    header* _prev;
+    // Pointer to the next free header in the Cyclic Doubly Linked List
+    header* _next;
+  };
+
+  struct footer {
+    // How much memory is free INSIDE the block : excludes header and footer
+    // size High order bit of 1 == used memory block High order bit of 0 == free
+    // memory block
+    size_type _size;
+  };
+
+  typedef header* (heap::*allocation_method)(size_type size);
+
+
 private:
-	// Entire Memory Pool
-	char * m_pchPool;
-	// The Last footer
-	TFooter * m_ptEndPoolFooter;
-	// The Entry Point to the free list (Cyclic Doubly-Linked List)
-	THeader * m_ptFreeHead;
-	// How much memory was allocated for this pool.
-	unsigned int m_nTotalPoolSize;
-	// Function pointer for the allocation behavior
-	THeader *(CHeap::*FindFreeMemory)(unsigned int nAllocSize);
-	// Allocation Behaviors
-	THeader * FirstAvailable(unsigned int nAllocSize);
+  // Entire Memory Pool
+  void* _pool = nullptr;
 
-	// For Debugging Purposes
-	int m_nMemoryAvailable;
-	int m_nNumPtrs;
+  // The Last footer
+  footer* _last_footer = nullptr;
 
-	// Struct used in the detection of memory leaks within the manager
-	struct TLeakDetector
-	{
-		char* szFile;			// File where the memory was allocated
-		unsigned int nLine;		// Line the memory was allocated on
-		unsigned int nSize;		// The memory of allocated
-	};
+  // The Entry Point to the free list (Cyclic Doubly-Linked List)
+  header* _free_head = nullptr;
 
-	// List of all the Memory currently allocated
-	map<unsigned int, TLeakDetector> m_cLeakList;
-	
+  // How much memory was allocated for this pool.
+  size_type _total_size = 0;
+
+  // Function pointer for the allocation behavior
+  allocation_method _find_free_memory;
+
+  // Allocation Behaviors
+  header* first_available(size_type size);
+
+  // For Debugging Purposes
+  size_type _bytes_available = 0;
+  size_type _pointer_count = 0;
+
+  // Struct used in the detection of memory leaks within the manager
+  struct leak_detector {
+    size_type _size; // The memory of allocated
+    size_type _line; // Line the memory was allocated on
+    const char* _file; // File where the memory was allocated
+  };
+
+  // List of all the Memory currently allocated
+  std::map<void*, leak_detector> _leaks;
+
 public:
-	// Constructor
-	CHeap();
+  /**
+   * Initializes the Heap Object
+   *
+   * @param[in] size The total pool size of the heap in bytes
+   */
+  heap(size_type size);
 
-	// Trilogy of Evil
-	~CHeap();
-	CHeap(const CHeap &);
-	CHeap & operator=(const CHeap &);
+  // Trilogy of Evil
+  ~heap();
+  heap(const heap&) = delete;
+  heap& operator=(const heap&) = delete;
 
-	// Accessors
-	unsigned int GetMemUsed() { return m_nTotalPoolSize - m_nMemoryAvailable; }
-	unsigned int GetPoolSize() { return m_nTotalPoolSize; }
+  // Accessors
+  size_type bytes_allocated() const { return _total_size - _bytes_available; }
+  size_type total_size() const { return _total_size; }
 
-////////////////////////////////////////////////////////////////////////////////
-// Init()	:	Initializes the Heap Object
-//
-// Ins		:	nPoolSizeInBytes	-	The total pool size of the heap in bytes
-//
-// Outs		:	void
-//
-// Returns	:	void
-//
-// Mod. Date		:	3/29/11
-// Mod. Initials	:	MR
-////////////////////////////////////////////////////////////////////////////////
-	void Init(unsigned int nPoolSizeInBytes);
+  /**
+   * Allocates a section of memory using the Allocator class
+   *
+   * @param[in] nAllocSize The amount of memory to allocate
+   *
+   * @return A pointer to the memory allocated
+   */
+  void* allocate(size_type size);
 
-////////////////////////////////////////////////////////////////////////////////
-// Allocate()	:	Allocates a section of memory using the Allocator class
-//
-// Ins			:	nAllocSize	-	The amount of memory to allocate
-//
-// Outs			:	void
-//
-// Returns		:	char*	-	A pointer to the memory allocated
-//
-// Mod. Date		:	3/29/11
-// Mod. Initials	:	MR
-////////////////////////////////////////////////////////////////////////////////
-	char * Allocate(unsigned int nAllocSize, char* szFile, unsigned int nLine);
-	
-////////////////////////////////////////////////////////////////////////////////
-// DeAllocate()		:	Adds the memory allocated at the passed in pointer back to
-//						to the pool of free memory
-//
-// Ins				:	char* pchData	-	The data to be deallocated
-//
-// Outs				:	void
-//
-// Returns			:	void
-//
-// Mod. Date		:	3/29/11
-// Mod. Initials	:	MR
-////////////////////////////////////////////////////////////////////////////////
-	void DeAllocate(char * pchData);
+  /**
+   * Allocates a section of memory using the Allocator class
+   *
+   * @param[in] size The number of bytes to allocate.
+   * @param[in] file The file making the allocation.
+   * @param[in] line The line of the file where the allocation call was made.
+   *
+   * @return A pointer to the memory allocated.
+   */
+  void* allocate(size_type size, const char* file, size_type line);
+
+  /**
+   * Adds the memory allocated at the passed in pointer back to the pool of free
+   * memory.
+   *
+   * @param[in] data The pointer to deallocate.
+   */
+  void deallocate(void* data);
 };
 
-#else
-// This version of the class does not use leak detection
-
-class CHeap
-{
-public:
-	struct THeader
-	{
-		// How much memory is free INSIDE the block : excludes header and footer size
-		// High order bit of 1 == used memory block
-		// High order bit of 0 == free memory block
-		unsigned int m_nSize;
-		// Pointer to the previous free header in the Cyclic Doubly Linked List
-		THeader * m_ptPrev;
-		// Pointer to the next free header in the Cyclic Doubly Linked List
-		THeader * m_ptNext;
-	};
-	struct TFooter
-	{
-		// How much memory is free INSIDE the block : excludes header and footer size
-		// High order bit of 1 == used memory block
-		// High order bit of 0 == free memory block
-		unsigned int m_nSize;
-	};
-private:
-	// Entire Memory Pool
-	char * m_pchPool;
-	// The Last footer
-	TFooter * m_ptEndPoolFooter;
-	// The Entry Point to the free list (Cyclic Doubly-Linked List)
-	THeader * m_ptFreeHead;
-	// How much memory was allocated for this pool.
-	unsigned int m_nTotalPoolSize;
-	// Function pointer for the allocation behavior
-	THeader *(CHeap::*FindFreeMemory)(unsigned int nAllocSize);
-	// Allocation Behaviors
-	THeader * FirstAvailable(unsigned int nAllocSize);
-
-	// For Debugging Purposes
-	int m_nMemoryAvailable;
-	int m_nNumPtrs;
-	
-public:
-	// Constructor
-	CHeap();
-
-	// Trilogy of Evil
-	~CHeap();
-	CHeap(const CHeap &);
-	CHeap & operator=(const CHeap &);
-	
-	// Accessors
-	unsigned int GetMemUsed() { return m_nTotalPoolSize - m_nMemoryAvailable; }
-	unsigned int GetPoolSize() { return m_nTotalPoolSize; }
-
-////////////////////////////////////////////////////////////////////////////////
-// Init()	:	Initializes the Heap Object
-//
-// Ins		:	nPoolSizeInBytes	-	The total pool size of the heap in bytes
-//
-// Outs		:	void
-//
-// Returns	:	void
-//
-// Mod. Date		:	3/29/11
-// Mod. Initials	:	MR
-////////////////////////////////////////////////////////////////////////////////
-	void Init(unsigned int nPoolSizeInBytes);
-
-////////////////////////////////////////////////////////////////////////////////
-// Allocate()	:	Allocates a section of memory using the Allocator class
-//
-// Ins			:	nAllocSize	-	The amount of memory to allocate
-//
-// Outs			:	void
-//
-// Returns		:	char*	-	A pointer to the memory allocated
-//
-// Mod. Date		:	3/29/11
-// Mod. Initials	:	MR
-////////////////////////////////////////////////////////////////////////////////
-	char * Allocate(unsigned int nAllocSize);
-	
-////////////////////////////////////////////////////////////////////////////////
-// DeAllocate()		:	Adds the memory allocated at the passed in pointer back to
-//						to the pool of free memory
-//
-// Ins				:	char* pchData	-	The data to be deallocated
-//
-// Outs				:	void
-//
-// Returns			:	void
-//
-// Mod. Date		:	3/29/11
-// Mod. Initials	:	MR
-////////////////////////////////////////////////////////////////////////////////
-	void DeAllocate(char * pchData);
-};
-
-#endif	// MM_LEAK_DETECTION
-#endif	// _CHEAP_H_
+} // namespace scd

@@ -1,54 +1,38 @@
-///////////////////////////////////////////////////////////////////////////////
-//  File			:	"CCameraManager.h"
-//
-//  Author			:	Joseph Leybovich (JL)
-//
-//  Date Created	:	04/12/11
-//
-//	Last Changed	:	04/12/11
-//
-//  Purpose			:	A manager for cameras
-///////////////////////////////////////////////////////////////////////////////
+/**
+ * @file camera_manager.h
+ *
+ * @author Joseph Leybovich
+ *
+ * @brief A manager for cameras
+ */
 #pragma once
 
 #include "core/camera.h"
 
+#include <memory>
+
 namespace scd {
 class camera_manager {
 private:
-  camera* _camera = nullptr;
-
-  camera_manager() = default;
+  std::unique_ptr<camera> _camera = nullptr;
 
 public:
-  // Singleton Instance
-  static camera_manager& get() {
-    static camera_manager _manager;
-    return _manager;
-  }
+  /**
+   * Initializes the Camera and builds the perspective and registers for events
+   *
+   * @param[in] screen_width The width of the screen in pixels.
+   * @param[in] screen_height The height of the screen in pixels.
+  */
+  camera_manager(int screen_width, int screen_height);
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Function: "Init"
-  //
-  // Return: void
-  //
-  // Parameters: int - the screen width
-  //			int - the screen height
-  //
-  // Purpose:  Initializes the Camera and builds the prospective and registers
-  //    for events
-  ////////////////////////////////////////////////////////////////////////////////
-  void init(int nScreenWidth, int nScreenHeight);
+  const camera* camera() const { return _camera.get(); }
 
-  // Accessors
-  const camera* camera() const { return _camera; }
+  void on_attach_to_camera(const event&);
+  void on_move_camera(const event&);
+  void on_update(const event&);
+  void on_attach_to_win_state(const event&);
+  void on_attach_to_lose_state(const event&);
 
-  // Function Callbacks
-  static void AttachToCamCallback(IEvent* e, IComponent* comp);
-  static void MoveCameraCallback(IEvent* e, IComponent* comp);
-  static void UpdateCallback(IEvent* e, IComponent* comp);
-  static void AttachToWinStateCallback(IEvent* e, IComponent* comp);
-  static void AttachToLoseStateCallback(IEvent* e, IComponent* comp);
-  static int AttachCamToPlayer(lua_State* pLua);
+  static int attach_camera_to_player(lua_State* pLua);
 };
 } // namespace scd
