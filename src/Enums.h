@@ -210,7 +210,7 @@ enum class render_function {
 ///////////////////////////////////////////////////////
 //       RENDER CONTEXT ENUMS
 //////////////////////////////////////////////////////
-enum ERenderContext {
+enum class render_context {
   min = -1,
   flat,
   // level geomery

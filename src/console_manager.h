@@ -19,43 +19,15 @@ struct lua_State;
 
 namespace scd {
 
-// For convenience
-#define Debug CConsoleManager::GetInstance()
-
-class console_manager {
-private:
-  unsigned int _visible_line_count;
-
-  std::string _current_line;
-  std::string _console_buffer;
-
-  bool _is_active;
-
-  lua_State* _lua;
-
-  console_manager();
-  ~console_manager();
-
+class lua_manager {
 public:
-  /**
-   * Gets a singleton instance of the Console Manager
-   *
-   * @return Reference to the singleton
-   */
-  static console_manager& get();
+  lua_manager();
+  ~lua_manager();
 
   /**
    * Initializes the Console Manager and Lua
    */
   void initialize();
-
-  /**
-   * Closes and shuts down Lua
-   *
-   * @param[in] event Not used in this function
-   * @param[in] component Not used in this function
-   */
-  static void shutdown(event*, base_component*);
 
   /**
    * Registers all the C++ functions that lua needs
@@ -74,17 +46,17 @@ public:
   /**
    * Displays the Console
    */
-  void display();
+  void display_console();
 
   /**
    * Hides the console
    */
-  void hide();
+  void hide_console();
 
   /**
    * Draws the console to the screen
    */
-  void draw();
+  void draw_console();
 
   /**
    * Displays the contents of the Lua Stack to the Windows Console Screen and
@@ -105,7 +77,7 @@ public:
    *
    * @param[in] lua_code The line of code to be executed in Lua
    */
-  void call_lua_function(const std::string& lua_code);
+  void execute(const std::string& lua_code);
 
   /**
    * Executed when the Enter key is pressed from the console.
@@ -117,19 +89,26 @@ public:
 
   /**
    * If the console is currently displayed, it hides, and vice versa
-   *
-   * @param[in] event Not used.
-   * @param[in] component Not used.
    */
-  static void toggle_console(event*, base_component*);
+  static void toggle_console();
 
   /**
    * Checks for input
-   *
-   * @param[in] event Not used.
-   * @param[in] component Not used.
    */
-  static void update(event*, base_component*);
+  static void update();
+
+private:
+  std::uint32_t _visible_line_count;
+  const std::uint32_t _max_line_count;
+
+  std::string _current_line;
+  std::string _console_buffer;
+
+  bool _is_active;
+
+  const std::string _script_root_directory;
+
+  lua_State* _lua;
 };
 
 } // namespace scd

@@ -1,347 +1,272 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	CConsoleManager.cpp
-//	Date			:	5/3/11
-//	Mod. Date		:	5/3/11
-//	Mod. Initials	:	MR
-//	Author			:	Mac Reichelt
-//	Purpose			:	Class displays a debugging console as text over the game
-//						screen. Console can be used to display debugging 
-//						information on different parts of the screen. Also, 
-//						users can type commands into the console to change data
-//						in the game and in lua files.
-////////////////////////////////////////////////////////////////////////////////
+#include "console_manager.h"
+
 #include <iostream>
-using std::cout;
 
-#include "CConsoleManager.h"
-
-#include "..\..\..\CObject.h"
-#include "..\Event Manager\CEventManager.h"
-#include "..\Event Manager\EventStructs.h"
-using namespace EventStructs;
-#include "..\Rendering Managers\Direct3DManager.h"
+#include "core/object.h"
+#include "events/event_manager.h"
+#include "events/events.h"
+#include "rendering/direct3d_manager.h"
 
 // Register With Lua
-#include "..\Object Manager\CObjectManager.h"
-#include "..\..\Component Managers\CMovementManager.h"
-#include "..\Rendering Managers\Renderer.h"
-#include "..\Rendering Managers\Texture Managers\CTextureManager.h"
-#include "..\Rendering Managers\Texture Managers\CHUDManager.h"
-#include "..\Keybind Manager\CKeybindsManager.h"
-#include "..\..\Component Managers\CAIManager.h"
-#include "..\..\Component Managers\CCollisionManager.h"
-#include "..\..\..\Components\Button\CButtonComponent.h"
-#include "..\..\..\Components\Slider\CSliderComponent.h"
-#include "..\..\..\Components\Scroller\CScrollerComponent.h"
-#include "..\..\..\Components\Rendering\CShadowComp.h"
-#include "..\..\..\Components\Rendering\CInvulnerableVFX.h"
-#include "..\..\..\Components\Rendering\CAnimatedDonutComp.h"
-#include "..\..\..\Components\Rendering\CSkidMarks.h"
-#include "..\..\..\Components\Rendering\CPeanutButterVFXComp.h"
-#include "..\..\..\Components\Rendering\CScrollingUVComp.h"
-#include "..\..\Component Managers\CInventoryManager.h"
-#include "..\..\Component Managers\CAnimateManager.h"
-#include "..\..\Component Managers\CLevelManager.h"
-#include "..\Camera Manager\CCameraManager.h"
+#include "components/ai_manager.h"
+#include "components/animation_manager.h"
+#include "components/inventory_manager.h"
+#include "components/level_manager.h"
+#include "components/rendering/animated_donut.h"
+#include "components/rendering/effects/invulnerable_effect.h"
+#include "components/rendering/effects/peanut_butter_effect.h"
+#include "components/rendering/scrolling_texture.h"
+#include "components/rendering/shadow.h"
+#include "components/rendering/skid_marks.h"
+#include "core/camera_manager.h"
+#include "core/object_manager.h"
+#include "input/keybinding_manager.h"
+#include "physics/collision_manager.h"
+#include "physics/movement_manager.h"
+#include "rendering/hud_manager.h"
+#include "rendering/renderer.h"
+#include "rendering/texture_manager.h"
+#include "ui/button.h"
+#include "ui/scroller.h"
+#include "ui/slider.h"
 
-#define MAX_LINES 40
+scd::lua_manager::lua_manager()
+  : _is_active(false)
+  , _visible_line_count(0)
+  , _max_line_count(40)
+  , _current_line()
+  , _console_buffer()
+  , _script_root_directory("Source/Scripts/")
+  , _lua(lua_open()) {
+  // Initialize Lua
+  luaL_openlibs(_lua);
 
-CConsoleManager::CConsoleManager() : m_bActive(false), m_pLua(lua_open())
-{
-	// Initialize Lua
-	luaL_openlibs(m_pLua);
+  std::string state = "Update";
+  state += CONSOLE_STATE;
+  CEventManager::GetInstance()->RegisterEvent(
+    "Shutdown", (IComponent*)this, Shutdown);
+  CEventManager::GetInstance()->RegisterEvent(
+    "InputStateChange", (IComponent*)this, ToggleConsole);
+  CEventManager::GetInstance()->RegisterEvent(
+    "KeyPressed", (IComponent*)this, Update);
 
-	m_szToDraw = "";
-	m_nNumLines  = 0;
+  register_c_functions();
+
+  load_lua_file("luatest.lua");
+
+  lua_getglobal(_lua, "InitValues");
+  lua_pcall(_lua, 0, 0, 0);
 }
 
-CConsoleManager::~CConsoleManager()
-{
+scd::lua_manager::~lua_manager() {
+  lua_close(_lua);
+  _lua = nullptr;
 }
 
-CConsoleManager& CConsoleManager::GetInstance()
-{
-	static CConsoleManager cConsoleManager;
-	return cConsoleManager;
+void scd::lua_manager::register_c_functions() {
+  lua_register(_lua, "CreateObj", &CObjectManager::CreateObject);
+  lua_register(_lua,
+               "CreateMovementComponent",
+               &CMovementManager::CreateMovementComponent);
+  lua_register(_lua, "CreateRenderComp", &Renderer::CreateRenderComp);
+  lua_register(_lua, "CreateSpriteComp", &CTextureManager::CreateSpriteComp);
+  lua_register(_lua, "CreateAIComponent", &CAIManager::CreateAIComponent);
+  lua_register(_lua,
+               "CreateCollideableComponent",
+               &CCollisionManager::CreateCollideableComponent);
+  lua_register(
+    _lua, "CreateButtonComponent", &CButtonComponent::CreateButtonComponent);
+  lua_register(
+    _lua, "CreateSliderComponent", &CSliderComponent::CreateSliderComponent);
+  lua_register(_lua, "SetSliderValue", &CSliderComponent::SetSliderValue);
+  lua_register(_lua,
+               "CreateScrollerComponent",
+               &CScrollerComponent::CreateScrollerComponent);
+  lua_register(
+    _lua, "SetNextButtonComponent", &CButtonComponent::SetNextButtonComponent);
+  lua_register(
+    _lua, "CreateInventoryComp", &CInventoryManager::CreateInventoryComp);
+  lua_register(_lua, "CreateAnimComp", &CAnimateManager::CreateAnimComp);
+  lua_register(_lua, "BindObjects", &CObjectManager::BindObjects);
+  lua_register(_lua, "print", &scd::lua_manager::Print);
+
+  lua_register(
+    _lua, "CreateUpdateStateEvent", &EventStructs::CreateUpdateStateEvent);
+  lua_register(_lua, "CreateStateEvent", &EventStructs::CreateStateEvent);
+  lua_register(_lua, "CreateRenderEvent", &EventStructs::CreateRenderEvent);
+  lua_register(_lua, "CreateRamEvent", &EventStructs::CreateRamEvent);
+  lua_register(_lua, "CreateObjectEvent", &EventStructs::CreateObjectEvent);
+  lua_register(_lua, "CreateInputEvent", &EventStructs::CreateInputEvent);
+  lua_register(_lua, "CreateHeadingEvent", &EventStructs::CreateHeadingEvent);
+  lua_register(_lua, "CreateGoalItemEvent", &EventStructs::CreateGoalItemEvent);
+  lua_register(
+    _lua, "CreateWeightClassEvent", &EventStructs::CreateWeightClassEvent);
+  lua_register(_lua,
+               "CreateGoalItemCollectedEvent",
+               &EventStructs::CreateGoalItemCollectedEvent);
+  lua_register(
+    _lua, "CreateStatusEffectEvent", &EventStructs::CreateStatusEffectEvent);
+  lua_register(_lua, "PushState", &CStateManager::PushState);
+  lua_register(_lua, "StateChange", &CStateManager::StateChange);
+  lua_register(_lua, "Back", &CStateManager::Back);
+  lua_register(_lua, "SendLuaEvent", &EventStructs::SendLuaEvent);
+  lua_register(_lua, "SetCartWeight", &CMovementManager::SetCartWeight);
+  lua_register(_lua, "SetCharacterPicked", &CHUDManager::SetCharacterPicked);
+  lua_register(
+    _lua, "CreateShadowComponent", &CShadowComp::CreateShadowComponent);
+  lua_register(_lua, "Collisions", &CLevelManager::ToggleCollisionVision);
+  lua_register(_lua, "Geometry", &CLevelManager::ToggleGeometryVision);
+  lua_register(_lua,
+               "CreateInvulnerableVFXComponent",
+               &CInvulnerableVFX::CreateInvulnerableVFXComponent);
+  lua_register(
+    _lua, "CreateSkidMarksComponent", &CSkidMarks::CreateSkidMarksComponent);
+  lua_register(
+    _lua, "CreatePBVFXComp", &CPeanutButterVFXComp::CreatePBVFXComponent);
+  lua_register(_lua,
+               "CreateScrollingUVComponent",
+               &CScrollingUVComp::CreateScrollingUVComponent);
+
+  lua_register(_lua, "SetKey", &CKeybindsManager::SetKeyCallback);
+  lua_register(
+    _lua, "SetDefaultKeys", &CKeybindsManager::SetBindDefaultCallback);
+  lua_register(_lua, "LuaGetObjectByName", &CObjectManager::GetObjectByName);
+  lua_register(_lua,
+               "CreateAnimatedDonutComp",
+               &CAnimatedDonutComp::CreateAnimatedDonutComponent);
+  lua_register(_lua, "AttachCameraTo", &CCameraManager::AttachCamToPlayer);
+  lua_register(_lua, "SetGoalTri", &CAIManager::SetGoalTri);
 }
 
-void CConsoleManager::Initialize()
-{	
-	string szState = "Update";
-	szState += CONSOLE_STATE;
-	CEventManager::GetInstance()->RegisterEvent("Shutdown", (IComponent*)this, Shutdown);
-	CEventManager::GetInstance()->RegisterEvent("InputStateChange", (IComponent*)this, ToggleConsole);
-	CEventManager::GetInstance()->RegisterEvent("KeyPressed", (IComponent*)this, Update);
+bool scd::lua_manager::load_lua_file(const std::string& file_name) {
+  std::string file_path = _script_root_directory + file_name;
 
-	RegisterCFunctions();
-	
-	LoadLuaFile("luatest.lua");
+  if (luaL_dofile(_lua, file_path.c_str())) {
+    const char* error = lua_tostring(_lua, -1);
+    MessageBoxA(0, error, file_path.c_str(), MB_OK);
+    lua_pop(_lua, 1);
+    return false;
+  }
 
-	lua_getglobal(m_pLua, "InitValues");
-	lua_pcall(m_pLua, 0, 0, 0);
+  return true;
 }
 
-void CConsoleManager::Shutdown(IEvent*, IComponent*)
-{
-	lua_close(GetInstance().m_pLua);
+void scd::lua_manager::toggle_console() {
+  if (((TStateEvent*)pEvent->GetData())->m_eToState != CONSOLE_STATE) {
+    hide_console();
+  } else {
+    display_console();
+  }
 }
 
-void CConsoleManager::RegisterCFunctions()
-{
-	lua_register(m_pLua, "CreateObj", 
-		&CObjectManager::CreateObject);
-	lua_register(m_pLua, "CreateMovementComponent", 
-		&CMovementManager::CreateMovementComponent);
-	lua_register(m_pLua, "CreateRenderComp",
-		&Renderer::CreateRenderComp);
-	lua_register(m_pLua, "CreateSpriteComp",
-		&CTextureManager::CreateSpriteComp);
-	lua_register(m_pLua, "CreateAIComponent",
-		&CAIManager::CreateAIComponent);
-	lua_register(m_pLua, "CreateCollideableComponent",
-		&CCollisionManager::CreateCollideableComponent);
-	lua_register(m_pLua, "CreateButtonComponent",
-		&CButtonComponent::CreateButtonComponent);
-	lua_register(m_pLua, "CreateSliderComponent",
-		&CSliderComponent::CreateSliderComponent);
-	lua_register(m_pLua, "SetSliderValue",
-		&CSliderComponent::SetSliderValue);
-	lua_register(m_pLua, "CreateScrollerComponent",
-		&CScrollerComponent::CreateScrollerComponent);
-	lua_register(m_pLua, "SetNextButtonComponent",
-		&CButtonComponent::SetNextButtonComponent);
-	lua_register(m_pLua, "CreateInventoryComp",
-		&CInventoryManager::CreateInventoryComp);
-	lua_register(m_pLua, "CreateAnimComp",
-		&CAnimateManager::CreateAnimComp);
-	lua_register(m_pLua, "BindObjects",
-		&CObjectManager::BindObjects);
-	lua_register(m_pLua, "print",
-		&CConsoleManager::Print);
-
-	lua_register(m_pLua, "CreateUpdateStateEvent",
-		&EventStructs::CreateUpdateStateEvent);
-	lua_register(m_pLua, "CreateStateEvent",
-		&EventStructs::CreateStateEvent);
-	lua_register(m_pLua, "CreateRenderEvent",
-		&EventStructs::CreateRenderEvent);
-	lua_register(m_pLua, "CreateRamEvent",
-		&EventStructs::CreateRamEvent);
-	lua_register(m_pLua, "CreateObjectEvent",
-		&EventStructs::CreateObjectEvent);
-	lua_register(m_pLua, "CreateInputEvent",
-		&EventStructs::CreateInputEvent);
-	lua_register(m_pLua, "CreateHeadingEvent",
-		&EventStructs::CreateHeadingEvent);
-	lua_register(m_pLua, "CreateGoalItemEvent",
-		&EventStructs::CreateGoalItemEvent);
-	lua_register(m_pLua, "CreateWeightClassEvent",
-		&EventStructs::CreateWeightClassEvent);
-	lua_register(m_pLua, "CreateGoalItemCollectedEvent",
-		&EventStructs::CreateGoalItemCollectedEvent);
-	lua_register(m_pLua, "CreateStatusEffectEvent",
-		&EventStructs::CreateStatusEffectEvent);
-	lua_register(m_pLua, "PushState",
-		&CStateManager::PushState);
-	lua_register(m_pLua, "StateChange",
-		&CStateManager::StateChange);
-	lua_register(m_pLua, "Back",
-		&CStateManager::Back);
-	lua_register(m_pLua, "SendLuaEvent",
-		&EventStructs::SendLuaEvent);
-	lua_register(m_pLua, "SetCartWeight",
-		&CMovementManager::SetCartWeight);
-	lua_register(m_pLua, "SetCharacterPicked",
-		&CHUDManager::SetCharacterPicked);
-	lua_register(m_pLua, "CreateShadowComponent",
-		&CShadowComp::CreateShadowComponent);
-	lua_register(m_pLua, "Collisions",
-		&CLevelManager::ToggleCollisionVision);
-	lua_register(m_pLua, "Geometry",
-		&CLevelManager::ToggleGeometryVision);
-	lua_register(m_pLua, "CreateInvulnerableVFXComponent",
-		&CInvulnerableVFX::CreateInvulnerableVFXComponent);
-	lua_register(m_pLua, "CreateSkidMarksComponent",
-		&CSkidMarks::CreateSkidMarksComponent);
-	lua_register(m_pLua, "CreatePBVFXComp",
-		&CPeanutButterVFXComp::CreatePBVFXComponent);
-	lua_register(m_pLua, "CreateScrollingUVComponent",
-		&CScrollingUVComp::CreateScrollingUVComponent);
-
-	lua_register(m_pLua, "SetKey",
-		&CKeybindsManager::SetKeyCallback);
-	lua_register(m_pLua, "SetDefaultKeys",
-		&CKeybindsManager::SetBindDefaultCallback);
-	lua_register(m_pLua, "LuaGetObjectByName",
-		&CObjectManager::GetObjectByName);
-	lua_register(m_pLua, "CreateAnimatedDonutComp",
-		&CAnimatedDonutComp::CreateAnimatedDonutComponent);
-	lua_register(m_pLua, "AttachCameraTo",
-		&CCameraManager::AttachCamToPlayer);
-	lua_register(m_pLua, "SetGoalTri",
-		&CAIManager::SetGoalTri);
+void scd::lua_manager::display_console() {
+  _is_active = true;
 }
 
-bool CConsoleManager::LoadLuaFile(string szFileName)
-{
-	string szFilePath = "Source/Scripts/";
-	szFilePath += szFileName;
-
-	if(luaL_dofile(m_pLua, szFilePath.c_str()))
-	{
-		const char* error = lua_tostring(m_pLua, -1);
-		MessageBoxA(0, error, szFileName.c_str(), MB_OK);
-		lua_pop(m_pLua, 1);
-		return false;
-	}
-	return true;
+void scd::lua_manager::hide_console() {
+  _is_active = false;
 }
 
-void CConsoleManager::ToggleConsole(IEvent* pEvent, IComponent*)
-{
-	CConsoleManager& pDebug = GetInstance();
+void scd::lua_manager::draw_console() {
+  if (!_is_active)
+    return;
 
-	if(((TStateEvent*)pEvent->GetData())->m_eToState != CONSOLE_STATE)
-	{
-		pDebug.HideConsole();
-	}
-	else
-	{
-		pDebug.DisplayConsole();
-	}
+  // So the text starts at the bottom of the screen and works its way up
+  int nTop     = 750 - ((_visible_line_count + 1) * 16);
+
+  Direct3DManager::GetInstance()->GetFont()->DrawText(
+    0,
+    _console_buffer,
+    -1,
+    {0, nTop, 500, 750},
+    0,
+    {1.0f, 1.0f, 1.0f, 1.0f});
 }
 
-void CConsoleManager::DisplayConsole()
-{
-	m_bActive = true;
+void scd::lua_manager::dump_stack() {
+  int i;
+  int top = lua_gettop(_lua);
+  for (i = 1; i <= top; ++i) {
+    int t = lua_type(_lua, i);
+    switch (t) {
+    case LUA_TSTRING: {
+      printf("%s", lua_tostring(_lua, i));
+      break;
+    }
+    case LUA_TBOOLEAN: {
+      printf(lua_toboolean(_lua, i) ? "true" : "false");
+      break;
+    }
+    case LUA_TNUMBER: {
+      printf("%g", lua_tonumber(_lua, i));
+      break;
+    }
+    default: {
+      printf("%s", lua_typename(_lua, t));
+      break;
+    }
+    };
+    printf(" ");
+  }
+  printf("\n");
 }
 
-void CConsoleManager::HideConsole()
-{
-	m_bActive = false;
+int scd::lua_manager::print(lua_State* pLua) {
+  const char* message = lua_tostring(pLua, -1);
+  lua_pop(pLua, 1);
+
+  print(message);
+
+  return 0;
 }
 
-void CConsoleManager::DrawConsole()
-{
-	if(m_bActive == false)
-		return;
+void scd::lua_manager::print(const std::string& message) {
+  _console_buffer += message;
+  if (_console_buffer.last() != '\n')
+    _console_buffer += '\n';
 
-	// So the text starts at the bottom of the screen and works its way up
-	int nTop = 750 - ((m_nNumLines+1) * 16);
-	RECT fontRec = {0, nTop, 500, 750};
+  if (++_visible_line_count > MAX_LINES) {
+    _console_buffer.erase(0, _console_buffer.find('\n') + 1);
+    --_visible_line_count;
+  }
 
-	Direct3DManager::GetInstance()->GetFont()->DrawText(0, m_szToDraw.c_str(),
-		-1, &fontRec, 0, scd::vector4(1.0f, 1.0f, 1.0f, 1.0f));
+  std::cout << message.c_str() << std::endl;
 }
 
-void CConsoleManager::StackDump()
-{
-	int i;
-	int top = lua_gettop(m_pLua);
-	for(i=1; i<=top; i++)
-	{
-		int t = lua_type(m_pLua, i);
-		switch(t)
-		{
-		case LUA_TSTRING:
-			{
-				printf("%s", lua_tostring(m_pLua, i));
-				break;
-			}
-		case LUA_TBOOLEAN:
-			{
-				printf(lua_toboolean(m_pLua, i) ? "true" : "false");
-				break;
-			}
-		case LUA_TNUMBER:
-			{
-				printf("%g", lua_tonumber(m_pLua, i));
-				break;
-			}
-		default:
-			{
-				printf("%s", lua_typename(m_pLua, t));
-				break;
-			}
-		};
-		printf(" ");
-	}
-	printf("\n");
+void scd::lua_manager::execute(const std::string& lua_code) {
+  luaL_dostring(_lua, lua_code.c_str());
 }
 
-int CConsoleManager::Print(lua_State* pLua)
-{
-	const char* szString = lua_tostring(pLua, -1);
-	lua_pop(pLua, 1);
+void scd::lua_manager::update() {
+  char ch = ((TConsoleEvent*)pEvent->GetData())->m_chKeyPressed;
 
-	Debug.Print(szString);
+  if (ch) {
+    if (ch == '\b' && _current_line.size() > 0) {
+      _current_line.erase(_current_line.end() - 1);
+      _console_buffer.erase(_console_buffer.end() - 1);
+      return;
+    } else {
+      _console_buffer += ch;
+    }
 
-	return 0;
+    if (ch == '\n') {
+      // Parse and Execute CurrLine
+      execute(_current_line);
+
+      _current_line.clear();
+      _current_line;
+      ++_visible_line_count;
+    } else {
+      _current_line += ch;
+    }
+  }
+
+  if (_visible_line_count > MAX_LINES) {
+    _console_buffer.erase(0, _console_buffer.find('\n') + 1);
+    --_visible_line_count;
+  }
 }
 
-void CConsoleManager::Print(string szTextToPrint)
-{
-	m_szToDraw += szTextToPrint;
-	if(*(m_szToDraw.end()-1) != '\n')
-		m_szToDraw += '\n';
-	
-	if(++m_nNumLines > MAX_LINES)
-	{
-		m_szToDraw.erase(0, m_szToDraw.find('\n')+1);
-		--m_nNumLines;
-	}
-
-	cout << szTextToPrint.c_str() << endl;
-}
-
-void CConsoleManager::CallLuaFunc(string szFunc)
-{
-	luaL_dostring(m_pLua, szFunc.c_str());
-}
-
-void CConsoleManager::Update(IEvent* pEvent, IComponent*)
-{
-	CConsoleManager& pDebug = GetInstance();
-	char ch = ((TConsoleEvent*)pEvent->GetData())->m_chKeyPressed;
-
-	if(ch)
-	{
-		if(ch == '\b' && pDebug.m_szCurrLine.size() > 0)
-		{
-			pDebug.m_szCurrLine.erase(pDebug.m_szCurrLine.end()-1);
-			pDebug.m_szToDraw.erase(pDebug.m_szToDraw.end()-1);
-			return;
-		}
-		else
-		{
-			pDebug.m_szToDraw += ch;
-		}
-
-		if(ch == '\n')
-		{
-			// Parse and Execute CurrLine
-			pDebug.Parse(pDebug.m_szCurrLine);
-
-			pDebug.m_szCurrLine.clear();
-			pDebug.m_szCurrLine;
-			++pDebug.m_nNumLines;
-		}
-		else
-		{
-			pDebug.m_szCurrLine += ch;
-		}
-
-	}
-
-	if(pDebug.m_nNumLines > MAX_LINES)
-	{
-		pDebug.m_szToDraw.erase(0, pDebug.m_szToDraw.find('\n')+1);
-		--pDebug.m_nNumLines;
-	}
-}
-
-void CConsoleManager::Parse(string szCommand)
-{
-	// Parse the string for any possible commands (Run it through Lua)
-	CallLuaFunc(szCommand);
+void scd::lua_manager::parse(const std::string& command) {
+  call_lua_function(command);
 }

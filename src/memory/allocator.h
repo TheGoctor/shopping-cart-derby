@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "enums.h"
-
 #include <memory>
 
 namespace scd {

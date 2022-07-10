@@ -4,167 +4,96 @@
 //	Mod. Date		:	4/4/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
-//	Purpose			:	The CStateManager module controls the transitions of 
-//						states in our game by means of a state stack. 
+//	Purpose			:	The CStateManager module controls the transitions of
+//						states in our game by means of a state stack.
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _CSTATEMANAGER_H_
-#define _CSTATEMANAGER_H_
+#pragma once
 
+#include "core/containers.h"
+
+#include <atomic>
 #include <stack>
 
-extern "C"
-{
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
+namespace scd {
 
-#include "../Memory Manager/scd::allocator.h"
-#include "../../../Enums.h"
-
-class IEvent;
-class IComponent;
-class CEventManager;
-
-class CStateManager
-{
-	std::stack<EGameState, deque<EGameState, scd::allocator<EGameState>>> m_cStateStack; // The stack which contains the active states
-	CEventManager* m_pEM;
-
-	bool		m_bChangingState;
-
-	// Constructors, Destructors
-	CStateManager(void);
-	~CStateManager(void);
-	CStateManager(const CStateManager&);
-	CStateManager& operator=(const CStateManager&);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// PushState()	:	Pushes the passed in state
-	//
-	// Ins		:	EGameState	- The state to push
-	//
-	// Returns	:	void
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	void PushState(EGameState eGameState);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// PopState()	:	Pops the top state off the stack
-	//
-	// Returns	:	void
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	void PopState(void);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// ChangeState()	:	Pops the states off the stack and pushes the passed in 
-	//						state
-	//
-	// Returns	:	void
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	void ChangeState(EGameState eGameState);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Update()	:	Sends Update[State]Object events
-	//
-	// Ins		:	float	- Delta time
-	// 
-	// Returns	:	void
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	void Update(float fDT);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// Render()	:	Sends Render[State]Object events
-	//
-	// Returns	:	void
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	void Render(void);
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Function:	“Shutdown”
-	//
-	// Return:		void
-	//
-	// Parameters:	void
-	//
-	// Purpose:		This function is called when shutting the game down. This function shuts down all the singletons
-	//				and cleans up any memory that has been allocated.
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	void Shutdown(void);
-
-	////////////////////////////////////////////////////////////////////////////////
-	// ClearAllStates()	:	Pops all the active states off the stack
-	//
-	// Returns	:	void
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	void ClearAllStates(void);
-
-	// Helper Funcs
-	void PostEnableObjectsEvent(EGameState eGameState);
-	void PostDisableObjectsEvent(EGameState eGameState);
-	void PostInitObjectsEvent(EGameState eGameState);
-	void PostLoadObjectsEvent(EGameState eGameState);
-	void PostUnloadObjectsEvent(EGameState eGameState);
-	void PostInputChangeEvent(EGameState eGameState);
+class state_manager {
+public:
+  enum class game_state {
+    init,
+    main_menu,
+  };
 
 public:
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// GetInstance()	:	Returns the Singleton
-	//
-	// Returns	:	static CStateManager*
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	static CStateManager* GetInstance(void) 
-	{ 
-		static CStateManager cStateManager;
-		return &cStateManager; 
-	} 
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Init()	:	Initializes the State Manager Object
-	//
-	// Mod. Date		:	4/4/11
-	// Mod. Initials	:	JL
-	////////////////////////////////////////////////////////////////////////////////
-	void Init(void);
+  // Constructors, Destructors
+  state_manager();
+  ~state_manager();
+  state_manager(const state_manager&);
+  state_manager& operator=(const state_manager&);
 
-	// Callbacks
-	static void Update(IEvent* pcEvent, IComponent* pcSender);
-	static void Render(IEvent* pcEvent, IComponent* pcSender);
-	static void Shutdown(IEvent* pcEvent, IComponent* pcSender);
-	static void PushState(IEvent* pcEvent, IComponent* pcSender);
-	static void PopState(IEvent* pcEvent, IComponent* pcSender);
-	static void ChangeState(IEvent* pcEvent, IComponent* pcSender);
-	static void ChangeStateGameplay(IEvent* pcEvent, IComponent* pcSender);
-	static void PushPausedState(IEvent* pcEvent, IComponent* pcSender);
-	
-	
-	static void LoseFocus(IEvent* pcEvent, IComponent* pcSender);
-	
-	static int PushState(lua_State* pLua);
-	static int StateChange(lua_State* pLua);
-	static int Back(lua_State* pLua);
+  /**
+   * @brief Pushes a new state onto the stack.
+   *
+   * @param state The new state.
+   */
+  void push(game_state state);
 
+  /**
+   * @brief Pops the current state off the stack.
+   */
+  void pop();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // ChangeState()	:	Pops the states off the stack and pushes the passed in
+  //						state
+  //
+  // Returns	:	void
+  //
+  // Mod. Date		:	4/4/11
+  // Mod. Initials	:	JL
+  ////////////////////////////////////////////////////////////////////////////////
+  void change_state(game_state state);
+
+  /**
+   * @brief Sends update events for the current state.
+   *
+   * @param dt Time since the last update in seconds.
+   */
+  void update(float dt);
+
+  /**
+   * @brief Sends render events for the current state.
+   */
+  void render();
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // ClearAllStates()	:	Pops all the active states off the stack
+  //
+  // Returns	:	void
+  //
+  // Mod. Date		:	4/4/11
+  // Mod. Initials	:	JL
+  ////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @brief Pops all actives states off the state stack.
+   */
+  void clear();
+
+  // Helper Funcs
+  void PostEnableObjectsEvent(game_state eGameState);
+  void PostDisableObjectsEvent(game_state eGameState);
+  void PostInitObjectsEvent(game_state eGameState);
+  void PostLoadObjectsEvent(game_state eGameState);
+  void PostUnloadObjectsEvent(game_state eGameState);
+  void PostInputChangeEvent(game_state eGameState);
+
+private:
+  // The stack which contains the active states
+  std::stack<game_state, scd::deque<game_state>> _state_stack;
+
+  std::weak_ptr<class event_manager> _event_manager;
+
+  std::atomic_bool _is_changing_state;
 };
 
-#endif
+} // namespace scd
