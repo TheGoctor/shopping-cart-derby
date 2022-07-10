@@ -8,13 +8,13 @@ using namespace EventStructs;
 
 CMovementManager::CMovementManager()
 {
-	CEventManager::GetInstance()->RegisterEvent("Shutdown", (scd::base_component*)GetInstance(), Shutdown);
+	event_manager.register_event("Shutdown", (scd::base_component*)GetInstance(), Shutdown);
 }
 
 void CMovementManager::Shutdown(IEvent*, scd::base_component*)
 {
 	CMovementManager* pM = GetInstance();
-	std::map<unsigned int, CMovement*, less<unsigned int>, 
+	std::map<unsigned int, CMovement*, less<unsigned int>,
 		scd::allocator<pair<unsigned int, CMovement*>>>::iterator pIter;
 	pIter = pM->m_cMovements.begin();
 	while(pIter != pM->m_cMovements.end())
@@ -26,13 +26,13 @@ void CMovementManager::Shutdown(IEvent*, scd::base_component*)
 }
 bool CMovementManager::PlayerIsInvincible(scd::object* pPlayer)
 	{
-		std::map<unsigned int, CMovement*, less<unsigned int>, scd::allocator<pair<unsigned int, 
+		std::map<unsigned int, CMovement*, less<unsigned int>, scd::allocator<pair<unsigned int,
 			CMovement*>>>::iterator pPlayerIter = m_cMovements.find(pPlayer->GetID());
 		return (*pPlayerIter).second->GetPlayerInvulnerable();
 	}
 float CMovementManager::GetPlayerSpeed(scd::object* pPlayer)
 {
-	std::map<unsigned int, CMovement*, less<unsigned int>, scd::allocator<pair<unsigned int, 
+	std::map<unsigned int, CMovement*, less<unsigned int>, scd::allocator<pair<unsigned int,
 		CMovement*>>>::iterator pPlayerIter = m_cMovements.find(pPlayer->GetID());
 	return (*pPlayerIter).second->GetPlayerSpeed();
 }
@@ -51,7 +51,7 @@ int CMovementManager::SetCartWeight(lua_State* pLua)
 	int nPlayerNum = lua_tointeger(pLua, -2);
 	int nWeight = lua_tointeger(pLua, -1);
 
-	std::map<unsigned int, CMovement*, less<unsigned int>, 
+	std::map<unsigned int, CMovement*, less<unsigned int>,
 		scd::allocator<pair<unsigned int, CMovement*>>>::iterator iter;
 	iter = GetInstance()->m_cMovements.begin();
 
@@ -79,7 +79,7 @@ CMovement* CMovementManager::CreateMovementComponent(scd::object* pObj)
 	static int nNumCreated = 0;
 
 	CMovement* comp = MMNEW(CMovement);
-	
+
 	comp->SetObject(pObj);
 	comp->SetPlayerNumber(nNumCreated);
 	comp->Init();
@@ -107,13 +107,13 @@ CMovement* CMovementManager::CreateMovementComponent(scd::object* pObj)
 
 	return comp;
 }
- 
+
 
 CMovement* CMovementManager::GetMovementComponent(scd::object* pOwner)
 {
 	CMovementManager* mgr = GetInstance();
 
-	std::map<unsigned int, CMovement*, less<unsigned int>, 
+	std::map<unsigned int, CMovement*, less<unsigned int>,
 		scd::allocator<pair<unsigned int, CMovement*>>>::iterator iter;
 	iter = mgr->m_cMovements.begin();
 

@@ -8,17 +8,11 @@
           When created, Init should be called and a EHeldItemType
           should be given.
  ******************************************************************************/
-#ifndef _CHELDITEMCOMPONENT_H_
-#define _CHELDITEMCOMPONENT_H_
+#pragma once
 
-#include "scd::base_component.h"
+#include "core/base_component.h"
 
-class scd::object;
-class IEvent;
-class scd::base_component;
-struct TSpawnLocation;
-class CRenderComponent;
-enum EHeldItemType;
+namespace scd {
 
 class CHeldItemComponent : public scd::base_component {
   scd::object* m_pParent;
@@ -105,8 +99,8 @@ public:
   /*****************************************************************
    * Update()	Update call
    *
-   * Ins:				IEvent*		-	TUpdateStateEvent*
-   *					scd::base_component*	-	CHeldItemComponent*
+   * Ins:				IEvent*		-
+   *TUpdateStateEvent* scd::base_component*	-	CHeldItemComponent*
    *
    * Outs:
    *
@@ -121,8 +115,8 @@ public:
    * HeldItemCollected()	Called when a Held Item was collected.
    *						Calls despawn on the Held Item.
    *
-   * Ins:				IEvent*		-	THeldItemCollected*
-   *					scd::base_component*	-	CHeldItemComponent*
+   * Ins:				IEvent*		-
+   *THeldItemCollected* scd::base_component*	-	CHeldItemComponent*
    *
    * Outs:
    *
@@ -135,11 +129,11 @@ public:
 
   /*****************************************************************
    * HeldItemCollision()	Called when a Held Item was collided with by
-   *						a player. Sends out the HeldItemCollected event
-   *						and the BlueLightSpecialDespawned event
+   *						a player. Sends out the HeldItemCollected
+   *event and the BlueLightSpecialDespawned event
    *
-   * Ins:				IEvent*		-	THeldItemCollected*
-   *					scd::base_component*	-	CHeldItemComponent*
+   * Ins:				IEvent*		-
+   *THeldItemCollected* scd::base_component*	-	CHeldItemComponent*
    *
    * Outs:
    *
@@ -154,7 +148,8 @@ public:
    * PauseUpdateCallback()	Allows us to render in pause state
    *
    * Ins:				IEvent*		-
-   *					scd::base_component*	-	CHeldItemComponent*
+   *					scd::base_component*	-
+   *CHeldItemComponent*
    *
    * Outs:
    *
@@ -182,4 +177,4 @@ public:
   }
 };
 
-#endif // _CHELDITEMCOMPONENT_H_
+} // namespace scd

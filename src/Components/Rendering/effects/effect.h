@@ -7,327 +7,213 @@
 //	Purpose			:	Lets an Object have a Effect
 ////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////
-// Header Protection
-///////////////////////////////////////////////////////////////////////////////
-#ifndef _CEFFECTCOMPONENT_H_
-#define _CEFFECTCOMPONENT_H_
+#pragma once
 
-///////////////////////////////////////////////////////////////////////////////
-// Includes
-///////////////////////////////////////////////////////////////////////////////
-#include <list>
-#include <map>
-using namespace std;
-#include "..\\..\\IComponent.h"
-#include "..\\..\\Managers\\Global Managers\\Memory Manager\\scd::allocator.h"
-#include "..\\..\\Managers\\Global Managers\\Rendering Managers\\CParticleEmitter.h"
+#include "core/base_component.h"
+#include "rendering/particle_emitter.h"
 
-///////////////////////////////////////////////////////////////////////////////
-// Foward Declares
-///////////////////////////////////////////////////////////////////////////////
-class CRenderComponent;
-class IEvent;
-class CObject;
-class CFrame;
+namespace scd {
+enum EEmitterCompType {
+  EC_TYPE_MIN,                  // 0
+  EC_TYPE_GOAL_ITEM,            // 1
+  EC_TYPE_GOAL_ITEM_COLLECTION, // 2
+  EC_TYPE_CART_COLLISION_CRASH, // 3
+  EC_TYPE_CART_SMOKE,           // 4
+  EC_TYPE_CART_MUD,             // 5
+  EC_TYPE_BOOST,                // 6
+  EC_TYPE_TURKEY_STUN,          // 8
+  EC_TYPE_TURKEY_TRAIL,         // 9
+  EC_TYPE_PIE_TRAIL,            // 10
+  EC_TYPE_CHICKEN_INV,          // 11
+  EC_TYPE_BANANA_SLIP,          // 12
+  EC_TYPE_PEANUT_SQUISH,        // 13
+  EC_TYPE_JAM_USE,              // 14
+  EC_TYPE_JAM_HIT_FALL,         // 15
+  EC_TYPE_JAM_HIT_FALL_B,       // 16
+  EC_TYPE_JAM_HIT_POPUP,        // 17
+  EC_TYPE_DONUT_USE,            // 18
+  EC_TYPE_PIE_HIT,              // 19
+  EC_TYPE_FIREWORK_TRAIL,       // 20
+  EC_TYPE_FIREWORK_BURST,       // 21
+  EC_TYPE_COL_BURST,            // 22
+  EC_TYPE_CONFETTI,             // 23
+  EC_TYPE_CAUTION,              // 24
+  EC_TYPE_MAX
+}; // 25
 
-///////////////////////////////////////////////////////////////////////////////
-// Enumerations
-///////////////////////////////////////////////////////////////////////////////
-enum EEmitterCompType	  { EC_TYPE_MIN,					// 0
-							EC_TYPE_GOAL_ITEM,				// 1
-							EC_TYPE_GOAL_ITEM_COLLECTION,	// 2
-							EC_TYPE_CART_COLLISION_CRASH,	// 3
-							EC_TYPE_CART_SMOKE,				// 4
-							EC_TYPE_CART_MUD,				// 5
-							EC_TYPE_BOOST,					// 6
-							EC_TYPE_TURKEY_STUN,			// 8
-							EC_TYPE_TURKEY_TRAIL,			// 9
-							EC_TYPE_PIE_TRAIL,				// 10
-							EC_TYPE_CHICKEN_INV,			// 11
-							EC_TYPE_BANANA_SLIP,			// 12
-							EC_TYPE_PEANUT_SQUISH,			// 13
-							EC_TYPE_JAM_USE,				// 14
-							EC_TYPE_JAM_HIT_FALL,			// 15
-							EC_TYPE_JAM_HIT_FALL_B,			// 16
-							EC_TYPE_JAM_HIT_POPUP,			// 17
-							EC_TYPE_DONUT_USE,				// 18
-							EC_TYPE_PIE_HIT,				// 19
-							EC_TYPE_FIREWORK_TRAIL,			// 20
-							EC_TYPE_FIREWORK_BURST,			// 21
-							EC_TYPE_COL_BURST,				// 22
-							EC_TYPE_CONFETTI,				// 23
-							EC_TYPE_CAUTION,				// 24
-							EC_TYPE_MAX };					// 25
+typedef scd::map<CParticleEmitter*, CRenderComponent*> EmitterRenderCompMap;
 
-///////////////////////////////////////////////////////////////////////////////
-// Type Definitions
-///////////////////////////////////////////////////////////////////////////////
-typedef map<CParticleEmitter*, CRenderComponent*, less<CParticleEmitter*>,
-		scd::allocator<pair<CParticleEmitter*, CRenderComponent*>>> EmitterRenderCompMap;
+struct effect_data {
+  EmitterRenderCompMap m_cEmitterRenderComps; // Map of RenderComps (Key =
+                                              // Emitter, Data = Render Comps)
+  float m_fCooldown;                          // Cooldown Timer
+  float m_fLifespan;                          // Lifespane (Switch to Burst)
+  float m_fTimer;                             // Timer to Turn On
+  float m_fDeadTimer;                         // Dead Timer
+  int m_nEmitterCount;                        // Count
+  EEmitterCompType m_eType;                   // Type
+  bool m_bOn;                                 // On
 
-///////////////////////////////////////////////////////////////////////////////
-// Effect Structure
-///////////////////////////////////////////////////////////////////////////////
-struct TEffect
-{
-	///////////////////////////////////////////////////////////////////////////
-	// Data Members
-	///////////////////////////////////////////////////////////////////////////
+  effect_data();
+  ~effect_data();
 
-		EmitterRenderCompMap m_cEmitterRenderComps; // Map of RenderComps (Key = Emitter, Data = Render Comps)
-		float m_fCooldown;							// Cooldown Timer
-		float m_fLifespan;							// Lifespane (Switch to Burst)
-		float m_fTimer;								// Timer to Turn On
-		float m_fDeadTimer;							// Dead Timer
-		int m_nEmitterCount;						// Count
-		EEmitterCompType m_eType;					// Type
-		bool m_bOn;									// On
+  /**
+   * @brief Updates the effect's timers and emitters, and renders the effects.
+   *
+   * @param dt The number of seconds since the last update.
+   */
+  void update(float dt);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Constructor
-	///////////////////////////////////////////////////////////////////////////
-	TEffect(void);
+  // On/Off (All Emitters)
+  void SwitchOnOffEmitters(bool bOn);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Destructor
-	///////////////////////////////////////////////////////////////////////////
-	~TEffect(void);
+  // On Target (All Emitters)
+  void SetOnTarget(bool bOnTarget);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Function: “Update”
-	//
-	// Return: void
-	//
-	// Parameters: float fDT - The time since the last Frame
-	//
-	// Purpose: This Functions is used to Handle Updating the Effects by
-	//			Updating Timers, Emitters and Rendering the Effects.
-	///////////////////////////////////////////////////////////////////////////
-	void Update(float fDT);
+  // Continuous (All Emitters)
+  void SetContinuous(bool bContinuous);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Function: “Shutdown”
-	//
-	// Return: void
-	//
-	// Parameters: void
-	//
-	// Purpose: This Functions is used to Handle Shuting down Emitter Objects
-	//			by Destroying the Objects associated with each Sub-Emitter on
-	//			Destruction of Parent Objects.
-	///////////////////////////////////////////////////////////////////////////
-	void Shutdown(void);
+  // Parent Frame (All Emitters)
+  void SetParentFrame(CFrame* pFrame);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Mutators
-	///////////////////////////////////////////////////////////////////////////
+  // Effect Timer (All Emitters)
+  void SetETimer(float fTimer) { m_fTimer = fTimer; }
 
-		// On/Off (All Emitters)
-		void SwitchOnOffEmitters(bool bOn);
+  // Dead Timer (All Emitters)
+  void SetDeadTimer(float fTimer) { m_fDeadTimer = fTimer; }
 
-		// On Target (All Emitters)
-		void SetOnTarget(bool bOnTarget);
+  // Context (Passed in Emitter)
+  void ChangeContext(
+      EParticleEmitterType eEmitterType,
+      unsigned int uRenderContextIdx);
 
-		// Continuous (All Emitters)
-		void SetContinuous(bool bContinuous);
-
-		// Parent Frame (All Emitters)
-		void SetParentFrame(CFrame* pFrame);
-
-		// Effect Timer (All Emitters)
-		void SetETimer(float fTimer) { m_fTimer = fTimer; }
-
-		// Dead Timer (All Emitters)
-		void SetDeadTimer(float fTimer) { m_fDeadTimer = fTimer; }
-
-		// Context (Passed in Emitter)
-		void ChangeContext(EParticleEmitterType eEmitterType,
-			unsigned int uRenderContextIdx);
-		
-		// Animation Frame (Passed in Emitter)
-		void SetFrame(EParticleEmitterType eEmitterType, int nFrame);
+  // Animation Frame (Passed in Emitter)
+  void SetFrame(EParticleEmitterType eEmitterType, int nFrame);
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// Type Definitions
-///////////////////////////////////////////////////////////////////////////////
-typedef map<EEmitterCompType, TEffect, less<EEmitterCompType>,
-		scd::allocator<pair<EEmitterCompType, TEffect>>> EffectMap;
+typedef scd::map<EEmitterCompType, TEffect> EffectMap;
 
-///////////////////////////////////////////////////////////////////////////////
-// Effect Component Class
-///////////////////////////////////////////////////////////////////////////////
-class CEffectComponent : public IComponent
-{
+namespace component {
+
+class effect : public scd::base_component {
 private:
+  EffectMap m_cEffectMap; // Map of Effects
 
-	///////////////////////////////////////////////////////////////////////////
-	// Data Members
-	///////////////////////////////////////////////////////////////////////////
+  void on_update(float dt);
 
-		CObject* m_pcParent;	// Parent Object
-		EffectMap m_cEffectMap;	// Map of Effects
-
-	///////////////////////////////////////////////////////////////////////////
-	// Event Handlers
-	///////////////////////////////////////////////////////////////////////////
-
-		///////////////////////////////////////////////////////////////////////
-		// Function: “Update”
-		//
-		// Return: void
-		//
-		// Parameters: float fDT - The time since the last Frame
-		//
-		// Purpose: This Functions is used to Handle Updating the Effects by
-		//			Updating each Effect in the Map.
-		///////////////////////////////////////////////////////////////////////
-		void Update(float fDT);
-
-		///////////////////////////////////////////////////////////////////////
-		// Function: “WinState”
-		//
-		// Return: void
-		//
-		// Parameters: void
-		//
-		// Purpose: This Functions is used to Handle Updating during Win State.
-		///////////////////////////////////////////////////////////////////////
-		void WinState(void);
+  void WinState();
 
 public:
+  effect(scd::object& owner);
+  ~effect();
 
-	///////////////////////////////////////////////////////////////////////////
-	// Function: “Shutdown”
-	//
-	// Return: void
-	//
-	// Parameters: void
-	//
-	// Purpose: This Functions is used to Handle Shuting down Emitter Objects
-	//			by Destroying the Objects associated with each Effect and 
-	//			Sub-Emitter on Destruction of Parent Objects.
-	///////////////////////////////////////////////////////////////////////////
-	void Shutdown(void);
-	
-	///////////////////////////////////////////////////////////////////////////
-	// Constructor
-	///////////////////////////////////////////////////////////////////////////
-	CEffectComponent(CObject* pParent);
+  ///////////////////////////////////////////////////////////////////////////
+  // Function: ï¿½AddEmitterï¿½
+  //
+  // Return: void
+  //
+  // Parameters: EEmitterCompType eType		     - Effect Type to Add
+  //			   CParticleEmitter* pEmitter	     - Emitter to Add
+  //			   CRenderComponent* pRenderComp     - Render Comp of
+  // Emitter 			   EParticleEmitterType eEmitterType - Emitter
+  // Type
+  //
+  // Purpose: This Functions is used to Add a Pair of Render Components and
+  //			Emitters to the Map of Effects.
+  ///////////////////////////////////////////////////////////////////////////
+  void add_emitter(
+      EEmitterCompType type,
+      const std::shared_ptr<particle_emitter>& emitter,
+      const std::shared_ptr<renderable>& render_component,
+      CFrame* parent_frame,
+      particle_emitter::emitter_type emitter_type);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Destructor
-	///////////////////////////////////////////////////////////////////////////
-	~CEffectComponent(void);
+  ///////////////////////////////////////////////////////////////////////
+  // Function: ï¿½UpdateCallbackï¿½
+  //
+  // Return: void
+  //
+  // Parameters: IEvent* pEvent	 - Event Data
+  //			   IComponent* pComp - The Listening Component
+  //
+  // Purpose: This Functions is used to Handle Updating the Passed in
+  //			Component's Effects and Check for end to Switch Effects
+  // Off.
+  ///////////////////////////////////////////////////////////////////////
+  void on_update(float dt);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Function: “AddEmitter”
-	//
-	// Return: void
-	//
-	// Parameters: EEmitterCompType eType		     - Effect Type to Add
-	//			   CParticleEmitter* pEmitter	     - Emitter to Add
-	//			   CRenderComponent* pRenderComp     - Render Comp of Emitter
-	//			   EParticleEmitterType eEmitterType - Emitter Type
-	//
-	// Purpose: This Functions is used to Add a Pair of Render Components and
-	//			Emitters to the Map of Effects.
-	///////////////////////////////////////////////////////////////////////////
-	void AddEmitter(EEmitterCompType eType, CParticleEmitter* pEmitter,
-		CRenderComponent* pRenderComp, CFrame* pParentFrame,
-		EParticleEmitterType eEmitterType);
+  ///////////////////////////////////////////////////////////////////////
+  // Function: ï¿½WinStateCallbackï¿½
+  //
+  // Return: void
+  //
+  // Parameters: IEvent* pEvent	 - Event Data
+  //			   IComponent* pComp - The Listening Component
+  //
+  // Purpose: This Functions is used to Handle Updating the Passed in
+  //			Component's Effects during Win State.
+  ///////////////////////////////////////////////////////////////////////
+  void on_win_state(scd::event& pEvent);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Event Callbacks
-	///////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  // Function: ï¿½DestroyObjectCallbackï¿½
+  //
+  // Return: void
+  //
+  // Parameters: IEvent* pEvent	 - Event Data
+  //			   IComponent* pComp - The Listening Component
+  //
+  // Purpose: This Functions is used to Handle Shutting down all Effects
+  //			associated with the Parent Object on Destruction.
+  ///////////////////////////////////////////////////////////////////////
+  void on_destroy_object(scd::event& pEvent);
 
-		///////////////////////////////////////////////////////////////////////
-		// Function: “UpdateCallback”
-		//
-		// Return: void
-		//
-		// Parameters: IEvent* pEvent	 - Event Data
-		//			   IComponent* pComp - The Listening Component
-		//
-		// Purpose: This Functions is used to Handle Updating the Passed in
-		//			Component's Effects and Check for end to Switch Effects Off.
-		///////////////////////////////////////////////////////////////////////
-		static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
+  // Cooldown Timer (Passed in Effect)
+  float cooldown(EEmitterCompType eType) const {
+    return m_cEffectMap[eType].m_fCooldown;
+  }
 
-		///////////////////////////////////////////////////////////////////////
-		// Function: “WinStateCallback”
-		//
-		// Return: void
-		//
-		// Parameters: IEvent* pEvent	 - Event Data
-		//			   IComponent* pComp - The Listening Component
-		//
-		// Purpose: This Functions is used to Handle Updating the Passed in
-		//			Component's Effects during Win State.
-		///////////////////////////////////////////////////////////////////////
-		static void WinStateCallback(IEvent* pEvent, IComponent* pComp);
+  // Active Flag (Passed in Effect)
+  bool is_emitter_active(EEmitterCompType eType) {
+    return m_cEffectMap[eType].m_bOn;
+  }
 
-		///////////////////////////////////////////////////////////////////////
-		// Function: “DestroyObjectCallback”
-		//
-		// Return: void
-		//
-		// Parameters: IEvent* pEvent	 - Event Data
-		//			   IComponent* pComp - The Listening Component
-		//
-		// Purpose: This Functions is used to Handle Shutting down all Effects
-		//			associated with the Parent Object on Destruction.
-		///////////////////////////////////////////////////////////////////////
-		static void DestroyObjectCallback(IEvent* pEvent, IComponent* pComp);
+  // Cooldown (Passed in Effect)
+  void SetCooldown(EEmitterCompType eType, float fCooldown);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Accessors
-	///////////////////////////////////////////////////////////////////////////
-	
-		// Parent Object
-		CObject* GetParent(void) { return m_pcParent; }
+  // Lifespan (Passed in Effect)
+  void SetLifespan(EEmitterCompType eType, float fLifespan);
 
-		// Cooldown Timer (Passed in Effect)
-		float GetCooldown(EEmitterCompType eType)
-		{ return m_cEffectMap[eType].m_fCooldown; }
+  // Coninuous (Passed in Effect)
+  void SetContinuous(EEmitterCompType eType, bool bContinuous);
 
-		// Active Flag (Passed in Effect)
-		bool GetIsActiveEmitter(EEmitterCompType eType)
-		{ return m_cEffectMap[eType].m_bOn; }
+  // Parent Frame (Passed in Effect)
+  void SetParentFrame(EEmitterCompType eType, CFrame* pFrame);
 
-	///////////////////////////////////////////////////////////////////////////
-	// Mutators
-	///////////////////////////////////////////////////////////////////////////
-	
-		// Cooldown (Passed in Effect)
-		void SetCooldown(EEmitterCompType eType, float fCooldown);
-		
-		// Lifespan (Passed in Effect)
-		void SetLifespan(EEmitterCompType eType, float fLifespan);
-	
-		// Coninuous (Passed in Effect)
-		void SetContinuous(EEmitterCompType eType, bool bContinuous);
-	
-		// Parent Frame (Passed in Effect)
-		void SetParentFrame(EEmitterCompType eType, CFrame* pFrame);
+  // On/Off (Passed in Effect)
+  void SwitchOnOffEmitters(EEmitterCompType eType, bool bOn);
 
-		// On/Off (Passed in Effect)
-		void SwitchOnOffEmitters(EEmitterCompType eType, bool bOn);
+  // On Target (Passed in Effect)
+  void SetOnTarget(EEmitterCompType eType, bool bOnTarget);
 
-		// On Target (Passed in Effect)
-		void SetOnTarget(EEmitterCompType eType, bool bOnTarget);
+  // Effect Timer (Passed in Effect)
+  void SetEffectTimer(EEmitterCompType eType, float fTimer);
 
-		// Effect Timer (Passed in Effect)
-		void SetEffectTimer(EEmitterCompType eType, float fTimer);
-		
-		// Dead Timer (Passed in Effect)
-		void SetDeadTimer(EEmitterCompType eType, float fTimer);
+  // Dead Timer (Passed in Effect)
+  void SetDeadTimer(EEmitterCompType eType, float fTimer);
 
-		// Context (Passed in Effect, Passed in Emitter)
-		void ChangeContext(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, unsigned int uRenderContextIdx);
- 
-		// Animation Frame (Passed in Effect, Passed in Emitter)
-		void SetFrame(EEmitterCompType eCompType, EParticleEmitterType eEmitterType, int nFrame);
+  // Context (Passed in Effect, Passed in Emitter)
+  void ChangeContext(
+      EEmitterCompType eCompType,
+      EParticleEmitterType eEmitterType,
+      unsigned int uRenderContextIdx);
+
+  // Animation Frame (Passed in Effect, Passed in Emitter)
+  void SetFrame(
+      EEmitterCompType eCompType,
+      EParticleEmitterType eEmitterType,
+      int nFrame);
 };
-#endif // _CEFFECTCOMPONENT_H_
+
+} // namespace component
+} // namespace scd

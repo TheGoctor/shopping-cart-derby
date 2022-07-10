@@ -42,33 +42,33 @@ m_bSoundPlayed(false)
 		m_bGoalItemCollectionState[item] = false;
 	}
 	//m_fSoundTimer = 0.0f;
-	CEventManager::GetInstance()->RegisterEvent("GoalItemCollected", this,
+	event_manager.register_event("GoalItemCollected", this,
 		GoalItemCollectedCallback);
-	CEventManager::GetInstance()->RegisterEvent("GoalItemSpawned", this,
+	event_manager.register_event("GoalItemSpawned", this,
 		GoalItemSpawnedCallback);
-	CEventManager::GetInstance()->RegisterEvent("PickupItemCollected", this,
+	event_manager.register_event("PickupItemCollected", this,
 		PickupItemCollectedCallback);
-	CEventManager::GetInstance()->RegisterEvent("CheckoutCollision", this,
+	event_manager.register_event("CheckoutCollision", this,
 		checkout);
-	CEventManager::GetInstance()->RegisterEvent("GoalItemInit", this,
+	event_manager.register_event("GoalItemInit", this,
 		GoalItemInitCallback);
-	CEventManager::GetInstance()->RegisterEvent("HeldItemCollected", this,
+	event_manager.register_event("HeldItemCollected", this,
 		HeldItemCollected);
-	CEventManager::GetInstance()->RegisterEvent("UseHeldItem1", this, UseHeldItem1);
-	CEventManager::GetInstance()->RegisterEvent("UseHeldItem2", this, UseHeldItem2);
-	CEventManager::GetInstance()->RegisterEvent("Stun", this, StunCallback);
+	event_manager.register_event("UseHeldItem1", this, UseHeldItem1);
+	event_manager.register_event("UseHeldItem2", this, UseHeldItem2);
+	event_manager.register_event("Stun", this, StunCallback);
 
-	CEventManager::GetInstance()->RegisterEvent("StealItem", this, HeldItemSteal);
+	event_manager.register_event("StealItem", this, HeldItemSteal);
 
-	CEventManager::GetInstance()->RegisterEvent("PlayerRammed", this, Rammed);
+	event_manager.register_event("PlayerRammed", this, Rammed);
 
 	std::string szEvent = "Update";
 	szEvent += GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
+	event_manager.register_event(szEvent, this, Update);
 
 	string szEventName = "InitObjects";
 	szEventName += (char)GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, this, HandleInit);	
+	event_manager.register_event(szEventName, this, HandleInit);
 
 	for(int i=0; i<MAX_GOAL_ITEMS; i++)
 	{
@@ -119,7 +119,7 @@ void CInventoryComponent::GoalItemCollectedCallback(IEvent* e, scd::base_compone
 			pComp->PlayAllItemCollectionSound(pCollector);
 		}
 		else
-		{	
+		{
 			pComp->PlayCollectionSound(pCollector);
 		}
 
@@ -170,7 +170,7 @@ void CInventoryComponent::PickupItemCollectedCallback(IEvent* e, scd::base_compo
 
 		}
 		else
-		{	
+		{
 			pComp->PlayCollectionSound(pCollector);
 		}
 	}
@@ -194,12 +194,12 @@ void CInventoryComponent::HeldItemCollected(IEvent* iEvent, scd::base_component*
 		}
 		if(pComp->m_eHeldItem[0] == NO_HELD_ITEM)
 		{
-			pComp->m_eHeldItem[0] = 
+			pComp->m_eHeldItem[0] =
 				CSpawningManager::GetInstance()->GetHeldItemType(pHeldItem);
 		}
 		else if(pComp->m_eHeldItem[1] == NO_HELD_ITEM)
 		{
-			pComp->m_eHeldItem[1] = 
+			pComp->m_eHeldItem[1] =
 				CSpawningManager::GetInstance()->GetHeldItemType(pHeldItem);
 		}
 	}
@@ -297,11 +297,11 @@ void CInventoryComponent::UseHeldItem(CInventoryComponent* pComp, int nIndex, fl
 		{
 			if(fAmount > 0.0f)
 			{
-				SendStatusEffectEvent("UsePieForward", pComp, pComp->GetParent(), fAmount);	
+				SendStatusEffectEvent("UsePieForward", pComp, pComp->GetParent(), fAmount);
 			}
 			else
 			{
-				SendStatusEffectEvent("UsePieBehind", pComp, pComp->GetParent(), fAmount);	
+				SendStatusEffectEvent("UsePieBehind", pComp, pComp->GetParent(), fAmount);
 			}
 			break;
 		}
@@ -343,7 +343,7 @@ void CInventoryComponent::Rammed(IEvent* e, scd::base_component* comp)
 	// if we were the ones rammed
 	if(pComp->m_pParent == pRammedObject)
 	{
-		
+
 		// make sure we have at least one item to drop
 		int nItemsInInventory = 0;
 		for(int item = 0; item < NUM_ITEMS_IN_LEVEL; ++item)
@@ -391,7 +391,7 @@ void CInventoryComponent::Rammed(IEvent* e, scd::base_component* comp)
 				}
 
 				// TODO: Send decrement scoreboard and lose item event to the hud
-				// Send goal item event "ItemDropped" 
+				// Send goal item event "ItemDropped"
 				SendGoalItemCollectedEvent("ItemDropped", pComp, (scd::object*)nItemID, pComp->m_pParent);
 				CWwiseSoundManager::GetInstance()->PlayTheSound(GOAL_ITEM_DROP, GLOBAL_ID);
 
@@ -401,7 +401,7 @@ void CInventoryComponent::Rammed(IEvent* e, scd::base_component* comp)
 				// object fly direction should be the rammERs heading. That's the way they're going innit?
 				scd::vector3 vRamDir(
 					pRammerObject->GetTransform()->GetLocalMatrix()._31,
-					pRammerObject->GetTransform()->GetLocalMatrix()._32, 
+					pRammerObject->GetTransform()->GetLocalMatrix()._32,
 					pRammerObject->GetTransform()->GetLocalMatrix()._33);
 
 				// Spawn the item
@@ -428,7 +428,7 @@ void CInventoryComponent::checkout(IEvent* e, scd::base_component* comp)
 	if(objEvent->m_pcObj == pComp->GetParent())
 	{
 		// check for full list
-		for(int i=0; i< NUM_ITEMS_IN_LEVEL; i++) 
+		for(int i=0; i< NUM_ITEMS_IN_LEVEL; i++)
 		{
 			if(pComp->m_bGoalItemCollectionState[i] == false) // if one of them isn't collected
 			{
@@ -480,7 +480,7 @@ void CInventoryComponent::GoalItemInitCallback(IEvent* e, scd::base_component* c
 
 	pComp->m_nGoalItemIndices[nSpawnedItemID] = pComp->m_nInitIndices;
 
-	pComp->m_nInitIndices++;	
+	pComp->m_nInitIndices++;
 }
 
 void CInventoryComponent::Update(IEvent* e, scd::base_component* iComponent)
@@ -490,7 +490,7 @@ void CInventoryComponent::Update(IEvent* e, scd::base_component* iComponent)
 
 	// update our stun timer
 	pInventoryComponent->m_fStunDuration -= tEvent->m_fDeltaTime;
-	pInventoryComponent->m_fSoundtimer	+= tEvent->m_fDeltaTime;	
+	pInventoryComponent->m_fSoundtimer	+= tEvent->m_fDeltaTime;
 }
 
 

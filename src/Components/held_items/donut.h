@@ -5,45 +5,42 @@
 #include "physics/collider.h"
 #include "physics/physics_manager.h"
 
-#define DONUTTIME 15.0f
-
 namespace scd::component {
 
 class donut : public scd::base_component {
 private:
-  float m_fTimeRemaining;
-  float m_fDuration;
-  scd::object* m_pParent;
-  scd::object* m_pAttachedObject;
-  bool m_bIsSpawned;
-  int DONUT_ID;
+  float _time_remaining{_duration};
+  float _duration{donut_effect_time};
+  scd::object* _attached_object{nullptr};
+  bool _is_spawned{true};
+  int _audio_id{-1};
+
+  static constexpr float donut_effect_time{15.0f};
 
 public:
-  donut(scd::object& owner)
-      : base_component(owner) {}
+  donut(scd::object& owner, scd::event_manager& event_manager);
 
-  static donut* create(scd::object& owner);
+  static std::shared_ptr<donut>
+  create(scd::object& owner, scd::event_manager& event_manager);
 
-  void first_init();
-
-  // call backs
-  static void update(event* cEvent, scd::base_component* cCenter);
-  static void on_player_collision(event* cEvent, scd::base_component* cCenter);
+  void on_update(float dt);
+  void on_player_collision(const scd::event::impact& data);
   void reinit();
   void despawn();
 
-  float time_remaining() const { return m_fTimeRemaining; }
-  float duration() const { return m_fDuration; }
-  bool is_spawned() const { return m_bIsSpawned; }
+  float time_remaining() const { return _time_remaining; }
+  float duration() const { return _duration; }
+  bool is_spawned() const { return _is_spawned; }
 
-  void set_time_remaining(float fRemaining) { m_fTimeRemaining = fRemaining; }
-  void set_duration(float fDuration) { m_fDuration = fDuration; }
-  void set_spawned(bool bSpawned) { m_bIsSpawned = bSpawned; }
+  void time_remaining(float value) { _time_remaining = value; }
+  void duration(float value) { _duration = value; }
+  void is_spawned(bool value) { _is_spawned = value; }
+
   void set_position(const scd::vector3& position) {
-    _owner.set_local_position(position);
+    _owner.local_position({position.x, 0.5f, position.z});
   }
 
-  void set_attached_object(scd::object* pObj) { m_pAttachedObject = pObj; }
+  void attach_object(scd::object& obj) { _attached_object = &obj; }
 };
 
 } // namespace scd::component

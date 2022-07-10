@@ -5,59 +5,43 @@
 #include "physics/collider.h"
 #include "physics/physics_manager.h"
 
-#define SOUPTIME 5.0f
-
 namespace scd::component {
 
 class chicken_soup : public scd::base_component {
 private:
-  float m_fTimeRemaining;
-  float m_fDuration;
-  scd::object* m_pParent;
-  bool m_bIsSpawned;
-  scd::object* m_pAttachedObject;
-  scd::vector3 m_vPosition; // world space position
-  int CHICKENSOUP_ID;
+  float _duration{10.0f};
+  float _time_remaining{_duration};
+  bool _is_spawned{true};
+  int _audio_id{-1};
+
+  scd::object* _attached_object;
+
+  static constexpr float soup_effect_duration{5.0f};
 
 public:
-  chicken_soup(const scd::object& owner)
-      : base_component(owner) {}
+  chicken_soup(scd::object& owner, scd::event_manager& event_manager);
 
-  static chicken_soup* create(const scd::object& owner);
-
-  void first_init();
+  static std::shared_ptr<chicken_soup>
+  create(scd::object& owner, scd::event_manager& event_manager);
 
   // call backs
-  static void on_update(IEvent* cEvent, scd::base_component* cCenter);
-  static void on_player_collision(IEvent* cEvent, scd::base_component* cCenter);
-  static void on_item_collision(IEvent* cEvent, scd::base_component* cCenter);
+  void on_update(float dt);
+  void on_player_collision(IEvent* cEvent);
+  void on_item_collision(IEvent* cEvent);
 
   void reinit();
   void despawn();
 
-  float time_remaining() const { return m_fTimeRemaining; }
-  float duration() const { return m_fDuration; }
-  bool is_spawned() const { return m_bIsSpawned; }
+  float time_remaining() const { return _time_remaining; }
+  float duration() const { return _duration; }
+  bool is_spawned() const { return _is_spawned; }
 
-  void set_time_remaining(float fRemaining) { m_fTimeRemaining = fRemaining; }
-  void set_position(const scd::vector3& vPos) {
-    _owner.set_local_position(vPos);
+  void time_remaining(float value) { _time_remaining = value; }
+  void set_position(const scd::vector3& position) {
+    _owner.local_position({position.x, 0.5f, position.z});
   }
 
-  void set_attached_object(scd::object* pObj) { m_pAttachedObject = pObj; }
-
-  // Warning, only call once
-  void set_duration(float fDuration) {
-    // only call this function once, you have been warned
-    static bool bHasBeenCalled = false;
-
-    if (!bHasBeenCalled) {
-      m_fDuration = fDuration;
-      bHasBeenCalled = true; // don't do it again, duration is not to be changed
-    }
-  }
-
-  void set_spawned(bool bIsSpawned) { m_bIsSpawned = bIsSpawned; }
+  void attach_object(scd::object* obj) { _attached_object = obj; }
 };
 
 } // namespace scd::component

@@ -31,7 +31,7 @@ void CPickupItemManager::Init(void)
 	{
 		scd::vector3 vObjPos(300.0f, 300.0f, 300.0f);
 		string szObjName = "PickupItem";
-		static int nNumCreated = 0; 
+		static int nNumCreated = 0;
 		szObjName += (nNumCreated + '0');
 		nNumCreated++;
 		scd::object* pPickupItem = scd::objectManager::GetInstance()->CreateObject(szObjName, vObjPos.x, vObjPos.y, vObjPos.z);
@@ -43,7 +43,7 @@ void CPickupItemManager::Init(void)
 
 		pComp->m_pRenderComp = Renderer::GetInstance()->CreateRenderComp(
 			pPickupItem, 33, 0, 2);
-		
+
 		// Add a collision component to pick it up
 		TSphere tsphere;
 		tsphere.cPosition = vObjPos;
@@ -56,13 +56,13 @@ void CPickupItemManager::Init(void)
 	string szEvent = "ShutdownObjects";
 	szEvent += GAMEPLAY_STATE;
 
-	CEventManager::GetInstance()->RegisterEvent(szEvent.c_str(), (scd::base_component*)this, Shutdown);
-	CEventManager::GetInstance()->RegisterEvent("SpawnPickupItem", (scd::base_component*)this, SpawnPickupItem);
+	event_manager.register_event(szEvent.c_str(), (scd::base_component*)this, Shutdown);
+	event_manager.register_event("SpawnPickupItem", (scd::base_component*)this, SpawnPickupItem);
 }
 
 void CPickupItemManager::Shutdown(IEvent*, scd::base_component*)
 {
-	list<CPickupItemComponent*, 
+	list<CPickupItemComponent*,
 		scd::allocator<CPickupItemComponent*>>::iterator pIter = GetInstance()->m_cPickupItemComps.begin();
 
 	cout << "Number of Pickup Items: " << GetInstance()->m_cPickupItemComps.size() << endl;
@@ -133,13 +133,13 @@ void CPickupItemManager::SpawnPickupItem(IEvent* cEvent, scd::base_component* /*
 	// add that left or right dir to the move dir
 	vMoveDir += vRightDir;
 	D3DXVec3Normalize(&vMoveDir, &vMoveDir);
-	
+
 
 	pComp->m_vDirectionToMove = vMoveDir;
 	pComp->m_nItemType = (EGoalItemType)nItemID;
 
 	// Send a Event
-	SendPickupItemEvent("PickupItemDropped", (scd::base_component*)GetInstance(), pComp->GetObject(), pComp->m_nItemType); 
+	SendPickupItemEvent("PickupItemDropped", (scd::base_component*)GetInstance(), pComp->GetObject(), pComp->m_nItemType);
 }
 
 
@@ -161,7 +161,7 @@ void CPickupItemManager::DespawnPickupItem(CPickupItemComponent* pComp)
 
 CPickupItemComponent* CPickupItemManager::GetPickupComp(EGoalItemType eType)
 {
-	list<CPickupItemComponent*, 
+	list<CPickupItemComponent*,
 		scd::allocator<CPickupItemComponent*>>::iterator pIter =
 		m_cPickupItemComps.begin();
 
@@ -187,7 +187,7 @@ CPickupItemComponent* CPickupItemManager::GetAPickupItem(EGoalItemType eType)
 	// iterate through the list and find the first instance not used
 	while(iter != GetInstance()->m_cPickupItemComps.end())
 	{
-		// if it's despawned 
+		// if it's despawned
 		if((*iter)->m_bSpawned == false)
 		{
 			// get out of here so we can change it further down
@@ -215,13 +215,13 @@ CPickupItemComponent* CPickupItemManager::GetAPickupItem(EGoalItemType eType)
 	// create another pickup item
 	scd::vector3 vObjPos(300.0f, 300.0f, 300.0f);
 	string szObjName = "PickupItem";
-	static int nNumCreated = 0; 
+	static int nNumCreated = 0;
 	szObjName += (char)(nNumCreated + '0');
 	nNumCreated++;
 	scd::object* pPickupItem = scd::objectManager::GetInstance()->CreateObject(szObjName);
-	
+
 	// Let us know it has been created (Note: This is immediate so that the PickupITemDropped message is always received second)
-	SendPickupItemEvent("PickupItemSpawned", (scd::base_component*)GetInstance(), pPickupItem, eType, PRIORITY_IMMEDIATE); 
+	SendPickupItemEvent("PickupItemSpawned", (scd::base_component*)GetInstance(), pPickupItem, eType, PRIORITY_IMMEDIATE);
 
 	CPickupItemComponent* pComp = CPickupItemComponent::CreatePickupItemComponent(pPickupItem, scd::vector3(0,0,0));
 	pComp->EventInit();

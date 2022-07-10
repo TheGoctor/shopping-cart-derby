@@ -66,9 +66,9 @@ void CCollisionManager::Init()
 	//register for events
 	string szEventName = "Update";
 	szEventName += GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName,
+	event_manager.register_event(szEventName,
 		(scd::base_component*)GetInstance(), Update);
-	CEventManager::GetInstance()->RegisterEvent("Shutdown",
+	event_manager.register_event("Shutdown",
 		(scd::base_component*)GetInstance(), Shutdown);
 	m_pReflect = MMNEW(scd::vector3);
 	m_pColpt = MMNEW(scd::vector3);
@@ -154,7 +154,7 @@ void CCollisionManager::Init()
 		{
 			//int x = 0;
 		}
-			
+
 
 		delete [] pos_buffer;
 		delete [] norm_buffer;
@@ -168,7 +168,7 @@ void CCollisionManager::Init()
 	}
 }
 
-CCollideable* CCollisionManager::CreateCollideableComponent(scd::object* pParent, 
+CCollideable* CCollisionManager::CreateCollideableComponent(scd::object* pParent,
 															bool isStatic, bool isReactor, unsigned int objType)
 {
 	//create a collideable with the passed in data
@@ -226,7 +226,7 @@ int CCollisionManager::CreateCollideableComponent(lua_State* pLua)
 			// 34 for Spheres
 			CRenderComponent* pRender = Renderer::GetInstance()->CreateRenderComp(
 				pColObj, 34, 0, RF_INDEXED_VERT);
-			pColObj->GetTransform()->ScaleFrame(tsphere.fRadius * 2.0f, 
+			pColObj->GetTransform()->ScaleFrame(tsphere.fRadius * 2.0f,
 				tsphere.fRadius * 2.0f, tsphere.fRadius * 2.0f);
 			if(pCollideable->GetObjType() != OBJCAMERA)
 				CLevelManager::GetInstance()->AddRenderCollision(pRender);
@@ -238,7 +238,7 @@ int CCollisionManager::CreateCollideableComponent(lua_State* pLua)
 		{
 			//d3dxvec3 centerpoint
 			//d3dxvec3[3] tU local x y and z axes
-			//d3dxvec3 tE positive halfwidth extents along each axis 
+			//d3dxvec3 tE positive halfwidth extents along each axis
 			TOBB tBox;
 			scd::object *pObject = (scd::object*)lua_topointer(pLua, -20);
 			bool bIsStatic = (lua_toboolean(pLua, -19) != 0);
@@ -271,14 +271,14 @@ int CCollisionManager::CreateCollideableComponent(lua_State* pLua)
 			scd::object *pColObj = scd::objectManager::GetInstance()->CreateObject(
 				szColObjID, 0.0f, 0.0f, 0.0f, 0.0f, pObject);
 
-			TAABB testbox;	
+			TAABB testbox;
 			testbox.cBoxMin = -1*scd::vector3(tBox.tE[0], tBox.tE[1], tBox.tE[2]);
 			testbox.cBoxMax = scd::vector3(tBox.tE[0], tBox.tE[1], tBox.tE[2]);
 			//			testbox.cBoxMin.z += 0.2f;
 			//			testbox.cBoxMax.z += 0.2f;
 			CRenderComponent* pRender = Renderer::GetInstance()->CreateRenderComp(
 				pColObj, ModelManager::GetInstance()->CreateCubeFromAABB(testbox), 0, RF_INDEXED_VERT);
-			pColObj->GetTransform()->ScaleFrame(tBox.tE[0] * 2.0f, 
+			pColObj->GetTransform()->ScaleFrame(tBox.tE[0] * 2.0f,
 				tBox.tE[1] * 2.0f, tBox.tE[2] * 2.0f);
 			CLevelManager::GetInstance()->AddRenderCollision(pRender);
 			lua_pop(pLua, 20);
@@ -381,7 +381,7 @@ void CCollisionManager::CondenseCollisionBoxes(void)
 
 				}
 				combinedboxes.push_back(combobox);
-				StaticBoxes.erase(boxIter2);	
+				StaticBoxes.erase(boxIter2);
 				StaticBoxes.erase(boxIter1);
 				boxIter1 = StaticBoxes.begin();
 				boxIter2 = StaticBoxes.begin();
@@ -464,7 +464,7 @@ void CCollisionManager::Update(IEvent* pEvent, scd::base_component* pComponent)
 void CCollisionManager::AddSepBox(CCollideable* cStatic, unsigned int nObjID)
 {
 	//adds the static component to the list of statics
-	pair<unsigned int, CCollideable*> pTest = 
+	pair<unsigned int, CCollideable*> pTest =
 		pair<unsigned int, CCollideable*>(nObjID, cStatic);
 	m_cSeparatedBoxes.insert(pTest); //make_pair(nObjID, cStatic));
 }
@@ -479,9 +479,9 @@ void CCollisionManager::RemoveSepBox(CCollideable* /*cStatic*/, unsigned int nOb
 	m_cSeparatedBoxes.erase(statiter);
 }
 void CCollisionManager::AddStatic(CCollideable* cStatic, unsigned int nObjID)
-{	
+{
 	//adds the static component to the list of statics
-	pair<unsigned int, CCollideable*> pTest = 
+	pair<unsigned int, CCollideable*> pTest =
 		pair<unsigned int, CCollideable*>(nObjID, cStatic);
 	m_cStaticObjects.insert(pTest); //make_pair(nObjID, cStatic));
 }
@@ -517,7 +517,7 @@ void CCollisionManager::RemoveNonStatic(CCollideable*, unsigned int nObjID)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////collision functions v
 //////////////////////////////////////////////////////////////////////////
-bool CCollisionManager::SphereToSphereIntersection(CCollideable* obj1, CCollideable* obj2, 
+bool CCollisionManager::SphereToSphereIntersection(CCollideable* obj1, CCollideable* obj2,
 												   scd::vector3* vReflect, bool bReact)
 {
 	TSphere s1, s2;
@@ -580,7 +580,7 @@ bool CCollisionManager::SphereToAABBIntersection(CCollideable* obj1, CCollideabl
 	//and the distance of that vector
 	float fDist = D3DXVec3Length(&vfromAABB);
 	//if that distance is less than the sphere's radius
-	if(fDist <= obj1->GetSphere().fRadius) 
+	if(fDist <= obj1->GetSphere().fRadius)
 	{
 		//egads!  collision!
 		if(!bReact)
@@ -593,7 +593,7 @@ bool CCollisionManager::SphereToAABBIntersection(CCollideable* obj1, CCollideabl
 		//translate the sphere by the normal * the penetration
 		obj1->GetParent()->GetTransform()->TranslateFrame( (boxNorm * (obj1->GetSphere().fRadius+0.1f - fDist)) );
 		//set the reflect vector to the normal
-		*vReflect = boxNorm;	
+		*vReflect = boxNorm;
 		//return collision
 		return true;
 	}
@@ -618,7 +618,7 @@ bool CCollisionManager::OBBToAABBIntersection(CCollideable* obj1, CCollideable* 
 		bA.tU[i] = obj1->GetOBB().tU[i];
 	//turn that axis aligned noise into something a little more oriented
 	bB.cCenterPoint = (obj2->GetAABB().cBoxMin + obj2->GetAABB().cBoxMax)/2.0f;
-	bB.tU[0] = scd::vector3(1.0f, 0.0f, 0.0f);	
+	bB.tU[0] = scd::vector3(1.0f, 0.0f, 0.0f);
 	bB.tU[1] = scd::vector3(0.0f, 1.0f, 0.0f);
 	bB.tU[2] = scd::vector3(0.0f, 0.0f, 1.0f);
 	bB.tE[0] = D3DXVec3Length( &(scd::vector3(bB.cCenterPoint.x, 0.0f, 0.0f) - scd::vector3(obj2->GetAABB().cBoxMax.x, 0.0f, 0.0f)) );
@@ -704,7 +704,7 @@ bool CCollisionManager::OBBToAABBIntersection(CCollideable* obj1, CCollideable* 
 	//no separating axis found, the OBBs must be intersecting
 	return true;
 }
-void CCollisionManager::ClosestPointToOBB(TOBB tBox, 
+void CCollisionManager::ClosestPointToOBB(TOBB tBox,
 										  scd::vector3 tTestPt, scd::vector3& tClosest)
 {
 	//returns the closest point to the OBb
@@ -765,7 +765,7 @@ bool CCollisionManager::SphereToOBBIntersection(CCollideable* obj1, CCollideable
 		obj2->GetParent()->GetTransform()->TranslateFrame(vreflect*0.25f);//tV * D3DXVec3Length(&vreflect));
 	}
 	//return your collision status
-	return collision;	
+	return collision;
 }
 bool CCollisionManager::OBBToOBBIntersection(CCollideable* obj1, CCollideable* obj2,
 											 scd::vector3* /*tPosition*/, bool bReact)
@@ -777,7 +777,7 @@ bool CCollisionManager::OBBToOBBIntersection(CCollideable* obj1, CCollideable* o
 	if(D3DXVec3Length(&vecto1) < 1.0f)
 	{
 		obj1->GetParent()->GetTransform()->TranslateFrame(vecto1);
-		obj2->GetParent()->GetTransform()->TranslateFrame(vecto2);		
+		obj2->GetParent()->GetTransform()->TranslateFrame(vecto2);
 	}
 	/////////////////////////////---end of check stuck
 	float fRA, fRB, fTrans;
@@ -976,7 +976,7 @@ bool CCollisionManager::PointInTriangle(TTriangle tTri, scd::vector3 tTestPt)
 		return false;
 	Edge1 = tTri.tVert2 - tTri.tVert1;
 	D3DXVec3Cross(&Norm1, &Edge1, &tTri.tNorm);
-	//half space test with 
+	//half space test with
 	if(HalfSpaceTest(Norm1, tTri.tVert1, tTestPt) > 0)
 		return false;
 	Edge2 = tTri.tVert0 - tTri.tVert2;
@@ -986,7 +986,7 @@ bool CCollisionManager::PointInTriangle(TTriangle tTri, scd::vector3 tTestPt)
 		return false;
 	return true;
 }
-int CCollisionManager::HalfSpaceTest(scd::vector3 tNorm, 
+int CCollisionManager::HalfSpaceTest(scd::vector3 tNorm,
 									 scd::vector3 tPlanePt, scd::vector3 tTest)
 {
 	scd::vector3 tV = tTest - tPlanePt;
@@ -1106,7 +1106,7 @@ int Test2DSegmentSegment(D3DXVECTOR2 a, D3DXVECTOR2 b, D3DXVECTOR2 c, D3DXVECTOR
 	float a1 = Signed2DTriArea(a, b, d);	// Compute winding of abd (+ or -)
 	float a2 = Signed2DTriArea(a, b, c);	// To intersect, must have sign opposite of a1
 
-	// If c and d are on different sides of ab, areas have different signs 
+	// If c and d are on different sides of ab, areas have different signs
 	if(a1 * a2 < 0.0f)
 	{
 		// Compute signs for a and b with respect to segment cd
@@ -1115,7 +1115,7 @@ int Test2DSegmentSegment(D3DXVECTOR2 a, D3DXVECTOR2 b, D3DXVECTOR2 c, D3DXVECTOR
 		// float a4 = Signed2DTriArea(c, d, b); // Must have opposite sign of a3
 		float a4 = a3 + a2 - a1;
 		// Points a and b on different sides of cd if areas have different signs
-		if(a3 * a4 < 0.0f) 
+		if(a3 * a4 < 0.0f)
 		{
 			// Segments intersect. Find intersection point along L(t) = a + t * (b - a).
 			// Given height h1 of an over cd and height h2 of b over cd,
@@ -1367,7 +1367,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 		vToprevpos = obj1->m_vPrevPos - pos;
 		obj1->GetParent()->GetTransform()->TranslateFrame(vToprevpos);
 		//send the impact event for the object that may be tunneled through
-		SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(), 
+		SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(),
 			obj1->m_cTunneledObject, obj1->m_vPrevNorm, PRIORITY_IMMEDIATE);
 		obj1->m_bNextFrameTunneling = false;
 		return true;
@@ -1390,8 +1390,8 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 						SendRamEvent("CartRam", (scd::base_component*)GetInstance(), obj2->GetParent(), obj1->GetParent());
 						// object 1 collided with object 2
 						scd::vector3 ColPoint = GetCollisionPtSpheres(obj1, obj2);
-						SendImpactEvent("CartCollision", (scd::base_component*)GetInstance(), obj1->GetParent(), 
-							obj2->GetParent(), *m_pReflect,PRIORITY_IMMEDIATE, ColPoint);		
+						SendImpactEvent("CartCollision", (scd::base_component*)GetInstance(), obj1->GetParent(),
+							obj2->GetParent(), *m_pReflect,PRIORITY_IMMEDIATE, ColPoint);
 						//	object 2 collided with object 1
 						SendImpactEvent("CartCollision", (scd::base_component*)GetInstance(), obj2->GetParent(),
 							obj1->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE, ColPoint);
@@ -1403,7 +1403,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 				{//player to goal item
 					if(SphereToOBBIntersection(obj2, obj1, m_pReflect, false))
 					{
-						SendGoalItemCollectedEvent("GoalItemCollision", (scd::base_component*)GetInstance(), 
+						SendGoalItemCollectedEvent("GoalItemCollision", (scd::base_component*)GetInstance(),
 							obj2->GetParent(), obj1->GetParent(), PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1437,7 +1437,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					velociraptor *= fsped;
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
 					{
-						SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(), 
+						SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(),
 							obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1448,7 +1448,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					if(SphereToSphereIntersection(obj1, obj2, m_pReflect, true))
 					{
 						// dont send so we just slide off
-						SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(), 
+						SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(),
 							obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1462,7 +1462,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					velociraptor *= fsped;
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
 					{
-						SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(), 
+						SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(),
 							obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1485,7 +1485,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 				{//player to used held item
 					if(SphereToOBBIntersection(obj2, obj1, m_pReflect, false))
 					{
-						SendImpactEvent("HeldItemInWorldPlayerCollision", obj1, 
+						SendImpactEvent("HeldItemInWorldPlayerCollision", obj1,
 							obj1->GetParent(), obj2->GetParent(), scd::vector3(0.0f, 1.0f, 0.0f), PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1562,7 +1562,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
 					{
 						obj1->GetParent()->GetTransform()->TranslateFrame((*m_pReflect * 0.5f));
-						SendImpactEvent("HeldItemInWorldCollision", obj1, 
+						SendImpactEvent("HeldItemInWorldCollision", obj1,
 							obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1580,7 +1580,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 					if(MovingSphereToAABBIntersection(obj1, obj2, velociraptor, m_pReflect, true))
 					{
 						obj1->GetParent()->GetTransform()->TranslateFrame((*m_pReflect * 0.5f));
-						SendImpactEvent("HeldItemInWorldCollision", obj1, 
+						SendImpactEvent("HeldItemInWorldCollision", obj1,
 							obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1599,7 +1599,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 						{
 							m_pReflect->x = 0.0f;
 						}
-						SendImpactEvent("HeldItemInWorldCollision", obj1, 
+						SendImpactEvent("HeldItemInWorldCollision", obj1,
 							obj1->GetParent(), obj2->GetParent(), *m_pReflect, PRIORITY_IMMEDIATE);
 						return true;
 					}
@@ -1690,7 +1690,7 @@ bool CCollisionManager::TestCollision(CCollideable* obj1, CCollideable* obj2)
 	};
 	return false;
 }
-bool CCollisionManager::MovingSphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2, 
+bool CCollisionManager::MovingSphereToAABBIntersection(CCollideable* obj1, CCollideable* obj2,
 													   scd::vector3 tVelocity, scd::vector3* /*vReflect*/, bool /*bReact*/)
 {
 	TSphere currsphere, intsphere, nextsphere;
@@ -1838,23 +1838,23 @@ int CCollisionManager::TestObjAgainstWall(CCollideable* obj1)
 		{
 			scd::vector3 v = p - s.cPosition;
 			scd::vector3 test = p + m_pWallTris[i].tNorm * (s.fRadius+ 0.1f);
-			if(HalfSpaceTest(m_pWallTris[i].tNorm, test, s.cPosition) < 1) 
+			if(HalfSpaceTest(m_pWallTris[i].tNorm, test, s.cPosition) < 1)
 			{
 				scd::transform& mymat = obj1->GetParent()->GetTransform()->GetLocalMatrix();
 				mymat._41 = test.x;
 				mymat._42 = test.y;
-				mymat._43 = test.z;			
+				mymat._43 = test.z;
 				if(obj1->GetObjType() == OBJTURKEY || obj1->GetObjType() == OBJPIE)
 				{
 					*m_pReflect = m_pWallTris[i].tNorm;
-					SendImpactEvent("HeldItemInWorldCollision", obj1, 
+					SendImpactEvent("HeldItemInWorldCollision", obj1,
 						obj1->GetParent(), (scd::object*)GetInstance(), *m_pReflect, PRIORITY_IMMEDIATE);
 					return 0;
 				}
 				else if(obj1->GetObjType() == OBJPLAYER)
 				{
 					*m_pReflect = m_pWallTris[i].tNorm;
-					SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(), 
+					SendImpactEvent("EnvironmentHit", (scd::base_component*)GetInstance(), obj1->GetParent(),
 						NULL, *m_pReflect, PRIORITY_IMMEDIATE);
 					return 0;
 				}
@@ -1890,11 +1890,11 @@ int CCollisionManager::TestObjAgainstWall(scd::vector3 &cameraFrame, scd::vector
 		{
 			scd::vector3 v = p - s.cPosition;
 			scd::vector3 test = p + m_pWallTris[i].tNorm * (s.fRadius+ 0.1f);
-			if(HalfSpaceTest(m_pWallTris[i].tNorm, test, s.cPosition) < 1) 
+			if(HalfSpaceTest(m_pWallTris[i].tNorm, test, s.cPosition) < 1)
 			{
 				cameraFrame.x = test.x;
 				cameraFrame.y = test.y;
-				cameraFrame.z = test.z;			
+				cameraFrame.z = test.z;
 			}
 		}
 	}
@@ -1908,7 +1908,7 @@ int CCollisionManager::TestObjAgainstWall(scd::vector3 &cameraFrame, scd::vector
 
 
 
-bool CCollisionManager::IntersectRayTriangle( const scd::vector3 &vert0, const scd::vector3 &vert1, const scd::vector3 &vert2, 
+bool CCollisionManager::IntersectRayTriangle( const scd::vector3 &vert0, const scd::vector3 &vert1, const scd::vector3 &vert2,
 											 const scd::vector3 &norm, const scd::vector3 &start, const scd::vector3 &d, float &t )
 {
 
@@ -1923,12 +1923,12 @@ bool CCollisionManager::IntersectRayTriangle( const scd::vector3 &vert0, const s
 
 	float dDotNorm =  D3DXVec3Dot(&d, &norm); // "angle" between rayDir and triNorm
 
-	// in front of tri         ||   facing opposite direction (aka toward triangle)   
+	// in front of tri         ||   facing opposite direction (aka toward triangle)
 	if(dDotNorm < -.01f)
 	{
 		return false;
 	}
-	// line segment to triangle 
+	// line segment to triangle
 	scd::vector3 sa = vert0 - start;
 	scd::vector3 sb = vert1 - start;
 	scd::vector3 sc = vert2 - start;

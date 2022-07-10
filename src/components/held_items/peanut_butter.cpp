@@ -12,44 +12,44 @@ peanut_butter::peanut_butter(scd::object& owner)
   _time_remaining = _duration;
   PEANUT_BUTTER_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
   // register for events
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "HeldItemInWorldPlayerCollision", this, PlayerCollision);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "HeldItemInWorldCollision", this, ItemCollision);
   string szEventName = "Update";
   szEventName += GAMEPLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
+  event_manager.register_event(szEventName, this, Update);
 
   szEventName = "Update";
   szEventName += PAUSE_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
   szEventName = "Update";
   szEventName += CONSOLE_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += PAUSE_OPTIONS_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += PAUSE_KEYBINDS_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += QUIT_CONFIRMATION_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
   szEventName = "Update";
   szEventName += IN_GAME_HOW_TO_PLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
   szEventName = "Update";
   szEventName += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 }
 

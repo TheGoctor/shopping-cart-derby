@@ -1,17 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
-// File:	“CInputManager.cpp”
+// File:	ï¿½CInputManager.cppï¿½
 //
 // Author: Mac Reichelt (MR)
-// 
-// Description: This class is used to manage all input from both the keyboard 
-//		and a gamepad, It sends enum values based upon the input it receives 
+//
+// Description: This class is used to manage all input from both the keyboard
+//		and a gamepad, It sends enum values based upon the input it receives
 //		from either device that correspond to the apporpriate action bound to
 //		those keys/buttons.
 //
 // Stipulations: There should only be one instance of the Input Manager at any
 //		given time.
 //
-// Interface: The CGame object is responsible for handling the creation and 
+// Interface: The CGame object is responsible for handling the creation and
 //		destruction of the Input Manager.
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,15 +79,15 @@ CInputManager::CInputManager()
 	m_tSteerLeft.m_nID				= CMD_STEERLEFT;
 	m_tSteerLeft.m_nControllerButton = 0; //LeftStick
 	m_tSteerLeft.m_chKeyboardKey	= DIK_LEFT;
-	
+
 	m_tSteerRight.m_nID				= CMD_STEERRIGHT;
 	m_tSteerRight.m_nControllerButton = 0; //LeftStick
 	m_tSteerRight.m_chKeyboardKey	= DIK_RIGHT;
-	
+
 	m_tShoveLeft.m_nID				= CMD_SHOVELEFT;
 	m_tShoveLeft.m_nControllerButton = XINPUT_GAMEPAD_LEFT_SHOULDER;
 	m_tShoveLeft.m_chKeyboardKey	= DIK_A;
-	
+
 	m_tShoveRight.m_nID				= CMD_SHOVERIGHT;
 	m_tShoveRight.m_nControllerButton = XINPUT_GAMEPAD_RIGHT_SHOULDER;
 	m_tShoveRight.m_chKeyboardKey	= DIK_S;
@@ -95,15 +95,15 @@ CInputManager::CInputManager()
 	m_tDrift.m_nID					= CMD_DRIFT;
 	m_tDrift.m_nControllerButton	= XINPUT_GAMEPAD_A; // A?
 	m_tDrift.m_chKeyboardKey		= DIK_LSHIFT;
-	
+
 	m_tUseItem1.m_nID				= CMD_USEITEM1;
 	m_tUseItem1.m_nControllerButton	= XINPUT_GAMEPAD_X; // A?
 	m_tUseItem1.m_chKeyboardKey		= DIK_Z;
-	
+
 	m_tUseItem2.m_nID				= CMD_USEITEM2;
 	m_tUseItem2.m_nControllerButton	= XINPUT_GAMEPAD_B; // A?
 	m_tUseItem2.m_chKeyboardKey		= DIK_X;
-	
+
 }
 
 //	Destructor
@@ -112,7 +112,7 @@ CInputManager::~CInputManager()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Function:	“GetInstance”
+// Function:	ï¿½GetInstanceï¿½
 //
 // Return:		CInputManager*	-	The instance of the class
 //
@@ -127,14 +127,14 @@ CInputManager* CInputManager::GetInstance()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Function:	“Initialize”
+// Function:	ï¿½Initializeï¿½
 //
 // Return:		void
 //
 // Parameters:	HWND hWnd			-	the handle to the window
 //				HINSTANCE hInstance	-	the handle to the instance
 //
-// Purpose:		This function is used to initialize the Input Manager. All 
+// Purpose:		This function is used to initialize the Input Manager. All
 //				DirectX objects are initialized	and devices are polled.
 ////////////////////////////////////////////////////////////////////////////////
 void CInputManager::Initialize(HWND hWnd, HINSTANCE hInstance)
@@ -142,7 +142,7 @@ void CInputManager::Initialize(HWND hWnd, HINSTANCE hInstance)
 	// Save the hWnd
 	m_hWnd = hWnd;
 
-	DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, 
+	DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
 		(void**)&m_pDin, 0);
 	m_pDin->CreateDevice(GUID_SysKeyboard, &m_pKeyboard, NULL);
 
@@ -165,16 +165,16 @@ void CInputManager::Initialize(HWND hWnd, HINSTANCE hInstance)
 	m_eGameState =  INTRO_STATE;
 #endif
 
-	CEventManager::GetInstance()->RegisterEvent("GetInput", (IComponent*)GetInstance(), GetInput);
-	CEventManager::GetInstance()->RegisterEvent("InputStateChange", (IComponent*)GetInstance(),
+	event_manager.register_event("GetInput", (IComponent*)GetInstance(), GetInput);
+	event_manager.register_event("InputStateChange", (IComponent*)GetInstance(),
 		InputStateChange);
-	CEventManager::GetInstance()->RegisterEvent("PlayerCreated", (IComponent*)GetInstance(), SetPlayer);
+	event_manager.register_event("PlayerCreated", (IComponent*)GetInstance(), SetPlayer);
 
 	InitKeyStrings();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Function:	“Shutdown”
+// Function:	ï¿½Shutdownï¿½
 //
 // Return:		void
 //
@@ -241,13 +241,13 @@ void CInputManager::Shutdown(IEvent*, IComponent*)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Function:	“ReadDevices”
+// Function:	ï¿½ReadDevicesï¿½
 //
 // Return:		void
 //
 // Parameters:	void
 //
-// Purpose:		This function is used to read the current devices and collect 
+// Purpose:		This function is used to read the current devices and collect
 //				info on their current state.
 ////////////////////////////////////////////////////////////////////////////////
 void CInputManager::ReadDevices()
@@ -261,10 +261,10 @@ void CInputManager::GetInput(IEvent*, IComponent*)
 {
 	// Read Input from Devices based on Current GameState
 	CInputManager* pIM = CInputManager::GetInstance();
-	
+
 	// Get Current Keyboard state
 	pIM->ReadDevices();
-	
+
 	// Toggle Fullscreen
 	if(KEYDOWN(pIM->m_chKeys, DIK_LALT) && KEYDOWN(pIM->m_chKeys, DIK_RETURN)
 		&& !KEYDOWN(pIM->m_chPrevKeys, DIK_RETURN)) // buffered input only on return
@@ -364,7 +364,7 @@ void CInputManager::GetInput(IEvent*, IComponent*)
 
 		}
 	};
-	
+
 	memcpy(pIM->m_chPrevKeys, pIM->m_chKeys, sizeof(pIM->m_chPrevKeys));
 }
 
@@ -395,7 +395,7 @@ void CInputManager::GetInputIntro()
 		m_bControllerConnected = false;
 	}
 
-	if(m_bControllerConnected) 
+	if(m_bControllerConnected)
 	{
 		if(m_pController->dwPacketNumber != m_dwPrevState)
 		{
@@ -421,15 +421,15 @@ void CInputManager::GetInputMenu()
 		SendInputEvent("Accept", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
 	if(BUFFERED_KEYDOWN(m_tBack.m_chKeyboardKey))
-	{		
+	{
 		SendInputEvent("Back", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
-	if(BUFFERED_KEYDOWN(m_tUp.m_chKeyboardKey) || 
+	if(BUFFERED_KEYDOWN(m_tUp.m_chKeyboardKey) ||
 		BUFFERED_KEYDOWN(DIK_UP))
 	{
 		SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
-	if(BUFFERED_KEYDOWN(m_tDown.m_chKeyboardKey)|| 
+	if(BUFFERED_KEYDOWN(m_tDown.m_chKeyboardKey)||
 		BUFFERED_KEYDOWN(DIK_DOWN))
 	{
 		SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
@@ -466,7 +466,7 @@ void CInputManager::GetInputMenu()
 		m_bControllerConnected = false;
 	}
 
-	if(m_bControllerConnected) 
+	if(m_bControllerConnected)
 	{
 ////////////////////////////////////////////////////////////////////////////////
 // THUMB STICK DEAD ZONE
@@ -474,25 +474,25 @@ void CInputManager::GetInputMenu()
 		if(m_pController->Gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Right
-			SendInputEvent("Right", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Right", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLX / 32767))); // <- Max Value
 		}
 		else if(m_pController->Gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Left
-			SendInputEvent("Left", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Left", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLX	/ -32767))); // <- Max Value
 		}
 		else if(m_pController->Gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Up
-			SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLY	/ 32767))); // <- Max Value
 		}
 		else if(m_pController->Gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Down
-			SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLY	/ -32767))); // <- Max Value
 		}
 ////////////////////////////////////////////////////////////////////////////////
@@ -543,15 +543,15 @@ void CInputManager::GetInputOptions()
 		SendInputEvent("Accept", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
 	if(BUFFERED_KEYDOWN(m_tBack.m_chKeyboardKey))
-	{		
+	{
 		SendInputEvent("Back", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
-	if(BUFFERED_KEYDOWN(m_tUp.m_chKeyboardKey) || 
+	if(BUFFERED_KEYDOWN(m_tUp.m_chKeyboardKey) ||
 		BUFFERED_KEYDOWN(DIK_UP))
 	{
 		SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
-	if(BUFFERED_KEYDOWN(m_tDown.m_chKeyboardKey)|| 
+	if(BUFFERED_KEYDOWN(m_tDown.m_chKeyboardKey)||
 		BUFFERED_KEYDOWN(DIK_DOWN))
 	{
 		SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
@@ -588,7 +588,7 @@ void CInputManager::GetInputOptions()
 		m_bControllerConnected = false;
 	}
 
-	if(m_bControllerConnected) 
+	if(m_bControllerConnected)
 	{
 ////////////////////////////////////////////////////////////////////////////////
 // THUMB STICK DEAD ZONE
@@ -596,25 +596,25 @@ void CInputManager::GetInputOptions()
 		if(m_pController->Gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Right
-			SendInputEvent("Right", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Right", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLX / 32767))); // <- Max Value
 		}
 		else if(m_pController->Gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Left
-			SendInputEvent("Left", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Left", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLX	/ -32767))); // <- Max Value
 		}
 		else if(m_pController->Gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Up
-			SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLY	/ 32767))); // <- Max Value
 		}
 		else if(m_pController->Gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Down
-			SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLY	/ -32767))); // <- Max Value
 		}
 ////////////////////////////////////////////////////////////////////////////////
@@ -664,7 +664,7 @@ void CInputManager::GetInputEndgame()
 	{
 		SendInputEvent("AcceptWinState", (IComponent*)GetInstance(), m_pPlayer0, 1.0f);
 	}
-	
+
 	if(KEYDOWN(m_chKeys, DIK_GRAVE) && !KEYDOWN(m_chPrevKeys, DIK_GRAVE))
 	{
 		SendStateEvent("PushState", (IComponent*)GetInstance(), CONSOLE_STATE);
@@ -689,12 +689,12 @@ void CInputManager::GetInputEndgame()
 		m_bControllerConnected = false;
 	}
 
-	if(m_bControllerConnected) 
+	if(m_bControllerConnected)
 	{
 ////////////////////////////////////////////////////////////////////////////////
 // THUMB STICK DEAD ZONE
 ////////////////////////////////////////////////////////////////////////////////
-		
+
 ////////////////////////////////////////////////////////////////////////////////
 
 		if(m_pController->dwPacketNumber != m_dwPrevState)
@@ -796,7 +796,7 @@ void CInputManager::GetInputGameplay()
 		m_bControllerConnected = false;
 	}
 
-	if(m_bControllerConnected) 
+	if(m_bControllerConnected)
 	{
 		// For throwing items forward/backwards
 		int nBackwards = 0;
@@ -807,38 +807,38 @@ void CInputManager::GetInputGameplay()
 		if(m_pController->Gamepad.sThumbLX > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Right
-			SendInputEvent("SteerRight", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("SteerRight", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLX / 32767.0f))); // <- Max Value
 		}
 		else if(m_pController->Gamepad.sThumbLX < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Left
-			SendInputEvent("SteerLeft", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("SteerLeft", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLX / -32767.0f))); // <- Max Value
 		}
 		if(m_pController->Gamepad.sThumbLY > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Up
-			SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Up", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLY / 32767.0f))); // <- Max Value
 			nBackwards = 1;
 		}
 		else if(m_pController->Gamepad.sThumbLY < -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
 			//	Move Down
-			SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Down", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.sThumbLY / -32767.0f))); // <- Max Value
 			nBackwards = -1;
 		}
 
 		if(m_pController->Gamepad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 		{
-			SendInputEvent("Accelerate", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Accelerate", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.bRightTrigger / 255.0f)));
 		}
 		if(m_pController->Gamepad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
 		{
-			SendInputEvent("Decelerate", (IComponent*)GetInstance(), m_pPlayer0, 
+			SendInputEvent("Decelerate", (IComponent*)GetInstance(), m_pPlayer0,
 				(float(m_pController->Gamepad.bLeftTrigger / 255.0f)));
 		}
 		if(m_pController->Gamepad.wButtons == m_tDrift.m_nControllerButton)

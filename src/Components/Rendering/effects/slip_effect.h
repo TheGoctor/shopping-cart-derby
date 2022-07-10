@@ -6,99 +6,92 @@
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Encapsulates the Slip VFX
 ////////////////////////////////////////////////////////////////////////////////
+#pragma once
 
-// Header Protexction
-#ifndef _CSLIPVFXCOMP_H_
-#define _CSLIPVFXCOMP_H_
+#include "components/component_manager.h"
+#include "components/rendering/effects/effect.h"
+#include "core/base_component.h"
+#include "core/object.h"
 
-// Includes
-#include "CEffectComponent.h"
-#include "..\\..\\IComponent.h"
-#include "..\\..\\CObject.h"
-#include "..\\..\\Managers\\Component Managers\\CComponentManager.h"
+namespace scd {
 
 // Slip VFX
-class CSlipVFXComp : public IComponent
-{
+class CSlipVFXComp : public scd::base_component {
 private:
+  // Parent Object
+  CObject* m_pParentObj;
 
-	// Parent Object
-	CObject* m_pParentObj;
+  // Emitter Objs
+  CObject* m_pLeftEmitter;
+  CObject* m_pRightEmitter;
 
-	// Emitter Objs
-	CObject* m_pLeftEmitter;
-	CObject* m_pRightEmitter;
+  // Effect Comps
+  CEffectComponent* m_pLeftEffect;
+  CEffectComponent* m_pRightEffect;
 
-	// Effect Comps
-	CEffectComponent* m_pLeftEffect;
-	CEffectComponent* m_pRightEffect;
+  // Cooldowns
+  float m_fSlowCooldown;
 
-	// Cooldowns
-	float m_fSlowCooldown;
+  // Handlers
+  void Slip(TStatusEffectEvent* pcEvent);
+  void Slow(TStatusEffectEvent* pcEvent);
+  void Update(float fDT);
 
-	// Handlers
-	void Slip(TStatusEffectEvent* pcEvent);
-	void Slow(TStatusEffectEvent* pcEvent);
-	void Update(float fDT);
-
-
-	// Helper Funcs
-	void CreateLeftDrip(void);
-	void CreateRightDrip(void);
+  // Helper Funcs
+  void CreateLeftDrip(void);
+  void CreateRightDrip(void);
 
 public:
+  // Get Auto-Manager
+  static CComponentManager<CSlipVFXComp>* GetManager(void) {
+    // Auto-Manager
+    static CComponentManager<CSlipVFXComp> m_cManager;
 
-	// Get Auto-Manager
-	static CComponentManager<CSlipVFXComp>* GetManager(void)
-	{
-		// Auto-Manager
-		static CComponentManager<CSlipVFXComp> m_cManager;
+    return &m_cManager;
+  }
 
-		return &m_cManager;
-	}
+  // Initalize
+  void Init(void);
 
-	// Initalize
-	void Init(void);
+  // Shutdown
+  void Shutdown(void);
 
-	// Shutdown
-	void Shutdown(void);
+  // Constructor
+  CSlipVFXComp(CObject* pParent)
+      : m_pParentObj(pParent)
+      , m_pLeftEmitter(NULL)
+      , m_pRightEmitter(NULL)
+      , m_pLeftEffect(NULL)
+      , m_pRightEffect(NULL)
+      , m_fSlowCooldown(0.0f) {
+    // Add to Auto Manager
+    GetManager()->Add(this);
 
-	// Constructor
-	CSlipVFXComp(CObject* pParent) : m_pParentObj(pParent), m_pLeftEmitter(NULL),
-									 m_pRightEmitter(NULL), m_pLeftEffect(NULL),
-									 m_pRightEffect(NULL), m_fSlowCooldown(0.0f)
-	{
-		// Add to Auto Manager
-		GetManager()->Add(this);
+    // Add Component to Parent
+    pParent->AddComponent(this);
 
-		// Add Component to Parent
-		pParent->AddComponent(this);
+    // Initalize
+    Init();
+  }
 
-		// Initalize
-		Init();
-	}
+  // Destructor
+  ~CSlipVFXComp(void) {
+    // Shutdown();
+    GetManager()->Remove(this);
+  }
 
-	// Destructor
-	~CSlipVFXComp(void)
-	{
-		//Shutdown();
-		GetManager()->Remove(this);
-	}
+  // Factory
+  static CSlipVFXComp* CreateSlipVFXComponent(CObject* pParent) {
+    return MMNEW(CSlipVFXComp(pParent));
+  }
 
-	// Factory
-	static CSlipVFXComp* CreateSlipVFXComponent(CObject* pParent)
-	{
-		return MMNEW(CSlipVFXComp(pParent));
-	}
+  // Callbacks
+  static void SlipCallback(IEvent* pEvent, IComponent* pComp);
+  static void SlowCallback(IEvent* pEvent, IComponent* pComp);
+  static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
+  static void DestroyObjectCallback(IEvent* pEvent, IComponent* pComp);
 
-	// Callbacks
-	static void SlipCallback(IEvent* pEvent, IComponent* pComp);
-	static void SlowCallback(IEvent* pEvent, IComponent* pComp);
-	static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
-	static void DestroyObjectCallback(IEvent* pEvent, IComponent* pComp);
-
-	// Accessors
-	CObject* GetParent(void) { return m_pParentObj; }
+  // Accessors
+  CObject* GetParent(void) { return m_pParentObj; }
 };
-
-#endif // _CSLIPVFXCOMP_H_
+} // namespace scd

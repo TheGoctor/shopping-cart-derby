@@ -4,9 +4,14 @@
 
 #include <string>
 
-namespace scd::events {
-void send(const std::string& event_name, base_component* sender, void* data,
-          event_priority priority);
+struct lua_State;
+
+namespace scd::event {
+void send(
+    const std::string& event_name,
+    base_component* sender,
+    void* data,
+    event_priority priority);
 
 struct update_state {
   const float _delta_time;
@@ -24,8 +29,8 @@ struct update_state {
 struct state_change {
   const game_state _new_state;
 
-  State(game_state new_state)
-    : _new_state(new_state) {}
+  state_change(game_state new_state)
+      : _new_state(new_state) {}
 
   static int create(lua_State* lua);
 
@@ -46,6 +51,7 @@ struct render {
                    object& object,
                    event_priority priority = event_priority::render);
 };
+
 struct ram {
   object& _rammer;
   object& _rammee;

@@ -482,9 +482,9 @@ void CWwiseSoundManager::SetSFXVolumeCallback(
 }
 // Register for events
 void CWwiseSoundManager::RegisterForEvents() {
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "SetSoundVolume", (IComponent*)GetInstance(), SetSFXVolumeCallback);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "SetMusicVolume", (IComponent*)GetInstance(), SetMusicVolumeCallback);
 
   // BGM Handlers
@@ -497,9 +497,9 @@ void CWwiseSoundManager::RegisterForEvents() {
   szEventNamePlay += MAIN_MENU_STATE;
   szEventNamePause += MAIN_MENU_STATE;
   szEventNameResume += MAIN_MENU_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNamePlay, (IComponent*)GetInstance(), PlayMenuMusic);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "PlayMenuMusic", (IComponent*)GetInstance(), ResumeMenuMusic);
 
   szEventNamePlay = "InitObjects";
@@ -510,13 +510,13 @@ void CWwiseSoundManager::RegisterForEvents() {
   szEventNamePause += GAMEPLAY_STATE;
   szEventNameResume += GAMEPLAY_STATE;
   szEventNameUpDate += GAMEPLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNamePlay, (IComponent*)GetInstance(), PlayGameplayMusic);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNamePause, (IComponent*)GetInstance(), PauseGameplayMusic);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNameResume, (IComponent*)GetInstance(), ResumeGameplayMusic);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNameUpDate, (IComponent*)GetInstance(), StopMenuMusic);
 
   szEventNamePlay = "InitObjects";
@@ -525,9 +525,9 @@ void CWwiseSoundManager::RegisterForEvents() {
   szEventNamePlay += PAUSE_STATE;
   szEventNamePause += PAUSE_STATE;
   szEventNameResume += PAUSE_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNamePlay, (IComponent*)GetInstance(), PlayPauseMusic);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNamePause, (IComponent*)GetInstance(), PausePauseMusic);
 
   szEventNamePlay = "InitObjects";
@@ -543,7 +543,7 @@ void CWwiseSoundManager::RegisterForEvents() {
   szEventNamePlay += OPTIONS_STATE;
   szEventNamePause += OPTIONS_STATE;
   szEventNameResume += OPTIONS_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNamePlay, (IComponent*)GetInstance(), PlayMenuMusic);
 
   szEventNamePlay = "InitObjects";
@@ -552,9 +552,9 @@ void CWwiseSoundManager::RegisterForEvents() {
   szEventNamePlay += WIN_STATE;
   szEventNamePause += WIN_STATE;
   szEventNameResume += WIN_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNamePlay, (IComponent*)GetInstance(), PlayMenuMusic);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventNameResume, (IComponent*)GetInstance(), ResumeMenuMusic);
 }
 

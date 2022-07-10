@@ -2,8 +2,6 @@
 
 #include "core/base_component.h"
 #include "core/object.h"
-#include "physics/collider.h"
-#include "physics/physics_manager.h"
 
 namespace scd::component {
 
@@ -14,12 +12,12 @@ private:
   float _time_remaining;
   float _boost_amount{2.0f};
 
-  int ENERGY_DRINK_ID;
+  int _audio_id;
 
 public:
-  energy_drink(scd::object& owner);
+  energy_drink(scd::object& owner, scd::event_manager& event_manager);
 
-  static std::shared_ptr<energy_drink> create(scd::object& owner);
+  static std::shared_ptr<energy_drink> create(scd::object& owner, scd::event_manager& event_manager);
 
   void on_update(float dt);
   void on_use(scd::object& obj);

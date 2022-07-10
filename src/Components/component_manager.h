@@ -25,7 +25,7 @@ template <
 class component_manager {
 public:
   component_manager() {
-    _shutdown_event_id = CEventManager::GetInstance()->RegisterEvent(
+    _shutdown_event_id = event_manager.register_event(
       "Shutdown", reinterpret_cast<scd::base_component*>(this), shutdown);
   }
 

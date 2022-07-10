@@ -1,66 +1,50 @@
-#ifndef _DXRENDERCONTEXTMANAGER_H_
-#define _DXRENDERCONTEXTMANAGER_H_
+#pragma once
 
-#include "DXRenderContext.h"
-#include "..\\..\\..\\Enums.h"
+#include "enums.h"
+#include "rendering/dx_render_context.h"
 
-
-class DXRenderContextManager
-{
+namespace scd {
+class dx_render_context_manager {
 private:
-	// Singleton data
-	DXRenderContextManager();
-	DXRenderContextManager(const DXRenderContextManager &) 
-	{
-	}
-	DXRenderContextManager &operator=(const DXRenderContextManager &) 
-	{
-	}
+  ///////////////////////////////////////////////
+  // Render contexts
+  DXRenderContext m_cContexts[RC_MAX];
 
-	///////////////////////////////////////////////
-	// Render contexts
-	DXRenderContext m_cContexts[RC_MAX];
+  // Map of Contexts (Key = ID of Texture Name, Data = DXRenderContext)
+  scd::map<unsigned int, DXRenderContext*> m_cDynamicContexts;
 
-	// Map of Contexts (Key = ID of Texture Name, Data = DXRenderContext)
-	map<unsigned int, DXRenderContext*, less<unsigned int>,
-		scd::allocator<pair<unsigned int, DXRenderContext*>>> m_cDynamicContexts;
+  void BuildRenderContexts();
+  typedef scd::map<unsigned int, ID3DXEffect*> ShaderMap;
+  ShaderMap m_cShaderFiles;
 
-	void BuildRenderContexts();
-	typedef map<unsigned int, ID3DXEffect*, less<unsigned int>, 
-		CRenderAllocator<pair<unsigned int, ID3DXEffect*>>> ShaderMap;
-	ShaderMap m_cShaderFiles;
-
-	ID3DXEffect* LoadShader(const char *szFXFile);
+  ID3DXEffect* LoadShader(const char* szFXFile);
 
 public:
-	///////////////////////////////////////////////
-	// Singleton public methods
+  dx_render_context_manager();
+  ~dx_render_context_manager();
 
-	// Gets a pointer to the instance
-	static DXRenderContextManager *GetInstance();
+  ///////////////////////////////////////////////
+  // Standard methods
 
-	~DXRenderContextManager();
-	///////////////////////////////////////////////
-	// Standard methods
-	
-	void Initialize();
-	void RenderContexts();
+  void Initialize();
+  void RenderContexts();
 
-	// Init
-	void Init(void);
+  // Init
+  void Init(void);
 
-	// Shutdown
-	static void ShutdownCallback(IEvent*, IComponent*);
-	void Shutdown(void);
+  // Shutdown
+  static void ShutdownCallback(IEvent*, IComponent*);
+  void Shutdown(void);
 
-	// Factory
-	DXRenderContext* CreateRenderContext(string szTexFile = "default.jpg",
-		string szEffectFile = "Texture2D.fx",
-		void (*pRenderFunc)(RenderNode &node) = DXRenderContext::TexturedRenderContextFunc);
+  // Factory
+  DXRenderContext* CreateRenderContext(
+      string szTexFile = "default.jpg",
+      string szEffectFile = "Texture2D.fx",
+      void (*pRenderFunc)(RenderNode& node) =
+          DXRenderContext::TexturedRenderContextFunc);
 
-	///////////////////////////////////////////////
-	// Render context accessors
-	DXRenderContext* GetContext(ERenderContext eContextIdx);
+  ///////////////////////////////////////////////
+  // Render context accessors
+  DXRenderContext* GetContext(ERenderContext eContextIdx);
 };
-
-#endif	// _DXRENDERCONTEXTMANAGER_H_
+} // namespace scd

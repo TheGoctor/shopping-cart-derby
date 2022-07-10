@@ -4,41 +4,30 @@
 //	Mod. Date		:	5/25/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
-//	Purpose			:	Encapsulates the Chaining of Renderable Object
+//	Purpose			:	Encapsulates the Chaining of Renderable
+// Object
 ////////////////////////////////////////////////////////////////////////////////
+#pragma once
 
-// File Header
-#ifndef _RENDERNODE_H_
-#define _RENDERNODE_H_
-
-// Render Node
-class RenderNode
-{
+namespace scd {
+class render_node {
 private:
-	friend class Renderer;
+  friend class renderer;
 
 protected:
-	RenderNode *m_pNext; // Pointer to the Next Node
+  render_node* _next{nullptr}; // Pointer to the Next Node
 
 public:
+  // Render Function Pointer
+  void (*render_function)(render_node& node);
 
-	// Constructor
-	RenderNode() : m_pNext(0) {}
+  // Depth Render Function Pointer
+  void (*depth_render_function)(render_node&, render_node&);
 
-	// Render Function Pointer
-	void (*RenderFunc)(RenderNode &node);
+  // Render the Node with the Associated Render Function
+  void render_process() { render_function(*this); }
 
-	// Depth Render Function Pointer
-	void (*DepthRenderFunc)(RenderNode &, RenderNode &);
-
-	// Render the Node with the Associated Render Function
-	void RenderProcess() { RenderFunc(*this); }
-
-	// Accessor
-	inline RenderNode *GetNext(void) { return m_pNext; }
-
-	// Mutator
-	inline void SetNext(RenderNode *pNode) { m_pNext = pNode; }
+  render_node* next() const { return _next; }
+  void next(render_node* node) { _next = node; }
 };
-
-#endif	// _RENDERNODE_H_
+} // namespace scd

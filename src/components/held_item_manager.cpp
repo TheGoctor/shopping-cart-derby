@@ -28,26 +28,26 @@ held_item_manager::held_item_manager() {
   nPeanutButtersCreated = 0;
   nTurkeysCreated = 0;
 
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "UsePieForward", (scd::base_component*)this, UsePieCallback);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "UseBananaForward", (scd::base_component*)this, UseBananaCallback);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "UseTurkeyForward", (scd::base_component*)this, UseTurkeyCallback);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "UseBoost", (scd::base_component*)this, UseBoostCallback);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "UsePeanutButterForward",
       (scd::base_component*)this,
       UsePeanutButterCallback);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "UseSoup", (scd::base_component*)this, UseSoupCallback);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "UseDonut", (scd::base_component*)this, UseDonutCallback);
 
   string szEventName = "ShutdownObjects";
   szEventName += GAMEPLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, (scd::base_component*)this, ShutdownCallback);
 }
 

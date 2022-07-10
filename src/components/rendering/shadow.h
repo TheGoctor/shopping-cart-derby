@@ -6,102 +6,90 @@
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Lets an Object have a Shadow
 ////////////////////////////////////////////////////////////////////////////////
+#pragma once
 
-// Header Protection
-#ifndef _CSHADOWCOMP_H_
-#define _CSHADOWCOMP_H_
+#include "components/component_manager.h"
+#include "core/base_component.h"
+#include "core/object.h"
+#include "enums.h"
 
-// Includes
-#include "..\\..\\IComponent.h"
-#include "..\\..\\Enums.h"
-#include "..\\..\\CObject.h"
-#include "..\\..\\Managers\\Component Managers\\CComponentManager.h"
-#include "..\\..\\Managers\\Global Managers\\Console Manager\\CConsoleManager.h"
-//#include "..\\..\\Managers\\Global Managers\\Rendering Managers\\DXMesh.h"
-
+namespace scd {
 // Foward Declares
 class CObject;
 class DXMesh;
 class CRenderComponent;
 
 // Shadow Component
-class CShadowComp : IComponent
-{
+class CShadowComp : scd::base_component {
 private:
+  // Shadow Obj
+  CObject* m_pShadowObj;
 
-	// Parent Object
-	CObject* m_pParent;
+  // Type
+  ECharacterSet m_eType;
 
-	// Shadow Obj
-	CObject* m_pShadowObj;
+  // Render Comp
+  CRenderComponent* m_pRenComp;
 
-	// Type
-	ECharacterSet m_eType;
-
-	// Render Comp
-	CRenderComponent* m_pRenComp;
-
-	// Helper Funcs
-	DXMesh* GetShadowMeshByCharacterSet(ECharacterSet eType);
+  // Helper Funcs
+  DXMesh* GetShadowMeshByCharacterSet(ECharacterSet eType);
 
 public:
+  // Get Auto-Manager
+  static CComponentManager<CShadowComp>* GetManager(void) {
+    // Auto-Manager
+    static CComponentManager<CShadowComp> m_cManager;
 
-	// Get Auto-Manager
-	static CComponentManager<CShadowComp>* GetManager(void)
-	{
-		// Auto-Manager
-		static CComponentManager<CShadowComp> m_cManager;
+    return &m_cManager;
+  }
 
-		return &m_cManager;
-	}
+  // Constructor
+  CShadowComp(CObject* pParent, ECharacterSet eType)
+      : m_pParent(pParent)
+      , m_eType(eType)
+      , m_pRenComp(NULL)
+      , m_pShadowObj(NULL) {
+    // Add to Auto Manager
+    GetManager()->Add(this);
 
-	// Constructor
-	CShadowComp(CObject* pParent, ECharacterSet eType) : m_pParent(pParent),
-		m_eType(eType), m_pRenComp(NULL), m_pShadowObj(NULL)
-	{
-		// Add to Auto Manager
-		GetManager()->Add(this);
+    // Add Component to Parent
+    pParent->AddComponent(this);
 
-		// Add Component to Parent
-		pParent->AddComponent(this);
+    // Initalize
+    Init();
+  }
 
-		// Initalize
-		Init();
-	}
+  // Initalize
+  void Init(void);
 
-	// Initalize
-	void Init(void);
+  // Destructor
+  ~CShadowComp(void) {
+    Shutdown();
+    GetManager()->Remove(this);
+  }
 
-	// Destructor
-	~CShadowComp(void)
-	{
-		Shutdown();
-		GetManager()->Remove(this);
-	}
+  // Shutdown
+  void Shutdown(void);
 
-	// Shutdown
-	void Shutdown(void);
+  // Factory
+  static int CreateShadowComponent(lua_State* pLua);
+  static CShadowComp*
+  CreateShadowComponent(CObject* pParent, ECharacterSet eType) {
+    return MMNEW(CShadowComp(pParent, eType));
+  }
 
-	// Factory
-	static int CreateShadowComponent(lua_State* pLua);
-	static CShadowComp* CreateShadowComponent(CObject* pParent, ECharacterSet eType)
-	{
-		return MMNEW(CShadowComp(pParent, eType));
-	}
+  // Accessors
+  CObject* GetParent(void) { return m_pParent; }
+  ECharacterSet GetCharacterSetType(void) { return m_eType; }
 
-	// Accessors
-	CObject* GetParent(void) { return m_pParent; }
-	ECharacterSet GetCharacterSetType(void) { return m_eType; }
+  // Mutators
+  void SetCharaterSetType(ECharacterSet eType) { m_eType = eType; }
 
-	// Mutators
-	void SetCharaterSetType(ECharacterSet eType) { m_eType = eType; }
+  // Callbacks
+  static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
+  void Update(void);
 
-	// Callbacks
-	static void UpdateCallback(IEvent* pEvent, IComponent* pComp);
-	void Update(void);
-
-	// Shutdown 
-	static void ShutdownCallback(IEvent* pEvent, IComponent* pComp);
+  // Shutdown
+  static void ShutdownCallback(IEvent* pEvent, IComponent* pComp);
 };
-
-#endif // _CSHADOWCOMP_H_
+} // namespace scd

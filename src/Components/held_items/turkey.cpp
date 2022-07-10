@@ -17,50 +17,50 @@ turkey(object& owner)
   // TODO: subscribe to events
   string szEventName = "Update";
   szEventName += GAMEPLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
+  event_manager.register_event(szEventName, this, Update);
 
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "HeldItemInWorldCollision", this, EnvironmentCollision);
 
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "HeldItemInWorldPlayerCollision", this, PlayerCollision);
 
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       "TurkeyDestroyedByItem", this, ItemCollision);
 
   szEventName = "Update";
   szEventName += PAUSE_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += CONSOLE_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += PAUSE_OPTIONS_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += PAUSE_KEYBINDS_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += QUIT_CONFIRMATION_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += IN_GAME_HOW_TO_PLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
       szEventName, this, PauseUpdateCallback);
 
   SendObjectEvent("TurkeyCreated", this, _owner, PRIORITY_IMMEDIATE);

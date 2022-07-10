@@ -12,8 +12,8 @@ jam::jam(scd::object& owner)
   JAM_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
   std::string szEvent = "Update";
   szEvent += GAMEPLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
-  // CEventManager::GetInstance()->RegisterEvent("UseJam", this, ReInit);
+  event_manager.register_event(szEvent, this, Update);
+  // event_manager.register_event("UseJam", this, ReInit);
   // register for events
 }
 

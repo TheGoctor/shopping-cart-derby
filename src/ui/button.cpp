@@ -47,7 +47,7 @@ int CButtonComponent::CreateButtonComponent(lua_State* pLua)
 	return 1;
 }
 
-CButtonComponent* CButtonComponent::CreateButtonComponent(scd::object* pObj, string szEventName, string szOnRolloverFunc, string szSpriteTextureName, 
+CButtonComponent* CButtonComponent::CreateButtonComponent(scd::object* pObj, string szEventName, string szOnRolloverFunc, string szSpriteTextureName,
 														  int nPosX, int nPosY, bool bStartSelected, int eGameState, int nTextureDepth)
 {
 	CButtonComponent* comp = MMNEW(CButtonComponent(pObj));
@@ -65,24 +65,24 @@ CButtonComponent* CButtonComponent::CreateButtonComponent(scd::object* pObj, str
 	// listens for these events
 	string szEvent = "EnableObjects";
 	szEvent += (char)comp->m_eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ButtonStateEnable);
+	event_manager.register_event(szEvent, comp, ButtonStateEnable);
 
 	szEvent = "DisableObjects";
 	szEvent += (char)comp->m_eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ButtonStateDisable);
-	
+	event_manager.register_event(szEvent, comp, ButtonStateDisable);
+
 	szEvent = "InitObjects";
 	szEvent += (char)comp->m_eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ButtonStateInit);
-	
+	event_manager.register_event(szEvent, comp, ButtonStateInit);
+
 	szEvent = "ShutdownObjects";
 	szEvent += (char)comp->m_eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ButtonStateDisable);
+	event_manager.register_event(szEvent, comp, ButtonStateDisable);
 
 	// HACK - update to gameplay to disable buttons to fix creeper  bug
 	szEvent = "Update";
 	szEvent += GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, GameplayUpdate);
+	event_manager.register_event(szEvent, comp, GameplayUpdate);
 
 	comp->Load(szSpriteTextureName, nTextureDepth, nPosX, nPosY);
 
@@ -107,7 +107,7 @@ int CButtonComponent::SetNextButtonComponent(lua_State* pLua)
 	return 0;
 }
 
-void CButtonComponent::SetNextButtonComponent(CButtonComponent* pMe, CButtonComponent* pDown, 
+void CButtonComponent::SetNextButtonComponent(CButtonComponent* pMe, CButtonComponent* pDown,
 											  CButtonComponent* pUp, CButtonComponent* pLeft, CButtonComponent* pRight)
 {
 	if(pMe)
@@ -127,20 +127,20 @@ void CButtonComponent::SetNextButtonComponent(CButtonComponent* pMe, CButtonComp
 
 void CButtonComponent::Init(string textureName, int /*nTextureDepth*/)
 {
-	
-	
+
+
 	m_fTimeSinceSelectionEntry = 0;
 	m_fInputCooldown = .2f;
 	m_bSelected = false;
 	m_bSelectedStartValue = false;
-	
+
 	m_pDisplayComponentButton = NULL;
 	m_pDisplayComponentSelection = NULL;
 
 	m_pDisplayObjectButton = NULL;
 	m_pDisplayObjectSelection = NULL;
 
-	
+
 }
 
 // setup stuff that wont change throughout the game
@@ -156,7 +156,7 @@ void CButtonComponent::Load(string textureName, int nTextureDepth, int nPosX, in
 		szButtonTex += textureName;
 		nTexID0 = CTextureManager::GetInstance()->LoadTexture(szButtonTex.c_str(), RGB(220,240,120));
 	}
-	
+
 	nTexID1 = CTextureManager::GetInstance()->LoadTexture("Resource\\HUD\\T_Pause_Icon_Glow_D.png", RGB(255,255,255));
 
 
@@ -172,7 +172,7 @@ void CButtonComponent::Load(string textureName, int nTextureDepth, int nPosX, in
 	m_pDisplayObjectSelection = scd::objectManager::GetInstance()->CreateObject(szDispObjName);
 
 	// Get Inital Sprite Data
-	
+
 	m_tSpriteDataButton.m_nTexture = nTexID0;
 	m_tSpriteDataButton.m_nX = 150;
 	m_tSpriteDataButton.m_nY = 200;
@@ -223,13 +223,13 @@ void CButtonComponent::Load(string textureName, int nTextureDepth, int nPosX, in
 
 	string szEvent = "Update";
 	szEvent += (char)m_eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
-	CEventManager::GetInstance()->RegisterEvent("Up", this, UpPressed);
-	CEventManager::GetInstance()->RegisterEvent("Down", this, DownPressed);
-	CEventManager::GetInstance()->RegisterEvent("Right", this, RightPressed); // make right and left invalid since it confuses the EPs
-	CEventManager::GetInstance()->RegisterEvent("Left", this, LeftPressed);
-	CEventManager::GetInstance()->RegisterEvent("Back", this, InvalidSelection);
-	CEventManager::GetInstance()->RegisterEvent("Accept", this, SelectPressed);
+	event_manager.register_event(szEvent, this, Update);
+	event_manager.register_event("Up", this, UpPressed);
+	event_manager.register_event("Down", this, DownPressed);
+	event_manager.register_event("Right", this, RightPressed); // make right and left invalid since it confuses the EPs
+	event_manager.register_event("Left", this, LeftPressed);
+	event_manager.register_event("Back", this, InvalidSelection);
+	event_manager.register_event("Accept", this, SelectPressed);
 
 
 
@@ -242,13 +242,13 @@ void CButtonComponent::ReInitValues()
 	if(m_pDisplayComponentButton != NULL)
 	{
 		m_pDisplayComponentButton->SetActive(true);
-	}	
-	
+	}
+
 	if(m_bSelected && m_pDisplayComponentSelection != NULL)
 	{
 		m_pDisplayComponentSelection->SetActive(true);
 	}
-	
+
 }
 
 void CButtonComponent::Activate()
@@ -326,7 +326,7 @@ void CButtonComponent::Update(IEvent* cEvent, scd::base_component* cCenter)
 	if(comp->m_bSelected)
 	{
 		comp->m_fTimeSinceSelectionEntry += fDt;
-		
+
 		// Button idle logic here
 	}
 }
@@ -343,7 +343,7 @@ void CButtonComponent::UpPressed(IEvent* /*cEvent*/, scd::base_component* cCente
 			comp->m_pSelectUp->Activate();
 		}
 	}
-	
+
 }
 
 void CButtonComponent::DownPressed(IEvent* /*cEvent*/, scd::base_component* cCenter)
@@ -391,7 +391,7 @@ void CButtonComponent::LeftPressed(IEvent* /*cEvent*/, scd::base_component* cCen
 void CButtonComponent::SelectPressed(IEvent* /*cEvent*/, scd::base_component* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
-	if(comp->m_bSelected && 
+	if(comp->m_bSelected &&
 		comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
 		// if we don't have an event
@@ -404,7 +404,7 @@ void CButtonComponent::SelectPressed(IEvent* /*cEvent*/, scd::base_component* cC
 		{
 			//Sound Hack
 			CWwiseSoundManager::GetInstance()->PlayTheSound(MENU_SELECT, GLOBAL_ID);
-			
+
 			Debug.CallLuaFunc(comp->m_szSelectionFunc);
 			//SendStateEvent(comp->m_szSelectionEvent, comp, (EGameState)comp->m_nToState, PRIORITY_NORMAL);
 
@@ -412,7 +412,7 @@ void CButtonComponent::SelectPressed(IEvent* /*cEvent*/, scd::base_component* cC
 			/*
 			// Unshow all the elements
 			CButtonComponent* pCur = comp->m_pSelectDown;
-			// while it's not null and isn't us (aka full loop) 
+			// while it's not null and isn't us (aka full loop)
 			while(pCur && pCur != comp)
 			{
 				pCur->Unshow();
@@ -422,7 +422,7 @@ void CButtonComponent::SelectPressed(IEvent* /*cEvent*/, scd::base_component* cC
 			comp->Unshow();
 			/**/
 		}
-		
+
 		comp->m_fTimeSinceSelectionEntry = 0.0f;
 	}
 }
@@ -430,7 +430,7 @@ void CButtonComponent::SelectPressed(IEvent* /*cEvent*/, scd::base_component* cC
 void CButtonComponent::InvalidSelection(IEvent* /*cEvent*/, scd::base_component* cCenter)
 {
 	CButtonComponent* comp = (CButtonComponent*)cCenter;
-	if(comp->m_bSelected && 
+	if(comp->m_bSelected &&
 		comp->m_fTimeSinceSelectionEntry > comp->m_fInputCooldown)
 	{
 		//Sound Hack

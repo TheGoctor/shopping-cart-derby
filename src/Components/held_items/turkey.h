@@ -5,7 +5,7 @@
 
 namespace scd::component {
 
-class turkey : public scd::component {
+class turkey : public scd::base_component {
 public:
   turkey(scd::object& owner);
 

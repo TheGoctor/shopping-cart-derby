@@ -53,7 +53,7 @@ bool Direct3DManager::InitDirect3D(HWND hWnd,
 
 	// Make sure the object is valid.
 	//if (NULL == m_lpD3D) DXERROR( (LPCWSTR)"Failed to Create D3D Object");
-	
+
 	// Setup the parameters for using Direct3D.
 	m_PresentParams.BackBufferWidth				= nScreenWidth;
 	m_PresentParams.BackBufferHeight			= nScreenHeight;
@@ -82,7 +82,7 @@ bool Direct3DManager::InitDirect3D(HWND hWnd,
 	D3DXCreateFont(m_lpDev, 16, 0, FW_NORMAL, NULL, false, DEFAULT_CHARSET,
 		OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
 		"Consolas", &m_lpFont);
-	
+
 	// Create Line
 	D3DXCreateLine(m_lpDev, &m_lpLine);
 	m_lpLine->SetWidth(5.0f);
@@ -97,8 +97,8 @@ bool Direct3DManager::InitDirect3D(HWND hWnd,
 	// Texture Manager
 	CTextureManager::GetInstance()->InitTextureManager(m_lpDev, m_lpSprite);
 
-	CEventManager::GetInstance()->RegisterEvent("Shutdown", (IComponent*)GetInstance(), Shutdown);
-	CEventManager::GetInstance()->RegisterEvent("ChangeGamma", (IComponent*)GetInstance(), ChangeGamma);
+	event_manager.register_event("Shutdown", (IComponent*)GetInstance(), Shutdown);
+	event_manager.register_event("ChangeGamma", (IComponent*)GetInstance(), ChangeGamma);
 
 	//	Return success.
 	return true;
@@ -117,7 +117,7 @@ void Direct3DManager::InitVertDecls(void)
 	m_lpDev->CreateVertexDeclaration(posDecl, &m_pVertPosDecl);
 
 	// Create Vertex (Pos, Norm, Tex2D) Declaration
-	D3DVERTEXELEMENT9 declPosNormTex2[] =	
+	D3DVERTEXELEMENT9 declPosNormTex2[] =
 	{
 		{0, 0,  D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
 		{0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0},
@@ -127,7 +127,7 @@ void Direct3DManager::InitVertDecls(void)
 	m_lpDev->CreateVertexDeclaration(declPosNormTex2, &m_pVertPosNormTex2DDecl);
 
 	// Create Vertex (Pos, Norm, Tex2D) Declaration
-	D3DVERTEXELEMENT9 declPosColTex2[] =	
+	D3DVERTEXELEMENT9 declPosColTex2[] =
 	{
 		{0, 0,  D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0},
 		{0, 12, D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0},
@@ -253,11 +253,11 @@ void Direct3DManager::ChangeDisplayParam(int nWidth, int nHeight, bool bWindowed
 
 		// Get the dimensions of a window that will have a client rect that
 		// will really be the resolution we're looking for.
-		AdjustWindowRectEx(&rWindow, 
+		AdjustWindowRectEx(&rWindow,
 							dwWindowStyleFlags,
-							FALSE, 
+							FALSE,
 							WS_EX_APPWINDOW);
-		
+
 		// Calculate the width/height of that window's dimensions
 		int windowWidth		= rWindow.right  - rWindow.left;
 		int windowHeight	= rWindow.bottom - rWindow.top;
@@ -300,7 +300,7 @@ bool Direct3DManager::SpriteEnd(void)
 // Gamma
 void Direct3DManager::SetGamma(LPDIRECT3DDEVICE9 _lpD3D, float gamma)
 {
-	D3DGAMMARAMP ramp; 
+	D3DGAMMARAMP ramp;
 	_lpD3D->GetGammaRamp(0, &ramp);
 
 	//m_fGamma = gamma; // got rid of by smith since this value is used for the sliders
@@ -311,7 +311,7 @@ void Direct3DManager::SetGamma(LPDIRECT3DDEVICE9 _lpD3D, float gamma)
 		m_usGreen[i] = ramp.green[i];
 		m_usBlue[i] = ramp.blue[i];
 	}
-	
+
 	for (unsigned int i = 0; i < 256; ++i)
 	{
 		unsigned short val = (unsigned short)(min(255, i * (gamma + 1.0f))) << 8;
@@ -325,7 +325,7 @@ void Direct3DManager::SetGamma(LPDIRECT3DDEVICE9 _lpD3D, float gamma)
 		ramp.green[i] = m_usGreen[i];
 
 	}
-	
+
 	/*D3DCAPS9 caps;
 	HRESULT hr = 0;
 
@@ -337,12 +337,12 @@ void Direct3DManager::SetGamma(LPDIRECT3DDEVICE9 _lpD3D, float gamma)
 		{*/
 			_lpD3D->SetGammaRamp(0, D3DSGR_CALIBRATE, &ramp);
 		/*}
-		else 
+		else
 		{
 			_lpD3D->SetGammaRamp(0, D3DSGR_NO_CALIBRATION, &ramp);
 		}
 	}*/
-	
+
 }
 void Direct3DManager::ChangeGamma(IEvent* pevent, IComponent*)
 {

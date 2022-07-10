@@ -45,40 +45,40 @@ void scd::pickup::EventInit() {
   // listens for these events
   string szEvent = "Update";
   szEvent += GAMEPLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
+  event_manager.register_event(szEvent, this, Update);
 
   szEvent = "Update";
   szEvent += PAUSE_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, PauseUpdateCallback);
 
   szEvent = "Update";
   szEvent += CONSOLE_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, PauseUpdateCallback);
 
   szEvent = "Update";
   szEvent += PAUSE_OPTIONS_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, PauseUpdateCallback);
   szEvent = "Update";
   szEvent += PAUSE_KEYBINDS_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, PauseUpdateCallback);
   szEvent = "Update";
   szEvent += QUIT_CONFIRMATION_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, PauseUpdateCallback);
   szEvent = "Update";
   szEvent += IN_GAME_HOW_TO_PLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, PauseUpdateCallback);
   szEvent = "Update";
   szEvent += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, PauseUpdateCallback);
 
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     "PickupItemCollision", this, PickupItemCollisionCallback);
 }
 

@@ -6,60 +6,50 @@
 //	Author			:	Joseph Leybovich
 //	Purpose			:	Encapsulates the Wind Boost Effect
 ////////////////////////////////////////////////////////////////////////////////
+#pragma once
 
-// Header Protexction
-#ifndef _CWINDSPRITEEFFECT_H_
-#define _CWINDSPRITEEFFECT_H_
-
-// Includes
-#include <windows.h>
-#define LEAN_AND_MEAN
-
+namespace scd {
 // Foward Declares
 class CSpriteComponent;
 
 // Wind Sprite Effect
-class CWindSpriteEffect
-{
+class CWindSpriteEffect {
 private:
+  // Wind
+  CSpriteComponent* m_pWindScreenSprite;
 
-	// Wind
-	CSpriteComponent* m_pWindScreenSprite;
+  // Anim Timer
+  float m_fAnimTimer;
+  int m_nAnimCell;
 
-	// Anim Timer
-	float m_fAnimTimer;
-	int m_nAnimCell;
+  // Duration
+  float m_fDuration;
 
-	// Duration
-	float m_fDuration;
+  // Active Flags
+  bool m_bActive;
 
-	// Active Flags
-	bool m_bActive;
+  // Update Wind
+  void UpdateWind(float fDT);
 
-	// Update Wind
-	void UpdateWind(float fDT);
-
-	// Cell Algo
-	RECT CellAlgo(int nID, int nNumCols, int nCellWidth, int nCellHeight);
+  // Cell Algo
+  RECT CellAlgo(int nID, int nNumCols, int nCellWidth, int nCellHeight);
 
 public:
+  // Constructor
+  CWindSpriteEffect(void);
 
-	// Constructor
-	CWindSpriteEffect(void);
+  // Update
+  void Update(float fDT);
 
-	// Update
-	void Update(float fDT);
+  // Accessor
+  bool IsActive(void) { return m_bActive; }
 
-	// Accessor
-	bool IsActive(void) { return m_bActive; }
+  // Mutators
+  void SetOn(bool bOn) { m_bActive = bOn; }
+  void SetSpritesActive(bool bActive);
+  void SetDuration(float fDuration) { m_fDuration = fDuration; }
 
-	// Mutators
-	void SetOn(bool bOn) { m_bActive = bOn; }
-	void SetSpritesActive(bool bActive);
-	void SetDuration(float fDuration) { m_fDuration = fDuration; }
-
-	// Helper Funcs
-	void CreateWindSprite(void);
+  // Helper Funcs
+  void CreateWindSprite(void);
 };
-
-#endif // _CWINDSPRITEEFFECT_H_
+} // namespace scd

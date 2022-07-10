@@ -5,19 +5,18 @@
 
 namespace scd::component {
 
-class renderable : public IComponent {
-  CObject* m_pcParent;
-  DXRenderShape* m_cRenderShape;
+class renderable : public scd::base_component {
+  dx_render_shape* _render_shape;
 
 public:
   renderable(
-      CObject* pParent,
+      scd::object& owner,
       int nModelID,
       DXRenderContext* pRC,
       void (*pfRenderFunc)(RenderNode&));
 
   renderable(
-      CObject* pParent,
+      scd::object& owner,
       DXMesh* pMesh,
       DXRenderContext* pRC,
       void (*pfRenderFunc)(RenderNode&));
@@ -30,8 +29,6 @@ public:
   void Init(void);
 
   void SetMesh(unsigned int nMeshID, DXRenderContext* pContext);
-
-  inline CObject* GetParent() { return m_pcParent; }
 
   inline DXRenderShape* GetRenderShape() { return m_cRenderShape; }
 };

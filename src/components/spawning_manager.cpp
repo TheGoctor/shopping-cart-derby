@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Filename:  		CSpawningManager.cpp
+ * Filename:  		spawning_manager.cpp
  * Date:      		05/04/2011
  * Mod. Date: 		06/09/2011
  * Mod. Initials:	JS
@@ -8,26 +8,29 @@
  *					spawn items on the level and
  *					cycle through them.
  ******************************************************************************/
-#include "CCollisionManager.h"
-#include "CLevelManager.h"
-#include "CSpawningManager.h"
-#include "Components\Level\CDepartment.h"
-#include "Components\Level\CGoalItemComponent.h"
-#include "Components\Level\CHeldItemComponent.h"
-#include "Global Managers\Event Manager\EventStructs.h"
-#include "Global Managers\Object Manager\scd::objectManager.h"
-#include "Global Managers\Rendering Managers\ModelManager.h"
-#include "Global Managers\Rendering Managers\Renderer.h"
+#include "spawning_manager.h"
+
+#include "components/level/department.h"
+#include "components/level/goal_item.h"
+#include "components/level/held_item.h"
+#include "components/level_manager.h"
+#include "core/object_manager.h"
+#include "events/events.h"
+#include "physics/physics_manager.h"
+#include "rendering/model_manager.h"
+#include "rendering/renderer.h"
+
 #include <fstream>
-using namespace EventStructs;
 
-CSpawningManager::CSpawningManager()
-  : m_fGoalItemWaveTime(3.0f)
-  , m_nMaxHeldItems(15) {}
+namespace scd {
 
-CSpawningManager::~CSpawningManager() {}
+spawning_manager::spawning_manager()
+    : m_fGoalItemWaveTime(3.0f)
+    , m_nMaxHeldItems(15) {}
 
-void CSpawningManager::Init() {
+spawning_manager::~spawning_manager() {}
+
+void spawning_manager::Init() {
   CEventManager* pEM = CEventManager::GetInstance();
 
   string szEvent = "Update";
@@ -36,113 +39,115 @@ void CSpawningManager::Init() {
   pEM->RegisterEvent(szEvent, (scd::base_component*)GetInstance(), Update);
   pEM->RegisterEvent("Shutdown", (scd::base_component*)GetInstance(), Shutdown);
   pEM->RegisterEvent(
-    "GoalItemDespawned", (scd::base_component*)GetInstance(), Despawned);
-  pEM->RegisterEvent("GoalItemCollected",
-                     (scd::base_component*)GetInstance(),
-                     GoalItemCollected);
+      "GoalItemDespawned", (scd::base_component*)GetInstance(), Despawned);
   pEM->RegisterEvent(
-    "DestroyObject", (scd::base_component*)GetInstance(), DestroyObject);
-  pEM->RegisterEvent("GoalItemCollision",
-                     (scd::base_component*)GetInstance(),
-                     GoalItemCollision);
+      "GoalItemCollected",
+      (scd::base_component*)GetInstance(),
+      GoalItemCollected);
   pEM->RegisterEvent(
-    "OverlayUnshow", (scd::base_component*)GetInstance(), HandleStartUpdate);
+      "DestroyObject", (scd::base_component*)GetInstance(), DestroyObject);
+  pEM->RegisterEvent(
+      "GoalItemCollision",
+      (scd::base_component*)GetInstance(),
+      GoalItemCollision);
+  pEM->RegisterEvent(
+      "OverlayUnshow", (scd::base_component*)GetInstance(), HandleStartUpdate);
 
   szEvent = "InitObjects";
   szEvent += GAMEPLAY_STATE;
   pEM->RegisterEvent(
-    szEvent, (scd::base_component*)GetInstance(), HandleInitObjects);
+      szEvent, (scd::base_component*)GetInstance(), HandleInitObjects);
 
   // Load models
   // GOAL ITEM MESHES AND RENDER COMPS
 
-  m_szGoalItemNames[GORILLA_MILK]   = "FFP_3D_GorillaMilk_FIN";
+  m_szGoalItemNames[GORILLA_MILK] = "FFP_3D_GorillaMilk_FIN";
   m_szGoalItemNames[CAPTAIN_FLAKEY] = "FFP_3D_CaptainFlakey_FIN";
-  m_szGoalItemNames[PIZZA]          = "FFP_3D_Blue_Bomber_Pizza_FIN";
-  m_szGoalItemNames[CAKE]           = "FFP_3D_Cake_FIN";
-  m_szGoalItemNames[CANNED_BEARS]   = "FFP_3D_CannedBears_FIN";
-  m_szGoalItemNames[CARROTS]        = "FFP_3D_Carrots_FIN";
+  m_szGoalItemNames[PIZZA] = "FFP_3D_Blue_Bomber_Pizza_FIN";
+  m_szGoalItemNames[CAKE] = "FFP_3D_Cake_FIN";
+  m_szGoalItemNames[CANNED_BEARS] = "FFP_3D_CannedBears_FIN";
+  m_szGoalItemNames[CARROTS] = "FFP_3D_Carrots_FIN";
   m_szGoalItemNames[SAMMY_SANDWICH] = "FFP_3D_SammySandwich_FIN";
-  m_szGoalItemNames[SQUID]          = "FFP_3D_Squid_FIN";
-  m_szGoalItemNames[AGENT_ORANGE]   = "FFP_3D_AgentOrange_FIN";
+  m_szGoalItemNames[SQUID] = "FFP_3D_Squid_FIN";
+  m_szGoalItemNames[AGENT_ORANGE] = "FFP_3D_AgentOrange_FIN";
 
-  string szMeshPath
-    = "Resource/Goal Item Meshes/" + m_szGoalItemNames[GORILLA_MILK] + ".mesh";
-  m_nGoalItems[GORILLA_MILK]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  string szMeshPath =
+      "Resource/Goal Item Meshes/" + m_szGoalItemNames[GORILLA_MILK] + ".mesh";
+  m_nGoalItems[GORILLA_MILK] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
   szMeshPath = "Resource/Goal Item Meshes/" + m_szGoalItemNames[CAPTAIN_FLAKEY]
                + ".mesh";
-  m_nGoalItems[CAPTAIN_FLAKEY]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  m_nGoalItems[CAPTAIN_FLAKEY] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
-  szMeshPath
-    = "Resource/Goal Item Meshes/" + m_szGoalItemNames[PIZZA] + ".mesh";
-  m_nGoalItems[PIZZA]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  szMeshPath =
+      "Resource/Goal Item Meshes/" + m_szGoalItemNames[PIZZA] + ".mesh";
+  m_nGoalItems[PIZZA] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
   szMeshPath = "Resource/Goal Item Meshes/" + m_szGoalItemNames[CAKE] + ".mesh";
-  m_nGoalItems[CAKE]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  m_nGoalItems[CAKE] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
-  szMeshPath
-    = "Resource/Goal Item Meshes/" + m_szGoalItemNames[CANNED_BEARS] + ".mesh";
-  m_nGoalItems[CANNED_BEARS]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  szMeshPath =
+      "Resource/Goal Item Meshes/" + m_szGoalItemNames[CANNED_BEARS] + ".mesh";
+  m_nGoalItems[CANNED_BEARS] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
-  szMeshPath
-    = "Resource/Goal Item Meshes/" + m_szGoalItemNames[CARROTS] + ".mesh";
-  m_nGoalItems[CARROTS]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  szMeshPath =
+      "Resource/Goal Item Meshes/" + m_szGoalItemNames[CARROTS] + ".mesh";
+  m_nGoalItems[CARROTS] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
   szMeshPath = "Resource/Goal Item Meshes/" + m_szGoalItemNames[SAMMY_SANDWICH]
                + ".mesh";
-  m_nGoalItems[SAMMY_SANDWICH]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  m_nGoalItems[SAMMY_SANDWICH] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
-  szMeshPath
-    = "Resource/Goal Item Meshes/" + m_szGoalItemNames[SQUID] + ".mesh";
-  m_nGoalItems[SQUID]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  szMeshPath =
+      "Resource/Goal Item Meshes/" + m_szGoalItemNames[SQUID] + ".mesh";
+  m_nGoalItems[SQUID] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
-  szMeshPath
-    = "Resource/Goal Item Meshes/" + m_szGoalItemNames[AGENT_ORANGE] + ".mesh";
-  m_nGoalItems[AGENT_ORANGE]
-    = ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
+  szMeshPath =
+      "Resource/Goal Item Meshes/" + m_szGoalItemNames[AGENT_ORANGE] + ".mesh";
+  m_nGoalItems[AGENT_ORANGE] =
+      ModelManager::GetInstance()->LoadModel((char*)szMeshPath.c_str());
 
-  m_nGoalItemRenderContexts[GORILLA_MILK]   = RC_GORILLA_MILK;
+  m_nGoalItemRenderContexts[GORILLA_MILK] = RC_GORILLA_MILK;
   m_nGoalItemRenderContexts[CAPTAIN_FLAKEY] = RC_CAPTAIN_FLAKEY;
-  m_nGoalItemRenderContexts[PIZZA]          = RC_PIZZA;
-  m_nGoalItemRenderContexts[CAKE]           = RC_CAKE;
-  m_nGoalItemRenderContexts[CANNED_BEARS]   = RC_CANNED_BEARS;
-  m_nGoalItemRenderContexts[CARROTS]        = RC_CARROTS;
+  m_nGoalItemRenderContexts[PIZZA] = RC_PIZZA;
+  m_nGoalItemRenderContexts[CAKE] = RC_CAKE;
+  m_nGoalItemRenderContexts[CANNED_BEARS] = RC_CANNED_BEARS;
+  m_nGoalItemRenderContexts[CARROTS] = RC_CARROTS;
   m_nGoalItemRenderContexts[SAMMY_SANDWICH] = RC_SAMMY_SANDWICH;
-  m_nGoalItemRenderContexts[SQUID]          = RC_SQUID;
-  m_nGoalItemRenderContexts[AGENT_ORANGE]   = RC_AGENT_ORANGE;
+  m_nGoalItemRenderContexts[SQUID] = RC_SQUID;
+  m_nGoalItemRenderContexts[AGENT_ORANGE] = RC_AGENT_ORANGE;
 
   /// HELD ITEM MESH AND RENDER CONTEXTS
-  ModelManager* pMM          = ModelManager::GetInstance();
+  ModelManager* pMM = ModelManager::GetInstance();
   m_nHeldItemMeshIDs[BANANA] = pMM->GetMeshIndexByName("Banana_MShape");
-  m_nHeldItemMeshIDs[SOUP]
-    = pMM->GetMeshIndexByName("Chicken_NoodleSoup_MShape");
+  m_nHeldItemMeshIDs[SOUP] =
+      pMM->GetMeshIndexByName("Chicken_NoodleSoup_MShape");
   m_nHeldItemMeshIDs[DONUT] = pMM->GetMeshIndexByName("Donut");
-  m_nHeldItemMeshIDs[TURKEY]
-    = pMM->GetMeshIndexByName("FFP_3D_IceTurkeyBox_FIN");
+  m_nHeldItemMeshIDs[TURKEY] =
+      pMM->GetMeshIndexByName("FFP_3D_IceTurkeyBox_FIN");
   m_nHeldItemMeshIDs[JAM] = pMM->GetMeshIndexByName("Jam_MShape");
-  m_nHeldItemMeshIDs[PEANUT_BUTTER]
-    = pMM->GetMeshIndexByName("Peanut_butter_MShape");
+  m_nHeldItemMeshIDs[PEANUT_BUTTER] =
+      pMM->GetMeshIndexByName("Peanut_butter_MShape");
   m_nHeldItemMeshIDs[PIE] = pMM->GetMeshIndexByName("Pie_MShape");
-  m_nHeldItemMeshIDs[ENERGY_DRINK]
-    = pMM->GetMeshIndexByName("Thors_Thunder_MShape");
+  m_nHeldItemMeshIDs[ENERGY_DRINK] =
+      pMM->GetMeshIndexByName("Thors_Thunder_MShape");
 
-  m_nHeldItemRenderCompIDs[BANANA]        = RC_BANANA;
-  m_nHeldItemRenderCompIDs[SOUP]          = RC_CHICKENSOUP;
-  m_nHeldItemRenderCompIDs[DONUT]         = RC_DONUT;
-  m_nHeldItemRenderCompIDs[TURKEY]        = RC_TURKEYBOX;
-  m_nHeldItemRenderCompIDs[JAM]           = RC_JAM;
+  m_nHeldItemRenderCompIDs[BANANA] = RC_BANANA;
+  m_nHeldItemRenderCompIDs[SOUP] = RC_CHICKENSOUP;
+  m_nHeldItemRenderCompIDs[DONUT] = RC_DONUT;
+  m_nHeldItemRenderCompIDs[TURKEY] = RC_TURKEYBOX;
+  m_nHeldItemRenderCompIDs[JAM] = RC_JAM;
   m_nHeldItemRenderCompIDs[PEANUT_BUTTER] = RC_PEANUTBUTTER;
-  m_nHeldItemRenderCompIDs[PIE]           = RC_PIE;
-  m_nHeldItemRenderCompIDs[ENERGY_DRINK]  = RC_THOR;
+  m_nHeldItemRenderCompIDs[PIE] = RC_PIE;
+  m_nHeldItemRenderCompIDs[ENERGY_DRINK] = RC_THOR;
 
   m_fGoalItemSpawnTimer = 4.0f;
 
@@ -157,8 +162,8 @@ void CSpawningManager::Init() {
   map<EDepartment,
       CDepartment*,
       less<unsigned int>,
-      scd::allocator<pair<EDepartment, CDepartment*>>>::iterator pIter
-    = m_cDepartments.begin();
+      scd::allocator<pair<EDepartment, CDepartment*>>>::iterator pIter =
+      m_cDepartments.begin();
 
   int nID = -1;
 
@@ -174,9 +179,9 @@ void CSpawningManager::Init() {
   }
 }
 
-void CSpawningManager::Shutdown(IEvent*, scd::base_component*) {
+void spawning_manager::Shutdown(IEvent*, scd::base_component*) {
   // Clear all memory
-  CSpawningManager* pSM = GetInstance();
+  spawning_manager* pSM = GetInstance();
 
   map<EDepartment,
       CDepartment*,
@@ -206,7 +211,7 @@ void CSpawningManager::Shutdown(IEvent*, scd::base_component*) {
       CHeldItemComponent*,
       less<unsigned int>,
       scd::allocator<pair<unsigned int, CHeldItemComponent*>>>::iterator
-    pHeldIter;
+      pHeldIter;
   pHeldIter = pSM->m_cHeldItems.begin();
   while (pHeldIter != pSM->m_cHeldItems.end()) {
     MMDEL(pHeldIter->second);
@@ -215,7 +220,7 @@ void CSpawningManager::Shutdown(IEvent*, scd::base_component*) {
   pSM->m_cHeldItems.clear();
 }
 
-void CSpawningManager::InitGoalItems() {
+void spawning_manager::InitGoalItems() {
   for (int nIndex = 0; nIndex < MAX_DEPARTMENTS; ++nIndex) {
     std::string szID;
     szID = "Department ";
@@ -226,7 +231,7 @@ void CSpawningManager::InitGoalItems() {
   }
 }
 
-void CSpawningManager::InitHeldItems() {
+void spawning_manager::InitHeldItems() {
   m_nTotalSpawnedHeldItems = 0;
 
   string szID;
@@ -236,35 +241,35 @@ void CSpawningManager::InitHeldItems() {
     szID = "HeldItem ";
     szID += chCounter;
 
-    scd::object* pObj
-      = scd::objectManager::GetInstance()->CreateObject(szID, 0, 0, 0);
+    scd::object* pObj =
+        scd::objectManager::GetInstance()->CreateObject(szID, 0, 0, 0);
     CHeldItemComponent* pHeldItemComp = CreateHeldItemComponent(pObj);
 
     // Set Render/Collision
     // 34 for spheres
-    CRenderComponent* pRenderComp
-      = Renderer::GetInstance()->CreateRenderComp(pObj, 34, 0, 2);
+    CRenderComponent* pRenderComp =
+        Renderer::GetInstance()->CreateRenderComp(pObj, 34, 0, 2);
     pHeldItemComp->SetRenderComponent(pRenderComp);
 
     TSphere tsphere;
     tsphere.cPosition = pObj->GetTransform()->GetWorldPosition();
-    tsphere.fRadius   = 1.5f;
-    CCollideable* pCollideable
-      = CCollisionManager::GetInstance()->CreateCollideableComponent(
-        pObj, false, false, OBJHELDITEM);
+    tsphere.fRadius = 1.5f;
+    CCollideable* pCollideable =
+        CCollisionManager::GetInstance()->CreateCollideableComponent(
+            pObj, false, false, OBJHELDITEM);
     pCollideable->SetBVType(BSPHERE);
     pCollideable->SetSphere(tsphere);
 
     // Scale obj's frame so it's easily seen
     pObj->GetTransform()->ScaleFrame(
-      tsphere.fRadius, tsphere.fRadius, tsphere.fRadius);
+        tsphere.fRadius, tsphere.fRadius, tsphere.fRadius);
   }
 }
 
-void CSpawningManager::LoadGoalItemLocations() {
-  fstream fin("Resource\\Node Map\\GoalItems.nm",
-              ios_base::in | ios_base::binary);
-  int nstrlen     = 0;
+void spawning_manager::LoadGoalItemLocations() {
+  fstream fin(
+      "Resource\\Node Map\\GoalItems.nm", ios_base::in | ios_base::binary);
+  int nstrlen = 0;
   int objectcount = 0;
   // double matrixbuffer = 0.0;
   CLevelManager::CNode* levelNodes;
@@ -272,8 +277,8 @@ void CSpawningManager::LoadGoalItemLocations() {
   // LOAD NODES
   if (fin.is_open()) {
     fin.read((char*)&objectcount, sizeof(int));
-    levelNodes
-      = MMNEWARRAYEX(CLevelManager::CNode, objectcount, HEAPID_GENERAL);
+    levelNodes =
+        MMNEWARRAYEX(CLevelManager::CNode, objectcount, HEAPID_GENERAL);
     for (int i = 0; i < objectcount; ++i) {
       // name length
       fin.read((char*)&nstrlen, sizeof(int));
@@ -291,16 +296,16 @@ void CSpawningManager::LoadGoalItemLocations() {
   }
 
   // Create strings of wanted GoalItems
-  string* pGoalItems       = MMNEWARRAYEX(string, objectcount, HEAPID_GENERAL);
-  pGoalItems[DAIRY]        = "Dairy";
-  pGoalItems[DRY_GOODS]    = "DryGoods";
-  pGoalItems[FREEZER]      = "Freezer";
-  pGoalItems[BAKERY]       = "Bakery";
+  string* pGoalItems = MMNEWARRAYEX(string, objectcount, HEAPID_GENERAL);
+  pGoalItems[DAIRY] = "Dairy";
+  pGoalItems[DRY_GOODS] = "DryGoods";
+  pGoalItems[FREEZER] = "Freezer";
+  pGoalItems[BAKERY] = "Bakery";
   pGoalItems[CANNED_GOODS] = "CannedGoods";
-  pGoalItems[PRODUCE]      = "Produce";
-  pGoalItems[DELI]         = "Deli";
-  pGoalItems[MEATS]        = "Meats";
-  pGoalItems[SNACKS]       = "Snacks";
+  pGoalItems[PRODUCE] = "Produce";
+  pGoalItems[DELI] = "Deli";
+  pGoalItems[MEATS] = "Meats";
+  pGoalItems[SNACKS] = "Snacks";
 
   // Search for nodes
   char chBuffer[64];
@@ -319,7 +324,7 @@ void CSpawningManager::LoadGoalItemLocations() {
     memcpy(chBuffer, levelNodes[nIndex].szName, nNameLength);
 
     // init the strtok to deliminate based on _
-    char* nextToken   = NULL;
+    char* nextToken = NULL;
     char* szTokenizer = strtok_s(chBuffer, "_", &nextToken);
 
     // while strtoke doesn't return null (aka it's not at the end of the
@@ -333,8 +338,8 @@ void CSpawningManager::LoadGoalItemLocations() {
               CDepartment*,
               less<unsigned int>,
               scd::allocator<pair<EDepartment, CDepartment*>>>::iterator
-            DepartmentIter
-            = m_cDepartments.find(static_cast<EDepartment>(nDepartment));
+              DepartmentIter =
+                  m_cDepartments.find(static_cast<EDepartment>(nDepartment));
 
           if (DepartmentIter == m_cDepartments.end()) {
             Debug.Print("Error in SpawningManager.cpp 'LoadGoalItemLocations'");
@@ -346,9 +351,9 @@ void CSpawningManager::LoadGoalItemLocations() {
           tSpawnLocation.m_cPos.y = levelNodes[nIndex].tWorldMatrix._42;
           tSpawnLocation.m_cPos.z = levelNodes[nIndex].tWorldMatrix._43;
 
-          DepartmentIter->second->m_cGoalItemSpawnLocations.insert(
-            make_pair(DepartmentIter->second->m_cGoalItemSpawnLocations.size(),
-                      tSpawnLocation));
+          DepartmentIter->second->m_cGoalItemSpawnLocations.insert(make_pair(
+              DepartmentIter->second->m_cGoalItemSpawnLocations.size(),
+              tSpawnLocation));
 
           break;
         }
@@ -359,7 +364,7 @@ void CSpawningManager::LoadGoalItemLocations() {
   MMDELARRAYEX(levelNodes, HEAPID_GENERAL);
 }
 
-void CSpawningManager::LoadHeldItemLocations() {
+void spawning_manager::LoadHeldItemLocations() {
   // Search for endcap nodes
   char chBuffer[64];
   char chTempBuffer[64];
@@ -380,7 +385,7 @@ void CSpawningManager::LoadHeldItemLocations() {
     memcpy(chBuffer, tNode[nIndex].szName, nNameLength);
 
     // init the strtok to deliminate based on underscores
-    char* nextToken   = NULL;
+    char* nextToken = NULL;
     char* szTokenizer = strtok_s(chBuffer, "_", &nextToken);
 
     // while strtoke doesn't return null (aka it's not at the end of the
@@ -398,8 +403,8 @@ void CSpawningManager::LoadHeldItemLocations() {
   }
 }
 
-int CSpawningManager::CreateGoalItemComponent(lua_State* pLua) {
-  scd::object* pObj           = (scd::object*)lua_topointer(pLua, -2);
+int spawning_manager::CreateGoalItemComponent(lua_State* pLua) {
+  scd::object* pObj = (scd::object*)lua_topointer(pLua, -2);
   EGoalItemType eGoalItemType = (EGoalItemType)((int)lua_tonumber(pLua, -1));
   CreateGoalItemComponent(pObj, eGoalItemType);
 
@@ -408,21 +413,22 @@ int CSpawningManager::CreateGoalItemComponent(lua_State* pLua) {
   return 0;
 }
 
-CGoalItems* CSpawningManager::CreateGoalItemComponent(scd::object* pObj,
-                                                      EGoalItemType eType) {
+CGoalItems* spawning_manager::CreateGoalItemComponent(
+    scd::object* pObj,
+    EGoalItemType eType) {
   CGoalItems* comp = MMNEW(CGoalItems(pObj));
 
   comp->Init(eType);
   pObj->AddComponent(comp);
 
-  CSpawningManager::GetInstance()->m_cGoalItems.insert(
-    make_pair((unsigned int)eType, comp));
+  spawning_manager::GetInstance()->m_cGoalItems.insert(
+      make_pair((unsigned int)eType, comp));
 
   return comp;
 }
 
-int CSpawningManager::CreateDepartmentComponent(lua_State* pLua) {
-  scd::object* pObj     = (scd::object*)lua_topointer(pLua, -2);
+int spawning_manager::CreateDepartmentComponent(lua_State* pLua) {
+  scd::object* pObj = (scd::object*)lua_topointer(pLua, -2);
   EDepartment eDeptType = static_cast<EDepartment>(lua_tointeger(pLua, -1));
   CreateDepartmentComponent(pObj, eDeptType);
 
@@ -431,8 +437,9 @@ int CSpawningManager::CreateDepartmentComponent(lua_State* pLua) {
   return 0;
 }
 
-CDepartment* CSpawningManager::CreateDepartmentComponent(scd::object* pObj,
-                                                         EDepartment eType) {
+CDepartment* spawning_manager::CreateDepartmentComponent(
+    scd::object* pObj,
+    EDepartment eType) {
   CDepartment* comp = MMNEW(CDepartment(pObj));
 
   comp->Init(eType);
@@ -443,7 +450,7 @@ CDepartment* CSpawningManager::CreateDepartmentComponent(scd::object* pObj,
   return comp;
 }
 
-int CSpawningManager::CreateHeldItemComponent(lua_State* pLua) {
+int spawning_manager::CreateHeldItemComponent(lua_State* pLua) {
   scd::object* pObj = (scd::object*)lua_topointer(pLua, -1);
   CreateHeldItemComponent(pObj);
 
@@ -453,7 +460,7 @@ int CSpawningManager::CreateHeldItemComponent(lua_State* pLua) {
 }
 
 CHeldItemComponent*
-  CSpawningManager::CreateHeldItemComponent(scd::object* pObj) {
+spawning_manager::CreateHeldItemComponent(scd::object* pObj) {
   CHeldItemComponent* comp = MMNEW(CHeldItemComponent(pObj));
 
   comp->Init();
@@ -465,9 +472,9 @@ CHeldItemComponent*
   return comp;
 }
 
-void CSpawningManager::DestroyObject(IEvent* pcEvent, scd::base_component*) {
+void spawning_manager::DestroyObject(IEvent* pcEvent, scd::base_component*) {
   TObjectEvent* pObjEvent = (TObjectEvent*)pcEvent->GetData();
-  EGoalItemType eID       = GetInstance()->GetGoalItemType(pObjEvent->m_pcObj);
+  EGoalItemType eID = GetInstance()->GetGoalItemType(pObjEvent->m_pcObj);
 
   map<unsigned int,
       CGoalItems*,
@@ -479,7 +486,7 @@ void CSpawningManager::DestroyObject(IEvent* pcEvent, scd::base_component*) {
   }
 }
 
-void CSpawningManager::GoalItemCollected(IEvent* iEvent, scd::base_component*) {
+void spawning_manager::GoalItemCollected(IEvent* iEvent, scd::base_component*) {
   TGoalItemCollectedEvent* tEvent = (TGoalItemCollectedEvent*)iEvent->GetData();
 
   scd::object* pcObj = (scd::object*)tEvent->m_pcGoalItem;
@@ -501,18 +508,18 @@ void CSpawningManager::GoalItemCollected(IEvent* iEvent, scd::base_component*) {
 
   // Find Department where Goal Item has been collected
   pcDeptIter = GetInstance()->m_cDepartments.find(
-    (EDepartment)pcGoalIter->second->GetType());
+      (EDepartment)pcGoalIter->second->GetType());
 
   // Despawn Department
   pcDeptIter->second->Despawn();
 }
 
-void CSpawningManager::Update(IEvent* iEvent, scd::base_component*) {
+void spawning_manager::Update(IEvent* iEvent, scd::base_component*) {
   TUpdateStateEvent* pcUpdateState = (TUpdateStateEvent*)iEvent->GetData();
-  CSpawningManager::GetInstance()->UpdateTimer(pcUpdateState->m_fDeltaTime);
+  spawning_manager::GetInstance()->UpdateTimer(pcUpdateState->m_fDeltaTime);
 }
 
-void CSpawningManager::UpdateTimer(const float fDT) {
+void spawning_manager::UpdateTimer(const float fDT) {
   if (m_bGameHasntStartedYet) {
     return;
   }
@@ -526,7 +533,7 @@ void CSpawningManager::UpdateTimer(const float fDT) {
   }
 }
 
-void CSpawningManager::Despawned(IEvent* iEvent, scd::base_component*) {
+void spawning_manager::Despawned(IEvent* iEvent, scd::base_component*) {
   TGoalItemEvent* tEvent = (TGoalItemEvent*)iEvent->GetData();
   CGoalItems* pcGoalItem = (CGoalItems*)tEvent->m_pcGoalItem;
 
@@ -534,14 +541,14 @@ void CSpawningManager::Despawned(IEvent* iEvent, scd::base_component*) {
   map<EDepartment,
       CDepartment*,
       less<unsigned int>,
-      scd::allocator<pair<EDepartment, CDepartment*>>>::iterator pcIter
-    = GetInstance()->m_cDepartments.find((EDepartment)pcGoalItem->GetType());
+      scd::allocator<pair<EDepartment, CDepartment*>>>::iterator pcIter =
+      GetInstance()->m_cDepartments.find((EDepartment)pcGoalItem->GetType());
 
   // Call Department's Despawn function
   pcIter->second->Despawn();
 }
 
-void CSpawningManager::SpawnGoalItem() {
+void spawning_manager::SpawnGoalItem() {
   // Get a random Department
   int nLocation = rand() % MAX_DEPARTMENTS;
 
@@ -562,7 +569,7 @@ void CSpawningManager::SpawnGoalItem() {
   m_cDepartments[static_cast<EDepartment>(nLocation)]->SpawnGoalItem();
 }
 
-EGoalItemType CSpawningManager::GetGoalItemType(scd::object* pcObject) {
+EGoalItemType spawning_manager::GetGoalItemType(scd::object* pcObject) {
   map<unsigned int,
       CGoalItems*,
       less<unsigned int>,
@@ -583,12 +590,12 @@ EGoalItemType CSpawningManager::GetGoalItemType(scd::object* pcObject) {
   return NO_ITEM;
 }
 
-EHeldItemType CSpawningManager::GetHeldItemType(scd::object* pcObject) {
+EHeldItemType spawning_manager::GetHeldItemType(scd::object* pcObject) {
   map<unsigned int,
       CHeldItemComponent*,
       less<unsigned int>,
       scd::allocator<pair<unsigned int, CHeldItemComponent*>>>::iterator
-    ItemIter;
+      ItemIter;
 
   ItemIter = m_cHeldItems.begin();
 
@@ -605,17 +612,17 @@ EHeldItemType CSpawningManager::GetHeldItemType(scd::object* pcObject) {
   return NO_HELD_ITEM;
 }
 
-void CSpawningManager::HandleInitObjects(IEvent*, scd::base_component*) {
-  GetInstance()->m_fGoalItemSpawnTimer  = 6.0f;
+void spawning_manager::HandleInitObjects(IEvent*, scd::base_component*) {
+  GetInstance()->m_fGoalItemSpawnTimer = 6.0f;
   GetInstance()->m_bGameHasntStartedYet = true;
 }
 
-void CSpawningManager::GoalItemCollision(IEvent* iEvent, scd::base_component*) {
+void spawning_manager::GoalItemCollision(IEvent* iEvent, scd::base_component*) {
   TGoalItemCollectedEvent* tEvent = (TGoalItemCollectedEvent*)iEvent->GetData();
 
-  scd::object* pGoalItem  = tEvent->m_pcGoalItem;
+  scd::object* pGoalItem = tEvent->m_pcGoalItem;
   scd::object* pCollector = tEvent->m_pcCollector;
-  EGoalItemType eType     = GetInstance()->GetGoalItemType(pGoalItem);
+  EGoalItemType eType = GetInstance()->GetGoalItemType(pGoalItem);
 
   map<unsigned int,
       CGoalItems*,
@@ -630,13 +637,14 @@ void CSpawningManager::GoalItemCollision(IEvent* iEvent, scd::base_component*) {
   }
 
   // Tell everyone else
-  SendGoalItemCollectedEvent("GoalItemCollected",
-                             (scd::base_component*)GetInstance(),
-                             pGoalItem,
-                             pCollector);
+  SendGoalItemCollectedEvent(
+      "GoalItemCollected",
+      (scd::base_component*)GetInstance(),
+      pGoalItem,
+      pCollector);
 }
 
-int CSpawningManager::GetGoalItemMeshID(int nItemID) {
+int spawning_manager::GetGoalItemMeshID(int nItemID) {
   if (nItemID > -1 && nItemID < MAX_GOAL_ITEMS) {
     return m_nGoalItems[nItemID];
   }
@@ -644,12 +652,12 @@ int CSpawningManager::GetGoalItemMeshID(int nItemID) {
   return -1;
 }
 
-bool CSpawningManager::IsSpawned(EGoalItemType eType) {
+bool spawning_manager::IsSpawned(EGoalItemType eType) {
   map<unsigned int,
       CGoalItems*,
       less<unsigned int>,
-      scd::allocator<pair<unsigned int, CGoalItems*>>>::iterator pIter
-    = m_cGoalItems.find(eType);
+      scd::allocator<pair<unsigned int, CGoalItems*>>>::iterator pIter =
+      m_cGoalItems.find(eType);
 
   if (pIter == m_cGoalItems.end()) {
     return false;
@@ -658,6 +666,8 @@ bool CSpawningManager::IsSpawned(EGoalItemType eType) {
   return pIter->second->GetIsSpawned();
 }
 
-void CSpawningManager::HandleStartUpdate(IEvent*, scd::base_component*) {
+void spawning_manager::HandleStartUpdate(IEvent*, scd::base_component*) {
   GetInstance()->m_bGameHasntStartedYet = false;
 }
+
+} // namespace scd

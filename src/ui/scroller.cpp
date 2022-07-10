@@ -54,23 +54,23 @@ CScrollerComponent* CScrollerComponent::CreateScrollerComponent(CButtonComponent
 	comp->m_yPos = comp->m_yStartPos;
 
 	int eAssociatedState = pButton->GetAssociatedState();
-	
+
 	// listens for these events
 	string szEvent = "EnableObjects";
 	szEvent += (char)eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ScrollerStateEnable);
+	event_manager.register_event(szEvent, comp, ScrollerStateEnable);
 
 	szEvent = "DisableObjects";
 	szEvent += (char)eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ScrollerStateDisable);
-	
+	event_manager.register_event(szEvent, comp, ScrollerStateDisable);
+
 	szEvent = "InitObjects";
 	szEvent += (char)eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, ScrollerStateInit);
-	
+	event_manager.register_event(szEvent, comp, ScrollerStateInit);
+
 	szEvent = "Update";
 	szEvent += (char)eAssociatedState;
-	CEventManager::GetInstance()->RegisterEvent(szEvent, comp, Update);
+	event_manager.register_event(szEvent, comp, Update);
 
 	pObj->AddComponent(comp);
 
@@ -109,13 +109,13 @@ void CScrollerComponent::Update(IEvent* cEvent, scd::base_component* cCenter)
 
 		// check reset value for x axis
 		if(tSpriteData.m_nX > comp->m_xStartPos + comp->m_xSize)
-		{	
+		{
 			tSpriteData.m_nX = (int)comp->m_xStartPos;
 			comp->m_xPos = comp->m_xStartPos;
 		}
 		// check reset value for y axis
 		if(tSpriteData.m_nY < -2048)
-		{	
+		{
 			tSpriteData.m_nY = 1024;
 			comp->m_yPos = 1024;
 		}
@@ -129,7 +129,7 @@ void CScrollerComponent::ScrollerStateEnable(IEvent* /*cEvent*/, scd::base_compo
 	//CScrollerComponent* comp = (CScrollerComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
 
-	
+
 }
 
 void CScrollerComponent::ScrollerStateDisable(IEvent* /*cEvent*/, scd::base_component* /*cCenter*/)
@@ -137,7 +137,7 @@ void CScrollerComponent::ScrollerStateDisable(IEvent* /*cEvent*/, scd::base_comp
 	//CScrollerComponent* comp = (CScrollerComponent*)cCenter;
 	//TStateEvent* pEvent = (TStateEvent*)cEvent->GetData();
 
-	
+
 }
 
 void CScrollerComponent::ScrollerStateInit(IEvent* /*cEvent*/, scd::base_component* cCenter)

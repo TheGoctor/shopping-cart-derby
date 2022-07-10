@@ -105,30 +105,30 @@ void CSliderComponent::Init(string textureName, int nTextureDepth) {
   // listens for these events
   string szEvent = "EnableObjects";
   szEvent += (char)m_eAssociatedState;
-  CEventManager::GetInstance()->RegisterEvent(szEvent, this, ButtonStateEnable);
+  event_manager.register_event(szEvent, this, ButtonStateEnable);
 
   szEvent = "DisableObjects";
   szEvent += (char)m_eAssociatedState;
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     szEvent, this, ButtonStateDisable);
 
   szEvent = "InitObjects";
   szEvent += (char)m_eAssociatedState;
-  CEventManager::GetInstance()->RegisterEvent(szEvent, this, SliderStateInit);
+  event_manager.register_event(szEvent, this, SliderStateInit);
 
   szEvent = "Update";
   szEvent += (char)GetAssociatedState();
-  CEventManager::GetInstance()->RegisterEvent(szEvent, this, Update);
-  CEventManager::GetInstance()->RegisterEvent("Up", this, UpPressed);
-  CEventManager::GetInstance()->RegisterEvent("Down", this, DownPressed);
-  CEventManager::GetInstance()->RegisterEvent("Right", this, SlideRight);
-  CEventManager::GetInstance()->RegisterEvent("Left", this, SlideLeft);
-  CEventManager::GetInstance()->RegisterEvent("Back", this, InvalidSelection);
-  CEventManager::GetInstance()->RegisterEvent("Accept", this, SelectPressed);
+  event_manager.register_event(szEvent, this, Update);
+  event_manager.register_event("Up", this, UpPressed);
+  event_manager.register_event("Down", this, DownPressed);
+  event_manager.register_event("Right", this, SlideRight);
+  event_manager.register_event("Left", this, SlideLeft);
+  event_manager.register_event("Back", this, InvalidSelection);
+  event_manager.register_event("Accept", this, SelectPressed);
 
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     "CancelOptionsMain", this, SliderCancelMain);
-  CEventManager::GetInstance()->RegisterEvent(
+  event_manager.register_event(
     "CancelOptionsPause", this, SliderCancelPause);
 
   m_fTimeSinceSelectionEntry = 0;

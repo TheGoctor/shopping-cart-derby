@@ -4,55 +4,49 @@
 //	Mod. Date		:	5/25/11
 //	Mod. Initials	:	JL
 //	Author			:	Joseph Leybovich
-//	Purpose			:	Encapsulates the Data needed to Render a Static Mesh
+//	Purpose			:	Encapsulates the Data needed to Render a
+// Static Mesh
 ////////////////////////////////////////////////////////////////////////////////
+#pragma once
 
-// Header Protection
-#ifndef _DXRENDERSTATIC_H_
-#define _DXRENDERSTATIC_H_
+#include "rendering/render_node.h"
 
-// Includes
-#include "RenderNode.h"
+namespace scd {
 
 // Foward Declares
 class DXRenderContext;
 class DXMesh;
 
 // Render Static
-class DXRenderStatic : public RenderNode
-{
+class dx_render_static : public render_node {
 protected:
-	DXRenderContext *m_pRenderContext;	// Associated Context
-	DXMesh *m_pMesh;					// Mesh
-	float m_Color[4];					// Color
+  DXRenderContext* m_pRenderContext; // Associated Context
+  DXMesh* m_pMesh;                   // Mesh
+  float m_Color[4];                  // Color
 
 public:
-	
-	// Constructor
-	DXRenderStatic(void);
+  dx_render_static();
+  virtual ~dx_render_static();
 
-	// Destructor
-	virtual ~DXRenderStatic(void);
+  // Accessors
+  DXMesh* GetMesh(void) { return m_pMesh; }
+  DXRenderContext* GetRenderContext(void) const { return m_pRenderContext; }
+  const float* GetColor(void) { return m_Color; }
 
-	// Accessors
-	DXMesh* GetMesh(void)						  { return m_pMesh;			 }
-	DXRenderContext* GetRenderContext(void) const {	return m_pRenderContext; }
-	const float* GetColor(void)					  { return m_Color;			 }
+  // Mutators
+  void SetMesh(DXMesh* _pMesh) { m_pMesh = _pMesh; }
+  void SetRenderContext(DXRenderContext* _pRenderContext) {
+    m_pRenderContext = _pRenderContext;
+  }
+  void SetColor(float color4[4]) {
+    m_Color[0] = color4[0];
+    m_Color[1] = color4[1];
+    m_Color[2] = color4[2];
+    m_Color[3] = color4[3];
+  }
 
-	// Mutators
-	void SetMesh(DXMesh *_pMesh)							{ m_pMesh = _pMesh;					  }
-	void SetRenderContext(DXRenderContext *_pRenderContext)	{ m_pRenderContext = _pRenderContext; }
-	void SetColor(float color4[4]) 
-	{
-		m_Color[0] = color4[0];
-		m_Color[1] = color4[1];
-		m_Color[2] = color4[2];
-		m_Color[3] = color4[3];
-	}
-
-	// Render Funcs
-	static void VertsRenderFunc(RenderNode &node);
-	static void IndexedVertsRenderFunc(RenderNode &node);
+  // Render Funcs
+  static void VertsRenderFunc(render_node& node);
+  static void IndexedVertsRenderFunc(render_node& node);
 };
-
-#endif	// _DXRENDERSTATIC_H_
+} // namespace scd

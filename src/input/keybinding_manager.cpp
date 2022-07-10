@@ -36,53 +36,53 @@ void CKeybindsManager::Init()
 	m_lUnbindableKeys.push_back(DIK_ESCAPE);
 	m_lUnbindableKeys.push_back(DIK_GRAVE);
 
-	
+
 	string szEventName = "Update";
 	szEventName += (char)KEYBIND_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleUpdate);	
-	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleUpdate);
+
 	szEventName = "EnableObjects";
 	szEventName += (char)KEYBIND_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleStateEnter);	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleStateEnter);
 
 	szEventName = "DisableObjects";
 	szEventName += (char)KEYBIND_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleStateExit);	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleStateExit);
 
 	szEventName = "InitObjects";
 	szEventName += (char)KEYBIND_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleStateInit);	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleStateInit);
 
 // do the same for the pause version of this
 	szEventName = "Update";
 	szEventName += (char)PAUSE_KEYBINDS_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleUpdate);	
-	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleUpdate);
+
 	szEventName = "EnableObjects";
 	szEventName += (char)PAUSE_KEYBINDS_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleStateEnter);	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleStateEnter);
 
 	szEventName = "DisableObjects";
 	szEventName += (char)PAUSE_KEYBINDS_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleStateExit);	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleStateExit);
 
 	szEventName = "InitObjects";
 	szEventName += (char)PAUSE_KEYBINDS_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(IComponent*)GetInstance(), HandleStateInitPause);	
+	event_manager.register_event(szEventName,
+		(IComponent*)GetInstance(), HandleStateInitPause);
 
 
-	CEventManager::GetInstance()->RegisterEvent("SetKey", (IComponent*)GetInstance(), HandleStateInit);	
+	event_manager.register_event("SetKey", (IComponent*)GetInstance(), HandleStateInit);
 
 
-	// load bmap font stuff	
+	// load bmap font stuff
 	CBitmapFont font(-1, 13, 15, 33);
 	font.LoadFont("Resource\\BitmapFont.png", "Resource\\BitmapFont_Width.bin");
 
@@ -226,7 +226,7 @@ void CKeybindsManager::Init()
 	pBitObj = CObjectManager::GetInstance()->CreateObject("KebindsText9");
 	m_tKeyInfo[9].pFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, szName,
 		font, x, y, fScale, textColor, false);
-	
+
 	m_vMainMenuLocation[9].x = float(x);
 	m_vMainMenuLocation[9].y = float(y);
 
@@ -273,7 +273,7 @@ void CKeybindsManager::Init()
 
 
 	// Set up directions font
-	
+
 	pBitObj = CObjectManager::GetInstance()->CreateObject("Directionsf");
 	m_pDirectionsFont = CTextureManager::GetInstance()->CreateBitmapFontComp(pBitObj, "Press a key to bind",
 		font, 350, 700, 2.0f, scd::vector4(1.0f, .4f, .4f, 1.0f), false);
@@ -295,7 +295,7 @@ void CKeybindsManager::HandleUpdate(IEvent* cEvent, IComponent*)
 		// "Press a key to bind" text show because we're catching input
 		pMgr->m_pDirectionsFont->SetActive(true);
 		// make it flash by sin()ing the alpha channel
-		pMgr->m_pDirectionsFont->SetColor(scd::vector4(1.0f, .4f, .4f, 
+		pMgr->m_pDirectionsFont->SetColor(scd::vector4(1.0f, .4f, .4f,
 			sin(pMgr->m_fTimer)* ( sin(pMgr->m_fTimer) > 0.0f ? 1.0f : -1.0f))); // ^^ oscilation not ^v (look at the shape of those letters)
 
 		// if there's no controller connected (keybaord input)
@@ -413,7 +413,7 @@ void CKeybindsManager::HandleUpdate(IEvent* cEvent, IComponent*)
 				// get the string of the button pressed for new input
 				string szNewName = CInputManager::GetInstance()->GetStringController(nKeyPressed);
 
-				
+
 					// if it returned a string (aka it fount input)
 					if(szNewName.length() != 0)
 					{
@@ -506,7 +506,7 @@ void CKeybindsManager::HandleStateInit(IEvent* pEvent, IComponent*)
 		else // else we're keyboard input
 		{
 			GetInstance()->m_tKeyInfo[i].pFont->SetWord(("" ==CInputManager::GetInstance()->GetStringKeyboard(
-				CInputManager::GetInstance()->GetKeyboardKey(pMgr->m_tKeyInfo[i].nKey))) ? "<n/a>" : 
+				CInputManager::GetInstance()->GetKeyboardKey(pMgr->m_tKeyInfo[i].nKey))) ? "<n/a>" :
 					CInputManager::GetInstance()->GetStringKeyboard(
 					CInputManager::GetInstance()->GetKeyboardKey(pMgr->m_tKeyInfo[i].nKey))
 				);
@@ -544,7 +544,7 @@ void CKeybindsManager::HandleStateInitPause(IEvent* pEvent, IComponent*)
 		else // else we're keyboard input
 		{
 			GetInstance()->m_tKeyInfo[i].pFont->SetWord(("" ==CInputManager::GetInstance()->GetStringKeyboard(
-				CInputManager::GetInstance()->GetKeyboardKey(pMgr->m_tKeyInfo[i].nKey))) ? "<n/a>" : 
+				CInputManager::GetInstance()->GetKeyboardKey(pMgr->m_tKeyInfo[i].nKey))) ? "<n/a>" :
 					CInputManager::GetInstance()->GetStringKeyboard(
 					CInputManager::GetInstance()->GetKeyboardKey(pMgr->m_tKeyInfo[i].nKey))
 				);
@@ -562,7 +562,7 @@ void CKeybindsManager::HandleStateInitPause(IEvent* pEvent, IComponent*)
 int CKeybindsManager::SetBindDefaultCallback(lua_State* /*pLua*/)
 {
 	CKeybindsManager* pMgr = GetInstance();
-	
+
 	for(int i=0; i<NUM_REBINDABLE_KEYS; i++)
 	{
 		// set to default saved from init
@@ -584,21 +584,21 @@ int CKeybindsManager::SetBindDefaultCallback(lua_State* /*pLua*/)
 	}
 
 
-	
+
 	return 0;
 }
 
 int CKeybindsManager::SetKeyCallback(lua_State* pLua)
 {
 	CKeybindsManager* pMgr = GetInstance();
-	
+
 	int nIndexToChange = lua_tointeger(pLua, -1);
 
 	// if we're not currently catching input and if it's a valid index
 	if(!pMgr->m_bCatchingInput && nIndexToChange >= 0 && nIndexToChange < NUM_REBINDABLE_KEYS)
 	{
 		// if there's a controller connected and they're trying to bind 0 -3 (accel or decel, turn)
-		if( (nIndexToChange == 0 || nIndexToChange == 1 || nIndexToChange == 2 || nIndexToChange == 3) && 
+		if( (nIndexToChange == 0 || nIndexToChange == 1 || nIndexToChange == 2 || nIndexToChange == 3) &&
 			CInputManager::GetInstance()->IsControllerConnected())
 		{
 			// say BAD USER!

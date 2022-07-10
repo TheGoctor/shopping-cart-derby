@@ -32,7 +32,7 @@ using namespace EventStructs;
 #define ACCEL_SOUNDLENGTH 0.4f
 #define BRAKE_SOUNDLENGTH 5.0f
 
-///Sound 
+///Sound
 CWwiseSoundManager *pSound = CWwiseSoundManager::GetInstance();
 bool isplaying = false;
 
@@ -44,7 +44,7 @@ bool isplaying = false;
 #endif
 
 
-CMovement::CMovement() : m_pObject(NULL),  
+CMovement::CMovement() : m_pObject(NULL),
 m_fTurnAmount(0.0f), m_fTranslateThreshold(0.1f), m_bIsBackingUp(false),
 m_nPlayerNumber(1), m_fRammedCooldown(3.0f), m_fTimeSinceRammedLast(0.0f),
 m_eAccelerateBehavior(COAST), m_fDeltaTime(0.0f), m_fSoundPlayingTime(0.0f),
@@ -89,9 +89,9 @@ m_nFramesDrifting(0), m_vPrevVel(1.0f, 0.0f, 0.0f), m_bEndgameSlowingDown(false)
 
 	szEventName = "InitObjects";
 	szEventName += GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, this, StartOfGame);
+	event_manager.register_event(szEventName, this, StartOfGame);
 
-	CEventManager::GetInstance()->RegisterEvent("WonGame", this, GameWonCallback);
+	event_manager.register_event("WonGame", this, GameWonCallback);
 
 
 	// Needed by AI
@@ -121,10 +121,10 @@ void CMovement::CalculateValuesFromWeight()
 		m_fMaxSpeed = (m_eWeight + 6.0f)*2.0f;
 		m_fMaxReverseSpeed = m_fMaxSpeed * .5f;
 
-		m_fAccelerateCoefficient = (13 - m_eWeight*1.0f) * .5f;	
-		m_fBrakeCoefficient = m_fAccelerateCoefficient * 2.0f; // brake faster than accelerate	
-		m_fCoastCoefficient = 2.0f + m_eWeight;	
-		m_fReverseCoefficient = m_fAccelerateCoefficient;	
+		m_fAccelerateCoefficient = (13 - m_eWeight*1.0f) * .5f;
+		m_fBrakeCoefficient = m_fAccelerateCoefficient * 2.0f; // brake faster than accelerate
+		m_fCoastCoefficient = 2.0f + m_eWeight;
+		m_fReverseCoefficient = m_fAccelerateCoefficient;
 
 		m_fRammingSpeed = m_fMaxSpeed * .7f;
 
@@ -136,9 +136,9 @@ void CMovement::CalculateValuesFromWeight()
 		m_fShoveTimeLeft = 0.0f;
 		m_fShovePower = 7.0f-(m_eWeight*.5f);
 		m_fShoveCooldown = 2.0f;
-		m_fShoveCooldown *= -1.0f; // needed for check in handle shove (since it decrements) 
-		//(checks if it's less than the cooldown, which since the 
-		//time starts at, say .5f for the duration, and decrements, 
+		m_fShoveCooldown *= -1.0f; // needed for check in handle shove (since it decrements)
+		//(checks if it's less than the cooldown, which since the
+		//time starts at, say .5f for the duration, and decrements,
 		//if the cd is negative, we can see if, say, timeleft < -4.0f)
 		m_nShoveDirection = 0;
 
@@ -160,8 +160,8 @@ void CMovement::UpdatePosition(float fDt)
 	{
 		// grab our current forward vector
 		scd::vector3 vTranslateVec(
-			m_pObject->GetTransform()->GetLocalMatrix()._31, 
-			m_pObject->GetTransform()->GetLocalMatrix()._32, 
+			m_pObject->GetTransform()->GetLocalMatrix()._31,
+			m_pObject->GetTransform()->GetLocalMatrix()._32,
 			m_pObject->GetTransform()->GetLocalMatrix()._33);
 
 		// if we're bouncing back off a wall
@@ -170,7 +170,7 @@ void CMovement::UpdatePosition(float fDt)
 			vTranslateVec = m_vBounceVec;
 		}
 		// TODO: Put an else on this when bouncing is back in
-		// if we're slipping		
+		// if we're slipping
 		else if(m_fSlipDuration > 0.0f)
 		{
 			// don't use the model's forward, use the stored one
@@ -229,7 +229,7 @@ void CMovement::UpdatePosition(float fDt)
 	{
 		// so we don't continue a shove when we're not moving and start again
 		m_fShoveTimeLeft = 0.0f;
-	}	
+	}
 
 	// reset the drifting variable
 	m_bIsDrifting = false;
@@ -403,9 +403,9 @@ void CMovement::UpdateVelocity(float fDt)
 	float newVal = (((m_fSpeed) * (70.0f))/ (m_fMaxSpeed));
 
 
-	pSound->SetObjectPosition(CHUDManager::GetInstance()->GetPlayerCharID(CHUDManager::GetInstance()->GetPlayerNum(m_pObject)), 
+	pSound->SetObjectPosition(CHUDManager::GetInstance()->GetPlayerCharID(CHUDManager::GetInstance()->GetPlayerNum(m_pObject)),
 		m_pObject->GetTransform()->GetWorldPosition(), 0.25f);
-	pSound->SetRPMValueForSound(newVal, 
+	pSound->SetRPMValueForSound(newVal,
 		CHUDManager::GetInstance()->GetPlayerCharID(CHUDManager::GetInstance()->GetPlayerNum(m_pObject)));
 
 	if(CHUDManager::GetInstance()->GetPlayerNum(m_pObject) == 0)
@@ -591,7 +591,7 @@ void CMovement::HandleCollision(IEvent* cEvent, scd::base_component* cCenter)
 	CMovement* pRammeeComp = CMovementManager::GetInstance()->GetMovementComponent(pRamEvent->m_pcRammee);
 
 
-	// SHOVE RAMMING 
+	// SHOVE RAMMING
 	// if we're the rammer and we're shoving (shovetime) and the ramEE isn't invincible
 	if((pComp->GetObject() == pRamEvent->m_pcRammer) &&
 		pComp->m_fShoveTimeLeft > 0.0f && pRammeeComp->m_fInvulnerableDuration <= 0.0f)
@@ -601,7 +601,7 @@ void CMovement::HandleCollision(IEvent* cEvent, scd::base_component* cCenter)
 
 
 		// if we didn't get one back or what we did get back is invulnerable or the rammEE has a ram cd on him
-		if(pRammeeComp == NULL || pRammeeComp->m_fInvulnerableDuration > 0.0f || 
+		if(pRammeeComp == NULL || pRammeeComp->m_fInvulnerableDuration > 0.0f ||
 			pRammeeComp->m_fTimeSinceRammedLast > 0.0f)
 		{
 			// gtfo, can't do stuff on it
@@ -617,11 +617,11 @@ void CMovement::HandleCollision(IEvent* cEvent, scd::base_component* cCenter)
 
 	// SPEED RAMMING
 	if( pComp->m_pObject == pRamEvent->m_pcRammer)/**/
-	{	
+	{
 		// grab the component of the rammee
 
 		// if we didn't get one back or what we did get is invulnerable or the rammEE has a cd on being rammed
-		if(pRammeeComp == NULL || pRammeeComp->m_fInvulnerableDuration > 0.0f || 
+		if(pRammeeComp == NULL || pRammeeComp->m_fInvulnerableDuration > 0.0f ||
 			pRammeeComp->m_fTimeSinceRammedLast > 0.0f)
 		{
 			// gtfo, can't do stuff on it
@@ -629,11 +629,11 @@ void CMovement::HandleCollision(IEvent* cEvent, scd::base_component* cCenter)
 		}
 
 		// get the headings of each
-		scd::vector3 vRammerHeading(pRamEvent->m_pcRammer->GetTransform()->GetWorldMatrix()._31, 
-			pRamEvent->m_pcRammer->GetTransform()->GetWorldMatrix()._32, 
+		scd::vector3 vRammerHeading(pRamEvent->m_pcRammer->GetTransform()->GetWorldMatrix()._31,
+			pRamEvent->m_pcRammer->GetTransform()->GetWorldMatrix()._32,
 			pRamEvent->m_pcRammer->GetTransform()->GetWorldMatrix()._33);
-		scd::vector3 vRammeeHeading(pRamEvent->m_pcRammee->GetTransform()->GetWorldMatrix()._31, 
-			pRamEvent->m_pcRammee->GetTransform()->GetWorldMatrix()._32, 
+		scd::vector3 vRammeeHeading(pRamEvent->m_pcRammee->GetTransform()->GetWorldMatrix()._31,
+			pRamEvent->m_pcRammee->GetTransform()->GetWorldMatrix()._32,
 			pRamEvent->m_pcRammee->GetTransform()->GetWorldMatrix()._33);
 
 		// grab the vector between each object (to compare heading) (from rammer to ramee)
@@ -690,15 +690,15 @@ void CMovement::HandleShoveLeft(IEvent* cEvent, scd::base_component* cCenter)
 		pComp->m_fShoveTimeLeft <= 0.0f && fabs(pComp->m_fSpeed) > pComp->m_fTranslateThreshold)
 	{
 		pComp->m_fShoveTimeLeft = pComp->m_fShoveDuration;
-		pComp->m_nShoveDirection = -1; 
+		pComp->m_nShoveDirection = -1;
 
 		// if we have inverted controls, make the direction opposite
 		if(pComp->m_fInvertedControlTimeLeft > 0.0f)
 		{
-			pComp->m_nShoveDirection *= -1; 
+			pComp->m_nShoveDirection *= -1;
 		}
 
-		///sound 
+		///sound
 		pComp->PlayShoveSound(pComp->m_pObject);
 		// TODO: Send effect event now
 		SendInputEvent("ShoveLeftAnimation", pComp, pComp->m_pObject, 1.0f);
@@ -722,7 +722,7 @@ void CMovement::HandleShoveRight(IEvent* cEvent, scd::base_component* cCenter)
 		// if we have inverted controls, make the direction opposite
 		if(pComp->m_fInvertedControlTimeLeft > 0.0f)
 		{
-			pComp->m_nShoveDirection *= -1; 
+			pComp->m_nShoveDirection *= -1;
 		}
 
 		pComp->PlayShoveSound(pComp->m_pObject);
@@ -741,7 +741,7 @@ void CMovement::Boost(IEvent* cEvent, scd::base_component* cCenter)
 	{
 		pComp->m_fSpeed = pComp->m_fMaxSpeed * 2.0f;
 
-		//sound 
+		//sound
 		int charID = -1;
 		charID = CHUDManager::GetInstance()->GetPlayerCharID(pComp->GetPlayerNumber());
 		pSound->PlayTheSound(BULLDOG_CART_BOOST, charID);
@@ -858,7 +858,7 @@ void CMovement::SlipStatusCallback(IEvent* cEvent, scd::base_component* cCenter)
 		pSound->PlayerHurtSound(playernum);
 		pComp->m_fSlipTurnAmt = 0.0f;
 		pComp->m_bIsSlipping = true;
-		
+
 	}
 
 }
@@ -986,7 +986,7 @@ void CMovement::ApplyShove(float fDt, scd::vector3& vTranslateVec)
 
 		// This check is to allow shoving while moving backwards
 		// the way translate works, this is needed so it shoves the correct direction
-		if(m_fSpeed < 0.0f) 
+		if(m_fSpeed < 0.0f)
 		{
 			fCoeff *= -1.0f;
 		}
@@ -1014,11 +1014,11 @@ void CMovement::PlayAccelerateOrBrakeSound(EAccelerateBehavior eInput)
 
 	m_fSoundPlayingTime += m_fDeltaTime;
 
-	if(m_fSoundPlayingTime > BRAKE_SOUNDLENGTH && 
+	if(m_fSoundPlayingTime > BRAKE_SOUNDLENGTH &&
 		(m_eAccelerateBehavior == BRAKE))
 	{
 		m_fSoundPlayingTime = 0.0f;
-		// PLAY BRAKE SOUND HERE 
+		// PLAY BRAKE SOUND HERE
 		switch(CHUDManager::GetInstance()->GetPlayer1Char())
 		{
 		case BIKER_CHARACTER:
@@ -1123,7 +1123,7 @@ void CMovement::StartOfGame(IEvent* /*cEvent*/, scd::base_component* cCenter)
 
 	pComp->m_bEndgameSlowingDown = false;
 
-	// reset our debuff timers and stuff 
+	// reset our debuff timers and stuff
 	pComp->m_fInvulnerableDuration = 0.0f;
 	pComp->m_fSlowDuration = 0.0f;
 	pComp->m_fStunDuration = 0.0f;
@@ -1247,7 +1247,7 @@ void CMovement::BounceCallbackEnvironment(IEvent* cEvent, scd::base_component* c
 		if(fabs(fDot) > REFLECT_DOT_MIN && pComp->m_fSpeed > 5.0f)
 		{
 			// play collison sound only if speed is greater than 3 (and we're mostly head on)
-			int charID = -1; 
+			int charID = -1;
 			charID = CHUDManager::GetInstance()->GetPlayerCharID(pComp->GetPlayerNumber());
 			pSound->PlayTheSound(CART_WALL_COLLISION, charID);
 
@@ -1268,7 +1268,7 @@ void CMovement::BounceCallbackEnvironment(IEvent* cEvent, scd::base_component* c
 
 			SendObjectEvent("BouncebackEffect", pComp, pComp->m_pObject);
 		}
-		else 
+		else
 		{
 
 		}
@@ -1377,7 +1377,7 @@ void CMovement::GameWonCallback(IEvent*, scd::base_component* iComp)
 
 	pComp->m_bEndgameSlowingDown = true;
 
-	// reset our debuff timers and stuff 
+	// reset our debuff timers and stuff
 	/*pComp->m_fInvulnerableDuration = 0.0f;
 	pComp->m_fShoveDuration = 0.0f;
 	pComp->m_fSlowDuration = 0.0f;

@@ -8,94 +8,84 @@
 
 namespace scd::component {
 
-donut* donut::create(scd::object* pObj) {
-  donut* pComp = MMNEW(donut(pObj));
-  pComp->DONUT_ID = -1;
-  pComp->FirstInit();
-  pObj->AddComponent(pComp);
-  return pComp;
+donut::donut(scd::object& owner, scd::event_manager& event_manager)
+    : scd::base_component(owner) {
+  _audio_id = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
+
+  event_manager.register_event("UpdateGameplay", std::bind(&on_update, this));
+  event_manager.register_event(
+      "CartCollision", std::bind(&on_player_collision, this));
 }
-void donut::FirstInit(void) {
-  m_fDuration = DONUTTIME;
-  m_fTimeRemaining = m_fDuration;
-  DONUT_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
-  string szEventName = "Update";
-  szEventName += GAMEPLAY_STATE;
-  CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
-  CEventManager::GetInstance()->RegisterEvent(
-      "CartCollision", this, PlayerCollision);
+
+std::shared_ptr<donut> donut::create(scd::object& owner, scd::event_manager& event_manager) {
+  return owner.create_component<donut>(event_manager);
 }
-void donut::ReInit() {
-  SetIsSpawned(true);
-  DONUT_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
-  SetTimeRemaining(GetDuration());
+
+void donut::reinit() {
+  is_spawned(true);
+  _audio_id = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
+  time_remaining(duration());
 
   // m_pAttachedObject is already filled out before this reinit is called inside
   // HeldItemMgr
-  SendStatusEffectEvent("DonutEffect", this, m_pAttachedObject, m_fDuration);
+  scd::event::status_effect::send(
+      "DonutEffect", this, *_attached_object, _duration);
+
   // goober 2
   // SendStatusEffectEvent("DonutDespawn", this, m_pAttachedObject, 0.0f);
   CWwiseSoundManager::GetInstance()->SetObjectPosition(
-      DONUT_ID, m_pAttachedObject->GetTransform()->GetWorldPosition(), 0.3f);
-  CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_DOUGHNUT_USE, DONUT_ID);
+      _audio_id, _attached_object->world_position(), 0.3f);
+
+  CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_DOUGHNUT_USE, _audio_id);
 }
 
-void donut::Despawn() {
-  m_fTimeRemaining = 0.0f;
+void donut::despawn() {
+  _time_remaining = 0.0f;
+
   CWwiseSoundManager::GetInstance()->PlayTheSound(
-      ITEM_DOUGHNUT_AURA_STOP, DONUT_ID);
+      ITEM_DOUGHNUT_AURA_STOP, _audio_id);
 
-  m_bIsSpawned = false;
-  m_pParent->GetTransform()->GetLocalMatrix()._41 = 300.0f;
-  m_pParent->GetTransform()->GetLocalMatrix()._42 = 300.0f;
-  m_pParent->GetTransform()->GetLocalMatrix()._43 = 300.0f;
+  _is_spawned = false;
 
-  CWwiseSoundManager::GetInstance()->UnregisterObject(DONUT_ID);
+  _owner.local_position({300, 300, 300});
+
+  CWwiseSoundManager::GetInstance()->UnregisterObject(_audio_id);
   // goober 1
 }
 
 // call backs
-void donut::Update(IEvent* cEvent, scd::base_component* cCenter) {
-  donut* pComp = (donut*)cCenter;
-  TUpdateStateEvent* eEvent = (TUpdateStateEvent*)cEvent->GetData();
-  float fDt = eEvent->m_fDeltaTime;
-
-  if (!pComp->GetIsSpawned()) {
+void donut::on_update(float dt) {
+  if (!is_spawned()) {
     return;
   }
 
-  pComp->SetTimeRemaining(pComp->GetTimeRemaining() - fDt);
-  if (pComp->GetTimeRemaining() <= 0.0f) {
-    pComp->Despawn();
+  _time_remaining -= dt;
+
+  if (time_remaining() <= 0.0f) {
+    despawn();
     return;
   }
 
-  pComp->SetPosition(
-      pComp->m_pAttachedObject->GetTransform()->GetWorldPosition());
-  pComp->m_pParent->GetTransform()->GetLocalMatrix()._42 = .5f;
+  set_position(_attached_object->world_position());
 
   // SendRenderEvent("AddToSet", pComp, pComp->m_pParent, PRIORITY_IMMEDIATE);
 
-  pComp->SetPosition(pComp->GetParent()->GetTransform()->GetWorldPosition());
+  set_position(_owner.world_position());
 }
-void donut::PlayerCollision(IEvent* cEvent, scd::base_component* cCenter) {
-  donut* pComp = (donut*)cCenter;
-  TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
 
-  if (pComp->GetIsSpawned()
-      && tEvent->m_pcCollider == pComp->m_pAttachedObject) {
+void donut::on_player_collision(const scd::event::impact& data) {
+  if (is_spawned() && data._collider == _attached_object) {
     // send the collider as the one who gets the item
     CWwiseSoundManager::GetInstance()->PlayTheSound(
-        ITEM_DOUGHNUT_IMPACT, pComp->DONUT_ID);
-    SendImpactEvent(
-        "Steal",
-        pComp,
-        tEvent->m_pcCollider,
-        tEvent->m_pCollidedWith,
-        scd::vector3(0.0f, 0.0f, 0.0f));
-    SendStatusEffectEvent(
-        "DonutDespawn", pComp, pComp->m_pAttachedObject, 0.0f);
-    pComp->Despawn();
+        ITEM_DOUGHNUT_IMPACT, _audio_id);
+
+    scd::event::impact::send(
+        "Steal", this, data._collider, data._collidee, {0.0f, 0.0f, 0.0f});
+
+    scd::event::status_effect::send(
+        "DonutDespawn", this, *_attached_object, 0.0f);
+
+    despawn();
   }
 }
 
