@@ -45,7 +45,7 @@ void CWindSpriteEffect::CreateWindSprite(void)
 	tData.m_fRot = 0.0f;
 	tData.m_fRotCenterX = 0.0f;
 	tData.m_fRotCenterY = 0.0f;
-	tData.m_dwColor = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+	tData.m_dwColor = scd::vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	tData.m_tRect.top  = 0;
 	tData.m_tRect.left = 0;
 	tData.m_tRect.right = 1024;

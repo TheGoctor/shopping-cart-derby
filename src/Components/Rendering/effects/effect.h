@@ -20,7 +20,7 @@
 #include <map>
 using namespace std;
 #include "..\\..\\IComponent.h"
-#include "..\\..\\Managers\\Global Managers\\Memory Manager\\CAllocator.h"
+#include "..\\..\\Managers\\Global Managers\\Memory Manager\\scd::allocator.h"
 #include "..\\..\\Managers\\Global Managers\\Rendering Managers\\CParticleEmitter.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ enum EEmitterCompType	  { EC_TYPE_MIN,					// 0
 // Type Definitions
 ///////////////////////////////////////////////////////////////////////////////
 typedef map<CParticleEmitter*, CRenderComponent*, less<CParticleEmitter*>,
-		CAllocator<pair<CParticleEmitter*, CRenderComponent*>>> EmitterRenderCompMap;
+		scd::allocator<pair<CParticleEmitter*, CRenderComponent*>>> EmitterRenderCompMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Effect Structure
@@ -153,7 +153,7 @@ struct TEffect
 // Type Definitions
 ///////////////////////////////////////////////////////////////////////////////
 typedef map<EEmitterCompType, TEffect, less<EEmitterCompType>,
-		CAllocator<pair<EEmitterCompType, TEffect>>> EffectMap;
+		scd::allocator<pair<EEmitterCompType, TEffect>>> EffectMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Effect Component Class
