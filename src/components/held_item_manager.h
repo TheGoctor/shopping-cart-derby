@@ -1,391 +1,151 @@
-///////////////////////////////////////////////////////////////////////////////
-//  File			:	"CHeldItemManager.h"
-//
-//  Author			:	Mac Smith (MS)
-//
-//  Date Created	:	05/19/11
-//
-//	Last Changed	:	05/19/11
-//
-//  Purpose			:	A manager for HeldItem components
-///////////////////////////////////////////////////////////////////////////////
-#ifndef _CHELDITEMMANAGER_H_
-#define _CHELDITEMMANAGER_H_
+#pragma once
 
-// Includes
-#include <list>
-using std::list;
+#include "components/held_items/banana.h"
+#include "components/held_items/chicken_soup.h"
+#include "components/held_items/donut.h"
+#include "components/held_items/energy_drink.h"
+#include "components/held_items/jam.h"
+#include "components/held_items/peanut_butter.h"
+#include "components/held_items/pie.h"
+#include "components/held_items/turkey.h"
+#include "enums.h"
+#include "events/event_manager.h"
 
-// LUA
-extern "C"
-{
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
-
-// Includes
-#include "Global Managers\\Memory Manager\\scd::allocator.h"
-#include "Global Managers\Event Manager\CEventManager.h"
-#include "Enums.h"
-#include "Components\HeldItems\Donut\Donut.h"
-#include "Components\HeldItems\Turkey\CTurkeyComponent.h"
-#include "Components\HeldItems\Energy Drink\EnergyDrink.h"
-#include "Components\HeldItems\Banana\CBanana.h"
-#include "Components\HeldItems\Chicken Soup\CChickenSoup.h"
-#include "Components\HeldItems\Cream Pie\CreamPie.h"
-#include "Components\HeldItems\Jam\Jam.h"
-#include "Components\HeldItems\PeanutButter\PeanutButter.h"
-
-
-
-// Foward Declares
-class IEvent;
-class CPie;
-class CBanana;
-
-class CHeldItemManager
-{
+namespace scd {
+class held_item_manager {
 private:
-	
-	// Components - LISTS BE HERE
-	list<CTurkeyComponent*, scd::allocator<CTurkeyComponent*>> m_lTurkeyComps;
-	int nTurkeysCreated;
+  scd::list<component::turkey*> _turkeys;
+  scd::list<donut*> _donuts;
+  scd::list<energy_drink*> _energy_drinks;
+  scd::list<banana*> _bananas;
+  scd::list<chicken_soup*> _soups;
+  scd::list<pie*> _pies;
+  scd::list<jam*> _jams;
+  scd::list<peanut_butter*> _peanut_butters;
 
-	list<CDonut*, scd::allocator<CDonut*>> m_lDonutComps;
-	int nDonutsCreated;
-
-	list<CEnergyDrink*, scd::allocator<CEnergyDrink*>> m_lEnergyDrinkComps;
-	int nEnergyDrinksCreated;
-
-	list<CBanana*, scd::allocator<CBanana*>> m_lBananaComps;
-	int nBananasCreated;
-
-	list<CChickenSoupComponent*, scd::allocator<CChickenSoupComponent*>> m_lChickenSoupComps;
-	int nSoupsCreated;
-
-	list<CPie*, scd::allocator<CPie*>> m_lPieComps;
-	int nPiesCreated;
-	
-	list<CRayJam*, scd::allocator<CRayJam*>> m_lJamComps;
-	int nJamsCreated;
-
-	list<CPeanutButter*, scd::allocator<CPeanutButter*>> m_lPeanutButterComps;
-	int nPeanutButtersCreated;
-
-	unsigned int m_nRenderContexts[MAX_GOAL_ITEMS];
-
-	// Trilogy of Evil
-	CHeldItemManager(void)
-	{
-	}
-	CHeldItemManager(CHeldItemManager &ref);
+  unsigned int m_nRenderContexts[MAX_GOAL_ITEMS];
 
 public:
-	// Destructor
-	~CHeldItemManager(void)
-	{
-	}
+  /**
+   * @brief Listens for the use pie event and creates and initializes data for
+   * the pie to be shot.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_pie(IEvent* cEvent);
 
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: Init
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		Initialized all the data members in this class.
-	////////////////////////////////////////////////////////////////////////////////
-	void Init(void);
+  /**
+   * @brief Listens for the use turkey event and creates and initializes data
+   * for the turkey to be shot.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_turkey(IEvent* cEvent);
 
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetInstance
-	//
-	// Return:  
-	//		CHeldItemManager* - the instance of this singleton
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		First call creates this beautiful creature. Every call gives it to you.
-	////////////////////////////////////////////////////////////////////////////////
-	inline static CHeldItemManager* GetInstance(void)
-	{
-		static CHeldItemManager cHeldItemManager;
-		return &cHeldItemManager;
-	}
+  /**
+   * @brief Listens for the use boost event and creates and initializes data for
+   * the energy drink to be used.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_boost(IEvent* cEvent);
 
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UsePieCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use pie event and creates and initializes data
-	//		for the pie to be shot.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UsePieCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UseTurkeyCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use turkey event and creates and initializes data
-	//		for the turkey to be shot.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UseTurkeyCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UseBoostCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use boost event and creates and initializes data
-	//		for the boost to be used.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UseBoostCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UseBananaCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use banana event and creates and initializes data
-	//		for the banana to be used.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UseBananaCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UsePeanutButterCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use pb event and creates and initializes data
-	//		for the pb to be shot.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UsePeanutButterCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UseSoupCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use soup event and creates and initializes data
-	//		for the soup to be used.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UseSoupCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UseDonutCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use donut event and creates and initializes data
-	//		for the donut to be used.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UseDonutCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: UseJamCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		Listens for the use jam event and creates and initializes data
-	//		for the jam to be shot.
-	////////////////////////////////////////////////////////////////////////////////
-	static void UseRayJamCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: ShutdownCallback
-	//
-	// Return:  
-	//		void
-	//
-	// Parameters: 
-	//		IEvent* cEvent - The event data
-	//		scd::base_component* cCenter - The component listening for this event.
-	//
-	// Purpose:  
-	//		despawns everything for when the game ends
-	////////////////////////////////////////////////////////////////////////////////
-	static void ShutdownCallback(IEvent* cEvent, scd::base_component* cCenter);
-	
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetATurkey
-	//
-	// Return:  
-	//		CTurkeyComponent* - The item being returned.
-	//
-	// Parameters: 
-	//		scd::vector3 vPos - The pos to be spawned at
-	//
-	// Purpose:  
-	//		Grabs an unused CTurkeyComponent (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CTurkeyComponent* GetATurkey(scd::vector3 vPos);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetABanana
-	//
-	// Return:  
-	//		CBanana* - The item being returned.
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		Grabs an unused CBanana (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CBanana* GetABanana();
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetAChickenSoup
-	//
-	// Return:  
-	//		CChickenSoupComponent* - The item being returned.
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		Grabs an unused CChickenSoupComponent (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CChickenSoupComponent* GetAChickenSoup();
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetAnEnergyDrink
-	//
-	// Return:  
-	//		CEnergyDrink* - The item being returned.
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		Grabs an unused CEnergyDrink (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CEnergyDrink* GetAnEnergyDrink();
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetAPie
-	//
-	// Return:  
-	//		CPie* - The item being returned.
-	//
-	// Parameters: 
-	//		scd::vector3 vPos - The pos to be spawned at
-	//
-	// Purpose:  
-	//		Grabs an unused CPie (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CPie* GetAPie(scd::vector3 vPos);
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetAPeanutButter
-	//
-	// Return:  
-	//		CPeanutButter* - The item being returned.
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		Grabs an unused CPeanutButter (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CPeanutButter* GetAPeanutButter();
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetADonut
-	//
-	// Return:  
-	//		CDonut* - The item being returned.
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		Grabs an unused CDonut (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CDonut* GetADonut();
-	
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: GetARayJam
-	//
-	// Return:  
-	//		CRayJam* - The item being returned.
-	//
-	// Parameters: 
-	//		void
-	//
-	// Purpose:  
-	//		Grabs an unused CRayJam (or creates one if there isn't an unused one)
-	//		and returns it
-	////////////////////////////////////////////////////////////////////////////////
-	CRayJam* GetARayJam();
+  /**
+   * @brief Listens for the use banana event and creates and initializes data
+   * for the banana to be used.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_banana(IEvent* cEvent);
 
+  /**
+   * @brief Listens for the use peanut butter event and creates and initializes
+   * data for the peanut butter to be shot.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_peanut_butter(IEvent* cEvent);
 
+  /**
+   * @brief Listens for the use soup event and creates and initializes data for
+   * the soup to be used.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_soup(IEvent* cEvent);
+
+  /**
+   * @brief Listens for the use donut event and creates and initializes data for
+   * the donut to be used.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_donut(IEvent* cEvent);
+
+  /**
+   * @brief Listens for the use jam event and creates and initializes data for
+   * the jam to be used.
+   *
+   * @param cEvent The event data
+   */
+  void on_use_jam(IEvent* cEvent);
+
+  /**
+   * @brief Create a turkey object or recycles an unused one.
+   *
+   * @param position The position to place the turkey.
+   * @return turkey* A new or recycled turkey component.
+   */
+  turkey* create_turkey(const scd::vector3& position);
+
+  /**
+   * @brief Create a banana object or recycles an unused one.
+   *
+   * @return banana* A new or recycled banana component.
+   */
+  banana* create_banana();
+
+  /**
+   * @brief Create a chicken soup object or recycles an unused one.
+   *
+   * @return chicken_soup* A new or recycled chicken_soup component.
+   */
+  chicken_soup* create_soup();
+
+  /**
+   * @brief Create an energy drink object or recycles an unused one.
+   *
+   * @return energy_drink* A new or recycled energy_drink component.
+   */
+  energy_drink* create_energy_drink();
+
+  /**
+   * @brief Create a pie object or recycles an unused one.
+   *
+   * @param position The position to place the pie.
+   * @return pie* A new or recycled pie component.
+   */
+  pie* create_pie(const scd::vector3& position);
+
+  /**
+   * @brief Create a peanut butter object or recycles an unused one.
+   *
+   * @return peanut_butter* A new or recycled peanut butter component.
+   */
+  peanut_butter* create_peanut_butter();
+
+  /**
+   * @brief Create a donut object or recycles an unused one.
+   *
+   * @return donut* A new or recycled donut component.
+   */
+  donut* create_donut();
+
+  /**
+   * @brief Create a jam object or recycles an unused one.
+   *
+   * @return jam* A new or recycled jam component.
+   */
+  jam* create_jam();
 };
-
-#endif
+} // namespace scd

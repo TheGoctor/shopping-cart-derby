@@ -1,13 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	CUnlockableManager.h
-//	Date			:	7/19/11
-//	Mod. Date		:	7/19/11
-//	Mod. Initials	:	RN
-//	Author			:	Ray Nieves
-//	Purpose			:	Handles unlocking characters from winning the game
-//						game.
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include <string>
@@ -16,8 +6,6 @@ class unlockable_manager {
 public:
   unlockable_manager();
 
-  // unlocks all features that are locked(skipping intro, secret characters,
-  // etc)
   void unlock_features();
 
   // updates the file to reflect any changes

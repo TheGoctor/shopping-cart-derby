@@ -1,44 +1,39 @@
-// FILE HEADER
-#ifndef _CRENDERCOMP_H_
-#define _CRENDERCOMP_H_
+#pragma once
 
-#include"..\\..\\IComponent.h"
-#include"..\\..\\Managers\\Global Managers\\Rendering Managers\\DXRenderContext.h"
+#include "core/base_component.h"
+#include "rendering/dx_render_context.h"
 
-class DXRenderShape;
-class DXMesh;
-class CObject;
+namespace scd::component {
 
-class CRenderComponent : public IComponent
-{
-	CObject* m_pcParent;
-	DXRenderShape* m_cRenderShape;
+class renderable : public IComponent {
+  CObject* m_pcParent;
+  DXRenderShape* m_cRenderShape;
 
 public:
-	CRenderComponent(CObject* pParent, int nModelID, DXRenderContext* pRC,
-		void (*pfRenderFunc)(RenderNode&));
+  renderable(
+      CObject* pParent,
+      int nModelID,
+      DXRenderContext* pRC,
+      void (*pfRenderFunc)(RenderNode&));
 
-	CRenderComponent(CObject* pParent, DXMesh* pMesh, DXRenderContext* pRC,
-		void (*pfRenderFunc)(RenderNode&));
+  renderable(
+      CObject* pParent,
+      DXMesh* pMesh,
+      DXRenderContext* pRC,
+      void (*pfRenderFunc)(RenderNode&));
 
-	void AddToRenderSet(void);
-	static void AddToRenderSetCallback(IEvent* pEvent, IComponent* pComp);
+  void AddToRenderSet(void);
+  static void AddToRenderSetCallback(IEvent* pEvent, IComponent* pComp);
 
-	~CRenderComponent(void);
+  ~renderable(void);
 
-	void Init(void);
+  void Init(void);
 
-	void SetMesh(unsigned int nMeshID, DXRenderContext* pContext);
+  void SetMesh(unsigned int nMeshID, DXRenderContext* pContext);
 
-	inline CObject* GetParent()
-	{
-		return m_pcParent;
-	}
+  inline CObject* GetParent() { return m_pcParent; }
 
-	inline DXRenderShape* GetRenderShape()
-	{
-		return m_cRenderShape;
-	}
+  inline DXRenderShape* GetRenderShape() { return m_cRenderShape; }
 };
 
-#endif // SCD_RENDERCOMP_H_
+} // namespace scd::component

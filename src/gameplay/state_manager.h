@@ -11,7 +11,8 @@
 
 #include "core/containers.h"
 
-#include <atomic>
+#include <memory>
+#include <mutex>
 #include <stack>
 
 namespace scd {
@@ -19,16 +20,13 @@ namespace scd {
 class state_manager {
 public:
   enum class game_state {
-    init,
+    intro,
     main_menu,
   };
 
 public:
-  // Constructors, Destructors
   state_manager();
   ~state_manager();
-  state_manager(const state_manager&);
-  state_manager& operator=(const state_manager&);
 
   /**
    * @brief Pushes a new state onto the stack.

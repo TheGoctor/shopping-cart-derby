@@ -61,77 +61,65 @@ endgame_manager::endgame_manager() {
   auto fade_screen_obj = pOM->create("EndFadeScreen");
   _fade_screen = pTM->create_sprite(*fade_screen_obj, sprite, false);
 
+  sprite = {};
+
+  sprite.texture_id =
+      pTM->load_texture("Resource/HUD/T_Endings_Words_D.png", 0);
+  sprite.scale = {1.0f, 1.0f};
+  sprite.rotation_center = {0.0f, 0.0f};
+  sprite.rotation_angle = 0.0f;
+  sprite.x = 250;
+  sprite.y = 30;
+  sprite.z = 131;
+  sprite.color = scd::vector4(1.0f, 1.0f, 1.0f, 0.0f);
+  sprite.rectangle.left = 0;
+  sprite.rectangle.top = 0;
+  sprite.rectangle.right = 500;
+  sprite.rectangle.bottom = 145;
+
+  auto win_text_obj = pOM->create("WinText");
+  _win_lose = pTM->create_sprite(*win_text_obj, sprite, false);
 
   sprite = {};
 
-  sprite.m_nTexture =
-      pTM->LoadTexture("Resource\\HUD\\T_Endings_Words_D.png", 0);
-  sprite.m_fScaleX = 1.0f;
-  sprite.m_fScaleY = 1.0f;
-  sprite.m_fRotCenterX = 0.0f;
-  sprite.m_fRotCenterY = 0.0f;
-  sprite.m_fRot = 0.0f;
-  sprite.m_nX = 250;
-  sprite.m_nY = 30;
-  sprite.m_nZ = 131;
-  sprite.m_dwColor = scd::vector4(1.0f, 1.0f, 1.0f, 0.0f);
-  sprite.m_tRect.top = 0;
-  sprite.m_tRect.bottom = 145;
-  sprite.m_tRect.left = 0;
-  sprite.m_tRect.right = 500;
+  sprite.scale = {1.25f, 1.25f};
+  sprite.rectangle.top = 190;
+  sprite.rectangle.left = 10;
+  sprite.rectangle.right = 300;
+  sprite.rectangle.bottom = 265;
+  sprite.x = 350;
+  sprite.y = 650;
 
-  auto win_text_obj = pOM->create("WinText");
-  m_pWinLoseComp = pTM->CreateSpriteComp(pWinTextObj, tSpriteData, false);
+  auto main_menu_text = pOM->create("MainMenuText");
+  _main_menu = pTM->create_sprite(*main_menu_text, sprite, false);
 
-  CObject* pMainMenuText = pOM->CreateObject("MainMenuText");
+  sprite = {};
 
-  tSpriteData.m_fScaleX = 1.25f;
-  tSpriteData.m_fScaleY = 1.25f;
-  tSpriteData.m_tRect.top = 190;
-  tSpriteData.m_tRect.left = 10;
-  tSpriteData.m_tRect.right = 300;
-  tSpriteData.m_tRect.bottom = 265;
-  tSpriteData.m_nX = 350;
-  tSpriteData.m_nY = 650;
+  sprite.texture_id = pTM->load_texture("Resource/HUD/T_Finish_Sign_D.png", 0);
+  sprite.scale = {1.0f, 1.0f};
+  sprite.rectangle.top = {};
+  sprite.x = 150; // set in update
+  sprite.y = 150;
 
-  m_pMainMenuComp = pTM->CreateSpriteComp(pMainMenuText, tSpriteData, false);
+  auto finish_flag_pic_obj = pOM->create("FinishFlagPic");
+  _finish_flag = pTM->create_sprite(*finish_flag_pic_obj, sprite, false);
 
-  CObject* pFinishFlagPicObj = pOM->CreateObject("FinishFlagPic");
+  if (!unlockable_manager::was_player_notified()) {
+    bitmap_font font(-1, 13, 15, 33);
+    font.load_font("Resource/BitmapFont.png", "Resource/BitmapFont_Width.bin");
 
-  tSpriteData.m_nTexture =
-      pTM->LoadTexture("Resource\\HUD\\T_Finish_Sign_D.png", 0);
-  tSpriteData.m_fScaleX = 1.0f;
-  tSpriteData.m_fScaleY = 1.0f;
-  tSpriteData.m_tRect.top = 0;
-  tSpriteData.m_tRect.left = 0;
-  tSpriteData.m_tRect.right = 0;
-  tSpriteData.m_tRect.bottom = 0;
-  tSpriteData.m_nX = 150; // set in update
-  tSpriteData.m_nY = 150;
+    _font_position = {-100, 740};
 
-  m_pFinishFlag = pTM->CreateSpriteComp(pFinishFlagPicObj, tSpriteData, false);
-
-  if (!CUnlockableManager::GetPlayerNotified()) {
-    CBitmapFont font(-1, 13, 15, 33);
-    font.LoadFont("Resource\\BitmapFont.png", "Resource\\BitmapFont_Width.bin");
-    float fScale = 5.0f;
-    m_nFontX = -100;
-    m_nFontY = 740;
-    scd::vector4 fontColor(1.0f, 1.0f, 1.0f, 255.0f);
-    std::string szUnlockMsg = "New Shoppers Unlocked!";
-    CObject* pFontObj = CObjectManager::CreateObject("UnlockMsgObj");
-    m_pFont = CTextureManager::CreateBitmapFontComp(
-        pFontObj,
-        szUnlockMsg,
+    auto font_obj = pOM->create("UnlockMsgObj");
+    _font = pTM->create_font(
+        *font_obj,
+        "New Shoppers Unlocked!",
         font,
-        m_nFontX,
-        m_nFontY,
-        fScale,
-        fontColor,
+        _font_position[0],
+        _font_position[1],
+        5.0f,
+        {1.0f, 1.0f, 1.0f, 255.0f},
         false);
-    // m_pFont->DrawWord();
-    m_pFont->SetX(m_nFontX);
-    m_pFont->SetY(m_nFontY);
   }
 }
 
