@@ -10,6 +10,7 @@
 #pragma once
 
 #include "core/containers.h"
+#include "core/id_generator.h"
 
 #include <memory>
 
@@ -36,9 +37,11 @@ public:
    *
    * @return Pointer to the newly created object
    */
-  object* create(const std::string& name, const scd::vector3& position,
-                 float heading = 0.0f, object* parent = nullptr);
-  static int create(lua_State* lua);
+  std::shared_ptr<object> create(
+    const std::string& name,
+    const scd::vector3& position,
+    float heading  = 0.0f,
+    object* parent = nullptr);
 
   /**
    * Tells the component managers to destroy their components attached to this
@@ -46,7 +49,7 @@ public:
    *
    * @param[in] object The pointer to the object to be destroyed
    */
-  static void destroy(object* object);
+  void destroy(const std::shared_ptr<object>& object);
 
   /**
    * Binds the frames of the two passed in objects so the child object and
@@ -55,8 +58,7 @@ public:
    * @param[in] parent Pointer to the parent object
    * @param[in] child Pointer to the child object
    */
-  static int bind_objects(lua_State* lua);
-  void bind_objects(object* parent, object* child);
+  void bind_objects(object& parent, object& child);
 
   /**
    * Searches for an object with the given name. If no object is found, the
@@ -67,8 +69,12 @@ public:
    * @return Pointer to the object with the passed in name. NULL if object
    * wasn't found.
    */
-  object* by_name(const std::string& name);
-  static int by_name(lua_State* lua);
+  std::shared_ptr<object> by_name(const std::string& name);
+
+private:
+  // A list of all the game objects currently in the world
+  scd::map<id_generator::id_t, std::shared_ptr<object>> _objects;
+  id_generator _id_gen;
 };
 
 } // namespace scd

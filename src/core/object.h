@@ -10,23 +10,21 @@
 #pragma once
 
 #include "core/containers.h"
+#include "core/id_generator.h"
 #include "physics/math_types.h"
 
+#include <memory>
 #include <string>
 
 namespace scd {
 class component;
 
-class object {
+class object : public std::enable_shared_from_this<object> {
 public:
-  using id_t = std::uint32_t;
+  object(id_generator::id_t id)
+      : _id(id) {}
 
-  object(const std::string& name)
-      : _name(name) {}
-
-  std::string name() const { return _name; }
-  const scd::transform& pose() const { return _pose; }
-  id_t id() const { return _id; }
+  id_generator::id_t id() const { return _id; }
 
   /** Adds a component to the Object.
    *
@@ -35,9 +33,22 @@ public:
    *
    * @param component The Component to add.
    */
-  template <class T, class... Args>
-  void add_component<T>(Args&&... args) {
-    _components.emplace_back(std::make_shared<T>(std::forward<Args>(args)...));
+  template <class T>
+  void add_component(const std::shared_ptr<T>& component) {
+    // TODO: use sfinae?
+    static_assert(
+        std::is_base_of<scd::base_component, T>::value,
+        "Type must be a component!");
+
+    // TODO: check that there isn't already a component of this type.
+    _components.emplace_back(component);
+  }
+
+  template <class T, typename... Args>
+  std::shared_ptr<T> create_component(Args&&... args) {
+    auto component = std::make_shared<T>(std::forward<Args>(args)...);
+    _components.emplace_back(component);
+    return component;
   }
 
   /** Removes a component from the Object.
@@ -47,49 +58,47 @@ public:
    *
    * @param component The Component to remove.
    */
-  void remove_component(const std::shared_ptr<scd::component>& component) {
+  void remove_component(const std::shared_ptr<scd::base_component>& component) {
     _components.remove(component);
   }
 
 private:
-  scd::list<std::shared_ptr<scd::component>> _components;
+  scd::list<std::shared_ptr<scd::base_component>> _components;
 
-  const std::string _name;
+  const id_generator::id_t _id;
 
-  // The ID of the object. ID is generated from the name of the object
-  const id_t _id;
-
-private:
   scd::vector3 _last_world_position;
   scd::transform _local_pose;
   scd::transform _world_pose;
 
-  scd::object* _parent = nullptr;
-  scd::list<scd::object*> _children;
+  std::weak_ptr<scd::object> _parent;
+  scd::list<std::shared_ptr<scd::object>> _children;
 
   bool _dirty = false;
 
 public:
   void add_child(scd::object& child) {
-    if (child._parent == this) {
+    auto parent = child._parent.lock();
+    if (parent == shared_from_this()) {
       // nothing to do
       return;
     }
 
     // detach from old parent
-    if (child._parent != nullptr) {
-      child._parent->remove_child(child);
+    if (parent) {
+      parent->remove_child(child);
     }
 
-    _children.push_back(&child);
-    child._parent = this;
+    _children.push_back(child.shared_from_this());
+    child._parent = weak_from_this();
     child.dirty();
   }
 
   scd::object* remove_child(scd::object& child) {
-    _children.erase(&child);
-    child._parent = nullptr;
+    _children.erase(child.shared_from_this());
+    child._parent.reset();
     child.dirty();
+    return &child;
   }
 
   // sets all the children of a frame to "DIRTY"
@@ -103,10 +112,10 @@ public:
 
   const scd::transform& local_pose() const { return _local_pose; }
 
-  const scd::transform& world_pose() const {
+  const scd::transform& world_pose() {
     if (_dirty) {
-      if (_parent != nullptr) {
-        _world_pose = _parent->world_pose() * _local_pose;
+      if (auto parent = _parent.lock()) {
+        _world_pose = parent->world_pose() * _local_pose;
       } else {
         _world_pose = _local_pose;
       }
@@ -121,28 +130,30 @@ public:
   void rotate(const scd::vector3& axis, float angle) {
     scd::transform rotation = math::matrix_axis_angle(axis, angle);
     _local_pose = math::matrix_multiply(_local_pose, rotation);
-    update_world_pose();
+    world_pose();
   }
 
   void scale(const scd::vector3& scale) {
     scd::transform scale_matrix =
         math::matrix_scale(math::matrix_identity(), scale);
     _local_pose = math::matrix_multiply(_local_pose, scale_matrix);
-    update_world_pose();
+    world_pose();
   }
 
   void translate(const scd::vector3& translation) {
-    _last_position = world_position();
+    _last_world_position = world_position();
     _local_pose = math::matrix_translate(_local_pose, translation);
-    update_world_pose();
+    world_pose();
   }
 
-  const scd::vector3& last_world_position() const { return _last_position; }
-  const scd::vector3& world_position() const { return world_pose().p; }
+  const scd::vector3& last_world_position() const {
+    return _last_world_position;
+  }
+  const scd::vector3& world_position() { return world_pose().p; }
 
   const scd::vector3& local_position() const { return _local_pose.p; }
 
-  void local_position(const scd::vector3f& position) {
+  void local_position(const scd::vector3& position) {
     _local_pose.p = position;
   }
 };

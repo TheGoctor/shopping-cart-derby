@@ -10,15 +10,13 @@
 #pragma once
 
 #include <array>
+#include <memory>
+
+#include <cstdint>
 
 // Includes
 
 namespace scd {
-
-class CSpriteComponent;
-class IComponent;
-class IEvent;
-class CObject;
 
 class endgame_manager {
 public:
@@ -38,8 +36,8 @@ public:
   void on_enter_pressed();
 
 private:
-  constexpr float fade_alpha_rate{ 0.5f };
-  constexpr float lose_fade_time{ 3.0f };
+  static constexpr float fade_alpha_rate{ 0.5f };
+  static constexpr float lose_fade_time{ 3.0f };
 
   // mainly for when character unlock message pops up
   std::shared_ptr<class bitmap_font> _font{ nullptr };
@@ -63,11 +61,10 @@ private:
   float m_fCameraMoveTimer = 0.0f;
 
   // Sprite Components
-  CSpriteComponent* m_pFadeScreenComp = nullptr;
-  CSpriteComponent* m_pWinLoseComp    = nullptr;
-  CSpriteComponent* m_pMainMenuComp   = nullptr;
-
-  CSpriteComponent* m_pFinishFlag = nullptr;
+  std::shared_ptr<component::sprite> _fade_screen = nullptr;
+  std::shared_ptr<component::sprite> _win_lose    = nullptr;
+  std::shared_ptr<component::sprite> _main_menu   = nullptr;
+  std::shared_ptr<component::sprite> _finish_flag = nullptr;
 
   CObject* m_pWinnerObject;
   CObject* m_pLoserObject1;

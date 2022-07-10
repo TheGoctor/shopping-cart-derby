@@ -1,118 +1,91 @@
-#include "CBanana.h"
-#include "Managers\Global Managers\Event Manager\CEventManager.h"
-#include "Managers\Global Managers\Event Manager\EventStructs.h"
-#include "scd::object.h"
-#include "Managers\Global Managers\Object Manager\scd::objectManager.h"
-#include "Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
-#include "Managers\Component Managers\CHeldItemManager.h"
-#include "Managers\Component Managers\CCollisionManager.h"
-#include "Managers\Global Managers\Rendering Managers\CEffectManager.h"
-#include "Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
-using namespace EventStructs;
-CWwiseSoundManager* m_pSound = CWwiseSoundManager::GetInstance();
+#include "banana.h"
 
-CBanana* CBanana::CreateBananaComponent(scd::object* pObj) 
-{
-	CBanana* pComp = MMNEW(CBanana(pObj));
-	pComp->FirstInit();
-	pObj->AddComponent(pComp);
-	return pComp;
-}
-void CBanana::FirstInit()
-{
-	std::string szEventName = "Update";
-	BANANA_ID = 0;
-	szEventName += GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
-//	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldCollision", this, environment)
-	CEventManager::GetInstance()->RegisterEvent("HeldItemInWorldPlayerCollision", this, PlayerCollision);
-	CEventManager::GetInstance()->RegisterEvent("BananaDestroyedByItem", this, ItemCollision);
+#include "audio/wwise/wwise_audio_manager.h"
+#include "components/held_item_manager.h"
+#include "core/object.h"
+#include "core/object_manager.h"
+#include "events/event_manager.h"
+#include "events/events.h"
+#include "physics/physics_manager.h"
+#include "rendering/effect_manager.h"
+#include "rendering/hud_manager.h"
 
-	
-	szEventName = "Update";
-	szEventName += PAUSE_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
-	szEventName = "Update";
-	szEventName += CONSOLE_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
+scd::banana(scd::object& owner)
+    : scd::base_component(owner) {
+  std::string szEventName = "Update";
+  BANANA_ID = 0;
+  szEventName += GAMEPLAY_STATE;
+  CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
+  CEventManager::GetInstance()->RegisterEvent(
+      "HeldItemInWorldPlayerCollision", this, PlayerCollision);
+  CEventManager::GetInstance()->RegisterEvent(
+      "BananaDestroyedByItem", this, ItemCollision);
 
-	szEventName = "Update";
-	szEventName += PAUSE_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
-	szEventName = "Update";
-	szEventName += CONSOLE_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, this, PauseUpdateCallback);
-}
-void CBanana::ReInit()
-{
-	m_bIsSpawned = true;
-	BANANA_ID = m_pSound->RegisterHeldObject();
-	TSphere sphere;
-	CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_CREAMPIE_USE, BANANA_ID);
-}
-void CBanana::Update(IEvent* cEvent, scd::base_component* cCenter)
-{
-	CBanana* pComp = (CBanana*)cCenter;
-	/*TUpdateStateEvent* eEvent = */
-	(TUpdateStateEvent*)cEvent->GetData();
-	if(!pComp->m_bIsSpawned)
-	{
-		return;
-	}
-	m_pSound->SetObjectPosition(pComp->BANANA_ID,	
-		pComp->m_pObject->GetTransform()->GetWorldPosition(), 0.25f);
-	SendRenderEvent("AddToSet", pComp, pComp->m_pObject, PRIORITY_IMMEDIATE);
-}
-void CBanana::Despawn()
-{
-	m_bIsSpawned = false;
-	m_pObject->GetTransform()->GetLocalMatrix()._41 = 300.0f;
-	m_pObject->GetTransform()->GetLocalMatrix()._42 = 300.0f;
-	m_pObject->GetTransform()->GetLocalMatrix()._43 = 300.0f;
-	m_pSound->UnregisterObject(BANANA_ID);
-}
-void CBanana::PlayerCollision(IEvent* cEvent, scd::base_component* cCenter)
-{
-	CBanana* pComp = (CBanana*)cCenter;
-	TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
-	if(pComp->m_pObject == tEvent->m_pCollidedWith && pComp->m_bIsSpawned)
-	{
-		SendStatusEffectEvent("Slip", pComp, tEvent->m_pcCollider, SLOW_TIME);
-		pComp->Despawn();
-	}
+  szEventName = "Update";
+  szEventName += PAUSE_STATE;
+  CEventManager::GetInstance()->RegisterEvent(
+      szEventName, this, PauseUpdateCallback);
+  szEventName = "Update";
+  szEventName += CONSOLE_STATE;
+  CEventManager::GetInstance()->RegisterEvent(
+      szEventName, this, PauseUpdateCallback);
+
+  szEventName = "Update";
+  szEventName += PAUSE_STATE;
+  CEventManager::GetInstance()->RegisterEvent(
+      szEventName, this, PauseUpdateCallback);
+  szEventName = "Update";
+  szEventName += CONSOLE_STATE;
+  CEventManager::GetInstance()->RegisterEvent(
+      szEventName, this, PauseUpdateCallback);
 }
 
-void CBanana::PauseUpdateCallback(IEvent*, scd::base_component* pComp)
-{
-	// Get the Effect Comp
-	CBanana* comp = (CBanana*)pComp;
-	
-	if(comp->m_bIsSpawned)
-	{
-		SendRenderEvent("AddToSet", comp, comp->m_pObject, PRIORITY_UPDATE);
-	}
-	
+void scd::banana::spawn() {
+  is_spawned(true);
+  BANANA_ID = m_pSound->RegisterHeldObject();
+  CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_CREAMPIE_USE, BANANA_ID);
 }
 
+void scd::banana::on_update() {
+  if (!is_spawned()) {
+    return;
+  }
 
-void CBanana::ItemCollision(IEvent* cEvent, scd::base_component* cCenter)
-{
-	CBanana* pComp = (CBanana*)cCenter;
-	TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
-	if(pComp->m_pObject == tEvent->m_pcCollider && pComp->GetIsSpawned())
-	{	
-		//effect stuff
-		scd::vector3 p1, p2, trans;
-		p2 = pComp->m_pObject->GetTransform()->GetWorldPosition();
-		p1 = CCollisionManager::GetInstance()->GetBananaDestroyObject()->GetTransform()->GetWorldPosition();
-		trans = p2 - p1;//vector to the turkeys position
-		CCollisionManager::GetInstance()->GetBananaDestroyObject()->GetTransform()->TranslateFrame(trans);
-		CEffectComponent* pEC = CEffectManager::GetInstance()->CreateSlipComponent(CCollisionManager::GetInstance()->GetBananaDestroyObject());
-		pEC->SetDeadTimer(EC_TYPE_BANANA_SLIP, 0.0f);
-		pEC->SwitchOnOffEmitters(EC_TYPE_BANANA_SLIP, true);
+  m_pSound->SetObjectPosition(BANANA_ID, owner.world_position(), 0.25f);
 
-		pComp->Despawn();
-	}
+  SendRenderEvent("AddToSet", pComp, pComp->m_pObject, PRIORITY_IMMEDIATE);
 }
 
+void scd::banana::despawn() {
+  is_spawned(false);
 
+  owner.translate({300, 300, 300});
+
+  m_pSound->UnregisterObject(BANANA_ID);
+}
+void scd::banana::PlayerCollision(IEvent* cEvent) {
+  TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
+  if (&owner == tEvent->m_pCollidedWith && is_spawned()) {
+    SendStatusEffectEvent("Slip", this, tEvent->m_pcCollider, 2.3f);
+    despawn();
+  }
+}
+
+void scd::banana::ItemCollision(IEvent* cEvent) {
+  TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
+  if (&owner == tEvent->m_pcCollider && is_spawned()) {
+    // effect stuff
+    scd::vector3 p2 = owner.world_position();
+    scd::vector3 p1 =
+        physics_manager::get().GetBananaDestroyObject()->world_position();
+    scd::vector3 trans = p2 - p1; // vector to the turkeys position
+    physics_manager::get().->GetBananaDestroyObject()->translate(trans);
+
+    CEffectComponent* pEC = effect_manager::get().CreateSlipComponent(
+        physics_manager::get().GetBananaDestroyObject());
+    pEC->SetDeadTimer(EC_TYPE_BANANA_SLIP, 0.0f);
+    pEC->SwitchOnOffEmitters(EC_TYPE_BANANA_SLIP, true);
+
+    pComp->Despawn();
+  }
+}

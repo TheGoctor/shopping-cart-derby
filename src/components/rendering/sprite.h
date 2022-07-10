@@ -1,90 +1,46 @@
-///////////////////////////////////////////////////////////////////////////////
-//  File			:	"CSpriteComponent.h"
-//
-//  Author			:	Joseph Leybovich (JL)
-//
-//  Date Created	:	04/11/11
-//
-//	Last Changed	:	04/11/11
-//
-//  Purpose			:	A component that allows a game object to be represented
-//						as a sprite
-///////////////////////////////////////////////////////////////////////////////
-#ifndef _CSPRITECOMPONENT_H_
-#define _CSPRITECOMPONENT_H_
+#pragma once
 
-#include <windows.h>
-#define LEAN_AND_MEAN
+#include "core/base_component.h"
+#include "core/id_generator.h"
+#include "physics/math_types.h"
 
-#include"..\\..\\IComponent.h"
+#include <cstdint>
 
-// Foward Declares
-class CTextureManager;
-class CObject;
+namespace scd {
 
-// Structs
-struct TSpriteData
-{
-	int		 m_nTexture;	// The Texture ID of the Sprite
-	int		 m_nX;			// The X Position of the Sprite in Screen Space
-	int		 m_nY;			// The Y Position of the Sprite in Screen Space
-	int		 m_nZ;			// The Z Position of the Sprite in Screen Space
-	float	 m_fScaleX;		// The Scale of the Sprite in the X
-	float	 m_fScaleY;		// The Scale of the Sprite in the X
-	float	 m_fRotCenterX; // The the Center point for Sprite in the X
-	float	 m_fRotCenterY; // The the Center point for Sprite in the Y
-	float	 m_fRot;		// The the amount of rotation applied to the sprite
-	DWORD	 m_dwColor;		// The color to render the Sprite in
-	RECT	 m_tRect;		// The rectangle section of the Sprite to Draw
+struct sprite_data {
+  id_generator::id_t texture_id; // The Texture ID of the Sprite
+  std::int32_t x;                // The X Position of the Sprite in Screen Space
+  std::int32_t y;                // The Y Position of the Sprite in Screen Space
+  std::int32_t z;                // The Z Position of the Sprite in Screen Space
+  vector2 scale;                 // The Scale of the Sprite
+  vector2 rotation_center;       // The Center point for Sprite in the X
+  real rotation_angle;           // The amount of rotation applied to the sprite
+  std::uint32_t color;           // The color to render the Sprite in
+  geometry::rectangle rectangle; // The rectangle section of the Sprite to Draw
 };
 
-class CSpriteComponent : public IComponent
-{
-	CTextureManager*	m_pTM;		   // A Pointer to the Texture Manager
-	CObject*			m_pcParent;	   // The Game Object this Comp us associated with
-	TSpriteData			m_tSpriteData; // The data of the Sprite
-	bool				m_bActive;	   // A bool stating if the Sprite is Rendering
-
+namespace component {
+class sprite : public base_component {
 public:
+  // Constructor
+  sprite(object& owner, sprite_data data);
 
-	// Constructor
-	CSpriteComponent(CObject* pParent, TSpriteData tSpriteData);
+  void draw(class texture_manager& texture_manager);
 
-	// Draw Sprite
-	void DrawSprite(void);
+  sprite_data data() const { return _data; }
+  void data(sprite_data data) { _data = data; }
 
-	// Accessors
-	inline CObject* GetParent()
-	{
-		return m_pcParent;
-	}
+  bool is_rendering() const { return _is_rendering; }
+  void is_rendering(bool is_rendering) { _is_rendering = is_rendering; }
 
-	inline TSpriteData GetSpriteData()
-	{
-		return m_tSpriteData;
-	}
+  // Sort
+  bool operator<(const sprite& rhs) { return _data.z < rhs._data.z; }
 
-	inline bool IsActive(void)
-	{
-		return m_bActive;
-	}
-
-	// Mutators
-	inline void SetSpriteData(TSpriteData tSpriteData)
-	{
-		m_tSpriteData = tSpriteData;
-	}
-
-	inline void SetActive(bool bActive)
-	{
-		m_bActive = bActive;
-	}
-
-	// Sort
-	bool operator <(CSpriteComponent& sc)
-	{
-		return this->m_tSpriteData.m_nZ < sc.m_tSpriteData.m_nZ;
-	}
+private:
+  sprite_data _data{};
+  bool _is_rendering{false};
 };
+} // namespace component
 
-#endif // _CSPRITECOMPONENT_H_
+} // namespace scd

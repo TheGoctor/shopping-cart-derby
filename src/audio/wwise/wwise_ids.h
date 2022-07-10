@@ -3,11 +3,10 @@
 // Audiokinetic Wwise generated include file. Do not edit.
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma once
 
-#ifndef __WWISE_IDS_H__
-#define __WWISE_IDS_H__
-
-#include <AK/SoundEngine/Common/AkTypes.h>
+//#include <AK/SoundEngine/Common/AkTypes.h>
+typedef unsigned int AkUniqueID;
 
 namespace AK
 {
@@ -177,5 +176,3 @@ namespace AK
     } // namespace BANKS
 
 }// namespace AK
-
-#endif // __WWISE_IDS_H__

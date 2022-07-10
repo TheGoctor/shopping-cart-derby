@@ -7,201 +7,91 @@
 //
 //	Last Changed	:	07/24/11
 //
-//	Changed By		:	HN			
+//	Changed By		:	HN
 //
-//  Purpose			:	Wrapper class for manageing Textures for Direct3D
+//  Purpose			:	Wrapper class for manageing Textures for
+//  Direct3D
 ////////////////////////////////////////////////////////
-#ifndef _CTEXTUREMANAGER_H_
-#define _CTEXTUREMANAGER_H_
+#pragma once
 
-#include <map>
-#include <set>
-// The include files for Direct3D9
-#include <d3d9.h>
-#include <d3dx9.h>
-#pragma comment(lib, "d3d9.lib")
-#pragma comment(lib, "d3dx9.lib")
-#pragma comment (lib, "dxguid.lib")
+#include "components/rendering/sprite.h"
+#include "core/containers.h"
+#include "rendering/bitmap_font.h"
 
-extern "C"
-{
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
+#include <filesystem>
+#include <string>
 
-#include "..\\..\\..\\..\\Components\\Rendering\\CSpriteComponent.h"
-#include "..\\..\\Memory Manager\\scd::allocator.h"
-#include "CBitmapFont.h"
+#include <cstdint>
 
-// Foward Declares
-class CObject;
-class IEvent;
-class CBitmapFontComp;
+// DirectX Forward Declares
+struct DIRECT3DTEXTURE9;
+struct DIRECT3DDEVICE9;
+struct D3DXSPRITE;
 
-class CTextureManager
-{
-private:
-	// All the data we need to contain a texture.
-	typedef struct _TEXTURE
-	{
-		char				filename[_MAX_PATH];	// The filename of this texture.
-		int					ref;					// The number of times this texture has be loaded.
-		LPDIRECT3DTEXTURE9	texture;				// A pointer to the texture.
-		int					Width;					// The width of the texture.
-		int					Height;					// The Height of the texture.
+namespace scd {
+struct texture {
+  DIRECT3DTEXTURE9* texture{nullptr};
+  int width{0};
+  int height{0};
 
-		// Default constructor.
-		_TEXTURE()
-		{
-			filename[0] = '\0';
-			ref = 0;
-			texture = NULL;
-			Width = 0;
-			Height = 0;
-		}
-	} TEXTURE, *LPTEXTURE;
-
-	//Constructor
-	CTextureManager(void);
-	//Copy constructor
-	CTextureManager(CTextureManager &ref);
-	//Assignment operator
-	CTextureManager &operator=(CTextureManager &ref);
-
-
-	std::map<unsigned int, TEXTURE, less<unsigned int>,
-		scd::allocator<pair<unsigned int, TEXTURE>>>	m_Textures;			// A list of all the loaded textures.
-	LPDIRECT3DDEVICE9				m_lpDevice;			// A pointer to the Direct3D device.
-	LPD3DXSPRITE					m_lpSprite;			// A pointer to the sprite interface.
-	static CTextureManager			m_Instance;			// An instance to this class.
-
-	// Components
-	struct TSpriteCompare
-	{
-		bool operator()(CSpriteComponent* lhs, CSpriteComponent* rhs)
-		{
-			if(lhs->GetSpriteData().m_nZ == rhs->GetSpriteData().m_nZ)
-			{
-				return lhs < rhs;
-			}
-			// Greater than operator
-			return lhs->GetSpriteData().m_nZ < rhs->GetSpriteData().m_nZ;
-		}
-	};
-
-	std::set<CSpriteComponent*, TSpriteCompare,
-		scd::allocator<CSpriteComponent*>>	m_cSpriteComps;	// A list of all the Sprite Components
-
-	std::set<CBitmapFontComp*, less<CBitmapFontComp*>,
-		scd::allocator<CBitmapFontComp*>>	m_cBitmapFontComps;	// A list of all the Sprite Components
-
-public:
-	
-	//Destructor
-	~CTextureManager(void);
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: "GetInstance"
-	//
-	// Return: static CTextureManger* - returns an instance of the manager
-	//
-	// Parameters: void
-	//
-	//	Purpose:	Gets an instance to this class.
-	///////////////////////////////////////////////////////////////////
-	static CTextureManager *GetInstance(void);
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: "InitTextureManager"
-	//
-	// Return: bool - true if everything was successful
-	//				flase if something didn't initialize correctly
-	//
-	// Parameters: LPDIRECT3DDEVICE9 - the handle to the d3d device
-	//			LPD3DXSPRITE - the handle to the sprite device		
-	//
-	//	Purpose:	Initializes the texture manager.
-	///////////////////////////////////////////////////////////////////
-	bool InitTextureManager(LPDIRECT3DDEVICE9 _lpDevice, LPD3DXSPRITE _lpSprite);
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: "ShutdownTextureManager"
-	//
-	// Return: void
-	//
-	// Parameters: void
-	//
-	//	Purpose:	Unloads all the loaded textures and 
-	//				releases references to sprite and d3d devices.
-	///////////////////////////////////////////////////////////////////
-	void ShutdownTextureManager(void);
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: "LoadTexture"
-	//
-	// Return: int - the id to the texture
-	//
-	// Parameters: - const char* - the string to the file
-	//				DWORD - color key of the texture file
-	//
-	//	Purpose:	To load a texture from a file. 
-	//  NOTE:		Image dimensions must be a power of 2 (i.e. 256x64).
-	//				Supports .bmp, .dds, .dib, .hdr, .jpg, .pfm, .png, 
-	//				.ppm, and .tga files. 
-	///////////////////////////////////////////////////////////////////
-	int LoadTexture(const char* _szFilename, DWORD _dwColorkey = 0);
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: "UnloadTexture"
-	//
-	// Return: void
-	//
-	// Parameters: int - the texture id to unload
-	//
-	//	Purpose:	Releases a reference to a given texture. When the
-	//				reference to the texture is zero, the texture is
-	//				released from memory.
-	///////////////////////////////////////////////////////////////////
-	void UnloadTexture(int _nID);
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: "GetTextureWidth"
-	//
-	// Return: int - the width of the texture
-	//
-	// Parameters: int - the texture id to get width
-	//
-	//	Purpose:	Gets the width of a specified texture.
-	///////////////////////////////////////////////////////////////////
-	int GetTextureWidth(int _nID);
-	////////////////////////////////////////////////////////////////////////////////
-	// Function: "GetTextureHeight"
-	//
-	// Return: int - the height of the texture
-	//
-	// Parameters: int - the texture id
-	//
-	//	Purpose:	Gets the height of a specified texture.
-	///////////////////////////////////////////////////////////////////
-	int GetTextureHeight(int _nID);
-
-	//	Purpose:	Draws a texture to the screen.
-	//	NOTE:	Drawing a section of an image will only work properly if 
-	//			that image is a power of 2!
-	///////////////////////////////////////////////////////////////////
-	bool Draw(int _nID, int _nX, int _nY, float _fScaleX = 1.0f, float _fScaleY = 1.0f,
-		RECT* _pSection = NULL, float _fRotCenterX = 0.0f, float _fRotCenterY = 0.0f, 
-		float _fRotation = 0.0f, DWORD _dwColor = 0xFFFFFFFF);
-
-
-	// Component Functions
-	static int CreateSpriteComp(lua_State* pLua);
-	static CSpriteComponent* CreateSpriteComp(CObject* pParent,
-		TSpriteData tSpriteData, bool bActive);
-
-	static CBitmapFontComp* CreateBitmapFontComp(CObject* pParent,
-		string szWord, CBitmapFont cFont, int nX, int nY,
-		float fScale, DWORD dwColor, bool bActive);
-
-	void RenderSprites(void);
-
-	//Event callback functions
-	static void RenderSpritesCallback(IEvent* e, IComponent* comp);
-	static void ShutdownCallback(IEvent* e, IComponent* comp);
+  ~texture();
 };
-#endif // _CTEXTUREMANAGER_H_
+
+class texture_manager {
+public:
+  texture_manager(DIRECT3DDEVICE9* d3d_device, D3DXSPRITE* d3d_sprite);
+  ~texture_manager();
+
+  /**
+   * @brief Loads a texture from a file.
+   *
+   * Image dimensions must be a power of 2 (e.g. 256x64).
+   * Supports .bmp, .dds, .dib, .hdr, .jpg, .pfm, .ppm, and .tga files.
+   *
+   * @param filename The path of the texture file.
+   * @param color The color key of the texture file.
+   * @return std::shared_ptr<texture> The loaded texture.
+   */
+  std::shared_ptr<texture>
+  load_texture(const std::filesystem::path& filename, std::uint32_t color = 0);
+
+  /**
+   * @brief Draws a texture to the screen
+   *
+   * @note Drawing a section of an image will only work properly if that image
+   * is a power of 2
+   *
+   * @param data The sprite data
+   * @return true
+   * @return false
+   */
+  bool draw(const sprite_data& data);
+
+  std::shared_ptr<scd::component::sprite>
+  create_sprite(object& owner, sprite_data data, bool active);
+
+  std::shared_ptr<bitmap_font> create_font(
+      object& owner,
+      std::string word,
+      bitmap_font font,
+      int x,
+      int y,
+      float scale,
+      std::uint32_t color,
+      bool active);
+
+  void render_sprites();
+
+  // Event callback functions
+  void RenderSpritesCallback(IEvent* e, IComponent* comp);
+
+private:
+  scd::map<std::string, std::weak_ptr<texture>> _textures;
+  DIRECT3DDEVICE9* _d3d_device; // A pointer to the Direct3D device.
+  D3DXSPRITE* _d3d_sprite;      // A pointer to the sprite interface.
+
+  scd::set<std::weak_ptr<component::sprite>> _sprites;
+  scd::set<std::weak_ptr<bitmap_font>> _fonts;
+};
+
+} // namespace scd

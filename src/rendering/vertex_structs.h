@@ -1,7 +1,6 @@
-#ifndef _VERTEXSTRUCTS_H_
-#define _VERTEXSTRUCTS_H_
+#pragma once
 
-#include "dxutil.h"
+#include "rendering/dx_util.h"
 
 // vertex (position, color) structure
 struct VERTEX_POSCOLOR
@@ -32,5 +31,3 @@ struct VERTEX_POS3_TEX3
 	D3DXVECTOR3	position;	// 12 Bytes (3floats * 4bytes)
 	float		u,v,w;		// 12 Bytes (3floats * 4bytes)
 };
-
-#endif	// _VERTEXSTRUCTS_H_

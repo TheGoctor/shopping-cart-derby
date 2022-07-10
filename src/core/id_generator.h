@@ -8,8 +8,7 @@
 //						pairs into a map.
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _CIDGEN_H_
-#define _CIDGEN_H_
+#include "core/containers.h"
 
 #include <map>
 #include <string>
@@ -31,11 +30,15 @@ class CIDGen
 	CIDGen(const CIDGen&);
 	CIDGen& operator=(const CIDGen&);
 
+#include <cstdint>
+
+namespace scd {
+class id_generator {
 public:
-	static CIDGen* GetInstance();
+  using id_t = std::size_t;
 
 	////////////////////////////////////////////////////////////////////////////////
-	// Function: “GetID”
+	// Function: ï¿½GetIDï¿½
 	//
 	// Return:  unsigned int	-	The ID of the string and the address of where
 	//								the string is stored in memory.

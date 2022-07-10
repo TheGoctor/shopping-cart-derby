@@ -6,122 +6,57 @@ function InitValues()
     unlocked = false;
     radius = 0.8
 
-    P0X = -6;
-    P0Y = 0;
-    P0Z = 68;
-    P0Rot = 3.14159;
-
-    P1X = 0;
-    P1Y = 0;
-    P1Z = 68;
-    P1Rot = 3.14159;
-
-    P2X = 6;
-    P2Y = 0;
-    P2Z = 68;
-    P2Rot = 3.14159;
-
-    P3X = 12;
-    P3Y = 0;
-    P3Z = 68;
-    P3Rot = 3.14159;
-
-
-    -- Removed Shopping list in here - Agent Smith
-
     -- Player Creation
     -- CreatePlayerObj(ObjName, XPos, YPos, ZPos, Rot, IsHuman)
-    Player0 = CreatePlayerObj("Player0", P0X, P0Y, P0Z, P0Rot, true);
-    Player1 = CreatePlayerObj("Player1", P1X, P1Y, P1Z, P1Rot, false);
-    Player2 = CreatePlayerObj("Player2", P2X, P2Y, P2Z, P2Rot, false);
-    Player3 = CreatePlayerObj("Player3", P3X, P3Y, P3Z, P3Rot, false);
+    Player0 = CreatePlayerObj("Player0", -6, 0, 68, 3.141592, true);
+    Player1 = CreatePlayerObj("Player1",  0, 0, 68, 3.141592, false);
+    Player2 = CreatePlayerObj("Player2",  6, 0, 68, 3.141592, false);
+    Player3 = CreatePlayerObj("Player3", 12, 0, 68, 3.141592, false);
 
-    -- Intro State
-    stateEventIntroState = 48 -- ascii for '0'
-    -- main menu
-    stateEventMainMenu = stateEventIntroState + 1
-    -- gameplay
-    stateEventGameplay = stateEventMainMenu + 1
-    -- pause state - 3
-    stateEventPause = stateEventGameplay + 1
-    -- win state
-    stateEventWin = stateEventPause + 1
-    -- lose state
-    stateEventLose = stateEventWin + 1
-    -- console state
-    stateEventConsole = stateEventLose + 1
-    -- game mode select
-    stateEventGameModeSelect = stateEventConsole + 1
-    -- character select
-    stateEventCharacterSelect = stateEventGameModeSelect + 1
-    -- character select 2
-    stateEventCharacterSelect2 = stateEventCharacterSelect + 1
-    -- character select 3
-    stateEventCharacterSelect3 = stateEventCharacterSelect2 + 1
-    -- character select 4
-    stateEventCharacterSelect4 = stateEventCharacterSelect3 + 1
-    -- character select 5
-    stateEventCharacterSelect5 = stateEventCharacterSelect4 + 1
-    -- character select 6
-    stateEventCharacterSelect6 = stateEventCharacterSelect5 + 1
-    -- character select 7
-    stateEventCharacterSelect7 = stateEventCharacterSelect6 + 1
-    -- options
-    stateEventOptions = stateEventCharacterSelect7 + 1
-    -- credits
-    stateEventCredits = stateEventOptions + 1
-    -- keybinds
-    stateEventKeybinds = stateEventCredits + 1
-    -- how to play 0
-    stateEventHowToPlay = stateEventKeybinds + 1
-    -- how to play 1
-    stateEventHowToPlay1 = stateEventHowToPlay + 1
-    -- how to play 2
-    stateEventHowToPlay2 = stateEventHowToPlay1 + 1
-    -- how to play 3
-    stateEventHowToPlay3 = stateEventHowToPlay2 + 1
-    -- how to play 4
-    stateEventHowToPlay4 = stateEventHowToPlay3 + 1
-    -- how to play 5
-    stateEventHowToPlay5 = stateEventHowToPlay4 + 1
-    -- how to play 6
-    stateEventHowToPlay6 = stateEventHowToPlay5 + 1
-    -- how to play 7
-    stateEventHowToPlay7 = stateEventHowToPlay6 + 1
-    -- how to play 8
-    stateEventHowToPlay8 = stateEventHowToPlay7 + 1
-    -- how to play 9
-    stateEventHowToPlay9 = stateEventHowToPlay8 + 1
-    -- how to play 10
-    stateEventHowToPlay10 = stateEventHowToPlay9 + 1
-    -- how to play 11
-    stateEventHowToPlay11 = stateEventHowToPlay10 + 1
-    -- how to play 12
-    stateEventHowToPlay12 = stateEventHowToPlay11 + 1
-    -- how to play 13
-    stateEventHowToPlay13 = stateEventHowToPlay12 + 1
-    -- how to play 14
-    stateEventHowToPlay14 = stateEventHowToPlay13 + 1
-    -- how to play 15
-    stateEventHowToPlay15 = stateEventHowToPlay14 + 1
-    -- pause options menu state
-    statePauseOptions = stateEventHowToPlay15 + 1
-    -- pause keybinds menu state
-    statePauseKeybinds = statePauseOptions + 1
-    -- in game how to play state
-    stateInGameHowToPlay = statePauseKeybinds + 1
-    -- level select state
-    stateLevelSelect = stateInGameHowToPlay + 1
-    -- level select state2
-    stateLevelSelect2 = stateLevelSelect + 1
-    -- Quit Confirmation menu
-    stateEventQuitConfirmation = stateLevelSelect2 + 1
+    states = {
+        intro = 48, -- ascii for '0'
+        main_menu,
+        gameplay,
+        pause,
+        win,
+        lose,
+        console,
+        game_mode_select,
+        character_select_1,
+        character_select_2,
+        character_select_3,
+        character_select_4,
+        character_select_5,
+        character_select_6,
+        character_select_7,
+        options,
+        credits,
+        keybinds,
+        tutorial_0,
+        tutorial_1,
+        tutorial_2,
+        tutorial_3,
+        tutorial_4,
+        tutorial_5,
+        tutorial_6,
+        tutorial_7,
+        tutorial_8,
+        tutorial_9,
+        tutorial_10,
+        tutorial_11,
+        tutorial_12,
+        tutorial_13,
+        tutorial_14,
+        tutorial_15,
+        pause_options,
+        pause_keybinds,
+        in_game_tutorial,
+        level_select_1,
+        level_select_2,
+        quit_confirmation
+    }
 
-
-    InitIntroState()
     InitMainMenu()
-    InitWinGameMenu()
-    InitLoseGameMenu()
     InitPauseMenu()
     InitOptionsMenu()
     InitKeybindsMenu()
@@ -133,14 +68,6 @@ function InitValues()
     InitOptionsKeybindsMenu()
     InitLevelSelectMenu()
     InitQuitConfirmationMenu()
-
-end
-function InitIntroState()
-
-    -- 0 is the Intro State
-    --local thisState = stateEventIntroState;
-
-    --local background = CreateMenuButton("GPSplash", "", "", "T_Black_Screen_D.PNG", 0, 0, false, stateEventIntroState, 2);
 
 end
 
@@ -163,65 +90,6 @@ function InitMainMenu()
     SetNextButtonComponent(howToPlayButton, creditsButton, optionsGameButton, 0, 0 );
     SetNextButtonComponent(creditsButton, exitGameButton, howToPlayButton, 0, 0);
     SetNextButtonComponent(exitGameButton, playGameButton, creditsButton, 0, 0);
-end
-
-
-function InitLevelSelectMenu()
-
-    -- NOT CALLED ANYMORE
-
-    --[[
-    local thisState1 = stateLevelSelect;
-    local thisState2 = stateLevelSelect2;
-
-
-    local background = CreateMenuButton("MainMenuBackground", "", "", "CharacterSelect/T_Select_Level_D.png", 0, 0, false, thisState1, -1);
-    local level1Button = CreateMenuButton("Level1Button", "LuaSendEvent(\"Level1Selected\");", "LuaStateChange(stateLevelSelect);",  "", 170, 220, true, thisState1, 3);
-    local level2Button = CreateMenuButton("Level2Button", "LuaStateChange(stateEventGameplay);", "LuaStateChange(stateLevelSelect2);",  "", 370, 220, false, thisState1, 3);
-    local backButton = CreateMenuButton("LevelSelectBackButton", "FromLevelSelectToCharSelect()", "",  "", 150, 625, false, thisState1, 3);
-
-    SetNextButtonComponent(level1Button, backButton, backButton, level2Button, level2Button);
-    SetNextButtonComponent(level2Button, backButton, backButton, level1Button, level1Button);
-    SetNextButtonComponent(backButton, level1Button, level1Button, 0, 0 );
-
-    local background2 = CreateMenuButton("MainMenuBackground2", "", "", "CharacterSelect/T_Select_Level2_D.png", 0, 0, false, thisState2, -1);
-    local level1Button2 = CreateMenuButton("Level1Button2", "LuaStateChange(stateEventGameplay);", "LuaStateChange(stateLevelSelect);",  "", 170, 220, false, thisState2, 3);
-    local level2Button2 = CreateMenuButton("Level2Button2", "LuaSendEvent(\"Level2Selected\");", "LuaStateChange(stateLevelSelect2);",  "", 370, 220, true, thisState2, 3);
-    local backButton2 = CreateMenuButton("LevelSelectBackButton2", "FromLevelSelectToCharSelect()", "",  "", 150, 625, false, thisState2, 3);
-
-    SetNextButtonComponent(level1Button2, backButton2, backButton2, level2Button2, level2Button2);
-    SetNextButtonComponent(level2Button2, backButton2, backButton2, level1Button2, level1Button2);
-    SetNextButtonComponent(backButton2, level2Button2, level2Button2, 0, 0 );
-
-    ]]--
-
-end
-
-
-function InitWinGameMenu()
-
-    -- 4 is win state
-    --local thisState = stateEventWin;
-
-    --local background		= CreateMenuButton("WinBackground", "", "", 	"T_Bikers_Win_D.png", 0, 0, false, stateEventWin, 2);
-    --local playAgainButton	= CreateMenuButton("WinPlayAgainButton", "LuaStateChange(stateEventMainMenu);", "",  "",	70, 700, true, stateEventWin, 3);
-    --local winExitGameButton = CreateMenuButton("WinExitButton",	"LuaSendEvent(\"ShutdownGame\");", "",  "", 925, 700, false, stateEventWin, 3);
-
-    --SetNextButtonComponent(playAgainButton, winExitGameButton, winExitGameButton, winExitGameButton, winExitGameButton);
-    --SetNextButtonComponent(winExitGameButton, playAgainButton, playAgainButton, playAgainButton, playAgainButton);
-end
-
-function InitLoseGameMenu()
-
-    -- 5 is lose state
-    --local thisState = stateEventLose;
-
-    --local background = CreateMenuButton("LoseBackground", "",  "", "T_Bikers_Lose_D.png", 0, 0, false, stateEventLose, 2);
-    --local playAgainButton = CreateMenuButton("WinPlayAgainButton", "LuaStateChange(stateEventMainMenu);", "",  "", 70, 700, true, stateEventLose, 3);
-    --local loseExitGameButton = CreateMenuButton("WinExitButton", "LuaSendEvent(\"ShutdownGame\");", "",  "", 925, 700, false, stateEventLose, 3);
-
-    --SetNextButtonComponent(playAgainButton, loseExitGameButton, loseExitGameButton, loseExitGameButton, loseExitGameButton);
-    --SetNextButtonComponent(loseExitGameButton, playAgainButton, playAgainButton, playAgainButton, playAgainButton);
 end
 
 function InitPauseMenu()
@@ -657,101 +525,6 @@ function InitHowToPlayMenu()
     SetNextButtonComponent(backtomainmenu6, prev6, next6, next6, prev6);
     SetNextButtonComponent(prev6, next6, backtomainmenu6, backtomainmenu6, next6);
     SetNextButtonComponent(next6, backtomainmenu6, prev6, prev6, backtomainmenu6);
-
-    --[[ -- these aren't  being used anymore
-
-    -- Screen 7 - State 23
-    local background7 = CreateMenuButton("HowToPlayBackground7", "", "", "/HowToPlay/T_How_To_Play8_D.png", 0, 0, false, stateEventHowToPlay7, 2);
-    local backtomainmenu7 = CreateMenuButton("HowToPlayReturnMenuButton7", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay7, 3);
-    local prev7 = CreateMenuButton("HowToPlayNextButton7", "LuaStateChange(stateEventHowToPlay6);", "", "", 500, 690, false, stateEventHowToPlay7, 3);
-    local next7 = CreateMenuButton("HowToPlayNextButton7", "LuaStateChange(stateEventHowToPlay8);", "", "", 855, 680, true, stateEventHowToPlay7, 3);
-
-    SetNextButtonComponent(backtomainmenu7, prev7, next7, next7, prev7);
-    SetNextButtonComponent(prev7, next7, backtomainmenu7, backtomainmenu7, next7);
-    SetNextButtonComponent(next7, backtomainmenu7, prev7, prev7, backtomainmenu7);
-
-    -- Screen 8 - State 24
-    local background8 = CreateMenuButton("HowToPlayBackground8", "", "", "/HowToPlay/T_How_To_Play9_D.png", 0, 0, false, stateEventHowToPlay8, 2);
-    local backtomainmenu8 = CreateMenuButton("HowToPlayReturnMenuButton8", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay8, 3);
-    local prev8 = CreateMenuButton("HowToPlayNextButton8", "LuaStateChange(stateEventHowToPlay7);", "", "", 500, 690, false, stateEventHowToPlay8, 3);
-    local next8 = CreateMenuButton("HowToPlayNextButton8", "LuaStateChange(stateEventHowToPlay9);", "", "", 855, 680, true, stateEventHowToPlay8, 3);
-
-    SetNextButtonComponent(backtomainmenu8, prev8, next8, next8, prev8);
-    SetNextButtonComponent(prev8, next8, backtomainmenu8, backtomainmenu8, next8);
-    SetNextButtonComponent(next8, backtomainmenu8, prev8, prev8, backtomainmenu8);
-
-    -- Screen 9 - State 25
-    local background9 = CreateMenuButton("HowToPlayBackground9", "", "", "/HowToPlay/T_How_To_Play10_D.png", 0, 0, false, stateEventHowToPlay9, 2);
-    local backtomainmenu9 = CreateMenuButton("HowToPlayReturnMenuButton9", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay9, 3);
-    local prev9 = CreateMenuButton("HowToPlayNextButton9", "LuaStateChange(stateEventHowToPlay8);", "", "", 500, 690,false, stateEventHowToPlay9, 3);
-    local next9 = CreateMenuButton("HowToPlayNextButton9", "LuaStateChange(stateEventHowToPlay10);", "", "",855, 680, true, stateEventHowToPlay9, 3);
-
-    SetNextButtonComponent(backtomainmenu9, prev9, next9, next9, prev9);
-    SetNextButtonComponent(prev9, next9, backtomainmenu9, backtomainmenu9, next9);
-    SetNextButtonComponent(next9, backtomainmenu9, prev9, prev9, backtomainmenu9);
-
-    -- Screen 10 - State 26
-    local background10 = CreateMenuButton("HowToPlayBackground10", "", "", "/HowToPlay/T_How_To_Play11_D.png", 0, 0, false, stateEventHowToPlay10, 2);
-    local backtomainmenu10 = CreateMenuButton("HowToPlayReturnMenuButton10", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay10, 3);
-    local prev10 = CreateMenuButton("HowToPlayNextButton10", "LuaStateChange(stateEventHowToPlay9);", "", "", 500, 690,false, stateEventHowToPlay10, 3);
-    local next10 = CreateMenuButton("HowToPlayNextButton10", "LuaStateChange(stateEventHowToPlay11);", "", "",855, 680, true, stateEventHowToPlay10, 3);
-
-    SetNextButtonComponent(backtomainmenu10, prev10, next10, next10, prev10);
-    SetNextButtonComponent(prev10, next10, backtomainmenu10, backtomainmenu10, next10);
-    SetNextButtonComponent(next10, backtomainmenu10, prev10, prev10, backtomainmenu10);
-
-    -- Screen 11 - State 27
-    local background11 = CreateMenuButton("HowToPlayBackground11", "", "", "/HowToPlay/T_How_To_Play12_D.png", 0, 0, false, stateEventHowToPlay11, 2);
-    local backtomainmenu11 = CreateMenuButton("HowToPlayReturnMenuButton11", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay11, 3);
-    local prev11 = CreateMenuButton("HowToPlayNextButton11", "LuaStateChange(stateEventHowToPlay10);", "", "", 500, 690, false, stateEventHowToPlay11, 3);
-    local next11 = CreateMenuButton("HowToPlayNextButton11", "LuaStateChange(stateEventHowToPlay12);", "", "", 855, 680, true, stateEventHowToPlay11, 3);
-
-    SetNextButtonComponent(backtomainmenu11, prev11, next11, next11, prev11);
-    SetNextButtonComponent(prev11, next11, backtomainmenu11, backtomainmenu11, next11);
-    SetNextButtonComponent(next11, backtomainmenu11, prev11, prev11, backtomainmenu11);
-
-    -- Screen 12 - State 28
-    local background12 = CreateMenuButton("HowToPlayBackground12", "", "", "/HowToPlay/T_How_To_Play13_D.png", 0, 0, false, stateEventHowToPlay12, 2);
-    local backtomainmenu12 = CreateMenuButton("HowToPlayReturnMenuButton12", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay12, 3);
-    local prev12 = CreateMenuButton("HowToPlayNextButton12", "LuaStateChange(stateEventHowToPlay11);", "", "", 500, 690, false, stateEventHowToPlay12, 3);
-    local next12 = CreateMenuButton("HowToPlayNextButton12", "LuaStateChange(stateEventHowToPlay13);", "", "", 855, 680, true, stateEventHowToPlay12, 3);
-
-    SetNextButtonComponent(backtomainmenu12, prev12, next12, next12, prev12);
-    SetNextButtonComponent(prev12, next12, backtomainmenu12, backtomainmenu12, next12);
-    SetNextButtonComponent(next12, backtomainmenu12, prev12, prev12, backtomainmenu12);
-
-    -- Screen 13 - State 29
-    local background13 = CreateMenuButton("HowToPlayBackground13", "", "", "/HowToPlay/T_How_To_Play14_D.png", 0, 0, false, stateEventHowToPlay13, 2);
-    local backtomainmenu13 = CreateMenuButton("HowToPlayReturnMenuButton13", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay13, 3);
-    local prev13 = CreateMenuButton("HowToPlayNextButton13", "LuaStateChange(stateEventHowToPlay12);", "", "", 500, 690, false, stateEventHowToPlay13, 3);
-    local next13 = CreateMenuButton("HowToPlayNextButton13", "LuaStateChange(stateEventHowToPlay14);", "", "", 855, 680, true, stateEventHowToPlay13, 3);
-
-    SetNextButtonComponent(backtomainmenu13, prev13, next13, next13, prev13);
-    SetNextButtonComponent(prev13, next13, backtomainmenu13, backtomainmenu13, next13);
-    SetNextButtonComponent(next13, backtomainmenu13, prev13, prev13, backtomainmenu13);
-
-    -- Screen 14 - State 30
-    local background14 = CreateMenuButton("HowToPlayBackground14", "", "", "/HowToPlay/T_How_To_Play15_D.png", 0, 0, false, stateEventHowToPlay14, 2);
-    local backtomainmenu14 = CreateMenuButton("HowToPlayReturnMenuButton14", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay14, 3);
-    local prev14 = CreateMenuButton("HowToPlayNextButton14", "LuaStateChange(stateEventHowToPlay13);", "", "", 500, 690, false, stateEventHowToPlay14, 3);
-    local next14 = CreateMenuButton("HowToPlayNextButton14", "LuaStateChange(stateEventHowToPlay15);", "", "", 855, 680, true, stateEventHowToPlay14, 3);
-
-    SetNextButtonComponent(backtomainmenu14, prev14, next14, next14, prev14);
-    SetNextButtonComponent(prev14, next14, backtomainmenu14, backtomainmenu14, next14);
-    SetNextButtonComponent(next14, backtomainmenu14, prev14, prev14, backtomainmenu14);
-
-    -- Screen 15 - State 31
-    local background15 = CreateMenuButton("HowToPlayBackground15", "", "", "/HowToPlay/T_How_To_Play16_D.png", 0, 0, false, stateEventHowToPlay15, 2);
-    local backtomainmenu15 = CreateMenuButton("HowToPlayReturnMenuButton15", "LuaStateChange(stateEventMainMenu);",  "","", 150, 625, false, stateEventHowToPlay15, 3);
-    local prev15 = CreateMenuButton("HowToPlayNextButton15", "LuaStateChange(stateEventHowToPlay14);", "", "", 500, 690, false, stateEventHowToPlay15, 3);
-    local next15 = CreateMenuButton("HowToPlayNextButton15", "LuaStateChange(stateEventHowToPlay);", "", "",  855, 680, true, stateEventHowToPlay15, 3);
-
-    SetNextButtonComponent(backtomainmenu15, prev15, next15, next15, prev15);
-    SetNextButtonComponent(prev15, next15, backtomainmenu15, backtomainmenu15, next15);
-    SetNextButtonComponent(next15, backtomainmenu15, prev15, prev15, backtomainmenu15);
-
-    ]]--
-
 
     -- Make the f1 screen in game
     local inGameHowToPlayBackground = CreateMenuButton("inGameHowToPlayBackground", "", "", "T_F1_How_To_Play_D.png", 0, 0, false, stateInGameHowToPlay, 2);

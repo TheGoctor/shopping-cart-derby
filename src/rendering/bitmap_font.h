@@ -23,7 +23,6 @@
 #define NUM_CHARS 128;
 
 namespace scd {
-class CTextureManager;
 class object;
 
 class bitmap_font {
@@ -45,12 +44,12 @@ public:
 
   // Draws a specified string to a location with scale, rotation and color of
   // choice
-  void draw_string(const char* szString, int nPosX, int nPosY,
-                   float fScale  = 1.0f,
-                   DWORD dwColor = D3DCOLOR_XRGB(255, 255, 255));
+  void draw_string(const char* string, int position_x, int position_y,
+                   float scale  = 1.0f,
+                   color color = {255, 255, 255, 255});
 
   // needs the file path and the file that contains the character widths
-  void load_font(const char* szFilename, const char* szFileWidths);
+  void load_font(const char* file_name, const char* file_widths);
 
   // unloads the image and sets the width array to 0;
   void unload_font();
@@ -67,7 +66,7 @@ private:
 
   int m_nRectWidth;
 
-  CTextureManager* m_pTM;
+  class texture_manager* m_pTM;
 
   // private so only we can call it
   RECT CellAlgorithm(int nID);
@@ -76,9 +75,9 @@ private:
 
 class font_component : public base_component {
 private:
-  CTextureManager* m_pTM; // A Pointer to the Texture Manager
-  std::string m_szWord;
-  bitmap_font m_cFont;
+  std::weak_ptr<class texture_manager> _texture_manager;
+  std::string _word;
+  bitmap_font _font;
 
   int m_nX;
   int m_nY;
