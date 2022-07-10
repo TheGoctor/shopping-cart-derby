@@ -1,13 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	endgame_manager.cpp
-//	Date			:	6/17/11
-//	Mod. Date		:	6/17/11
-//	Mod. Initials	:	JL, HN, MS
-//	Author			:
-//	Purpose			:	Encapsulates the Endgame Senarios
-////////////////////////////////////////////////////////////////////////////////
-
-// Includes
 #include "endgame_manager.h"
 
 #include "audio/wwise_audio_manager.h"
@@ -20,37 +10,11 @@
 #include "rendering/hud_manager.h"
 #include "rendering/texture_manager.h"
 
-/// Defines
-#define FADE_ALPHA_RATE (0.5f)
-#define LOSE_FADE_TIME (3.0f)
-
 // Constructor
-endgame_manager::endgame_manager()
-  : m_bExitingGameplay(false)
-  , m_bLoseFade(false)
-  , m_fFadeScreenAlpha(0.0f)
-  , m_pFadeScreenComp(NULL)
-  , m_pWinnerObject(NULL)
-  , m_pLoserObject1(NULL)
-  , m_pLoserObject2(NULL)
-  , m_pLoserObject3(NULL)
-  , m_pPlayerObject(NULL)
-  , m_pWinLoseComp(NULL)
-  , m_pMainMenuComp(NULL)
-  , m_fLoseFadeTimer(0.0f)
-  , m_bVictoryPlayed(false)
-  , m_bHumanWon(false)
-  , m_fWinLoseAlpha(0.0f)
-  , m_bSoundPlayed(false)
-  , m_fCameraMoveTimer(0.0f)
-  , m_bCameraMoved(false)
-  , m_fCameraTime(0.0f) {
-  m_bExitingGameplay = false;
-  m_fFadeScreenAlpha = 0.0f;
-  m_fCameraMoveTimer = 0.0f;
+endgame_manager::endgame_manager() {
   // Register for Events
   CEventManager* pEM = CEventManager::GetInstance();
-  string szEventName = "Update";
+  std::string szEventName = "Update";
   szEventName += GAMEPLAY_STATE;
 
   pEM->RegisterEvent(szEventName, (IComponent*)this, GameplayUpdateCallback);
@@ -151,6 +115,7 @@ endgame_manager::endgame_manager()
   tSpriteData.m_nY           = 150;
 
   m_pFinishFlag = pTM->CreateSpriteComp(pFinishFlagPicObj, tSpriteData, false);
+
   if (!CUnlockableManager::GetPlayerNotified()) {
     CBitmapFont font(-1, 13, 15, 33);
     font.LoadFont("Resource\\BitmapFont.png", "Resource\\BitmapFont_Width.bin");
@@ -168,7 +133,7 @@ endgame_manager::endgame_manager()
                                                     fScale,
                                                     fontColor,
                                                     false);
-    //		m_pFont->DrawWord();
+    // m_pFont->DrawWord();
     m_pFont->SetX(m_nFontX);
     m_pFont->SetY(m_nFontY);
   }

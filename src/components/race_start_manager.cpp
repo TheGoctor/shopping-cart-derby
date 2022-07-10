@@ -1,205 +1,132 @@
-#include "CStartOfRaceManager.h"
+#include "race_start_manager.h"
 
-#include "Global Managers\Memory Manager\CMemoryManager.h"
+#include "audio/wwise/wwise_audio_manager.h"
+#include "components/race_starter.h"
+#include "core/object.h"
+#include "core/object_manager.h"
+#include "events/events.h"
+#include "input/input_manager.h"
+#include "memory/memory_manager.h"
+#include "rendering/dx_render_context_manager.h"
+#include "rendering/hud_manager.h"
+#include "rendering/texture_manager.h"
 
-#include "Managers\Global Managers\Input Manager\CInputManager.h"
-#include "Managers\Global Managers\Event Manager\EventStructs.h"
-using namespace EventStructs;
+scd::race_start_manager::race_start_manager()
+  : _current_timer_value(0.0f)
+  , _total_duration(3.0f)
+  , _enable_input(true)
+  , _bike_started(false)
+  , _starting_light_context(nullptr)
+  , _waiting_for_input(false)
+  , _has_played_sound{false}
+  , _welcome_sound{false}
+  , _sound{scd::audio_manager::get()}
+  , _starting_light_context{scd::dx_render_context_manager::get().get_context(RC_STARTLIGHT)}
+  {
+  std::string szEventName = "Update";
+  szEventName += (char)GAMEPLAY_STATE;
+  event_manager::get().register_event(
+    szEventName, std::bind(&on_update, this);
 
-#include "Managers\Global Managers\Rendering Managers\Texture Managers\CTextureManager.h"
-#include "Managers\Global Managers\Rendering Managers\DXRenderContextManager.h"
-#include "Managers\Global Managers\Object Manager\scd::objectManager.h"
+  szEventName = "InitObjects";
+  szEventName += (char)GAMEPLAY_STATE;
+  event_manager::get().register_event(
+    szEventName, std::bind(&on_state_init, this));
 
-#include "scd::object.h"
+  event_manager::get().register_event(
+    "GameplayEnterPressed", std::bind(&on_keypress_enter, this));
 
-#include "Components\StartOfRace\CStartOfRaceComponent.h"
-#include "Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
-#include "Managers\Global Managers\Rendering Managers\Texture Managers\CHUDManager.h"
+  TSpriteData tListData{};
 
-CStartOfRaceManager::CStartOfRaceManager() : m_fCurrentTimerValue(0.0f), 
-	m_fTotalDuration(3.0f), m_bEnableInput(true), m_bBikeStarted(false), m_pStartingLightContex(NULL), m_bWaitingForInput(false)
-{
-	string szEventName = "Update";
-	szEventName += (char)GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(scd::base_component*)GetInstance(), HandleUpdate);	
-	
-	szEventName = "EnableObjects";
-	szEventName += (char)GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(scd::base_component*)GetInstance(), HandleStateEnter);	
+  tListData.m_nTexture = texture_manager::get().load_texture(
+    "Resource\\HUD\\HowToPlay\\T_Start_How_To_Play_D.png");
+  tListData.m_fScaleX      = 1.0f;
+  tListData.m_fScaleY      = 1.0f;
+  tListData.m_dwColor      = scd::vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	szEventName = "DisableObjects";
-	szEventName += (char)GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(scd::base_component*)GetInstance(), HandleStateExit);	
+  // Get Inital Sprite Data
+  scd::object* obj = object_manager::get().create_object("DirectionsOverlay"); // TODO: Clean this up?
 
-	szEventName = "InitObjects";
-	szEventName += (char)GAMEPLAY_STATE;
-	CEventManager::GetInstance()->RegisterEvent(szEventName, 
-		(scd::base_component*)GetInstance(), HandleStateInit);	
-
-	CEventManager::GetInstance()->RegisterEvent("GameplayEnterPressed", 
-		(scd::base_component*)GetInstance(), EnterPressed);	
-
-	
-
-
-	GetInstance()->m_bHasPlayedSound = false;
-	GetInstance()->m_bWelcomeSound = false;
-	GetInstance()->pSound = CWwiseSoundManager::GetInstance();
-	// Get Starting Light Context
-	m_pStartingLightContex = DXRenderContextManager::GetInstance()->GetContext(RC_STARTLIGHT);
-
-	TSpriteData tListData;
-
-	tListData.m_nTexture = CTextureManager::GetInstance()->LoadTexture("Resource\\HUD\\HowToPlay\\T_Start_How_To_Play_D.png");
-	tListData.m_nX = 0;
-	tListData.m_nY = 0;
-	tListData.m_nZ = 0;
-	tListData.m_fScaleX = 1.0f;
-	tListData.m_fScaleY = 1.0f;
-	tListData.m_dwColor = scd::vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	tListData.m_tRect.top    = 0;
-	tListData.m_tRect.right  = 0;
-	tListData.m_tRect.left   = 0;
-	tListData.m_tRect.bottom = 0;
-	tListData.m_fRotCenterX = 0.0f;
-	tListData.m_fRotCenterY = 0.0f;
-	tListData.m_fRot = 0.0f;
-
-	// Get Inital Sprite Data
-	scd::object* pObj = scd::objectManager::GetInstance()->CreateObject("DirectionsOverlay"); // TODO: Clean this up?
-
-	m_pDirectionsComp = CTextureManager::GetInstance()->CreateSpriteComp(
-		pObj, tListData, false);
-
+  m_pDirectionsComp = texture_manager::get().create_sprite(obj, tListData, false);
 }
 
+void scd::race_start_manager::on_update(float dt) {
+  if (_waiting_for_input) {
+    return;
+  }
 
+  if (!_welcome_sound) {
+    pSound->PlayTheSound(WELCOME_TO, GLOBAL_ID);
 
-void CStartOfRaceManager::HandleUpdate(IEvent* cEvent, scd::base_component*)
-{
-	TUpdateStateEvent* pEv = static_cast<TUpdateStateEvent*>(cEvent->GetData());
-	// get dt here
-	float fDt = pEv->m_fDeltaTime;
+    for (unsigned int playernum = 0; playernum < 4; ++playernum) {
+      pSound->SetRPMValueForSound(
+        0, CHUDManager::GetInstance()->GetPlayerCharID(playernum));
+    }
 
-	if(GetInstance()->m_bWaitingForInput)
-	{
-		return;
-	}
-	
-	if(!GetInstance()->m_bWelcomeSound)
-	{
-		GetInstance()->pSound->PlayTheSound(WELCOME_TO, GLOBAL_ID);
+    pSound->PlayCartSounds();
+    _welcome_sound = true;
+  }
 
-		for (unsigned int playernum = 0; playernum < 4; ++playernum)
-		{
-			GetInstance()->pSound->SetRPMValueForSound(0, 
-				CHUDManager::GetInstance()->GetPlayerCharID(playernum));
-		}
+  // if we're in the countdown
+  if (_current_timer_value < 5.0f) {
+    _current_timer_value += dt;
+    _enable_input = true;
 
-		GetInstance()->pSound->PlayCartSounds();
-		GetInstance()->m_bWelcomeSound = true;
-	}
+    if (_current_timer_value < 4.0f) {
+      // change input state to intro (aka disable input)
+      SendIEvent("DisableMovement", this, nullptr, PRIORITY_NORMAL);
+    }
 
+    if (_current_timer_value > 4.0f) // 3rd light
+    {
+      // check/change hud element
+      // play sound
+      m_pStartingLightContex->SetTexIdx(5);
 
-	// if we're in the countdown
-	if(GetInstance()->m_fCurrentTimerValue < 5.0f)
-	{
-	// increment timer
-		GetInstance()->m_fCurrentTimerValue += fDt;
+      if (m_bEnableInput) {
+        // re-enable the input
+        SendIEvent("EnableMovement", this, nullptr, PRIORITY_NORMAL);
 
-		// do logic
-		GetInstance()->m_bEnableInput = true;
+        m_bEnableInput = false;
 
-		if(GetInstance()->m_fCurrentTimerValue < 4.0f)
-		{
-			// change input state to intro (aka disable input)
-			SendIEvent("DisableMovement", (scd::base_component*)GetInstance(),
-				NULL, PRIORITY_NORMAL);
-		}
-		
-		if(GetInstance()->m_fCurrentTimerValue > 4.0f)		// 3rd light
-		{
-			// check/change hud element
-			// play sound
-			GetInstance()->m_pStartingLightContex->SetTexIdx(5);
-		
-			
+        SendIEvent("RaceStarted", this, nullptr, PRIORITY_NORMAL);
+      }
+    } else if (_current_timer_value > 3.0f) // 2nd light
+    {
+      m_pStartingLightContex->SetTexIdx(4);
+    } else if (_current_timer_value > 2.0f) // 1st light
+    {
+      m_pStartingLightContex->SetTexIdx(3);
+    } else if (_current_timer_value > 1.0f) // 1st light
+    {
+      m_pStartingLightContex->SetTexIdx(2);
 
-			if(GetInstance()->m_bEnableInput)
-			{
-			// re-enable the input
-				SendIEvent("EnableMovement", (scd::base_component*)GetInstance(),
-				NULL, PRIORITY_NORMAL);
-
-				GetInstance()->m_bEnableInput = false;
-
-				SendIEvent("RaceStarted", (scd::base_component*)GetInstance(), NULL, PRIORITY_NORMAL);
-				
-			}
-		}
-		else if(GetInstance()->m_fCurrentTimerValue > 3.0f) // 2nd light
-		{
-			GetInstance()->m_pStartingLightContex->SetTexIdx(4);
-
-		}
-		else if(GetInstance()->m_fCurrentTimerValue > 2.0f) // 1st light
-		{
-			GetInstance()->m_pStartingLightContex->SetTexIdx(3);
-	
-		}
-		else if(GetInstance()->m_fCurrentTimerValue > 1.0f ) // 1st light
-		{
-			GetInstance()->m_pStartingLightContex->SetTexIdx(2);
-			
-			if(!GetInstance()->m_bHasPlayedSound)
-			{
-				GetInstance()->pSound->PlayTheSound(START_COUNTDOWN, GLOBAL_ID);
-				GetInstance()->m_bHasPlayedSound = true;
-			}
-			
-		}
-	}
-	else
-	{
-		
-	}
+      if (!_has_played_sound) {
+        pSound->PlayTheSound(START_COUNTDOWN, GLOBAL_ID);
+        _has_played_sound = true;
+      }
+    }
+  }
 }
 
-void CStartOfRaceManager::HandleStateEnter(IEvent*, scd::base_component*)
-{
-	
+void scd::race_start_manager::on_state_init() {
+  m_fCurrentTimerValue = -5.0f;
+  m_bEnableInput       = true;
+  m_bHasPlayedSound    = false;
+  m_bWelcomeSound      = false;
+  m_bBikeStarted       = false;
+  m_pStartingLightContex->SetTexIdx(1);
+  m_pDirectionsComp->SetActive(true);
+  m_bWaitingForInput = true;
+
+  // change input state to intro (aka disable input)
+  SendIEvent("DisableMovement", this, nullptr, PRIORITY_NORMAL);
 }
 
-void CStartOfRaceManager::HandleStateExit(IEvent*, scd::base_component*)
-{
-	
-}
+void scd::race_start_manager::on_keypress_enter() {
+  m_bWaitingForInput = false;
 
-void CStartOfRaceManager::HandleStateInit(IEvent*, scd::base_component*)
-{
-	CStartOfRaceManager::GetInstance()->m_fCurrentTimerValue = -5.0f;
-	CStartOfRaceManager::GetInstance()->m_bEnableInput = true;
-	CStartOfRaceManager::GetInstance()->m_bHasPlayedSound = false;
-	CStartOfRaceManager::GetInstance()->m_bWelcomeSound = false;
-	CStartOfRaceManager::GetInstance()->m_bBikeStarted = false;
-	CStartOfRaceManager::GetInstance()->m_pStartingLightContex->SetTexIdx(1);
-	CStartOfRaceManager::GetInstance()->m_pDirectionsComp->SetActive(true);
-	GetInstance()->m_bWaitingForInput = true;
-
-	// change input state to intro (aka disable input)
-	SendIEvent("DisableMovement", (scd::base_component*)GetInstance(),
-		NULL, PRIORITY_NORMAL);
-}
-
-
-void CStartOfRaceManager::EnterPressed(IEvent*, scd::base_component*)
-{
-	GetInstance()->m_bWaitingForInput = false;
-
-	// Unshow the directions overlay
-	GetInstance()->m_pDirectionsComp->SetActive(false);	
-	SendIEvent("OverlayUnshow", (scd::base_component*)GetInstance(), NULL, PRIORITY_NORMAL);
+  // Unshow the directions overlay
+  m_pDirectionsComp->SetActive(false);
+  SendIEvent("OverlayUnshow", this, nullptr, PRIORITY_NORMAL);
 }

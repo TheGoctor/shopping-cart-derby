@@ -38,33 +38,36 @@ public:
   void on_enter_pressed();
 
 private:
-  // mainly for when character unlock message pops up
-  std::shared_ptr<class bitmap_font> _font;
+  constexpr float fade_alpha_rate{ 0.5f };
+  constexpr float lose_fade_time{ 3.0f };
 
-  std::array<std::int32_t, 2> _font_position;
+  // mainly for when character unlock message pops up
+  std::shared_ptr<class bitmap_font> _font{ nullptr };
+
+  std::array<std::int32_t, 2> _font_position{0, 0};
 
   // for winning the game only once per play
-  bool _game_won;
+  bool _game_won = false;
 
   // Flags and Timers
-  bool m_bExitingGameplay; // For Fading
-  bool m_bHumanWon;        // For Human player WINNING
-  bool m_bSoundPlayed;
-  bool m_bLoseFade;
-  bool m_bCameraMoved;
-  bool m_bVictoryPlayed;
-  float m_fCameraTime;
-  float m_fFadeScreenAlpha;
-  float m_fWinLoseAlpha;
-  float m_fLoseFadeTimer;
-  float m_fCameraMoveTimer;
+  bool m_bExitingGameplay  = false; // For Fading
+  bool m_bHumanWon         = false; // For Human player WINNING
+  bool m_bSoundPlayed      = false;
+  bool m_bLoseFade         = false;
+  bool m_bCameraMoved      = false;
+  bool m_bVictoryPlayed    = false;
+  float m_fCameraTime      = 0.0f;
+  float m_fFadeScreenAlpha = 0.0f;
+  float m_fWinLoseAlpha    = 0.0f;
+  float m_fLoseFadeTimer   = 0.0f;
+  float m_fCameraMoveTimer = 0.0f;
 
   // Sprite Components
-  CSpriteComponent* m_pFadeScreenComp;
-  CSpriteComponent* m_pWinLoseComp;
-  CSpriteComponent* m_pMainMenuComp;
+  CSpriteComponent* m_pFadeScreenComp = nullptr;
+  CSpriteComponent* m_pWinLoseComp    = nullptr;
+  CSpriteComponent* m_pMainMenuComp   = nullptr;
 
-  CSpriteComponent* m_pFinishFlag;
+  CSpriteComponent* m_pFinishFlag = nullptr;
 
   CObject* m_pWinnerObject;
   CObject* m_pLoserObject1;
