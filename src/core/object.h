@@ -21,8 +21,8 @@ class object {
 public:
   using id_t = std::uint32_t;
 
-  object(std::string name)
-    : _name(name) {}
+  object(const std::string& name)
+      : _name(name) {}
 
   std::string name() const { return _name; }
   const scd::transform& pose() const { return _pose; }
@@ -65,13 +65,11 @@ private:
   scd::transform _world_pose;
 
   scd::object* _parent = nullptr;
-  std::list<scd::object*> _children;
+  scd::list<scd::object*> _children;
 
-  std::uint32_t _flags = 0;
+  bool _dirty = false;
 
 public:
-  enum { DIRTY = 1 };
-
   void add_child(scd::object& child) {
     if (child._parent == this) {
       // nothing to do
@@ -96,7 +94,7 @@ public:
 
   // sets all the children of a frame to "DIRTY"
   void dirty() {
-    _flags |= DIRTY;
+    _dirty = true;
 
     for (auto& child : _children) {
       child->dirty();
@@ -106,7 +104,7 @@ public:
   const scd::transform& local_pose() const { return _local_pose; }
 
   const scd::transform& world_pose() const {
-    if (_flags & DIRTY) {
+    if (_dirty) {
       if (_parent != nullptr) {
         _world_pose = _parent->world_pose() * _local_pose;
       } else {
@@ -114,42 +112,38 @@ public:
       }
 
       // mark clean
-      _flags &= ~DIRTY;
+      _dirty = false;
     }
 
     return _world_pose;
   }
 
   void rotate(const scd::vector3& axis, float angle) {
-    scd::transform rotMat;
-    D3DXMatrixRotationAxis(&rotMat, &vRotAxis, fAngle);
-    D3DXMatrixMultiply(&m_mLocalMatrix, &rotMat, &m_mLocalMatrix);
+    scd::transform rotation = math::matrix_axis_angle(axis, angle);
+    _local_pose = math::matrix_multiply(_local_pose, rotation);
     update_world_pose();
   }
 
   void scale(const scd::vector3& scale) {
-    scd::transform scaleMat;
-    D3DXMatrixScaling(&scaleMat, x, y, z);
-    D3DXMatrixMultiply(&_local_pose, &_local_pose, &scaleMat);
+    scd::transform scale_matrix =
+        math::matrix_scale(math::matrix_identity(), scale);
+    _local_pose = math::matrix_multiply(_local_pose, scale_matrix);
+    update_world_pose();
+  }
+
+  void translate(const scd::vector3& translation) {
+    _last_position = world_position();
+    _local_pose = math::matrix_translate(_local_pose, translation);
     update_world_pose();
   }
 
   const scd::vector3& last_world_position() const { return _last_position; }
   const scd::vector3& world_position() const { return world_pose().p; }
 
-  const scd::vector3& get_local_position() const { return _local_pose.p; }
+  const scd::vector3& local_position() const { return _local_pose.p; }
 
-  void set_local_position(const scd::vector3& position) {
+  void local_position(const scd::vector3f& position) {
     _local_pose.p = position;
-  }
-
-  void translate_frame(const scd::vector3& translation) {
-    _last_position = world_pose().p;
-    scd::transform translateMat;
-    D3DXMatrixTranslation(
-      &translateMat, translation.x, translation.y, translation.z);
-    D3DXMatrixMultiply(&_local_pose, &_local_pose, &translateMat);
-    update_world_pose();
   }
 };
 } // namespace scd
