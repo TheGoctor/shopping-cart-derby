@@ -7,9 +7,7 @@
 
 #define DONUTTIME 15.0f
 
-namespace scd {
-class event;
-class CRenderComponent;
+namespace scd::component {
 
 class donut : public scd::base_component {
 private:
@@ -22,7 +20,7 @@ private:
 
 public:
   donut(scd::object& owner)
-    : base_component(owner) {}
+      : base_component(owner) {}
 
   static donut* create(scd::object& owner);
 
@@ -48,4 +46,4 @@ public:
   void set_attached_object(scd::object* pObj) { m_pAttachedObject = pObj; }
 };
 
-} // namespace scd
+} // namespace scd::component

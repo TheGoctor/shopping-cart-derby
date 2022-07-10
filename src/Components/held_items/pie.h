@@ -3,7 +3,7 @@
 #include "core/base_component.h"
 #include "core/object.h"
 
-namespace scd {
+namespace scd::component {
 class event;
 
 #define BLIND_TIME (3.0f)
@@ -11,18 +11,17 @@ class event;
 class pie : public scd::base_component {
 public:
   pie(scd::object& owner)
-    : base_component(owner) {}
+      : base_component(owner) {}
 
   static pie* create(scd::object& owner, const scd::vector3& direction);
 
   void first_init();
 
-  static void on_update(event* cEvent, scd::base_component* cCenter);
-  static void on_player_collision(event* cEvent, scd::base_component* cCenter);
-  static void on_environment_collision(event* cEvent,
-                                       scd::base_component* cCenter);
-  static void on_item_collision(event* cEvent, scd::base_component* cCenter);
-  static void on_pause_update(event*, scd::base_component* pComp);
+  void on_update(event* cEvent);
+  void on_player_collision(event* cEvent);
+  void on_environment_collision(event* cEvent);
+  void on_item_collision(event* cEvent);
+  void on_pause_update(event*);
 
   void reinit();
   void despawn();
@@ -49,4 +48,4 @@ private:
   int _id;
 };
 
-} // namespace scd
+} // namespace scd::component

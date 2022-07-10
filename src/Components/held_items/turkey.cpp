@@ -1,102 +1,94 @@
-#include "CTurkeyComponent.h"
+#include "turkey.h"
 
-#include "Managers\Global Managers\Event Manager\CEventManager.h"
-#include "Managers\Global Managers\Event Manager\EventStructs.h"
-using namespace EventStructs;
-
-#include "scd::object.h"
-#include "Managers\Global Managers\Object Manager\scd::objectManager.h"
-#include "Managers\Global Managers\Sound Manager\CWwiseSoundManager.h"
-
-#include "Managers\Component Managers\CCollisionManager.h"
-#include "Managers\Component Managers\CHeldItemManager.h"
-#include "Managers\Global Managers\Rendering Managers\CEffectManager.h"
+#include "audio/wwise/wwise_audio_manager.h"
+#include "components/held_item_manager.h"
+#include "core/object.h"
+#include "core/object_manager.h"
+#include "events/event_manager.h"
+#include "events/events.h"
+#include "physics/physics_manager.h"
+#include "rendering/effect_manager.h"
 
 namespace scd::components {
-turkey(object* owner)
-  : base_component(owner) {}
+turkey(object& owner)
+    : base_component(owner) {
+  TURKEY_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
 
-turkey* turkey::create_turkey(object* owner, const vector3& direction) {
-  turkey* comp = MMNEW(turkey(owner));
-
-  comp->_id             = -1;
-  comp->_move_direction = direction;
-  D3DXVec3Normalize(&comp->_move_direction, &comp->_move_direction);
-
-  comp->first_init();
-
-  owner->add_component(comp);
-
-  return comp;
-}
-
-void turkey::FirstInit() {
-  m_fDuration     = 30.0f;
-  m_fTimeLeft     = m_fDuration;
-  m_fSpeed        = 28.0f;
-  m_fStunDuration = 2.0f;
-  TURKEY_ID       = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
   // TODO: subscribe to events
   string szEventName = "Update";
   szEventName += GAMEPLAY_STATE;
   CEventManager::GetInstance()->RegisterEvent(szEventName, this, Update);
+
   CEventManager::GetInstance()->RegisterEvent(
-    "HeldItemInWorldCollision", this, EnvironmentCollision);
+      "HeldItemInWorldCollision", this, EnvironmentCollision);
+
   CEventManager::GetInstance()->RegisterEvent(
-    "HeldItemInWorldPlayerCollision", this, PlayerCollision);
+      "HeldItemInWorldPlayerCollision", this, PlayerCollision);
+
   CEventManager::GetInstance()->RegisterEvent(
-    "TurkeyDestroyedByItem", this, ItemCollision);
+      "TurkeyDestroyedByItem", this, ItemCollision);
 
   szEventName = "Update";
   szEventName += PAUSE_STATE;
   CEventManager::GetInstance()->RegisterEvent(
-    szEventName, this, PauseUpdateCallback);
+      szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += CONSOLE_STATE;
   CEventManager::GetInstance()->RegisterEvent(
-    szEventName, this, PauseUpdateCallback);
+      szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += PAUSE_OPTIONS_STATE;
   CEventManager::GetInstance()->RegisterEvent(
-    szEventName, this, PauseUpdateCallback);
+      szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += PAUSE_KEYBINDS_STATE;
   CEventManager::GetInstance()->RegisterEvent(
-    szEventName, this, PauseUpdateCallback);
+      szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += QUIT_CONFIRMATION_STATE;
   CEventManager::GetInstance()->RegisterEvent(
-    szEventName, this, PauseUpdateCallback);
+      szEventName, this, PauseUpdateCallback);
 
   szEventName = "Update";
   szEventName += IN_GAME_HOW_TO_PLAY_STATE;
   CEventManager::GetInstance()->RegisterEvent(
-    szEventName, this, PauseUpdateCallback);
+      szEventName, this, PauseUpdateCallback);
+
   szEventName = "Update";
   szEventName += IN_GAME_HOW_TO_PLAY_CONTROLLER_STATE;
   CEventManager::GetInstance()->RegisterEvent(
-    szEventName, this, PauseUpdateCallback);
+      szEventName, this, PauseUpdateCallback);
 
-  SendObjectEvent("TurkeyCreated", this, m_pObject, PRIORITY_IMMEDIATE);
+  SendObjectEvent("TurkeyCreated", this, _owner, PRIORITY_IMMEDIATE);
+}
+
+std::shared_ptr<turkey> turkey::create(object& owner, const vector3& direction) {
+  auto comp = owner.create_component<turkey>();
+
+  comp->_id = -1;
+  comp->_move_direction = direction;
+  D3DXVec3Normalize(&comp->_move_direction, &comp->_move_direction);
+
+  return comp;
 }
 
 void turkey::ReInit() {
   m_fTimeLeft = m_fDuration;
-  m_bSpawned  = true;
-  TURKEY_ID   = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
+  m_bSpawned = true;
+  TURKEY_ID = CWwiseSoundManager::GetInstance()->RegisterHeldObject();
   TSphere tsphere;
   //	tsphere.cPosition = scd::vector3(0,5,0);
-  tsphere.cPosition = m_pObject->GetTransform()->GetWorldPosition();
-  tsphere.fRadius   = .5f; // TODO: Is this the radius we want?
+  tsphere.cPosition = _owner.world_position();
+  tsphere.fRadius = .5f; // TODO: Is this the radius we want?
   m_pCollidableComponent->SetBVType(BSPHERE);
   m_pCollidableComponent->SetSphere(tsphere);
 
   CWwiseSoundManager::GetInstance()->SetObjectPosition(
-    TURKEY_ID, m_pObject->GetTransform()->GetWorldPosition(), 0.5f);
+      TURKEY_ID, _owner.world_position(), 0.5f);
   CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_USE, TURKEY_ID);
 
   // let effect stuff know we're fired
@@ -104,183 +96,138 @@ void turkey::ReInit() {
 }
 
 void turkey::despawn() {
-  m_bSpawned                                      = false;
-  m_pObject->GetTransform()->GetLocalMatrix()._41 = 300.0f;
-  m_pObject->GetTransform()->GetLocalMatrix()._42 = 300.0f;
-  m_pObject->GetTransform()->GetLocalMatrix()._43 = 300.0f;
+  m_bSpawned = false;
+  _owner.local_position({300, 300, 300});
 
-  CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_TRAVEL_STOP,
-                                                  TURKEY_ID);
+  CWwiseSoundManager::GetInstance()->PlayTheSound(
+      ITEM_TURKEY_TRAVEL_STOP, TURKEY_ID);
   CWwiseSoundManager::GetInstance()->UnregisterObject(TURKEY_ID);
 
   // instead, just set the sphere's radius to 0
-  TSphere tsphere;
-  tsphere.cPosition = m_pObject->GetTransform()->GetWorldPosition();
-  tsphere.fRadius   = 0.0f;
+  TSphere tsphere{};
+  tsphere.cPosition = _owner.world_position();
+  tsphere.fRadius = 0.0f;
 
-  SendObjectEvent("TurkeyDespawned", this, m_pObject);
+  SendObjectEvent("TurkeyDespawned", this, _owner);
 }
 
-///////////////////////////
-//
-//	Callback Functions
-//
-///////////////////////////
-void turkey::Update(IEvent* cEvent, scd::base_component* cCenter) {
-  turkey* comp              = (turkey*)cCenter;
-  TUpdateStateEvent* eEvent = (TUpdateStateEvent*)cEvent->GetData();
-  float fDt                 = eEvent->m_fDeltaTime;
-
+void turkey::on_update(float dt) {
   // if w'ere not spawned
-  if (!comp->m_bSpawned) {
+  if (!is_spawned()) {
     // no need to update
     return;
   }
 
-  comp->m_fTimeLeft -= fDt;
+  _time_remaining -= dt;
 
-  if (comp->m_fTimeLeft <= 0.0f) {
-    // destroy me sire!
-    comp->Despawn();
-
+  if (_time_remaining <= 0.0f) {
+    despawn();
     return;
   }
 
   // TODO: Play effect stuff here (frost, etc)
 
   // translate the object
-  comp->m_pObject->GetTransform()->TranslateFrame(comp->m_vMoveDirection * fDt
-                                                  * comp->m_fSpeed);
+  _owner.translate(_move_direction * dt * _speed);
 
-  comp->m_pObject->GetTransform()->RotateFrame(scd::vector3(0.0f, 1.0f, 0.0f),
-                                               fDt * 5.0f);
+  _owner.rotate({0.0f, 1.0f, 0.0f}, dt * 5.0f);
 
   CWwiseSoundManager::GetInstance()->SetObjectPosition(
-    comp->TURKEY_ID,
-    comp->m_pObject->GetTransform()->GetWorldPosition(),
-    0.25f);
+      TURKEY_ID, _owner.world_position(), 0.25f);
+
   // tell it to render
   SendRenderEvent("AddToSet", comp, comp->m_pObject, PRIORITY_IMMEDIATE);
 }
 
 // Collision on world
-void turkey::EnvironmentCollision(IEvent* cEvent,
-                                            scd::base_component* cCenter) {
-  turkey* pComp        = (turkey*)cCenter;
-  TImpactEvent* tEvent    = (TImpactEvent*)cEvent->GetData();
+void turkey::EnvironmentCollision(IEvent* cEvent) {
+  TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
 
   // collider is the item, collided is the world geometry
-  if (pComp->m_pObject == tEvent->m_pcCollider && pComp->m_bSpawned) {
-    // bounce around normal
-    //		if(D3DXVec3LengthSq(&tEvent->m_vNormal) == 0.0f)
-    //		{
-    //			// generate a random direction 200 range -100 to 100
-    //			pComp->m_vMoveDirection.x = static_cast<float>((rand()%200 - 100));
-    //			pComp->m_vMoveDirection.z = static_cast<float>((rand()%200 - 100));
-    //			D3DXVec3Normalize(&pComp->m_vMoveDirection,
-    //&pComp->m_vMoveDirection);
-    //		}
-    //		else
-    //		{
-    //			pComp->m_vMoveDirection = tEvent->m_vNormal;
-    //		}
-    // fresh start, bounce based on the normal yo!
-    // current direction, normal of collision, direction after reflection
-    scd::vector3 MoveDir, ColNormal, ReflectDir;
-    MoveDir.x = pComp->m_pObject->GetTransform()->GetLocalMatrix()._31;
-    MoveDir.y = pComp->m_pObject->GetTransform()->GetLocalMatrix()._32;
-    MoveDir.z = pComp->m_pObject->GetTransform()->GetLocalMatrix()._33;
+  if (_owner == tEvent->m_pcCollider && is_spawned()) {
+    scd::vector3 MoveDir = _owner.local_position();
     D3DXVec3Normalize(&MoveDir, &MoveDir);
+
     ColNormal = tEvent->m_vNormal;
     D3DXVec3Normalize(&ColNormal, &ColNormal);
 
-    //		if(D3DXVec3Length(&ColNormal) == 0.0f)
-    //		{
-    //			//crap crap crap, bad normal!
-    //			return;//aye, there be no bounce happening here i guess
-    //		}
-
-    // now that that's out of the way, lets do fancy stuff
-    //		ReflectDir = MoveDir - (D3DXVec3Dot(&MoveDir, &ColNormal) * ColNormal
-    //* 2.0f); 		ReflectDir.y = 0.0f; 		D3DXVec3Normalize(&ReflectDir,
-    //&ReflectDir); 		pComp->m_vMoveDirection = ReflectDir;
-    // play sound
     if (ColNormal.x > 0.0f || ColNormal.x <= 0.0f && ColNormal.z == 0.0f) {
-      pComp->m_vMoveDirection.x *= -1.0f;
-    } else if (ColNormal.z > 0.0f
-               || ColNormal.z < 0.0f && ColNormal.x == 0.0f) {
-      pComp->m_vMoveDirection.z *= -1.0f;
+      _move_direction.x *= -1.0f;
+    } else if (
+        ColNormal.z > 0.0f || ColNormal.z < 0.0f && ColNormal.x == 0.0f) {
+      _move_direction.z *= -1.0f;
     } else {
-      //			pComp->m_vMoveDirection.x *= -1.0f;
-      //			pComp->m_vMoveDirection.z *= -1.0f;
       // R = -2*(V dot N)*N - V reflection formula
-      scd::vector3 ref
-        = -2 * (D3DXVec3Dot(&pComp->m_vMoveDirection, &ColNormal)) * ColNormal
-          - pComp->m_vMoveDirection;
-      D3DXVec3Normalize(&pComp->m_vMoveDirection, &ref);
+      scd::vector3 ref =
+          -2 * (D3DXVec3Dot(&_move_direction, &ColNormal)) * ColNormal
+          - _move_direction;
+      D3DXVec3Normalize(&_move_direction, &ref);
     }
 
     CWwiseSoundManager::GetInstance()->PlayTheSound(
-      ITEM_TURKEY_EN_IMPACT, pComp->TURKEY_ID); // HACK: not global id
+        ITEM_TURKEY_EN_IMPACT, TURKEY_ID); // HACK: not global id
   }
 }
 
 // collision on player
-void turkey::PlayerCollision(IEvent* cEvent, scd::base_component* cCenter) {
-  turkey* comp         = (turkey*)cCenter;
-  TImpactEvent* tEvent   = (TImpactEvent*)cEvent->GetData();
+void turkey::on_player_collision(IEvent* cEvent) {
+  TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
 
   // collider is cart, collided is item
-  if (comp->m_pObject == tEvent->m_pCollidedWith && comp->m_bSpawned) {
+  if (_owner == tEvent->m_pCollidedWith && _is_spawned) {
     // send stun effect event to player
-    SendStatusEffectEvent(
-      "Stun", comp, tEvent->m_pcCollider, comp->m_fStunDuration);
+    SendStatusEffectEvent("Stun", this, tEvent->m_pcCollider, _stun_duration);
+
     // play sound
-    CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_IMPACT,
-                                                    comp->TURKEY_ID);
-    CWwiseSoundManager::GetInstance()->PlayTheSound(STATUS_STUN,
-                                                    comp->TURKEY_ID);
+    CWwiseSoundManager::GetInstance()->PlayTheSound(
+        ITEM_TURKEY_IMPACT, TURKEY_ID);
+
+    CWwiseSoundManager::GetInstance()->PlayTheSound(STATUS_STUN, TURKEY_ID);
+
     // destroy me
-    comp->Despawn();
+    despawn();
 
     // tell who we rammed to drop an item
-    SendRamEvent("PlayerRammed", comp, comp->m_pObject, tEvent->m_pcCollider);
+    SendRamEvent("PlayerRammed", this, _owner, tEvent->m_pcCollider);
   }
 }
 
-void turkey::ItemCollision(IEvent* cEvent, scd::base_component* cCenter) {
-  turkey* pComp        = (turkey*)cCenter;
-  TImpactEvent* tEvent    = (TImpactEvent*)cEvent->GetData();
-  if (pComp->m_pObject == tEvent->m_pcCollider && pComp->m_bSpawned) {
+void turkey::on_item_collision(IEvent* cEvent) {
+  TImpactEvent* tEvent = (TImpactEvent*)cEvent->GetData();
+  if (_owner == tEvent->m_pcCollider && _is_spawned) {
     // HACK: not global id
-    CWwiseSoundManager::GetInstance()->PlayTheSound(ITEM_TURKEY_IMPACT,
-                                                    pComp->TURKEY_ID);
+    CWwiseSoundManager::GetInstance()->PlayTheSound(
+        ITEM_TURKEY_IMPACT, TURKEY_ID);
 
     // effect stuff
     scd::vector3 p1, p2, trans;
-    p2 = pComp->m_pCollidableComponent->GetSphere().cPosition;
+    p2 = _collider->GetSphere().cPosition;
     p1 = CCollisionManager::GetInstance()
-           ->GetTurkeyDestroyObject()
-           ->GetTransform()
-           ->GetWorldPosition();
+             ->GetTurkeyDestroyObject()
+             ->GetTransform()
+             ->GetWorldPosition();
+
     trans = p2 - p1; // vector to the turkeys position
+
     CCollisionManager::GetInstance()
-      ->GetTurkeyDestroyObject()
-      ->GetTransform()
-      ->TranslateFrame(trans);
+        ->GetTurkeyDestroyObject()
+        ->GetTransform()
+        ->TranslateFrame(trans);
+
     CEffectComponent* pEC = CEffectManager::GetInstance()->CreateStunComponent(
-      CCollisionManager::GetInstance()->GetTurkeyDestroyObject());
+        CCollisionManager::GetInstance()->GetTurkeyDestroyObject());
+
     pEC->SetDeadTimer(EC_TYPE_TURKEY_STUN, 0.0f);
     pEC->SwitchOnOffEmitters(EC_TYPE_TURKEY_STUN, true);
 
-    pComp->Despawn();
+    despawn();
   }
 }
-void turkey::PauseUpdateCallback(IEvent*, scd::base_component* pComp) {
-  // Get the Effect Comp
-  turkey* comp = (turkey*)pComp;
-  if (comp->m_bSpawned) {
-    SendRenderEvent("AddToSet", comp, comp->m_pObject, PRIORITY_UPDATE);
+
+void turkey::on_pause_update(float dt) {
+  if (is_spawned()) {
+    SendRenderEvent("AddToSet", this, _owner, PRIORITY_UPDATE);
   }
 }
+
 } // namespace scd::components

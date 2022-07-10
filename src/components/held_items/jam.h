@@ -7,37 +7,33 @@
 
 #define JAM_TIME 10.0f
 
-namespace scd {
-namespace component {
+namespace scd::component {
 
 class jam : public scd::base_component {
 private:
-  scd::object* m_pParent;
-  bool m_bIsSpawned;
-  float m_fDuration;
-  float m_fTimeLeft;
+  bool _is_spawned{true};
+  float _duration{10.0f};
+  float _time_remaining;
+
   int JAM_ID;
 
 public:
-  jam(scd::object* pObj)
-      : m_pParent(pObj) {}
-  static CRayJam* CreateRayJamComponent(scd::object* pObj);
-  void FirstInit();
-  // call backs
-  static void Update(IEvent* cEvent, scd::base_component* cCenter);
-  static void ReInit(IEvent* cEvent, scd::base_component* cCenter);
-  void Despawn();
-  // accessors
-  scd::object* GetParent(void) { return m_pParent; }
-  bool GetIsSpawned(void) { return m_bIsSpawned; }
-  float GetDuration(void) { return m_fDuration; }
-  float GetTimeLeft(void) { return m_fTimeLeft; }
-  // mutators
-  void SetParent(scd::object* pParent) { m_pParent = pParent; }
-  void SetIsSpawned(bool bIsSpawned) { m_bIsSpawned = bIsSpawned; }
-  void SetDuration(float fDuration) { m_fDuration = fDuration; }
-  void SetTimeLeft(float fRemaining) { m_fTimeLeft = fRemaining; }
+  jam(scd::object& owner);
+
+  static std::shared_ptr<jam> create(scd::object& pObj);
+
+  void on_update(float dt);
+  void on_use();
+
+  void despawn();
+
+  bool is_spawned() const { return _is_spawned; }
+  float duration() const { return _duration; }
+  float time_remaining() const { return _time_remaining; }
+
+  void is_spawned(bool value) { _is_spawned = value; }
+  void duration(float value) { _duration = value; }
+  void time_remaining(float value) { _time_remaining = value; }
 };
 
-} // namespace component
-} // namespace scd
+} // namespace scd::component

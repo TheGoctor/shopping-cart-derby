@@ -1,57 +1,38 @@
-#include "EnergyDrink.h"
-#include "Managers\Global Managers\Event Manager\CEventManager.h"
-#include "Managers\Global Managers\Event Manager\EventStructs.h"
-#include "Managers\Global Managers\Object Manager\scd::objectManager.h"
-#include "Managers\Component Managers\CHeldItemManager.h"
-using namespace EventStructs;
+#include "energy_drink.h"
 
+#include "core/object.h"
+#include "events/event_manager.h"
+#include "events/events.h"
 
-CEnergyDrink* CEnergyDrink::CreateEnergyDrinkComponent(scd::object* pObj)
-{
-	//	CEnergyDrink* pComp = MMNEW(scd::object(pObj));
-	CEnergyDrink* pComp = MMNEW(CEnergyDrink(pObj));
-	pComp->FirstInit();
-	pObj->AddComponent(pComp);
-	return pComp;
-}
-void CEnergyDrink::FirstInit()
-{
-	m_fDuration = 3.0f;
-	m_fBoostAmount = 2.0f;		//mult with speed for boost
-	CEventManager::GetInstance()->RegisterEvent("UseBoost", this, ReInit);
-}
-//call backs
-void CEnergyDrink::Update(IEvent* cEvent, scd::base_component* cCenter)
-{
-	CEnergyDrink* pComp = (CEnergyDrink*)cCenter;
-	TUpdateStateEvent* eEvent = (TUpdateStateEvent*)cEvent->GetData();
-	float fDT = eEvent->m_fDeltaTime;
+namespace scd::component {
 
-	// if we're not spawned, dont do anything
-	if(!pComp->GetIsSpawned())
-	{
-		return;
-	}
-
-	// decrement time
-	pComp->SetTimeLeft(pComp->GetTimeLeft()-fDT);
-
-	if(pComp->GetTimeLeft() <= 0.0f)
-	{
-		pComp->Despawn();
-		return;
-	}
-
-}
-void CEnergyDrink::ReInit(IEvent* cEvent, scd::base_component* cCenter)
-{
-	CEnergyDrink* pComp = (CEnergyDrink*)cCenter;
-	TStatusEffectEvent* eEvent = (TStatusEffectEvent*)cEvent->GetData();
-	SendStatusEffectEvent("Boost", pComp, eEvent->m_pObject, pComp->m_fDuration);
-	pComp->SetIsSpawned(true);
+energy_drink::energy_drink(scd::object& owner)
+    : base_component(owner) {
+  event_manager::get()->register_event("UseBoost", this, on_use);
 }
 
-void CEnergyDrink::Despawn()
-{
-	m_bIsSpawned = false;
+std::shared_ptr<energy_drink> energy_drink::create(scd::object& owner) {
+  return owner.create_component<energy_drink>();
 }
+
+void energy_drink::on_update(float dt) {
+  // if we're not spawned, dont do anything
+  if (!is_spawned()) {
+    return;
+  }
+
+  // decrement time
+  _time_remaining -= dt;
+
+  if (time_remaining() <= 0.0f) {
+    despawn();
+    return;
+  }
+}
+
+void energy_drink::on_use(scd::object& obj) {
+  SendStatusEffectEvent("Boost", this, obj, _duration);
+  is_spawned(true);
+}
+
+} // namespace scd::component

@@ -8,58 +8,45 @@
 #define SLOWTIME (2.0f)
 #define SLOWRATE (0.3f)
 
-namespace scd {
-namespace component {
+namespace scd::component {
 
 class peanut_butter : public scd::base_component {
 private:
-  float m_fDuration;
-  float m_fTimeRemaining;
-  float m_fSlowRate; // something to mult the speed by to gain the slowed effect
-  bool m_bIsTossedForward;
-  scd::object* m_pParent;
-  bool m_bIsSpawned;
-  scd::vector3 m_vPosition;
-  CCollideable* m_pcAreaOfEffect;
-  float m_fEffectDuration;
-  float m_fSoundCooldown;
+  float _duration{15.0f};
+  float _time_remaining;
+  float _slow_rate; // something to mult the speed by to gain the slowed effect
+  bool _is_tossed_forward{false};
+  bool _is_spawned{true};
+  CCollideable* _area_of_effect;
+  float _effect_duration{5.0f};
+  float _sound_cooldown{0.0f};
+
   int PEANUT_BUTTER_ID;
 
 public:
-  peanut_butter(scd::object* pObj)
-      : m_pParent(pObj) {}
-  static CPeanutButter* CreatePeanutButterComponent(scd::object* pObj);
-  void FirstInit(void);
-  // call backs
-  static void Update(IEvent* cEvent, scd::base_component* cCenter);
-  static void PlayerCollision(IEvent* cEvent, scd::base_component* cCenter);
-  static void ItemCollision(IEvent* cEvent, scd::base_component* cCenter);
+  peanut_butter(scd::object& pObj);
+  static std::shared_ptr<peanut_butter> create(scd::object& owner);
 
-  void ReInit();
-  void Despawn();
-  // bananaccessors
-  CCollideable* GetAOE(void) { return m_pcAreaOfEffect; }
-  float GetTimeRemaining(void) { return m_fTimeRemaining; }
-  float GetDuration(void) { return m_fDuration; }
-  bool GetIsTossedForward(void) { return m_bIsTossedForward; }
-  scd::vector3 GetPosition(void) { return m_vPosition; }
-  scd::object* GetParent(void) { return m_pParent; }
-  bool GetIsSpawned(void) { return m_bIsSpawned; }
-  // mutananas
-  void SetTimeRemaining(float fTime) { m_fTimeRemaining = fTime; }
-  void SetPosition(scd::vector3 vPos) {
-    m_pParent->GetTransform()->GetLocalMatrix()._41 = vPos.x;
-    m_pParent->GetTransform()->GetLocalMatrix()._42 = vPos.y;
-    m_pParent->GetTransform()->GetLocalMatrix()._43 = vPos.z;
-  }
-  void SetDuration(float fDuration) { m_fDuration = fDuration; }
-  void SetAOE(CCollideable* pAOE) { m_pcAreaOfEffect = pAOE; }
-  void SetParent(scd::object* pParent) { m_pParent = pParent; }
-  void SetIsSpawned(bool bIsSpawned) { m_bIsSpawned = bIsSpawned; }
-  void SetIsTossedForward(bool bForward) { m_bIsTossedForward = bForward; }
+  void on_update(float dt);
+  void on_player_collision();
+  void on_item_collision();
+  void on_use();
 
-  static void PauseUpdateCallback(IEvent*, scd::base_component* pComp);
+  void despawn();
+
+  CCollideable* aoe() const { return _area_of_effect; }
+  float time_remaining() const { return _time_remaining; }
+  float duration() const { return _duration; }
+  bool is_tossed_forward() const { return _is_tossed_forward; }
+  bool is_spawned() { return _is_spawned; }
+
+  void time_remaining(float value) { _time_remaining = value; }
+  void duration(float value) { _duration = value; }
+  void aoe(CCollideable* value) { _area_of_effect = value; }
+  void is_spawned(bool value) { _is_spawned = value; }
+  void is_tossed_forward(bool value) { _is_tossed_forward = value; }
+
+  void on_pause_update(float dt);
 };
 
-} // namespace component
-} // namespace scd
+} // namespace scd::component

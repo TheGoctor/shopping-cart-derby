@@ -7,9 +7,7 @@
 
 #define SOUPTIME 5.0f
 
-namespace scd {
-class IEvent;
-class CRenderComponent;
+namespace scd::component {
 
 class chicken_soup : public scd::base_component {
 private:
@@ -23,7 +21,7 @@ private:
 
 public:
   chicken_soup(const scd::object& owner)
-    : base_component(owner) {}
+      : base_component(owner) {}
 
   static chicken_soup* create(const scd::object& owner);
 
@@ -54,7 +52,7 @@ public:
     static bool bHasBeenCalled = false;
 
     if (!bHasBeenCalled) {
-      m_fDuration    = fDuration;
+      m_fDuration = fDuration;
       bHasBeenCalled = true; // don't do it again, duration is not to be changed
     }
   }
@@ -62,4 +60,4 @@ public:
   void set_spawned(bool bIsSpawned) { m_bIsSpawned = bIsSpawned; }
 };
 
-} // namespace scd
+} // namespace scd::component

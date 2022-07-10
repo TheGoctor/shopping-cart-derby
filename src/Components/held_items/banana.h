@@ -6,7 +6,7 @@
 #include "physics/math_types.h"
 #include "physics/physics_manager.h"
 
-namespace scd {
+namespace scd::component {
 class collider;
 class event;
 class renderable;
@@ -35,4 +35,4 @@ private:
   int _id;
 };
 
-} // namespace scd
+} // namespace scd::component
