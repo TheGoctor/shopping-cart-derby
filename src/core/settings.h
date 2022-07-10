@@ -1,12 +1,3 @@
-/*
- * @file settings.h
- *
- * @brief Contains and loads settings from various sources.
- *
- * @author Mac Reichelt
- *
- * @copyright (c) 2016 Mac Reichelt
- */
 #pragma once
 
 #include <string>
@@ -14,7 +5,7 @@
 namespace scd {
 class settings {
 public:
-  settings();
+  settings() = default;
   settings(int argc, char** argv);
 
   bool load_cli(int argc, char** argv);
@@ -28,10 +19,10 @@ public:
   int get_window_width() const { return _window_width; }
 
 private:
-  bool _is_fullscreen;
-  std::string _log_dir;
-  float _window_aspect_ratio;
-  int _window_height;
-  int _window_width;
+  bool _is_fullscreen{ false };
+  std::string _log_dir{};
+  int _window_width{ 1280 };
+  int _window_height{ 720 };
+  float _window_aspect_ratio{ static_cast<float>(_window_width) / _window_height };
 };
 } // namespace scd

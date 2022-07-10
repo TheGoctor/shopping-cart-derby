@@ -1,12 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	Allocator.h
-//	Date			:	3/29/11
-//	Mod. Date		:	7/26/11
-//	Mod. Initials	:	MR
-//	Author			:	Mac Reichelt
-//	Purpose			:	Allocates memory into the General Heap for STL containers
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include <memory>
@@ -14,8 +5,7 @@
 namespace scd {
 
 template <class _Ty, heap _heap = heap::general>
-class allocator
-  : public _Allocator_base<_Ty> {
+class allocator : public _Allocator_base<_Ty> {
 public:
   typedef _Allocator_base<_Ty> _Mybase;
   typedef typename _Mybase::value_type value_type;
@@ -28,7 +18,8 @@ public:
   typedef _PDFT difference_type;
 
   template <class _Other>
-  struct rebind { // convert an scd::allocator<_Ty> to an scd::allocator <_Other>
+  struct rebind { // convert an scd::allocator<_Ty> to an scd::allocator
+                  // <_Other>
     typedef scd::allocator<_Other> other;
   };
 
@@ -37,7 +28,7 @@ public:
   }
 
   const_pointer
-    address(const_reference _Val) const { // return address of nonmutable _Val
+  address(const_reference _Val) const { // return address of nonmutable _Val
     return (&_Val);
   }
 
@@ -45,18 +36,19 @@ public:
   }
 
   scd::allocator(const scd::allocator<_Ty>&)
-    _THROW0() { // construct by copying (do nothing)
+      _THROW0() { // construct by copying (do nothing)
   }
 
   template <class _Other>
   scd::allocator(const scd::allocator<_Other>&)
-    _THROW0() { // construct from a related scd::allocator (do nothing)
+      _THROW0() { // construct from a related scd::allocator (do nothing)
   }
 
   template <class _Other>
-  scd::allocator<_Ty>& operator=(const scd::allocator<_Other>&) { // assign from a
-                                                          // related scd::allocator
-                                                          // (do nothing)
+  scd::allocator<_Ty>&
+  operator=(const scd::allocator<_Other>&) { // assign from a
+                                             // related scd::allocator
+                                             // (do nothing)
     return (*this);
   }
   // vv
@@ -70,18 +62,19 @@ public:
     // allocate array of _Count elements
     // return (_Allocate(_Count, (pointer)0));
     return (pointer)CMemoryManager::GetInstance()->Allocate(
-      sizeof(_Ty) * _Count, _heap, __FILE__, __LINE__);
+        sizeof(_Ty) * _Count, _heap, __FILE__, __LINE__);
   }
 
   pointer allocate(size_type _Count, const void _FARQ*) {
     // allocate array of _Count elements, ignore hint
     // return (allocate(_Count));
     return (pointer)CMemoryManager::GetInstance()->Allocate(
-      sizeof(_Ty) * _Count, _heap, __FILE__, __LINE__);
+        sizeof(_Ty) * _Count, _heap, __FILE__, __LINE__);
   }
   //^^
-  void construct(pointer _Ptr,
-                 const _Ty& _Val) { // construct object at _Ptr with value _Val
+  void construct(
+      pointer _Ptr,
+      const _Ty& _Val) { // construct object at _Ptr with value _Val
     _Construct(_Ptr, _Val);
   }
 
@@ -97,14 +90,16 @@ public:
 
 // scd::allocator TEMPLATE OPERATORS
 template <class _Ty, class _Other>
-inline bool operator==(const scd::allocator<_Ty>&, const scd::allocator<_Other>&)
-  _THROW0() { // test for scd::allocator equality (always true)
+inline bool
+operator==(const scd::allocator<_Ty>&, const scd::allocator<_Other>&)
+    _THROW0() { // test for scd::allocator equality (always true)
   return (true);
 }
 
 template <class _Ty, class _Other>
-inline bool operator!=(const scd::allocator<_Ty>&, const scd::allocator<_Other>&)
-  _THROW0() { // test for scd::allocator inequality (always false)
+inline bool
+operator!=(const scd::allocator<_Ty>&, const scd::allocator<_Other>&)
+    _THROW0() { // test for scd::allocator inequality (always false)
   return (false);
 }
 

@@ -1,20 +1,11 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	CEndgameManager.h
-//	Date			:	6/17/11
-//	Mod. Date		:	6/17/11
-//	Mod. Initials	:	JL, HN, MS
-//	Author			:
-//	Purpose			:	Encapsulates the Endgame Senarios
-////////////////////////////////////////////////////////////////////////////////
-
 #pragma once
+
+#include "core/containers.h"
 
 #include <array>
 #include <memory>
 
 #include <cstdint>
-
-// Includes
 
 namespace scd {
 
@@ -66,14 +57,10 @@ private:
   std::shared_ptr<component::sprite> _main_menu   = nullptr;
   std::shared_ptr<component::sprite> _finish_flag = nullptr;
 
-  CObject* m_pWinnerObject;
-  CObject* m_pLoserObject1;
-  CObject* m_pLoserObject2;
-  CObject* m_pLoserObject3;
-  CObject* m_pPlayerObject;
+  scd::vector<std::shared_ptr<scd::object>> _player_rankings;
 
   // Helper funcs
-  void ResetSprites(void);
+  void reset_sprites();
 };
 
 } // namespace scd

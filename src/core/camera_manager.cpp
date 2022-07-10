@@ -16,16 +16,16 @@ void camera_manager::camera_manager(int screen_width, int screen_height) {
 
   // BuildPerspective(field of view, aspect ratio, near plane, far plane)
   _camera->build_perspective(
-    D3DX_PI / 3.0f, (float)nScreenWidth / (float)nScreenHeight, 1.0f, 200.0f);
+      D3DX_PI / 3.0f, (float)nScreenWidth / (float)nScreenHeight, 1.0f, 200.0f);
 
   event_manager& event_manager = event_manager::get();
-  event_manager.register_event("AttachToCamera",
-                               std::bind(&on_attach_to_camera, this));
+  event_manager.register_event(
+      "AttachToCamera", std::bind(&on_attach_to_camera, this));
   event_manager.register_event("UpdateState", std::bind(&on_update, this));
-  event_manager.register_event("AttachToCameraWin",
-                               std::bind(&on_attach_to_win_state, this));
-  event_manager.register_event("AttachToCameraLose",
-                               std::bind(&on_attach_to_lose_state, this));
+  event_manager.register_event(
+      "AttachToCameraWin", std::bind(&on_attach_to_win_state, this));
+  event_manager.register_event(
+      "AttachToCameraLose", std::bind(&on_attach_to_lose_state, this));
 }
 
 int camera_manager::attach_camera_to_player(lua_State* pLua) {
@@ -57,10 +57,8 @@ void camera_manager::on_attach_to_camera(const event& e) {
 
   _camera->SetTarget(&_camera->GetTarget1());
   _camera->SetFrameParent(eObj->m_pcObj->GetTransform());
-  _camera->GetFrame().TranslateFrame(
-    D3DXVECTOR3(0.0f, 4.5f, -4.0f));
-  _camera->GetTarget()->TranslateFrame(
-    D3DXVECTOR3(0.0f, 1.0f, 5.0f));
+  _camera->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 4.5f, -4.0f));
+  _camera->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, 5.0f));
 }
 
 void camera_manager::on_update(const event& e) {
@@ -80,10 +78,8 @@ void camera_manager::on_attach_to_win_state(const event& e) {
 
   _camera->SetTarget(&_camera->GetTarget1());
   _camera->SetFrameParent(eObj->m_pcObj->GetTransform());
-  _camera->GetFrame().TranslateFrame(
-    D3DXVECTOR3(0.0f, 2.0f, 4.0f));
-  _camera->GetTarget()->TranslateFrame(
-    D3DXVECTOR3(0.0f, 1.0f, -2.0f));
+  _camera->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 4.0f));
+  _camera->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, -2.0f));
 }
 
 void camera_manager::on_attach_to_lose_state(const event& e) {
@@ -97,9 +93,7 @@ void camera_manager::on_attach_to_lose_state(const event& e) {
 
   _camera->SetTarget(&_camera->GetTarget1());
   _camera->SetFrameParent(eObj->m_pcObj->GetTransform());
-  _camera->GetFrame().TranslateFrame(
-    D3DXVECTOR3(0.0f, 2.0f, 4.0f));
-  _camera->GetTarget()->TranslateFrame(
-    D3DXVECTOR3(0.0f, 1.0f, -2.0f));
+  _camera->GetFrame().TranslateFrame(D3DXVECTOR3(0.0f, 2.0f, 4.0f));
+  _camera->GetTarget()->TranslateFrame(D3DXVECTOR3(0.0f, 1.0f, -2.0f));
 }
 } // namespace scd

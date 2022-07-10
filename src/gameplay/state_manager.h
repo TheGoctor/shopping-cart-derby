@@ -1,12 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//	File			:	CStateManager.h
-//	Date			:	4/4/11
-//	Mod. Date		:	4/4/11
-//	Mod. Initials	:	JL
-//	Author			:	Joseph Leybovich
-//	Purpose			:	The CStateManager module controls the transitions of
-//						states in our game by means of a state stack.
-////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "core/containers.h"
@@ -40,15 +31,11 @@ public:
    */
   void pop();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // ChangeState()	:	Pops the states off the stack and pushes the passed in
-  //						state
-  //
-  // Returns	:	void
-  //
-  // Mod. Date		:	4/4/11
-  // Mod. Initials	:	JL
-  ////////////////////////////////////////////////////////////////////////////////
+  /**
+   * @brief Clears state stack and pushes the new state.
+   *
+   * @param state The new state.
+   */
   void change_state(game_state state);
 
   /**
@@ -63,27 +50,18 @@ public:
    */
   void render();
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // ClearAllStates()	:	Pops all the active states off the stack
-  //
-  // Returns	:	void
-  //
-  // Mod. Date		:	4/4/11
-  // Mod. Initials	:	JL
-  ////////////////////////////////////////////////////////////////////////////////
-
   /**
    * @brief Pops all actives states off the state stack.
    */
   void clear();
 
   // Helper Funcs
-  void PostEnableObjectsEvent(game_state eGameState);
-  void PostDisableObjectsEvent(game_state eGameState);
-  void PostInitObjectsEvent(game_state eGameState);
-  void PostLoadObjectsEvent(game_state eGameState);
-  void PostUnloadObjectsEvent(game_state eGameState);
-  void PostInputChangeEvent(game_state eGameState);
+  void PostEnableObjectsEvent(game_state state);
+  void PostDisableObjectsEvent(game_state state);
+  void PostInitObjectsEvent(game_state state);
+  void PostLoadObjectsEvent(game_state state);
+  void PostUnloadObjectsEvent(game_state state);
+  void PostInputChangeEvent(game_state state);
 
 private:
   // The stack which contains the active states
@@ -91,7 +69,7 @@ private:
 
   std::weak_ptr<class event_manager> _event_manager;
 
-  std::atomic_bool _is_changing_state;
+  std::mutex _state_mutex;
 };
 
 } // namespace scd

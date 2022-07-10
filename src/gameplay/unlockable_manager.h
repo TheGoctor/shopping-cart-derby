@@ -4,12 +4,14 @@
 
 class unlockable_manager {
 public:
-  unlockable_manager();
+  unlockable_manager(const std::string& file_name);
 
   void unlock_features();
 
+  void read_file();
+
   // updates the file to reflect any changes
-  void update_file();
+  void update_file() const;
 
   // accessors and mutators
   std::string get_file_name() const { return _file_name; }

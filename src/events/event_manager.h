@@ -22,8 +22,8 @@ class event_manager {
 public:
   using event_callback = std::function<void(const event&)>;
 
-  event_id register_event(const std::string& event_name,
-                          event_callback callback);
+  event_id
+  register_event(const std::string& event_name, event_callback callback);
 
   void register_event(event_id id, event_callback callback);
 
@@ -38,8 +38,9 @@ public:
 private:
   // Struct needed to correctly insert new events into the event set
   struct cmp {
-    bool operator()(const std::unique_ptr<event>& lhs,
-                    const std::unique_ptr<event>& rhs) {
+    bool operator()(
+        const std::unique_ptr<event>& lhs,
+        const std::unique_ptr<event>& rhs) {
       return lhs->_priority > rhs->_priority;
     }
   };

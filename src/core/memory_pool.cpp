@@ -6,12 +6,12 @@
 #include <cstdlib>
 
 namespace {
-constexpr size_t byte_alignment = 8;
+constexpr size_t byte_alignment = sizeof(size_t);
 constexpr size_t ByteAlign(size_t size) {
   return (size + (byte_alignment - 1)) & ~(byte_alignment - 1);
 }
-constexpr size_t NodeSize
-  = sizeof(scd::MemoryPool::Header) + sizeof(scd::MemoryPool::Footer);
+constexpr size_t NodeSize =
+    sizeof(scd::MemoryPool::Header) + sizeof(scd::MemoryPool::Footer);
 constexpr size_t FreeMask = (1 << (sizeof(size_t) * 8 - 1));
 } // anonymous namespace
 
@@ -52,24 +52,24 @@ bool scd::MemoryPool::Init(size_t pool_size) {
 
   _available_memory = _total_size - NodeSize;
 
-  _free_head       = (Header*)_pool;
+  _free_head = (Header*)_pool;
   _free_head->size = _available_memory;
   _free_head->prev = _free_head;
   _free_head->next = _free_head;
 
-  _footer       = (Footer*)((char*)_pool + _available_memory + sizeof(Header));
+  _footer = (Footer*)((char*)_pool + _available_memory + sizeof(Header));
   _footer->size = _available_memory;
 
   return true;
 }
 
 scd::MemoryPool::Header*
-  scd::MemoryPool::FirstAvailable(size_t alloc_size) const {
+scd::MemoryPool::FirstAvailable(size_t alloc_size) const {
   if (_free_head == nullptr || _free_head->size == 0)
     return nullptr;
 
-  size_t avg_alloc_size
-    = _ptr_count > 0 ? (_total_size - _available_memory) / (_ptr_count) : 0;
+  size_t avg_alloc_size =
+      _ptr_count > 0 ? (_total_size - _available_memory) / (_ptr_count) : 0;
 
   if (alloc_size < avg_alloc_size) {
     Header* iter = _free_head->next;
@@ -100,7 +100,7 @@ bool scd::MemoryPool::IsFree(Header* header) const {
 }
 
 void* scd::MemoryPool::Allocate(size_t size, char* file, unsigned int line) {
-  size         = ByteAlign(size);
+  size = ByteAlign(size);
   Header* head = FirstAvailable(size);
 
   if (head == nullptr) // Free Memory was not found
@@ -123,16 +123,16 @@ void* scd::MemoryPool::Allocate(size_t size, char* file, unsigned int line) {
 
     Footer* new_foot = foot;
 
-    foot       = (Footer*)((char*)head + head->size + sizeof(Header));
+    foot = (Footer*)((char*)head + head->size + sizeof(Header));
     foot->size = head->size;
 
     Header* new_head = (Header*)((char*)foot + sizeof(Footer));
-    new_head->size   = block_size - size - NodeSize;
-    new_head->next   = head->next;
-    new_head->prev   = head;
+    new_head->size = block_size - size - NodeSize;
+    new_head->next = head->next;
+    new_head->prev = head;
 
     head->next->prev = new_head;
-    head->next       = new_head;
+    head->next = new_head;
 
     if (head->prev == head) {
       head->prev = new_head;
@@ -170,9 +170,9 @@ void* scd::MemoryPool::Allocate(size_t size, char* file, unsigned int line) {
 
   // Leak Detection
   Allocation tLeak;
-  tLeak.file             = file;
-  tLeak.line             = line;
-  tLeak.size             = size;
+  tLeak.file = file;
+  tLeak.line = line;
+  tLeak.size = size;
   _ptr_list[(size_t)ptr] = tLeak;
 
   return ptr;
@@ -204,8 +204,8 @@ void scd::MemoryPool::Deallocate(void* ptr) {
   Header* next_head = (Header*)((char*)foot + sizeof(Footer));
   if (((char*)next_head < (char*)_footer) && IsFree(next_head)) {
     // Next block is free
-    Footer* next_foot
-      = (Footer*)((char*)next_head + sizeof(Header) + next_head->size);
+    Footer* next_foot =
+        (Footer*)((char*)next_head + sizeof(Header) + next_head->size);
 
     // Merge Right
     head->size += next_head->size + NodeSize;
@@ -233,8 +233,8 @@ void scd::MemoryPool::Deallocate(void* ptr) {
 
   if (((char*)prev_foot > _pool) && (prev_foot->size & (1 << 31)) == 0) {
     // Previous block is free
-    Header* prev_head
-      = (Header*)((char*)prev_foot - prev_foot->size - sizeof(Header));
+    Header* prev_head =
+        (Header*)((char*)prev_foot - prev_foot->size - sizeof(Header));
 
     // Merge Left
     prev_head->size += head->size + NodeSize;
@@ -243,7 +243,7 @@ void scd::MemoryPool::Deallocate(void* ptr) {
     // Clear old Memory
     prev_foot->size = 0;
     head->next = head->prev = nullptr;
-    head->size              = 0;
+    head->size = 0;
 
     // Reset head Pointer
     head = prev_head;
@@ -256,11 +256,11 @@ void scd::MemoryPool::Deallocate(void* ptr) {
   // Block did not merge left, reinsert into list
   if (_free_head != nullptr) {
     // Set the head's prev (left)
-    head->prev       = _free_head->prev;
+    head->prev = _free_head->prev;
     head->prev->next = head;
 
     // Set the head's next (right)
-    head->next       = _free_head;
+    head->next = _free_head;
     head->next->prev = head;
   } else {
     _free_head = head;

@@ -15,11 +15,6 @@
 namespace scd {
 class camera {
 public:
-  camera();
-  camera(const camera&);
-  camera& operator=(const camera&);
-  ~camera();
-
   const scd::transform& projection_matrix() const { return _projection_matrix; }
   const scd::transform& view_projection_matrix() const {
     return _view_projection_matrix;

@@ -124,7 +124,7 @@ endgame_manager::endgame_manager() {
 }
 
 // Helper funcs
-void endgame_manager::ResetSprites(void) {
+void endgame_manager::reset_sprites() {
   // Update the Fade Screen Sprite
   sprite_data pSData = m_pFadeScreenComp->GetSpriteData();
   pSData.m_dwColor = scd::vector4(1.0f, 1.0f, 1.0f, 0.0f);

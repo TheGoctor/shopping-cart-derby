@@ -2,7 +2,7 @@
 
 #include "Settings.h"
 
-#include <Magnum\GL\DefaultFramebuffer.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
 
 #include <iostream>
 
@@ -15,7 +15,7 @@
 //}
 
 scd::game::game(const Arguments& arguments)
-  : Magnum::Platform::Application{arguments} {
+    : Magnum::Platform::Application{arguments} {
   // Rand
   srand(timeGetTime()); // GetTickCount());
 
@@ -88,7 +88,7 @@ scd::game::game(const Arguments& arguments)
 
   // Register for Events
   m_pEM->RegisterEvent(
-    "ShutdownGame", (scd::base_component*)GetInstance(), ShutdownCallback);
+      "ShutdownGame", (scd::base_component*)GetInstance(), ShutdownCallback);
 
   _prev_time = _timer.now()
 }
@@ -97,7 +97,11 @@ scd::game::~game() {
   // Unregister Events
 
   m_pEM->ClearEvents();
-  SendIEvent("Shutdown", (scd::base_component*)GetInstance(), NULL, PRIORITY_IMMEDIATE);
+  SendIEvent(
+      "Shutdown",
+      (scd::base_component*)GetInstance(),
+      nullptr,
+      PRIORITY_IMMEDIATE);
 
   // Shutdown Managers
   if (CInputManager::GetInstance())
@@ -106,7 +110,7 @@ scd::game::~game() {
   m_pSound->GetInstance()->ShutdownManager();
   if (m_pEM)
     m_pEM->Shutdown();
-  m_pEM = NULL;
+  m_pEM = nullptr;
 
   m_bShutdown = false;
 }
@@ -115,8 +119,8 @@ int scd::game::main() {
   // Time
   m_pSound->Update();
   auto start_time = _timer.now();
-  _delta_time     = (float)(start_time - _prev_time) / 1000.0f;
-  _prev_time      = start_time;
+  _delta_time = (float)(start_time - _prev_time) / 1000.0f;
+  _prev_time = start_time;
 
   ++_frame_count;
   _frame_time += _delta_time;
@@ -127,8 +131,8 @@ int scd::game::main() {
   }
 
   if (_frame_time >= 1) {
-    _fps         = _frame_count;
-    _frame_time  = 0;
+    _fps = _frame_count;
+    _frame_time = 0;
     _frame_count = 0;
     std::cout << "FPS: " << _fps << std::endl;
   }
@@ -143,10 +147,15 @@ int scd::game::main() {
   SendUpdateEvent("UpdateState", (scd::base_component*)GetInstance(), m_fDT);
 
   // Collision Test
-  SendIEvent("Collision", (scd::base_component*)GetInstance(), NULL, PRIORITY_COLLISION);
+  SendIEvent(
+      "Collision",
+      (scd::base_component*)GetInstance(),
+      NULL,
+      PRIORITY_COLLISION);
 
   // Render
-  SendIEvent("Render", (scd::base_component*)GetInstance(), NULL, PRIORITY_RENDER);
+  SendIEvent(
+      "Render", (scd::base_component*)GetInstance(), NULL, PRIORITY_RENDER);
 
   // Process Events
   m_pEM->ProcessEvents();

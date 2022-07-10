@@ -30,7 +30,7 @@ std::shared_ptr<object> object_manager::create(
 
   _objects.emplace(id, obj);
 
-  return obj.get();
+  return obj;
 }
 
 void object_manager::destroy(const std::shared_ptr<object>& obj) {
@@ -46,7 +46,7 @@ void object_manager::bind_objects(object& parent, object& child) {
   parent.add_child(child);
 }
 
-object* object_manager::by_name(const std::string& name) {
+std::shared_ptr<object> object_manager::by_name(const std::string& name) {
   // use the passed in name to find the object with the same name
   id_generator::id_t name_id = _id_gen.get_id(name);
 

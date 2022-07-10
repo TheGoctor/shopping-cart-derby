@@ -22,7 +22,7 @@ public:
    *
    * @param[in] screen_width The width of the screen in pixels.
    * @param[in] screen_height The height of the screen in pixels.
-  */
+   */
   camera_manager(int screen_width, int screen_height);
 
   const camera* camera() const { return _camera.get(); }

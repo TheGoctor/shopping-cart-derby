@@ -17,80 +17,55 @@
 #include "core/object.h"
 #include "physics/math_types.h"
 
+#include <array>
+
 namespace scd {
 class dx_mesh;
 class renderable;
 
 class ai_component : public scd::base_component {
 private:
-  enum class state { NOT_INIT = -1, COLLECTIVE = 0, AGGRESSIVE, DEFENSIVE };
+  enum class state {
+    collective = 0,
+    aggressive,
+    defensive
+  };
 
   // For rendering triangles in the nav mesh
   dx_mesh* _mesh;
   renderable* _renderable;
   bool _shutdown;
 
-  /*****************************************************************
-   * StartDraw()	Sets up anything needed to begin drawing traingles
-   *
-   * Ins:
-   *
-   * Outs:
-   *
-   * Returns:
-   *
-   * Mod. Date:		      06/06/11
-   * Mod. Initials:	      JS
-   *****************************************************************/
+  /**
+   * @brief Prepares objects before rendering.
+   */
   void start_draw();
 
-  /*****************************************************************
-   * EndDraw()	Passes all buffers to be drawn
-   *
-   * Ins:
-   *
-   * Outs:
-   *
-   * Returns:
-   *
-   * Mod. Date:		      06/06/11
-   * Mod. Initials:	      JS
-   *****************************************************************/
+  /**
+   * @brief Passes all buffers to be drawn to the renderer.
+   */
   void end_draw();
 
-  /*****************************************************************
-   * DrawTriangle()	Passes information for the triangle to be
-   *					drawn and a color to be drawn in
+  /**
+   * @brief Draws a single triangle.
    *
-   * Ins:				scd::vector3 / TTriangle* / TTri*
-   *					scd::vector4 cColor
-   *
-   * Outs:
-   *
-   * Returns:
-   *
-   * Mod. Date:		      06/06/11
-   * Mod. Initials:	      JS
-   *****************************************************************/
+   * @param vertex0 Vertex 0.
+   * @param vertex1 Vertex 1.
+   * @param vertex2 Vertex 2.
+   * @param color The color of the triangle.
+   */
   void draw_triangle(const scd::vector3& vertex0, const scd::vector3& vertex1,
                      const scd::vector3& vertex2, const scd::vector4& color);
   void draw_triangle(TTriangle* tTri, const scd::vector4& cColor);
   void draw_triangle(TTri* tTri, const scd::vector4& cColor);
 
-  /*****************************************************************
-   * DrawTriangle()	Passes information for a line to be
-   *					drawn and a color to be drawn in
+  /**
+   * @brief Draws a line.
    *
-   * Ins:				scd::vector3 vStart, vEnd
-   *					scd::vector4 cColor
-   *
-   * Outs:
-   *
-   * Returns:
-   *
-   * Mod. Date:		      06/06/11
-   * Mod. Initials:	      JS
-   *****************************************************************/
+   * @param start Start point.
+   * @param end End point.
+   * @param color The color of the line.
+   */
   void draw_line(const scd::vector3& start, const scd::vector3& end,
                  const scd::vector4& color);
 
@@ -106,7 +81,7 @@ private:
 
   // Needed Logic
   TRay m_tTargetPlayerLine;
-  float _weight[3];
+  std::array<float, 3> _weight;
   float _timer;
   scd::object* _target_player;
   bool _target_item;
@@ -120,19 +95,13 @@ private:
   float _use_item_timer;
   float _turkey_to_player;
 
-  /*****************************************************************
-   * Use()				Uses the passed in type if it has one
+  /**
+   * @brief Uses the item of the given type if held.
    *
-   * Ins:				EHeldItemType
-   *
-   * Outs:
-   *
-   * Returns:
-   *
-   * Mod. Date:		      05/11/11
-   * Mod. Initials:	      JS
-   *****************************************************************/
-  bool Use(EHeldItemType);
+   * @return true Item was held and used.
+   * @return false Item was not held.
+   */
+  bool use(EHeldItemType);
 
   /*****************************************************************
    * GetFirstPlace()	Returns the ID of who is in first place

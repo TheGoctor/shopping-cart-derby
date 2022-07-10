@@ -1,5 +1,4 @@
-#ifndef __scd_math_defs_h__
-#define __scd_math_defs_h__
+#pragma once
 
 #include <physx/foundation/PxQuat.h>
 #include <physx/foundation/PxTransform.h>
@@ -97,5 +96,3 @@ transform matrix_translate(const transform& pose, const vector3& translation) {
 }
 } // namespace math
 } // namespace scd
-
-#endif // __scd_math_defs_h__

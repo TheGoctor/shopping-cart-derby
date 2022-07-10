@@ -16,15 +16,6 @@
 
 namespace scd {
 class object_manager {
-  // A list of all the game objects currently in the world
-  scd::list<std::shared_ptr<object>> _objects;
-
-  object_manager() = default;
-  ~object_manager() = default;
-
-  object_manager(const object_manager&) = delete;
-  object_manager& operator=(const object_manager&) = delete;
-
 public:
   /**
    * The factory function used to create objects. All created objects must have

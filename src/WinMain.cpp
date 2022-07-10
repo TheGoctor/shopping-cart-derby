@@ -13,10 +13,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 #include <windows.h>	//	Needed for Windows Applications.
 #include <dbghelp.h>
-<<<<<<< Updated upstream
-=======
 #pragma comment(lib, "dbghelp.lib")
->>>>>>> Stashed changes
 
 #include <crtdbg.h>
 #include <io.h>
@@ -25,11 +22,7 @@
 #include <fcntl.h>
 using namespace std;
 
-<<<<<<< Updated upstream
-#include "..\resource.h"
-=======
 #include "resource.h"
->>>>>>> Stashed changes
 
 #include "CGame.h"		//	for our game
 #include "Managers/Global Managers/Sound Manager/CWwiseSoundManager.h"
@@ -104,11 +97,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				// pause game code here
 				// Sender cannot be NULL
-<<<<<<< Updated upstream
-				SendIEvent("FocusLost", (IComponent*)1, NULL, PRIORITY_NORMAL);
-=======
 				SendIEvent("FocusLost", (scd::base_component*)1, NULL, PRIORITY_NORMAL);
->>>>>>> Stashed changes
 			}
 		}
 		break;

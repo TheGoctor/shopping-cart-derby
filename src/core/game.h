@@ -8,8 +8,7 @@
  * @copyright (c) 2016 Mac Reichelt
  */
 
-#ifndef __scd_game_h__
-#define __scd_game_h__
+#pragma once
 
 #include <Magnum/Platform/Sdl2Application.h>
 
@@ -30,7 +29,7 @@ public:
   std::uint32_t window_width() const { return _window_width; }
   std::uint32_t window_height() const { return _window_height; }
   bool is_fullscreen() const { return _fullscreen; }
-  int fps() const { return _fps; }
+  float fps() const { return _fps; }
 
   void set_window_width(std::uint32_t width) { _window_width = width; }
   void set_window_height(std::uint32_t height) { _window_width = height; }
@@ -45,7 +44,7 @@ private:
 
   float _frame_time;
   int _frame_count;
-  int _fps;
+  float _fps;
   float _delta_time;
   std::uint32_t _prev_time;
 
@@ -59,5 +58,3 @@ private:
   bool _fullscreen;             // Whether the game is fullscreen or windowed
 };
 } // namespace scd
-
-#endif // __scd_game_h__

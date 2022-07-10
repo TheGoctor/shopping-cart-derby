@@ -4,13 +4,6 @@
 
 #include <iostream>
 
-scd::settings::settings()
-  : _is_fullscreen(false)
-  , _log_dir("./logs")
-  , _window_aspect_ratio(16.f / 9.f)
-  , _window_height(720)
-  , _window_width(1280) {}
-
 scd::settings::settings(int argc, char** argv) {
   this->load_cli(argc, argv);
 }

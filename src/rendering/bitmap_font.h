@@ -1,23 +1,9 @@
-////////////////////////////////////////////////////////
-//  File			:	"CBitmapFont.h"
-//
-//  Author			:	Huy Nguyen (HN)
-//
-//	Team			:	Falcon Fish Productions
-//
-//  Date Created	:	4/02/2011
-//
-//	Last Changed	:	07/24/11
-//
-//	Changed By		:	HN
-//
-//  Purpose			:	Handles the Rendering of Bitmap Fonts
-//
-////////////////////////////////////////////////////////
 #pragma once
 
 #include "core/base_component.h"
+#include "physics/math_types.h"
 
+#include <array>
 #include <string>
 
 #define NUM_CHARS 128;
@@ -25,10 +11,17 @@
 namespace scd {
 class object;
 
+struct color {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+  uint8_t a;
+};
+
 class bitmap_font {
 public:
-  bitmap_font(int nImageID = -1, int nRectWidth = 16, int nCharHeight = 16,
-              int nNumCols = 16, char chStartChar = ' ');
+  bitmap_font(int image_id = -1, int rect_width = 16, int char_height = 16,
+              int num_columns = 16, char start_char = ' ');
 
   ~bitmap_font();
 
@@ -69,7 +62,7 @@ private:
   class texture_manager* m_pTM;
 
   // private so only we can call it
-  RECT CellAlgorithm(int nID);
+  geometry::rectangle CellAlgorithm(int nID);
   int width(char cLetter) const;
 };
 
@@ -79,26 +72,23 @@ private:
   std::string _word;
   bitmap_font _font;
 
-  int m_nX;
-  int m_nY;
+  std::array<int, 2> _position;
 
-  float m_fScale;
-  DWORD m_dwColor;
+  float _scale;
+  color _color;
 
 public:
-  font_component(object* pParent, bitmap_font cFont, std::string szWord, int nX,
-                  int nY, float fScale, DWORD dwColor);
+  font_component(object& parent, bitmap_font font);
 
-  void draw_word(void);
+  void draw_word();
 
-  // Mutator
-  void set_word(const std::string& szWord) { m_szWord = szWord; }
+  void set_word(const std::string& word) { _word = word; }
 
-  void set_y(int nY) { m_nY = nY; }
+  void set_position(const std::array<int, 2>& position) { _position = position; }
 
-  void set_x(int nX) { m_nX = nX; }
+  void set_color(color color) { _color = color; }
 
-  void SetColor(DWORD nColor) { m_dwColor = nColor; }
+  void set_scale(float scale) { _scale = scale; }
 };
 
 } // namespace scd
